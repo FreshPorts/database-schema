@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.28 2002-02-18 03:35:43 dan Exp $
+-- $Id: sp.txt,v 1.29 2002-02-21 23:17:59 dan Exp $
 --
 
   drop function IsDescendantOf (int4 ,int4);
@@ -659,21 +659,8 @@ CREATE FUNCTION RecordLastestPortCommits(timestamp) RETURNS INT4 AS '
 
 	BEGIN
 
-		--
-		-- we set this right now, so that any refreshes that take
-		--place during our update are caught next time.
-		--
-		UPDATE housekeeping
-		   SET refresh_now = 0;
-
-		-- you better be wrapping this in a transaction!
-		-- delete what is already there
-		DELETE FROM commits_latest;
-
-		DateNow := now();
-
 		-- add in the new stuff
-		INSERT INTO commits_latest
+		CREATE TEMP TABLE commits_latest_tmp AS
 		SELECT DISTINCT
 			commit_log.commit_date															AS commit_date_raw,
 			commit_log.id																	AS commit_log_id,
@@ -691,9 +678,7 @@ CREATE FUNCTION RecordLastestPortCommits(timestamp) RETURNS INT4 AS '
 			ports.broken																	AS broken,
 			date_part(''epoch'', ports.date_added)											AS date_added,
 			ports.element_id																AS element_id,
-			ports.short_description 														AS short_description,
-			DateNow																			AS date_added_db,
-			DateNow																			AS date_added_db2
+			ports.short_description 														AS short_description
 	   FROM commit_log_ports, commit_log, element, categories, ports
 	  WHERE commit_log.commit_date         > Start_Date
 	    AND commit_log_ports.commit_log_id = commit_log.id
@@ -705,6 +690,11 @@ CREATE FUNCTION RecordLastestPortCommits(timestamp) RETURNS INT4 AS '
 			category,
 			port
 	  LIMIT 100;
+
+		-- delete what is already there
+		DELETE FROM commits_latest;
+
+		INSERT INTO commits_latest SELECT * FROM commits_latest_tmp;
 
 		SELECT MAX(commit_log_id)
 		  INTO MaxCommitID
