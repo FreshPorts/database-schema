@@ -48,7 +48,7 @@ FreshPorts2
 PostgreSQL 7.x
 PostgreSQL.def
 --\
--- $Id: FreshPorts2.pdm,v 1.70 2003-05-02 18:37:59 dan Exp $\
+-- $Id: FreshPorts2.pdm,v 1.71 2003-05-09 19:39:24 dan Exp $\
 --\
 -- The following options should be used to create the database schema\
 --\
@@ -80,7 +80,7 @@ PostgreSQL.def
 Dan Langille
 
 968886895
-1051900289
+1052505034
 0
 0
 0
@@ -1400,7 +1400,9 @@ task
 
 insert into tasks (name,description) values ('SecurityNoticeAdd', 'Ability to designate a given commit as security related');\
 \
-insert into tasks (name,description) values ('CategoryVirtualDescriptionSet', 'Ability to set the description for a virtual category');
+insert into tasks (name,description) values ('CategoryVirtualDescriptionSet', 'Ability to set the description for a virtual category');\
+\
+insert into tasks (name,description) values ('AnnouncementsUpdate', 'Ability to maintain the announcements table');
 0
 0
 0
@@ -1580,6 +1582,32 @@ latest_commits
 
 
 PK_LATEST_COMMITS
+
+
+
+0
+0
+0
+0
+0
+3
+19455
+19455
+2
+announcements
+announcements
+
+
+
+0
+0
+0
+
+
+
+
+
+
 
 
 
@@ -9973,6 +10001,170 @@ commit_date
 0
 0
 0
+3
+19456
+19456
+id
+id
+
+
+
+19455
+83
+serial
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+1
+0
+1
+1
+0
+0
+
+
+1
+0
+-100
+0
+0
+0
+0
+3
+19459
+19459
+text
+text
+
+
+
+19455
+84
+text
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+0
+1
+1
+0
+0
+
+
+2
+0
+-100
+0
+0
+0
+0
+3
+19457
+19457
+start_date
+start_date
+
+
+
+19455
+131
+timestamp with time zone
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+0
+0
+1
+0
+0
+
+
+3
+0
+-100
+0
+0
+0
+0
+3
+19458
+19458
+end_date
+end_date
+
+
+
+19455
+10854
+timestamp with time zone
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+0
+0
+1
+0
+0
+
+
+4
+0
+-100
+0
+0
+0
+0
 /END_TABLE AMCCOLN
 
 /BEGIN_TABLE AMCAKEY
@@ -15001,15 +15193,15 @@ Arial
 MS Sans Serif
 8
 0
-4
+8
 Arial
 8
 8
-5
+9
 Arial
 6
 0
-6
+10
 Comic Sans MS
 10
 0
@@ -17212,7 +17404,7 @@ OLE     BIN
 
 
 
-2
+13608
 22
 
 3
@@ -17245,7 +17437,7 @@ OLE     BIN
 
 
 
-2
+13608
 25
 
 3
@@ -17278,7 +17470,7 @@ OLE     BIN
 
 
 
-2
+13608
 29
 
 3
@@ -17311,7 +17503,7 @@ OLE     BIN
 
 
 
-2
+13608
 192
 
 3
@@ -17344,7 +17536,7 @@ OLE     BIN
 
 
 
-2
+13608
 197
 
 3
@@ -17364,7 +17556,7 @@ OLE     BIN
 1
 1
 0
-6
+10
 529
 0
 0
@@ -17379,7 +17571,7 @@ Copyright © 2001-2003 DVL Software Limited\
 Wellington, New Zealand  - 27 April 2003
 
 
-2
+13608
 0
 
 3
@@ -17412,7 +17604,7 @@ Wellington, New Zealand  - 27 April 2003
 
 
 
-2
+13608
 467
 
 3
@@ -17445,7 +17637,7 @@ Wellington, New Zealand  - 27 April 2003
 
 
 
-2
+13608
 1
 
 3
@@ -17478,7 +17670,7 @@ Wellington, New Zealand  - 27 April 2003
 
 
 
-2
+13608
 0
 
 3
@@ -17512,7 +17704,7 @@ Each commit will be \
 stored in this table.
 
 
-2
+13608
 0
 
 3
@@ -17545,7 +17737,7 @@ stored in this table.
 
 
 
-2
+13608
 4
 
 3
@@ -17579,7 +17771,7 @@ each commit modifies \
 one or more files
 
 
-2
+13608
 0
 
 3
@@ -17612,7 +17804,7 @@ one or more files
 
 
 
-2
+13608
 0
 
 3
@@ -17645,7 +17837,7 @@ one or more files
 
 
 
-2
+13608
 469
 
 3
@@ -17681,7 +17873,7 @@ Sample entries are \
 5.0-CURRENT
 
 
-2
+13608
 0
 
 3
@@ -17714,7 +17906,7 @@ Sample entries are \
 
 
 
-2
+13608
 0
 
 3
@@ -17749,7 +17941,7 @@ Operating Systems\
 in the same database
 
 
-2
+13608
 0
 
 3
@@ -17782,7 +17974,7 @@ in the same database
 
 
 
-2
+13608
 505
 
 3
@@ -17815,7 +18007,7 @@ in the same database
 
 
 
-2
+13608
 0
 
 3
@@ -17848,7 +18040,7 @@ in the same database
 
 
 
-2
+13608
 468
 
 3
@@ -17883,7 +18075,7 @@ same element referred to more \
 than once by the same tag.
 
 
-2
+13608
 0
 
 3
@@ -17916,7 +18108,7 @@ than once by the same tag.
 
 
 
-2
+13608
 1056
 
 3
@@ -17949,7 +18141,7 @@ than once by the same tag.
 
 
 
-2
+13608
 2324
 
 3
@@ -17982,7 +18174,7 @@ than once by the same tag.
 
 
 
-2
+13608
 2836
 
 3
@@ -18015,7 +18207,7 @@ than once by the same tag.
 
 
 
-2
+13608
 3363
 
 3
@@ -18048,7 +18240,7 @@ than once by the same tag.
 
 
 
-2
+13608
 4526
 
 3
@@ -18081,7 +18273,7 @@ than once by the same tag.
 
 
 
-2
+13608
 5703
 
 3
@@ -18114,7 +18306,7 @@ than once by the same tag.
 
 
 
-2
+13608
 6230
 
 3
@@ -18147,7 +18339,7 @@ than once by the same tag.
 
 
 
-2
+13608
 6547
 
 3
@@ -18180,7 +18372,7 @@ than once by the same tag.
 
 
 
-2
+13608
 8543
 
 3
@@ -18213,7 +18405,7 @@ than once by the same tag.
 
 
 
-2
+13608
 7239
 
 3
@@ -18246,7 +18438,7 @@ than once by the same tag.
 
 
 
-2
+13608
 7906
 
 3
@@ -18279,7 +18471,7 @@ than once by the same tag.
 
 
 
-2
+13608
 6871
 
 3
@@ -18312,7 +18504,7 @@ than once by the same tag.
 
 
 
-2
+13608
 0
 
 3
@@ -18345,7 +18537,7 @@ than once by the same tag.
 
 
 
-2
+13608
 9430
 
 3
@@ -18378,7 +18570,7 @@ than once by the same tag.
 
 
 
-2
+13608
 10451
 
 3
@@ -18411,7 +18603,7 @@ than once by the same tag.
 
 
 
-2
+13608
 10456
 
 3
@@ -18444,7 +18636,7 @@ than once by the same tag.
 
 
 
-2
+13608
 10812
 
 3
@@ -18477,7 +18669,7 @@ than once by the same tag.
 
 
 
-2
+13608
 10814
 
 3
@@ -18510,7 +18702,7 @@ than once by the same tag.
 
 
 
-2
+13608
 10829
 
 3
@@ -18543,7 +18735,7 @@ than once by the same tag.
 
 
 
-2
+13608
 10838
 
 3
@@ -18576,7 +18768,7 @@ than once by the same tag.
 
 
 
-2
+13608
 10864
 
 3
@@ -18609,7 +18801,7 @@ than once by the same tag.
 
 
 
-2
+13608
 11332
 
 3
@@ -18647,7 +18839,7 @@ one entry in this \
 table.
 
 
-2
+13608
 0
 
 3
@@ -18680,7 +18872,7 @@ table.
 
 
 
-2
+13608
 209
 
 3
@@ -18713,7 +18905,7 @@ table.
 
 
 
-2
+13608
 304
 
 3
@@ -18746,7 +18938,7 @@ table.
 
 
 
-2
+13608
 8
 
 3
@@ -18779,7 +18971,7 @@ table.
 
 
 
-2
+13608
 11727
 
 3
@@ -18792,10 +18984,10 @@ table.
 0
 0
 0
-28807
--166828
-36831
--162477
+28806
+-166829
+36830
+-162478
 2
 1
 0
@@ -18812,7 +19004,7 @@ table.
 
 
 
-2
+13608
 14576
 
 3
@@ -18845,7 +19037,7 @@ table.
 
 
 
-2
+13608
 14577
 
 3
@@ -18878,7 +19070,7 @@ table.
 
 
 
-2
+13608
 15520
 
 3
@@ -18911,7 +19103,7 @@ table.
 
 
 
-2
+13608
 15995
 
 3
@@ -18944,7 +19136,7 @@ table.
 
 
 
-2
+13608
 17130
 
 3
@@ -18977,7 +19169,7 @@ table.
 
 
 
-2
+13608
 17588
 
 3
@@ -19010,7 +19202,7 @@ table.
 
 
 
-2
+13608
 18036
 
 3
@@ -19043,14 +19235,47 @@ table.
 
 
 
-2
+13608
 18531
+
+3
+17739
+289
+0
+47
+0
+0
+0
+0
+0
+47691
+-112758
+63215
+-107432
+2
+1
+0
+0
+0
+0
+0
+0
+0
+0
+0
+
+0
+
+
+
+13608
+19455
 
 3
 4427
 290
 0
-47
+48
 0
 835
 3
@@ -19076,14 +19301,14 @@ table.
 
 
 
-2
+13608
 1572
 
 3
 9
 290
 0
-48
+49
 0
 2
 3
@@ -19109,14 +19334,14 @@ f4fdffffcb86fcff32300000cb86fcff323000000cacfcff
 
 
 
-2
+13608
 32
 
 3
 49
 290
 0
-49
+50
 0
 4
 7
@@ -19142,14 +19367,14 @@ f4fdffffcb86fcff32300000cb86fcff323000000cacfcff
 
 
 
-2
+13608
 41
 
 3
 52
 290
 0
-50
+51
 0
 6
 7
@@ -19175,14 +19400,14 @@ f4fdffffcb86fcff32300000cb86fcff323000000cacfcff
 
 
 
-2
+13608
 44
 
 3
 843
 290
 0
-51
+52
 0
 837
 836
@@ -19208,14 +19433,14 @@ f4fdffffcb86fcff32300000cb86fcff323000000cacfcff
 
 
 
-2
+13608
 479
 
 3
 888
 290
 0
-52
+53
 0
 4
 835
@@ -19241,14 +19466,14 @@ f4fdffffcb86fcff32300000cb86fcff323000000cacfcff
 
 
 
-2
+13608
 495
 
 3
 3087
 290
 0
-53
+54
 0
 925
 837
@@ -19274,14 +19499,14 @@ f9f8ffff29aefcfff9f8ffffc4c9fcff
 
 
 
-2
+13608
 821
 
 3
 3205
 290
 0
-54
+55
 0
 5
 6
@@ -19307,14 +19532,14 @@ a9b500003e26fdff5ff800003e26fdff
 
 
 
-2
+13608
 893
 
 3
 3482
 290
 0
-55
+56
 0
 320
 5
@@ -19340,14 +19565,14 @@ a9b500003e26fdff5ff800003e26fdff
 
 
 
-2
+13608
 964
 
 3
 4006
 290
 0
-56
+57
 0
 2
 3904
@@ -19373,14 +19598,14 @@ e9d2ffffce72fcffc04d0000ce72fcff
 
 
 
-2
+13608
 1230
 
 3
 4008
 290
 0
-57
+58
 0
 327
 3904
@@ -19406,14 +19631,14 @@ c79700001776fcffdc4100001776fcff
 
 
 
-2
+13608
 1231
 
 3
 4435
 290
 0
-58
+59
 0
 835
 836
@@ -19439,14 +19664,14 @@ c79700001776fcffdc4100001776fcff
 
 
 
-2
+13608
 1578
 
 3
 4522
 290
 0
-59
+60
 0
 3
 3904
@@ -19472,14 +19697,14 @@ fb49000073affcfffb4900005470fcff
 
 
 
-2
+13608
 2088
 
 3
 4540
 290
 0
-60
+61
 0
 925
 2
@@ -19505,14 +19730,14 @@ b1fcffff52aefcffb1fcffff9e7bfcff
 
 
 
-2
+13608
 2092
 
 3
 4580
 290
 0
-61
+62
 0
 5
 4579
@@ -19538,14 +19763,14 @@ c27900007ef1fcffc279000047e4fcff5b98000047e4fcff
 
 
 
-2
+13608
 2328
 
 3
 4702
 290
 0
-62
+63
 0
 2
 4701
@@ -19571,14 +19796,14 @@ c27900007ef1fcffc279000047e4fcff5b98000047e4fcff
 
 
 
-2
+13608
 2840
 
 3
 4704
 290
 0
-63
+64
 0
 327
 4701
@@ -19604,14 +19829,14 @@ c27900007ef1fcffc279000047e4fcff5b98000047e4fcff
 
 
 
-2
+13608
 2841
 
 3
 5216
 290
 0
-64
+65
 0
 5
 5215
@@ -19637,14 +19862,14 @@ ca7100004613fdffe3d7ffff4613fdff
 
 
 
-2
+13608
 3368
 
 3
 6099
 290
 0
-65
+66
 0
 4
 5524
@@ -19670,14 +19895,14 @@ ca7100004613fdffe3d7ffff4613fdff
 
 
 
-2
+13608
 6049
 
 3
 6476
 290
 0
-66
+67
 0
 320
 321
@@ -19703,14 +19928,14 @@ ca7100004613fdffe3d7ffff4613fdff
 
 
 
-2
+13608
 6875
 
 3
 7669
 290
 0
-67
+68
 0
 5
 7666
@@ -19736,14 +19961,14 @@ ca7100004613fdffe3d7ffff4613fdff
 
 
 
-2
+13608
 10833
 
 3
 7932
 290
 0
-68
+69
 0
 5
 7931
@@ -19769,14 +19994,14 @@ a6bc00001233fdff581501001233fdff
 
 
 
-2
+13608
 11336
 
 3
 11571
 290
 0
-69
+70
 0
 5
 5524
@@ -19802,14 +20027,14 @@ b5bb0000b912fdff7cde0000b912fdff7cde0000f001fdff
 
 
 
-2
+13608
 12188
 
 3
 11658
 290
 0
-70
+71
 0
 6
 5
@@ -19835,14 +20060,14 @@ aefe0000011ffdffd3be0000011ffdff
 
 
 
-2
+13608
 13301
 
 3
 11967
 290
 0
-71
+72
 0
 2
 5215
@@ -19868,14 +20093,14 @@ aefe0000011ffdffd3be0000011ffdff
 
 
 
-2
+13608
 14563
 
 3
 11998
 290
 0
-72
+73
 0
 5
 11997
@@ -19901,14 +20126,14 @@ aefe0000011ffdffd3be0000011ffdff
 
 
 
-2
+13608
 14585
 
 3
 12815
 290
 0
-73
+74
 0
 7652
 7654
@@ -19934,14 +20159,14 @@ aefe0000011ffdffd3be0000011ffdff
 
 
 
-2
+13608
 14986
 
 3
 12818
 290
 0
-74
+75
 0
 7685
 7654
@@ -19967,14 +20192,14 @@ aefe0000011ffdffd3be0000011ffdff
 
 
 
-2
+13608
 14989
 
 3
 12829
 290
 0
-75
+76
 0
 7652
 7666
@@ -20000,14 +20225,14 @@ a9cb00008f87fdffa9cb00001a65fdffb3ea00001a65fdff
 
 
 
-2
+13608
 14998
 
 3
 12831
 290
 0
-76
+77
 0
 7685
 7666
@@ -20033,14 +20258,14 @@ a9cb00008f87fdffa9cb00001a65fdffb3ea00001a65fdff
 
 
 
-2
+13608
 14999
 
 3
 2809
 290
 0
-77
+78
 0
 4
 622
@@ -20066,14 +20291,14 @@ a9cb00008f87fdffa9cb00001a65fdffb3ea00001a65fdff
 
 
 
-2
+13608
 671
 
 3
 2812
 290
 0
-78
+79
 0
 4
 327
@@ -20099,14 +20324,14 @@ a9cb00008f87fdffa9cb00001a65fdffb3ea00001a65fdff
 
 
 
-2
+13608
 674
 
 3
 2815
 290
 0
-79
+80
 0
 622
 327
@@ -20132,14 +20357,14 @@ a9cb00008f87fdffa9cb00001a65fdffb3ea00001a65fdff
 
 
 
-2
+13608
 677
 
 3
 2986
 290
 0
-80
+81
 0
 4
 4
@@ -20165,14 +20390,14 @@ feef000073affcff50fd000073affcff50fd000075a2fcff72f1000075a2fcff
 
 
 
-2
+13608
 751
 
 3
 8599
 290
 0
-81
+82
 0
 4
 8598
@@ -20198,14 +20423,14 @@ c7ef000045a4fcffc7ef00008885fcffe21b01008885fcff
 
 
 
-2
+13608
 11730
 
 3
 13094
 290
 0
-82
+83
 0
 11996
 11997
@@ -20226,19 +20451,19 @@ c7ef000045a4fcffc7ef00008885fcffe21b01008885fcff
 0
 0
 2
-e57a0000e97bfdffe57a0000c362fdff
+e47a0000e87bfdffe47a0000c362fdff
 2
 
 
 
-2
+13608
 15187
 
 3
 14390
 290
 0
-83
+84
 0
 327
 14385
@@ -20264,14 +20489,14 @@ c87d00005841fcffe16000005841fcff
 
 
 
-2
+13608
 16003
 
 3
 14604
 290
 0
-84
+85
 0
 2
 14385
@@ -20297,14 +20522,14 @@ c87d00005841fcffe16000005841fcff
 
 
 
-2
+13608
 16442
 
 3
 16244
 290
 0
-85
+86
 0
 2
 16242
@@ -20330,14 +20555,14 @@ e0d0ffffc774fcffe0d0fffffc55fcff
 
 
 
-2
+13608
 17133
 
 3
 16470
 290
 0
-86
+87
 0
 327
 16469
@@ -20363,14 +20588,14 @@ e0d0ffffc774fcffe0d0fffffc55fcff
 
 
 
-2
+13608
 17591
 
 3
 16472
 290
 0
-87
+88
 0
 622
 16469
@@ -20396,14 +20621,14 @@ e0d0ffffc774fcffe0d0fffffc55fcff
 
 
 
-2
+13608
 17592
 
 3
 16982
 290
 0
-88
+89
 0
 5215
 16972
@@ -20429,14 +20654,14 @@ e3eaffff0404fdffe3eaffff96f3fcff221e000096f3fcff
 
 
 
-2
+13608
 18047
 
 3
 17216
 290
 0
-89
+90
 0
 2
 17215
@@ -20462,7 +20687,7 @@ e3eaffff0404fdffe3eaffff96f3fcff221e000096f3fcff
 
 
 
-2
+13608
 18534
 
 /END_TABLE AMCSYMB
