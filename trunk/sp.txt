@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.73 2003-04-29 15:59:26 dan Exp $
+-- $Id: sp.txt,v 1.74 2003-04-29 16:25:52 dan Exp $
 --
 
 CREATE OR REPLACE FUNCTION IsDescendantOf (int4 ,int4) returns boolean As '
@@ -37,16 +37,6 @@ CREATE OR REPLACE FUNCTION IsDescendantOf (int4 ,int4) returns boolean As '
    END;
 '  LANGUAGE 'plpgsql';
 
-
-CREATE OR REPLACE FUNCTION element_pathname (integer) RETURNS text
-    AS '
-   DECLARE
-      element_id    ALIAS FOR $1;
-BEGIN
-  return Element_Pathname(element_id, TRUE);
-END;
-'
-    LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION element_pathname (integer, boolean) RETURNS text
     AS '
@@ -88,6 +78,16 @@ begin
   END IF;
 
   return pathname;
+END;
+'
+    LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION element_pathname (integer) RETURNS text
+    AS '
+   DECLARE
+      element_id    ALIAS FOR $1;
+BEGIN
+  return Element_Pathname(element_id, TRUE);
 END;
 '
     LANGUAGE plpgsql;
