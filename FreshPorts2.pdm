@@ -48,7 +48,7 @@ FreshPorts2
 PostgreSQL 7.x
 PostgreSQL.def
 --\
--- $Id: FreshPorts2.pdm,v 1.69 2003-04-28 03:39:43 dan Exp $\
+-- $Id: FreshPorts2.pdm,v 1.70 2003-05-02 18:37:59 dan Exp $\
 --\
 -- The following options should be used to create the database schema\
 --\
@@ -80,7 +80,7 @@ PostgreSQL.def
 Dan Langille
 
 968886895
-1051501035
+1051900289
 0
 0
 0
@@ -1225,9 +1225,15 @@ reports
 
 
 
-insert into reports(id, name, description) values (1, 'Watch List Notification', 'Details of any changes to any items on your watch list');\
+insert into reports(id, name, description, needs_frequency) values (1, 'Watch List Notification', 'Details of any changes to any items on your watch list', TRUE);\
 \
-insert into reports(id, name, description) values (2, 'New Ports', 'Lists the new ports which have been added to the ports tree');
+insert into reports(id, name, description, needs_frequency) values (2, 'New Ports', 'Lists the new ports which have been added to the ports tree', TRUE);\
+\
+insert into reports(id, name, description, needs_frequency) values (3, 'Maintainer notification', 'Port maintainers are notified when their port fails to build (for maintainers only).', FALSE);\
+\
+insert into reports(id, name, description, needs_frequency) values (4, 'Announcements', 'Very low frequency notices about important changes to the website (highly recommended)', FALSE);\
+\
+insert into reports(id, name, description, needs_frequency) values (5, 'Security Notices', 'Notification of any security commits related to ports on your watch list.', FALSE);
 0
 0
 0
@@ -3183,7 +3189,7 @@ smallint
 1
 0
 0
-
+page_size
 
 19
 0
@@ -18418,10 +18424,10 @@ than once by the same tag.
 0
 0
 0
-50022
--162842
-58046
--158491
+50020
+-162844
+58044
+-158493
 2
 1
 0
@@ -19923,7 +19929,7 @@ aefe0000011ffdffd3be0000011ffdff
 0
 0
 3
-75c90000c090fdff75c9000073b9fdffd8db000073b9fdff
+73c90000be90fdff73c9000073b9fdffd8db000073b9fdff
 2
 
 
@@ -19989,7 +19995,7 @@ aefe0000011ffdffd3be0000011ffdff
 0
 0
 3
-abcb00009187fdffabcb00001a65fdffb3ea00001a65fdff
+a9cb00008f87fdffa9cb00001a65fdffb3ea00001a65fdff
 2
 
 
