@@ -48,7 +48,7 @@ FreshPorts2
 PostgreSQL 7.x
 PostgreSQL.def
 --\
--- $Id: FreshPorts2.pdm,v 1.91 2004-08-27 14:48:35 dan Exp $\
+-- $Id: FreshPorts2.pdm,v 1.92 2004-08-27 16:55:35 dan Exp $\
 --\
 -- The following options should be used to create the database schema\
 --\
@@ -80,7 +80,7 @@ PostgreSQL.def
 Dan Langille
 
 968886895
-1093617736
+1093625466
 0
 0
 0
@@ -1958,7 +1958,7 @@ vuxml_references
 0
 0
 0
-
+vuxml_references
 
 
 
@@ -1984,7 +1984,7 @@ vuxml_affected
 0
 0
 0
-
+vuxml_affected
 
 
 
@@ -2010,7 +2010,7 @@ vuxml_names
 0
 0
 0
-
+vuxml_names
 
 
 
@@ -5310,7 +5310,7 @@ text
 1
 0
 0
-
+no_latest_link
 
 25
 0
@@ -5351,7 +5351,7 @@ text
 1
 0
 0
-
+no_package
 
 26
 0
@@ -5392,7 +5392,7 @@ text
 1
 0
 0
-
+pkgname
 
 27
 0
@@ -6376,7 +6376,7 @@ text
 1
 0
 0
-
+port_epoch
 
 6
 0
@@ -12407,7 +12407,7 @@ integer
 1
 0
 0
-
+commit_log_id
 
 2
 0
@@ -12581,10 +12581,10 @@ vuxml_port_xref_id
 0
 0
 3
-24709
-24709
-range_operator_start
-range_operator_start
+24713
+24713
+range_version_start
+range_version_start
 
 
 
@@ -12612,7 +12612,7 @@ text
 1
 0
 0
-range_operator_start
+range_version_start
 
 3
 0
@@ -12622,10 +12622,10 @@ range_operator_start
 0
 0
 3
-24712
-24712
-range_operator_end
-range_operator_end
+24709
+24709
+range_operator_start
+range_operator_start
 
 
 
@@ -12653,7 +12653,7 @@ text
 1
 0
 0
-range_operator_end
+range_operator_start
 
 4
 0
@@ -12663,10 +12663,10 @@ range_operator_end
 0
 0
 3
-24713
-24713
-range_version_start
-range_version_start
+24712
+24712
+range_operator_end
+range_operator_end
 
 
 
@@ -12694,7 +12694,7 @@ text
 1
 0
 0
-range_version_start
+range_operator_end
 
 5
 0
@@ -12899,7 +12899,7 @@ serial
 1
 0
 0
-
+id
 
 1
 0
@@ -12940,7 +12940,7 @@ integer
 1
 0
 0
-
+vuxml_id
 
 2
 0
@@ -12981,7 +12981,7 @@ text
 1
 0
 0
-
+type
 
 3
 0
@@ -13022,7 +13022,7 @@ text
 1
 0
 0
-
+reference
 
 4
 0
@@ -13063,7 +13063,7 @@ serial
 1
 0
 0
-
+id
 
 1
 0
@@ -13104,7 +13104,7 @@ integer
 1
 0
 0
-
+vuxml_id
 
 2
 0
@@ -13145,7 +13145,7 @@ text
 1
 0
 0
-
+type
 
 3
 0
@@ -13186,7 +13186,7 @@ serial
 1
 0
 0
-
+id
 
 1
 0
@@ -13227,7 +13227,7 @@ integer
 1
 0
 0
-
+vuxml_affected_id
 
 2
 0
@@ -13268,7 +13268,7 @@ text
 1
 0
 0
-
+name
 
 3
 0
@@ -14693,7 +14693,7 @@ Ref_25784
 1
 0
 0
-
+Ref_25784
 
 0
 n
@@ -14717,7 +14717,7 @@ Ref_25793
 1
 0
 0
-
+Ref_25793
 
 0
 n
@@ -14741,7 +14741,7 @@ Ref_25808
 1
 0
 0
-
+Ref_25808
 
 0
 n
@@ -14765,7 +14765,7 @@ Ref_25815
 1
 0
 0
-
+Ref_25815
 
 0
 n
@@ -14789,7 +14789,7 @@ Ref_25823
 1
 0
 0
-
+Ref_25823
 
 0
 n
@@ -14813,7 +14813,7 @@ Ref_25843
 1
 0
 0
-
+Ref_25843
 
 0
 n
@@ -18750,11 +18750,7 @@ Arial
 Arial
 6
 0
-6
-Comic Sans MS
-10
-0
-8
+7
 Comic Sans MS
 9
 1
@@ -21109,7 +21105,7 @@ OLE     BIN
 1
 1
 0
-8
+7
 529
 0
 0
@@ -23062,9 +23058,9 @@ one entry in this table.
 0
 0
 0
-57428
--288687
-69877
+57425
+-288694
+69874
 -281411
 2
 1
@@ -23195,9 +23191,9 @@ one entry in this table.
 0
 0
 57841
--278709
+-277977
 69465
--274358
+-273626
 2
 1
 0
@@ -24958,7 +24954,7 @@ a4b5000048ebfbffcdfe000048ebfbff
 0
 0
 2
-38f90000b6e7fbff38f9000034c7fbff
+38f90000b6e7fbff38f9000010cafbff
 2
 
 
@@ -24991,7 +24987,7 @@ a4b5000048ebfbffcdfe000048ebfbff
 0
 0
 2
-39f9000034c7fbff39f90000f1a5fbff
+36f9000010cafbff36f90000eea5fbff
 2
 
 
