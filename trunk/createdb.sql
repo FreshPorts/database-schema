@@ -1,5 +1,5 @@
 #
-# $Id: createdb.sql,v 1.34 2002-07-26 21:20:57 dan Exp $
+# $Id: createdb.sql,v 1.35 2002-07-26 21:21:39 dan Exp $
 #
 # Things which must be done to make this script work with PostgreSQL
 # 
