@@ -1,9 +1,7 @@
 This file contains notes for upgrading from one database version
 to another.
 
-2003 September 24
-
-To use non port tree commits:
+2003 September 27
 
   Add functions: 
 	commit_log_ports_insert
@@ -11,7 +9,9 @@ To use non port tree commits:
 	IsPort
 	IsCategory
 	elementGet
+    freshports_commit
 
   Add types:
 	element_type
 	commit_record
+    freshports_commit_record
