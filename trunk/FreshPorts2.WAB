@@ -48,7 +48,7 @@ FreshPorts2
 Sybase SQL Anywhere 5.5
 sqlany55.def
 #\
-# $Id: FreshPorts2.WAB,v 1.36 2002-04-02 04:55:43 dan Exp $\
+# $Id: FreshPorts2.WAB,v 1.37 2002-04-12 06:26:30 dan Exp $\
 #\
 # Things which must be done to make this script work with PostgreSQL\
 # \
@@ -84,7 +84,7 @@ sqlany55.def
 Dan Langille
 
 968886895
-1017718999
+1018585792
 0
 0
 0
@@ -1302,7 +1302,7 @@ message_subject
 
 
 1
-84
+0
 text
 0
 0
@@ -1503,6 +1503,41 @@ int4
 system_id
 
 9
+3
+9103
+9103
+encoding_losses
+encoding_losses
+
+
+
+1
+0
+boolean
+0
+0
+0
+0
+
+
+
+
+default 'f'::bool
+0
+0
+0
+
+
+
+0
+0
+1
+1
+0
+0
+
+
+10
 3
 5
 5
@@ -4981,6 +5016,41 @@ commit_log_id
 
 2
 3
+9104
+9104
+encoding_losses
+encoding_losses
+
+
+
+4528
+190
+boolean
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+0
+0
+1
+0
+0
+
+
+3
+3
 8877
 8877
 message_id
@@ -5012,49 +5082,14 @@ text
 1
 0
 0
-
-
-3
-3
-8262
-8262
-committer
-committer
-
-
-
-4528
-84
-text
-0
-0
-0
-0
-
-
-
-
-
-0
-0
-0
-
-
-
-0
-0
-0
-1
-0
-0
-committer
+message_id
 
 4
 3
-4531
-4531
-commit_description
-commit_description
+8262
+8262
+committer
+committer
 
 
 
@@ -5082,14 +5117,14 @@ text
 1
 0
 0
-commit_description
+committer
 
 5
 3
-4532
-4532
-commit_date
-commit_date
+4531
+4531
+commit_description
+commit_description
 
 
 
@@ -5117,14 +5152,14 @@ text
 1
 0
 0
-commit_date
+commit_description
 
 6
 3
-4533
-4533
-commit_time
-commit_time
+4532
+4532
+commit_date
+commit_date
 
 
 
@@ -5152,21 +5187,21 @@ text
 1
 0
 0
-commit_time
+commit_date
 
 7
 3
-4534
-4534
-port_id
-port_id
+4533
+4533
+commit_time
+commit_time
 
 
 
 4528
+84
+text
 0
-int4
-4
 0
 0
 0
@@ -5187,10 +5222,45 @@ int4
 1
 0
 0
-port_id
+commit_time
 
 8
 3
+4534
+4534
+port_id
+port_id
+
+
+
+4528
+0
+int4
+4
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+0
+0
+1
+0
+0
+port_id
+
+9
+3
 4535
 4535
 category
@@ -5224,7 +5294,7 @@ text
 0
 category
 
-9
+10
 3
 4536
 4536
@@ -5259,47 +5329,12 @@ int4
 0
 category_id
 
-10
-3
-4537
-4537
-port
-port
-
-
-
-4528
-84
-text
-0
-0
-0
-0
-
-
-
-
-
-0
-0
-0
-
-
-
-0
-0
-0
-1
-0
-0
-port
-
 11
 3
-4538
-4538
-version
-version
+4537
+4537
+port
+port
 
 
 
@@ -5327,10 +5362,45 @@ text
 1
 0
 0
-version
+port
 
 12
 3
+4538
+4538
+version
+version
+
+
+
+4528
+84
+text
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+0
+0
+1
+0
+0
+version
+
+13
+3
 7029
 7029
 revision
@@ -5364,7 +5434,7 @@ text
 0
 revision
 
-13
+14
 3
 4539
 4539
@@ -5399,7 +5469,7 @@ char(1)
 0
 status
 
-14
+15
 3
 4540
 4540
@@ -5434,43 +5504,43 @@ smallint
 0
 needs_refresh
 
-15
-3
-4541
-4541
-forbidden
-forbidden
-
-
-
-4528
-84
-text
-0
-0
-0
-0
-
-
-
-
-
-0
-0
-0
-
-
-
-0
-0
-0
-1
-0
-0
-forbidden
-
 16
 3
+4541
+4541
+forbidden
+forbidden
+
+
+
+4528
+84
+text
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+0
+0
+1
+0
+0
+forbidden
+
+17
+3
 4542
 4542
 broken
@@ -5504,7 +5574,7 @@ text
 0
 broken
 
-17
+18
 3
 4543
 4543
@@ -5539,7 +5609,7 @@ double precision
 0
 date_added
 
-18
+19
 3
 4544
 4544
@@ -5574,43 +5644,43 @@ int4
 0
 element_id
 
-19
-3
-4545
-4545
-short_description
-short_description
-
-
-
-4528
-84
-text
-0
-0
-0
-0
-
-
-
-
-
-0
-0
-0
-
-
-
-0
-0
-0
-1
-0
-0
-short_description
-
 20
 3
+4545
+4545
+short_description
+short_description
+
+
+
+4528
+84
+text
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+0
+0
+1
+0
+0
+short_description
+
+21
+3
 4546
 4546
 watch
@@ -5644,7 +5714,7 @@ text
 0
 watch
 
-21
+22
 3
 5705
 5705
@@ -8602,13 +8672,12 @@ commits_recent
 
 1
 1
-select distinct commit_log.id, commit_log.message_id, commit_log.message_date, \
+select distinct commit_log.id, commit_log.encoding_losses, commit_log.message_id, commit_log.message_date, \
 commit_log.message_subject, commit_log.date_added, commit_log.commit_date, \
 commit_log.committer, commit_log.description, commit_log.system_id\
-from commit_log \
-where exists\
-(select * from commit_log_ports where commit_log_ports.commit_log_id = commit_log.id)\
-order by commit_log.commit_date desc, commit_log.id limit 100
+from commit_log\
+where exists (select * from commit_log_ports where commit_log_ports.commit_log_id = commit_log.id)\
+order by, commit_log.id limit
 1
 1
 0
@@ -9226,6 +9295,10 @@ Arial
 5
 Comic Sans MS
 14
+1
+6
+Courier New
+10
 1
 /END_TABLE AMCFONT
 
@@ -11185,10 +11258,10 @@ table.
 0
 0
 0
--38311
--138316
--26537
--128117
+-38320
+-138811
+-26546
+-127637
 2
 1
 0
@@ -11252,10 +11325,10 @@ stored in this table.
 0
 0
 0
--31989
--121566
--22315
--115267
+-31992
+-121569
+-22318
+-115270
 2
 1
 0
@@ -11491,10 +11564,10 @@ than once by the same tag.
 0
 0
 0
--49985
--125805
--37836
--121456
+-49988
+-125808
+-37839
+-121459
 2
 1
 0
@@ -11557,10 +11630,10 @@ than once by the same tag.
 0
 0
 0
--42168
--155258
--32119
--148959
+-42171
+-155261
+-32122
+-148962
 2
 1
 0
@@ -11722,10 +11795,10 @@ than once by the same tag.
 0
 0
 0
-35175
--166620
-50324
--144722
+35173
+-167110
+50322
+-144236
 2
 1
 0
@@ -11854,10 +11927,10 @@ than once by the same tag.
 0
 0
 0
-17097
--165404
-34071
--153580
+16503
+-165313
+33477
+-152514
 2
 6
 0
@@ -11920,10 +11993,10 @@ than once by the same tag.
 0
 0
 0
-19600
--154878
-31624
--146954
+21530
+-155465
+33554
+-147541
 2
 6
 0
@@ -12001,7 +12074,7 @@ than once by the same tag.
 0
 0
 2
-b28effffb5fdfdffb28effffcb3cfeff
+a68effff43fefdffa68effffc83cfeff
 2
 
 
@@ -12067,7 +12140,7 @@ b28effffb5fdfdffb28effffcb3cfeff
 0
 0
 4
-cb3e0000394bfeffcb3e00009838feffb42d00009838feffb42d0000d728feff
+cb3e0000394bfeffb42d0000394bfeffb42d00009838feffb42d0000d728feff
 2
 
 
@@ -12397,7 +12470,7 @@ d11c0000878bfdffd11c000028a6fdff65ddffff28a6fdff
 0
 0
 3
-3272ffff0ff2fdff605affff0ff2fdff605affffc81afeff
+2972ffff80f1fdff5d5affff80f1fdff5d5affffc51afeff
 2
 
 
@@ -12430,7 +12503,7 @@ d11c0000878bfdffd11c000028a6fdff65ddffff28a6fdff
 0
 0
 3
-88edfffffd9efdff024dfffffd9efdff024dffff731dfeff
+88edfffffd9efdffff4cfffffd9efdffff4cffff701dfeff
 2
 
 
@@ -12463,7 +12536,7 @@ d11c0000878bfdffd11c000028a6fdff65ddffff28a6fdff
 0
 0
 3
-9efffffff91cfeff9effffffbd28feff81a1ffffbd28feff
+9efffffff91cfeff9effffffba28feff7ea1ffffba28feff
 2
 
 
@@ -12529,7 +12602,7 @@ d11c0000878bfdffd11c000028a6fdff65ddffff28a6fdff
 0
 0
 3
-378dffffbb31fefff14effffbb31fefff14efffff817feff
+348dffffb831feffee4effffb831feffee4efffff517feff
 2
 
 
@@ -12562,7 +12635,7 @@ d11c0000878bfdffd11c000028a6fdff65ddffff28a6fdff
 0
 0
 2
-3e8dfffffcc0fdff3e8dffff88fbfdff
+358dfffffcc0fdff358dffffe1fbfdff
 2
 
 
@@ -12628,7 +12701,7 @@ d11c0000878bfdffd11c000028a6fdff65ddffff28a6fdff
 0
 0
 2
-0873ffff46e6fdff0873ffff4bb4fdff
+fc72ffff96e4fdfffc72ffff48b4fdff
 2
 
 
@@ -12661,7 +12734,7 @@ d11c0000878bfdffd11c000028a6fdff65ddffff28a6fdff
 0
 0
 2
-ccdaffff13a8fdff626fffff13a8fdff
+ccdaffff10a8fdff5f6fffff10a8fdff
 2
 
 
