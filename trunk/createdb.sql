@@ -1,5 +1,5 @@
 --
--- $Id: createdb.sql,v 1.78 2004-10-21 01:55:55 dan Exp $
+-- $Id: createdb.sql,v 1.79 2004-12-14 01:10:47 dan Exp $
 --
 -- The following options should be used to create the database schema
 --
@@ -28,8 +28,8 @@
 create table watch_list_staging_log
 (
     id                         serial                not null,
-    date_added                 timestamp with time zone not null
-        default current_timestamp,
+    date_added                 timestamp without time zone not null
+        default currenttimestamputc(),
     user_id                    integer                       ,
     action                     char(1)               not null
         check (action in ('U','W','C','D')),
@@ -80,7 +80,7 @@ create table graphs
 create table commits_latest
 (
     commit_log_id              integer                       ,
-    commit_date_raw            timestamp with time zone         ,
+    commit_date_raw            timestamp without time zone         ,
     message_subject            text                          ,
     message_id                 text                          ,
     committer                  text                          ,
@@ -98,15 +98,16 @@ create table announcements
 (
     id                         serial                not null,
     text                       text                  not null,
-    start_date                 date                          ,
-    end_date                   date                          ,
+    start_date                 timestamp without time zone         ,
+    end_date                   timestamp without time zone         ,
     primary key (id)
 );
 
 create table page_load_summary
 (
     id                         serial                not null,
-    date                       date                  not null,
+    timestamp                  timestamp without time zone not null
+        default CurrentTimestampUTC(),
     page_name                  text                  not null,
     total                      integer               not null
         default 0,
@@ -118,14 +119,20 @@ create table page_load_summary
     primary key (id)
 );
 
-create unique index page_loads_date_date on page_load_summary (date, page_name);
+create unique index page_loads_date_date on page_load_summary (timestamp, page_name);
 
-create table commit_log_port_vuxml
+create table commit_log_port_vxuml
 (
     commit_log_id              integer               not null,
     port_id                    integer               not null,
     vuxml_id                   integer               not null,
     primary key (commit_log_id, port_id)
+);
+
+create table commits_latest_ports
+(
+    commit_log_id              integer               not null,
+    commit_date                timestamp without time zone not null
 );
 
 create table element
@@ -146,7 +153,7 @@ create table watch_notice
     frequency                  char(1)               not null
         check (frequency in ('Z','D','W','F','M')),
     description                text                  not null,
-    last_sent                  timestamp with time zone         ,
+    last_sent                  timestamp without time zone         ,
     primary key (id)
 );
 
@@ -182,6 +189,7 @@ create table reports
     id                         serial                not null,
     name                       text                  not null,
     description                text                  not null,
+    needs_frequency            boolean               not null,
     primary key (id)
 );
 
@@ -299,8 +307,8 @@ create table ports
     found_in_index             boolean                       ,
     forbidden                  text                          ,
     broken                     text                          ,
-    date_added                 timestamp with time zone         
-        default current_timestamp,
+    date_added                 timestamp without time zone         
+        default currenttimestamputc(),
     categories                 text                          ,
     deprecated                 text                          ,
     ignore                     text                          ,
@@ -320,10 +328,10 @@ create table users
     name                       text                  not null,
     password                   text                  not null,
     cookie                     text                  not null,
-    firstlogin                 timestamp with time zone         
-        default current_timestamp,
-    lastlogin                  timestamp with time zone         
-        default current_timestamp,
+    firstlogin                 timestamp without time zone         
+        default currenttimestamputc(),
+    lastlogin                  timestamp without time zone         
+        default currenttimestamputc(),
     email                      text                          ,
     watch_notice_id            integer               not null,
     emailsitenotices_yn        boolean                       ,
@@ -374,13 +382,13 @@ create table security_notice
 (
     id                         serial                not null,
     user_id                    integer               not null,
-    date_added                 timestamp with time zone not null
-        default current_timestamp,
+    date_added                 timestamp without time zone not null
+        default currenttimestamputc(),
     ip_address                 inet                  not null,
     description                text                  not null,
     commit_log_id              integer               not null,
     security_notice_status_id  char(1)               not null
-        default 'C",
+        default 'C',
     primary key (id)
 );
 
@@ -396,10 +404,10 @@ create table commit_log
 (
     id                         serial                not null,
     message_id                 text                  not null,
-    message_date               timestamp with time zone not null,
+    message_date               timestamp without time zone not null,
     message_subject            text                          ,
-    date_added                 timestamp with time zone not null,
-    commit_date                timestamp with time zone not null,
+    date_added                 timestamp without time zone not null,
+    commit_date                timestamp without time zone not null,
     committer                  text                  not null,
     description                text                  not null,
     system_id                  integer               not null,
@@ -441,8 +449,8 @@ create table watch_list_element
 create table watch_notice_log
 (
     id                         serial                not null,
-    notice_date                timestamp with time zone not null
-        default current_timestamp,
+    notice_date                timestamp without time zone not null
+        default currenttimestamputc(),
     frequency_id               integer               not null,
     watch_notice_count         integer               not null,
     commit_count               integer               not null,
@@ -477,6 +485,8 @@ create table commit_log_ports
 
 create index needs_refresh on commit_log_ports (needs_refresh);
 
+create index commit_log_ports_port_id on commit_log_ports (port_id);
+
 create table watch_list_staging
 (
     id                         serial                not null,
@@ -506,8 +516,8 @@ create table report_log
     id                         serial                not null,
     report_id                  integer               not null,
     frequency_id               integer               not null,
-    report_date                timestamp with time zone not null
-        default current_timestamp,
+    report_date                timestamp without time zone not null
+        default currenttimestamputc(),
     email_count                integer               not null,
     commit_count               integer               not null,
     port_count                 integer               not null,
@@ -559,8 +569,8 @@ create table commit_log_ports_ignore
 (
     commit_log_id              integer               not null,
     port_id                    integer               not null,
-    date_ignored               timestamp with time zone not null
-        default current_timestamp,
+    date_ignored               timestamp without time zone not null
+        default currenttimestamputc(),
     reason                     text                  not null,
     primary key (commit_log_id, port_id)
 );
@@ -568,7 +578,7 @@ create table commit_log_ports_ignore
 create table latest_commits_ports
 (
     commit_log_id              integer               not null,
-    commit_date                timestamp with time zone not null,
+    commit_date                timestamp without time zone not null,
     primary key (commit_log_id)
 );
 
@@ -584,8 +594,8 @@ create table security_notice_audit
     id                         serial                not null,
     security_notice_id         integer               not null,
     user_id                    integer               not null,
-    date_added                 timestamp with time zone not null
-        default current_timestamp,
+    date_added                 timestamp without time zone not null
+        default currenttimestamputc(),
     ip_address                 inet                  not null,
     description                text                  not null,
     commit_log_id              integer               not null,
@@ -596,7 +606,7 @@ create table security_notice_audit
 create table latest_commits
 (
     commit_log_id              integer               not null,
-    commit_date                timestamp with time zone not null,
+    commit_date                timestamp without time zone not null,
     primary key (commit_log_id)
 );
 
