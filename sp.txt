@@ -540,3 +540,22 @@ CREATE FUNCTION WatchListAdd (int4, text) RETURNS boolean AS '
    END;
 ' LANGUAGE 'plpgsql';
 
+
+  DROP FUNCTION IsLoginValid (text, text );
+CREATE FUNCTION IsLoginValid (text, text ) RETURNS int4 AS '
+   DECLARE
+      UserName     ALIAS for $1;
+      UserPassWord ALIAS for $2;
+      UserID       int4;
+
+   BEGIN
+      select id
+        into UserID
+        from Users
+       where lower(name) = lower(UserName)
+         and password    = UserPassWord;
+
+      return UserID;
+   END;
+' LANGUAGE 'plpgsql';
+
