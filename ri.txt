@@ -1,0 +1,150 @@
+  DROP function check_siblings();
+create function check_siblings() returns OPAQUE as '
+   declare 
+      ElementCount integer;
+begin
+
+  if new.Parent_ID is null then
+    select count(*) 
+      into ElementCount
+      from element
+     where element.name=new.name
+       and element.Parent_ID is null
+     group by element.name;
+  else
+    select count(*) 
+      into ElementCount
+      from element
+     where element.name=new.name
+       and element.Parent_ID=new.Parent_ID
+     group by element.name;
+  end if;
+
+  if (ElementCount > 1) then
+    RAISE EXCEPTION ''element % cannot be created as it already exists under that parent %'', new.name, new.parent_id;
+  end if;
+  RETURN NEW;
+
+end;
+' LANGUAGE 'plpgsql';
+
+
+  drop trigger check_siblings on element;
+create trigger check_siblings after insert or update 
+on element
+for each row
+execute procedure check_siblings();
+
+
+
+
+
+
+
+
+
+  DROP function on_delete_remove_children();
+
+create function on_delete_remove_children() returns OPAQUE as '
+begin
+
+  delete from element 
+   where parent_id=old.id;
+
+  RETURN old;
+end;
+' LANGUAGE 'plpgsql';
+
+  drop trigger on_delete_remove_children on element;
+
+create trigger on_delete_remove_children before delete 
+on element for each row
+execute procedure on_delete_remove_children();
+
+
+
+  DROP function check_parent();
+
+create function check_parent() returns OPAQUE as '
+   declare
+      ElementCount int4;
+begin
+   --  message ''check_parent'';
+   if new.parent_id is not null then
+      --    message ''check_parent 2'';
+      select count(*) 
+        into ElementCount
+        from element
+       where element.id = new.parent_id;
+      --    message ''check_parent 3'';
+      if (ElementCount = 0) then
+         -- message ''no such parent '' || NOW(*);
+         RAISE EXCEPTION ''modifications to element % with name=% cannot completed as the parent % does not exist.'', new.id, new.name, new.parent_id;
+      end if;
+   end if;
+   --    message ''check_parent 4''
+
+   RETURN NEW;
+end;
+' LANGUAGE 'plpgsql';
+
+  drop trigger check_parent on element;
+
+create trigger check_parent before insert or update
+on element for each row
+execute procedure check_parent();
+
+
+
+  DROP function parent_must_be_directory();
+
+create function parent_must_be_directory() returns OPAQUE as '
+   declare
+      ParentType char(1);
+begin
+   --  message ''parent_must_be_directory'';
+
+   if new.Parent_Id is not null then
+      select directory_file_flag 
+        into ParentType
+       from element
+      where element.id = new.parent_id;
+
+      if (ParentType = ''F'') then
+         -- message ''parent cannot be a file '' || NOW(*);
+         RAISE EXCEPTION ''modifications to element % with name=% cannot completed as the parent % is not a directory.'', new.id, new.name, new.parent_id;
+     end if;
+   end if;
+
+   RETURN NEW;
+end;
+' LANGUAGE 'plpgsql';
+
+  drop trigger check_parent on element;
+
+create trigger parent_must_be_directory before insert or update
+on element for each row
+execute procedure parent_must_be_directory();
+
+
+
+
+-- the procedure
+  DROP function id_change();
+create function id_change() returns OPAQUE as '
+begin
+   --  message ''check_siblings 4'';
+   if (new.id <> old.id) then
+      -- message ''change of id not allowed '' || NOW(*);
+      RAISE EXCEPTION ''modifications to element % with name=% cannot completed as you are not allowed to change id (new value was %).'', old.id, old.name, new.id;
+   end if;
+
+   RETURN NEW;
+end;
+' LANGUAGE 'plpgsql';
+
+-- the trigger
+  drop trigger id_change on element;
+create trigger id_change before update
+on element for each row
+execute procedure id_change();

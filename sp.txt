@@ -1,0 +1,301 @@
+CREATE TABLE element (
+   id serial not null,
+   name text NOT NULL,
+   parent_id int4,
+   directory_file_flag char(1) NOT NULL,
+   status char(1)
+);
+
+CREATE INDEX name_element_key ON element (name);
+CREATE INDEX parent_id_element_key ON element (parent_id);
+
+
+drop function IsDescendantOf (int4 ,int4) ;
+create function IsDescendantOf (int4 ,int4) returns boolean As '
+   DECLARE
+      element_id ALIAS FOR $1;
+      target_id  ALIAS FOR $2;
+
+      my_parent_id   int4;
+      IsDescendantOf boolean;
+      looping        int4;
+
+   BEGIN
+      IsDescendantOf := 0;
+      IF element_id <> target_id THEN
+         my_parent_id := element_id;
+         looping := 1;
+         WHILE looping=1 LOOP
+
+            select parent_id into my_parent_id
+              from element
+             where id = my_parent_id;
+
+            IF FOUND THEN
+               IF my_parent_id = target_id THEN
+                  IsDescendantOf := 1;
+                  looping        := 0;
+               END IF;
+            ELSE
+               looping := 0;
+            END IF;
+         END LOOP;
+      END IF;
+
+      RETURN IsDescendantOf;
+   END;
+'  LANGUAGE 'plpgsql';
+
+
+drop   function Element_Pathname(int4);
+create function Element_Pathname(int4) returns text AS '
+   DECLARE
+      element_id   ALIAS FOR $1;
+      my_parent_id int4;
+      element_name varchar(255);
+      pathname     text;
+
+begin
+  pathname = \'\';
+  select name, parent_id
+    into element_name, my_parent_id 
+    from element
+   where id = element_id;
+
+  IF FOUND THEN
+    pathname := \'/\' || element_name || pathname;
+    WHILE FOUND LOOP
+      select name, parent_id 
+        into element_name, my_parent_id
+        from element
+       where id = my_parent_id;
+
+      IF FOUND THEN
+        pathname = \'/\' || element_name || pathname;
+      END IF;
+    END LOOP;
+  END IF;
+  return pathname;
+END;
+'  LANGUAGE 'plpgsql';
+
+
+
+  drop function Pathname_ID(text);
+create function Pathname_ID(text) returns int4 AS '
+
+   DECLARE
+      in_element_pathname ALIAS FOR $1;
+
+      debug_str         text;
+      element_id        int4;
+      element_parent_id int4;
+      element_name      text;
+      element_pathname  text;
+      position          int4;
+      slash             text;
+
+begin
+  slash            := \'/\';
+  element_pathname := in_element_pathname;
+  element_id       := -1;
+
+  IF substr(element_pathname,1,1) = slash THEN
+    element_pathname := substr(element_pathname, 2);
+  END IF;
+
+  position := strpos(element_pathname, slash);
+  IF position = 0 THEN
+    element_name     := element_pathname;
+    element_pathname := \'\';
+  ELSE
+    element_name     := substr(element_pathname, 1, position-1);
+    element_pathname := substr(element_pathname, position+1);
+  END IF;
+
+  select id 
+    into element_parent_id
+    from element 
+   where element.name = element_name
+     and parent_id is null;
+
+  debug_str := debug_str || \'1 = \' || element_name;
+
+  WHILE(char_length(element_pathname) > 0) LOOP
+    position := strpos(element_pathname, slash);
+    if position = 0 then
+       element_name     := element_pathname;
+       element_pathname := \'\';
+    else
+       element_name     := substr(element_pathname, 1, position-1);
+       element_pathname := substr(element_pathname, position+1);
+    end if;
+
+    debug_str := debug_str || \'1 = \' || element_name;
+    select id 
+      into element_parent_id
+      from element 
+     where element.name = element_name 
+       and parent_id    = element_parent_id;
+
+    debug_str := debug_str || \' 2 = \' || element_name;
+    debug_str := debug_str || \' 3 = \' || element_parent_id;
+  end loop;
+
+  return element_parent_id;
+END;
+'  LANGUAGE 'plpgsql';
+
+  drop function Element_Add(text, char(1));
+create function Element_Add(text, char(1)) returns int4 AS '
+   DECLARE 
+      in_element_pathname ALIAS for $1;
+      element_directory_file_flag ALIAS for $2;
+      Element_ID          int4;
+      element_parent_id   int4;
+      element_name        text;
+      element_pathname    text;
+      DebugText           text;
+      position            int4;
+      slash               text;
+
+   BEGIN
+      slash            := \'/\';
+      element_pathname := in_element_pathname;
+
+      -- remove leading /
+      if substr(element_pathname, 1, 1) = slash then
+         element_pathname := substr(element_pathname, 2);
+      end if;
+
+      -- start off with a null parent, as we are in the root directory
+      element_parent_id = null;
+
+      /* on error do something here */
+      while(char_length(element_pathname) > 0) loop
+         position := strpos(element_pathname, slash);
+         if position = 0 then
+            element_name     := element_pathname;
+            element_pathname := \'\';
+         else
+            element_name     := substr(element_pathname,1, position-1);
+            element_pathname := substr(element_pathname,position+1);
+         end if;
+
+         if element_parent_id is null then
+            DebugText := DebugText || \' element id is null\';
+            select id 
+              into element_id
+              from element 
+             where element.name = element_name 
+               and parent_id    is null;
+         else
+            DebugText := DebugText || \' element id is NOT null\';
+            select id 
+              into element_id
+              from element 
+             where element.name = element_name 
+               and parent_id    = element_parent_id;
+         end if;
+
+         if NOT FOUND then
+            -- not found, we insert
+            -- DebugText := DebugText || \'not found\';
+
+            element_id := nextval(\'element_id_seq\');
+
+            insert into element(id, parent_id, directory_file_flag, name) 
+                         values(element_id, element_parent_id, element_directory_file_flag, element_name);
+         else
+            DebugText := DebugText || \'found\';
+            if element_pathname = \'\' then
+              -- element already exists
+              Element_ID := 0;
+            end if;
+         end if;
+
+        element_parent_id := element_id;
+      end loop;
+
+  return element_id;
+end;
+'  LANGUAGE 'plpgsql';
+
+
+
+
+
+  drop function Element_SetStatus(int4, char(1));
+create function Element_SetStatus(int4, char(1)) returns int4 AS '
+   DECLARE 
+      element_id     ALIAS for $1;
+      element_status ALIAS for $2;
+
+   BEGIN
+      update element 
+         set status = element_status
+       where id     = element_id;
+
+     return element_id;
+   END;
+'  LANGUAGE 'plpgsql';
+
+  drop function GetOrCreateCategory(text);
+create function GetOrCreateCategory(text) returns int4 AS '
+   DECLARE 
+      category_name ALIAS for $1;
+
+      pathname             text;
+      category_element_id  int4;
+      category_id          int4;
+
+   BEGIN
+      pathname            := \'ports/\' || category_name;
+      category_element_id := Pathname_ID(pathname);
+
+      IF NOT FOUND THEN
+         category_element_id := Element_Add(pathname, 'D');
+      END IF;
+
+      category_id := nextval(\'category_id_seq\');
+      INSERT INTO category (id,          is_primary, element_id, name)
+                 values    (category_id, 'Y', category_element_id, category_name, 
+
+      return category_id;
+   END;
+'  LANGUAGE 'plpgsql';
+
+
+
+
+  drop function CreateCategory(text, text, bool);
+create function CreateCategory(text, text, bool) returns int4 AS '
+   DECLARE 
+      category_name        ALIAS for $1;
+      category_description ALIAS for $2;
+      category_is_primary  ALIAS for $3;
+
+      pathname             text;
+      category_element_id  int4;
+      category_id          int4;
+
+   BEGIN
+      pathname            := \'ports/\' || category_name;
+      category_element_id := Pathname_ID(pathname);
+
+      IF category_element_id is NULL THEN
+         category_element_id := Element_Add(pathname, \'D\');
+      END IF;
+
+      category_id := nextval(\'categories_id_seq\');
+      INSERT INTO categories (id,          is_primary,          element_id,          name,              description)
+                  values     (category_id, category_is_primary, category_element_id, \'category_name\', \'category_description\');
+
+      return category_id;
+--       return category_element_id;
+
+   END;
+'  LANGUAGE 'plpgsql';
+
+
+
