@@ -105,7 +105,7 @@ alter table watch_notice_log       alter column id set default nextval('watch_no
 Dan Langille
 
 968886895
-978647622
+978647331
 0
 0
 0
@@ -3627,6 +3627,27 @@ fk_commit_log_element_element_revision
 n
 0
 3
+508
+508
+fk_system_version_system
+fk_system_version_system
+fk_system_version_system
+
+
+505
+469
+2
+2
+1
+1
+0
+0
+fk_system_version_system
+fk_system_version_system
+0
+n
+0
+3
 666
 666
 fk_watch_notice_log_watch_notice
@@ -3726,29 +3747,8 @@ fk_parent_id_element
 1
 0
 0
-fk_parent_id_element
-
-0
-n
-0
-3
-821
-821
-fk_system_version_system
-fk_system_version_system
-fk_system_version_system
 
 
-505
-469
-2
-2
-1
-1
-0
-0
-
-fk_system_version_system
 0
 n
 0
@@ -3827,6 +3827,11 @@ COLN2   N8
 470
 7
 1
+511
+511
+506
+477
+1
 669
 669
 193
@@ -3851,11 +3856,6 @@ COLN2   N8
 752
 9
 11
-1
-824
-824
-506
-477
 /END_TABLE AMCCCOL
 
 /BEGIN_TABLE AMCCREF
@@ -3945,6 +3945,12 @@ NUMR    N8
 503
 1
 3
+512
+512
+508
+511
+1
+3
 670
 670
 666
@@ -3973,12 +3979,6 @@ NUMR    N8
 753
 751
 752
-1
-3
-825
-825
-821
-824
 1
 /END_TABLE AMCCREF
 
@@ -6458,7 +6458,7 @@ OLE     BIN
 
 
 
-2994
+2871
 22
 
 3
@@ -6491,7 +6491,7 @@ OLE     BIN
 
 
 
-2994
+2871
 25
 
 3
@@ -6524,7 +6524,7 @@ OLE     BIN
 
 
 
-2994
+2871
 29
 
 3
@@ -6557,7 +6557,7 @@ OLE     BIN
 
 
 
-2994
+2871
 192
 
 3
@@ -6590,7 +6590,7 @@ OLE     BIN
 
 
 
-2994
+2871
 197
 
 3
@@ -6626,7 +6626,7 @@ copyright 2001 - DVL Software Limited\
 Wellington, New Zealand
 
 
-2994
+2871
 0
 
 3
@@ -6659,7 +6659,7 @@ Wellington, New Zealand
 
 
 
-2994
+2871
 467
 
 3
@@ -6692,7 +6692,7 @@ Wellington, New Zealand
 
 
 
-2994
+2871
 468
 
 3
@@ -6727,7 +6727,7 @@ unique key on (system_version_id,\
 element_revision_id)
 
 
-2994
+2871
 0
 
 3
@@ -6761,7 +6761,7 @@ each element revision is \
 tracked in this table
 
 
-2994
+2871
 0
 
 3
@@ -6794,7 +6794,7 @@ tracked in this table
 
 
 
-2994
+2871
 209
 
 3
@@ -6827,7 +6827,7 @@ tracked in this table
 
 
 
-2994
+2871
 304
 
 3
@@ -6860,7 +6860,7 @@ tracked in this table
 
 
 
-2994
+2871
 8
 
 3
@@ -6895,7 +6895,7 @@ the source tree will have exactly \
 one entry in this table.
 
 
-2994
+2871
 0
 
 3
@@ -6928,7 +6928,7 @@ one entry in this table.
 
 
 
-2994
+2871
 0
 
 3
@@ -6961,7 +6961,7 @@ one entry in this table.
 
 
 
-2994
+2871
 1
 
 3
@@ -6995,7 +6995,7 @@ Each commit will be \
 stored in this table.
 
 
-2994
+2871
 0
 
 3
@@ -7028,7 +7028,7 @@ stored in this table.
 
 
 
-2994
+2871
 4
 
 3
@@ -7062,7 +7062,7 @@ each commit modifies \
 one or more files
 
 
-2994
+2871
 0
 
 3
@@ -7075,10 +7075,10 @@ one or more files
 0
 0
 0
-27194
--95709
-35218
--91360
+27199
+-95704
+35223
+-91355
 2
 1
 0
@@ -7095,7 +7095,7 @@ one or more files
 
 
 
-2994
+2871
 469
 
 3
@@ -7129,7 +7129,7 @@ Sample entries are 4.2-RELEASE,\
 4.2-STABLE, 5.0-CURRENT
 
 
-2994
+2871
 0
 
 3
@@ -7164,7 +7164,7 @@ Operating Systems\
 in the same database
 
 
-2994
+2871
 0
 
 3
@@ -7197,7 +7197,7 @@ in the same database
 
 
 
-2994
+2871
 505
 
 3
@@ -7230,7 +7230,7 @@ c6affffff788feffc6afffffdeb8feff
 
 
 
-2994
+2871
 32
 
 3
@@ -7263,7 +7263,7 @@ f34900002a25fefff3490000cd59feff
 
 
 
-2994
+2871
 38
 
 3
@@ -7296,7 +7296,7 @@ f34900002a25fefff3490000cd59feff
 
 
 
-2994
+2871
 41
 
 3
@@ -7329,7 +7329,7 @@ f2490000cd59fefff2490000e58ffeff
 
 
 
-2994
+2871
 44
 
 3
@@ -7362,7 +7362,7 @@ f2490000cd59fefff2490000e58ffeff
 
 
 
-2994
+2871
 480
 
 3
@@ -7390,12 +7390,12 @@ f2490000cd59fefff2490000e58ffeff
 0
 0
 3
-d47800000899feffd4780000a6b6feff82590000a6b6feff
+d97800000d99feffd9780000a6b6feff82590000a6b6feff
 2
 
 
 
-2994
+2871
 479
 
 3
@@ -7428,7 +7428,7 @@ baf9ffff9893feffbaf9ffffd2b3feff
 
 
 
-2994
+2871
 495
 
 3
@@ -7461,7 +7461,7 @@ baf9ffff9893feffbaf9ffffd2b3feff
 
 
 
-2994
+2871
 500
 
 3
@@ -7494,7 +7494,7 @@ d19bffff563cfeffd19bffffe063feff
 
 
 
-2994
+2871
 666
 
 3
@@ -7527,7 +7527,7 @@ eef5ffff7080feffeef5ffff9468feff7ee1ffff9468feff7ee1ffff8141feff
 
 
 
-2994
+2871
 671
 
 3
@@ -7560,7 +7560,7 @@ eef5ffff7080feffeef5ffff9468feff7ee1ffff9468feff7ee1ffff8141feff
 
 
 
-2994
+2871
 674
 
 3
@@ -7593,7 +7593,7 @@ eef5ffff7080feffeef5ffff9468feff7ee1ffff9468feff7ee1ffff8141feff
 
 
 
-2994
+2871
 677
 
 3
@@ -7626,41 +7626,8 @@ eef5ffff7080feffeef5ffff9468feff7ee1ffff9468feff7ee1ffff8141feff
 
 
 
-2994
+2871
 751
-
-3
-3087
-290
-2
-35
-0
-925
-837
-0
-0
-0
-0
-0
-0
-2
-3
-0
-0
-0
-0
-0
-1
-0
-0
-2
-a67900007f65feffa6790000bd8cfeff
-2
-
-
-
-2994
-821
 
 /END_TABLE AMCSYMB
 
