@@ -1,5 +1,5 @@
 --
--- $Id: datatype.txt,v 1.9 2004-04-03 01:42:47 dan Exp $
+-- $Id: datatype.txt,v 1.10 2004-04-07 15:04:37 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -65,9 +65,10 @@ CREATE TYPE freshports_commit_record AS (
     is_port            boolean,
 	element_id         integer,
 	forbidden          text,
-    deprecated         text,
-    ignore             text,
-    broken             text
+	deprecated         text,
+	ignore             text,
+	broken             text,
+	security_notice_id integer
 );
 
 CREATE TYPE logincounts_record AS (
