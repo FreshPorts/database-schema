@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.107 2004-04-03 01:15:58 dan Exp $
+-- $Id: sp.txt,v 1.108 2004-04-03 01:52:35 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -1718,7 +1718,11 @@ SELECT FOURTH1.port_id,
        NULL::text         AS change_type,
        FOURTH1.pathname   AS pathname,
        CASE WHEN FOURTH1.port_id IS NULL THEN FALSE ELSE TRUE END AS is_port,
-       FOURTH1.element_id
+       FOURTH1.element_id,
+       FOURTH1.forbidden,
+       FOURTH1.deprecated,
+       FOURTH1.ignore,
+       FOURTH1.broken
 FROM(
 SELECT THIRD1.*,
        CLP.port_version,
@@ -1732,7 +1736,11 @@ FROM
 (SELECT FIRST1.*,
         P.id as port_id,
         P.short_description,
-        P.category_id
+        P.category_id,
+        P.forbidden,
+        P.deprecated,
+        P.ignore,
+        P.broken
 FROM         
 (SELECT CL.message_id   AS message_id,
         CL.committer    AS committer,
