@@ -502,3 +502,41 @@ CREATE FUNCTION SystemIDGet(text) RETURNS int4 AS '
    END;
 ' LANGUAGE 'plpgsql';
 
+
+  DROP FUNCTION WatchListAdd (int4, text );
+CREATE FUNCTION WatchListAdd (int4, text) RETURNS boolean AS '
+   DECLARE
+      UserID       ALIAS for $1;
+      ElementName  ALIAS for $2;
+      WatchListID  int4;
+      EntryExists  boolean = 0;
+      ElementID    int4;
+
+   BEGIN
+      select id
+        into WatchListID
+        from Watch_List
+       where user_id = UserId
+         and name    = \'main\';
+
+      IF NOT FOUND THEN
+         WatchListID = nextval(\'watch_list_id_seq\'::text);
+         insert into watch_list (id, user_id, name)
+                         values (WatchListId, UserId, \'main\');
+      END IF;      
+
+      select Pathname_ID(ElementName)
+        into ElementID;
+
+      IF ElementID IS NULL THEN
+         RAISE EXCEPTION ''cannot find ElementID for Element = % '', ElementName;
+      ELSE
+         INSERT INTO Watch_List_Element (watch_list_id, element_id)
+                         values (WatchListid,   ElementID);
+         EntryExists = 1;
+      END IF;
+
+      return EntryExists;
+   END;
+' LANGUAGE 'plpgsql';
+
