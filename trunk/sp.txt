@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.20 2001-11-20 18:23:00 dan Exp $
+-- $Id: sp.txt,v 1.21 2001-11-21 04:06:37 dan Exp $
 --
 
   drop function IsDescendantOf (int4 ,int4);
@@ -266,33 +266,6 @@ create function Element_SetStatus(int4, char(1)) returns int4 AS '
    END;
 '  LANGUAGE 'plpgsql';
 
-  drop function GetOrCreateCategory(text);
-create function GetOrCreateCategory(text) returns int4 AS '
-   DECLARE 
-      category_name ALIAS for $1;
-
-      pathname             text;
-      category_element_id  int4;
-      category_id          int4;
-
-   BEGIN
-      pathname            := \'ports/\' || category_name;
-      category_element_id := Pathname_ID(pathname);
-
-      IF NOT FOUND THEN
-         category_element_id := Element_Add(pathname, \'D\');
-      END IF;
-
-      category_id := nextval(\'category_id_seq\');
-      INSERT INTO category (id,          is_primary, element_id, name)
-                 values    (category_id, \'Y\', category_element_id, category_name, 
-
-      return category_id;
-   END;
-'  LANGUAGE 'plpgsql';
-
-
-
 
   drop function CreateCategory(text, text, bool);
 create function CreateCategory(text, text, bool) returns int4 AS '
@@ -315,7 +288,7 @@ create function CreateCategory(text, text, bool) returns int4 AS '
 
       category_id := nextval(\'categories_id_seq\');
       INSERT INTO categories (id,          is_primary,          element_id,          name,              description)
-                  values     (category_id, category_is_primary, category_element_id, \'category_name\', \'category_description\');
+                  values     (category_id, category_is_primary, category_element_id, category_name, category_description);
 
       return category_id;
 --       return category_element_id;
