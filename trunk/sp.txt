@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.36 2002-03-02 17:22:24 dan Exp $
+-- $Id: sp.txt,v 1.37 2002-03-02 21:12:27 dan Exp $
 --
 
   drop function IsDescendantOf (int4 ,int4);
@@ -788,7 +788,7 @@ CREATE FUNCTION WatchListStagingExists(int4) RETURNS int AS '
 
 
   DROP FUNCTION WatchListStagingAddItem(int4, text, text, int4);
-CREATE FUNCTION WatchListStagingAddItem(int4, text, text, int4) RETURNS int4 AS '
+CREATE FUNCTION WatchListStagingAddItem(int4, text, text, int4) RETURNS int8 AS '
 
 	DECLARE
 		WatchListID		ALIAS for $1;
@@ -813,7 +813,11 @@ CREATE FUNCTION WatchListStagingProcess(int4) RETURNS int4 AS '
 	DECLARE
 		WatchListID	ALIAS for $1;
 
-		RowCount	int4;
+		CountTotal		int4;
+		CountMatches	int4;
+		CountMissing	int4;
+		CountDuplicates	int4;
+		CountCategories	int4;
 
 	BEGIN
 
@@ -830,9 +834,34 @@ CREATE FUNCTION WatchListStagingProcess(int4) RETURNS int4 AS '
 				   AND ports.category_id = categories.id)
 		 WHERE watch_list_id = WatchListID;
 
-		GET DIAGNOSTICS RowCount = ROW_COUNT;
+		SELECT count(*)
+		  INTO CountTotal
+		  FROM watch_list_staging
+		 WHERE watch_list_id = WatchListID;
 
-		RETURN RowCount;
+		SELECT count(DISTINCT category)
+		  INTO CountCategories
+		  FROM watch_list_staging
+		 WHERE watch_list_id = WatchListID
+		   AND element_id IS NOT NULL;
+	
+		SELECT count(*)
+		  INTO CountMissing
+		  FROM watch_list_staging
+		 WHERE watch_list_id = WatchListID
+		   AND element_id IS NULL;
+
+		SELECT count(*)
+		  INTO CountDuplicates
+		  FROM watch_list_staging
+		 WHERE watch_list_id = WatchListID;
+
+		CountMatches := CountTotal - CountMissing;
+
+		PERFORM WatchListStagingLogGeneral(WatchListID, CountTotal, CountMatches, CountMissing, 
+											CountDuplicates, CountCategories);
+
+		RETURN CountTotal;
 	END
 ' LANGUAGE 'plpgsql';
 
@@ -848,6 +877,8 @@ CREATE FUNCTION WatchListDeleteAllElements(int4) RETURNS int4 AS '
 		      WHERE watch_list_id  = WatchListID;
 
 		GET DIAGNOSTICS RowCount = ROW_COUNT;
+
+		PERFORM WatchListStagingLogDelete(WatchListID, RowCount);
 
 		RETURN RowCount;
 	END
@@ -866,7 +897,103 @@ CREATE FUNCTION WatchListStagingClear(int4) RETURNS int4 AS '
 
 		GET DIAGNOSTICS RowCount = ROW_COUNT;
 
+		PERFORM WatchListStagingLogClearing(WatchListID, RowCount);
+
 		RETURN RowCount;
+	END
+' LANGUAGE 'plpgsql';
+
+
+  DROP FUNCTION WatchListStagingLogGeneral(int4, int4, int4, int4, int4, int4);
+CREATE FUNCTION WatchListStagingLogGeneral(int4, int4, int4, int4, int4, int4) returns int8 AS '
+	DECLARE
+		UserID			ALIAS for $1;
+		CountTotal		ALIAS for $2;
+		CountMatches	ALIAS for $3;
+		CountMissing	ALIAS for $4;
+		CountDuplicates	ALIAS for $5;
+		CountCategories	ALIAS for $6;
+
+		OID	int8;
+
+	BEGIN
+
+		INSERT INTO watch_list_staging_log (	user_id, 
+												action, 
+												count_total, 
+												count_matches, 
+												count_missing, 
+												count_duplicates, 
+												count_categories)
+					VALUES (UserID, \'U\', CountTotal, CountMatches, 
+							CountMissing, CountDuplicates, CountCategories);
+
+		GET DIAGNOSTICS OID = RESULT_OID;
+
+		RETURN OID;
+	END
+' LANGUAGE 'plpgsql';
+
+  DROP FUNCTION WatchListStagingLogClearing(int4, int4);
+CREATE FUNCTION WatchListStagingLogClearing(int4, int4) returns int8 AS '
+	DECLARE
+		UserID			ALIAS for $1;
+		ItemCount		ALIAS for $2;
+
+		OID	int8;
+
+	BEGIN
+
+		INSERT INTO watch_list_staging_log (	user_id, 
+												action,
+												count_total)
+					VALUES (UserID, \'C\', ItemCount);
+
+		GET DIAGNOSTICS OID = RESULT_OID;
+
+		RETURN OID;
+	END
+' LANGUAGE 'plpgsql';
+
+  DROP FUNCTION WatchListStagingLogDelete(int4, int4);
+CREATE FUNCTION WatchListStagingLogDelete(int4, int4) returns int8 AS '
+	DECLARE
+		UserID			ALIAS for $1;
+		ItemCount		ALIAS for $2;
+
+		OID	int8;
+
+	BEGIN
+
+		INSERT INTO watch_list_staging_log (	user_id, 
+												action,
+												count_total)
+					VALUES (UserID, \'D\', ItemCount);
+
+		GET DIAGNOSTICS OID = RESULT_OID;
+
+		RETURN OID;
+	END
+' LANGUAGE 'plpgsql';
+
+  DROP FUNCTION WatchListStagingLogWatch(int4, int4);
+CREATE FUNCTION WatchListStagingLogWatch(int4, int4) returns int8 AS '
+	DECLARE
+		UserID			ALIAS for $1;
+		CountTotal		ALIAS for $2;
+
+		OID	int8;
+
+	BEGIN
+
+		INSERT INTO watch_list_staging_log (	user_id, 
+												action,
+												count_total)
+					VALUES (UserID, \'W\', CountTotal);
+
+		GET DIAGNOSTICS OID = RESULT_OID;
+
+		RETURN OID;
 	END
 ' LANGUAGE 'plpgsql';
 
