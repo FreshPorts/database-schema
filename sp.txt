@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.116 2004-08-27 14:52:07 dan Exp $
+-- $Id: sp.txt,v 1.117 2004-09-17 18:48:16 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -2059,3 +2059,26 @@ CREATE OR REPLACE FUNCTION GetCategoryPortFromLatestLink(text) RETURNS TEXT AS '
 
    END;
 ' LANGUAGE plpgsql STABLE;
+
+
+CREATE OR REPLACE FUNCTION package_version(text, text, text) RETURNS text AS '
+DECLARE
+    p_PortVersion   ALIAS for $1;
+    p_PortRevision  ALIAS for $2;
+    p_PortEpoch     ALIAS for $3;
+
+    l_PKGNAME       text;
+BEGIN
+    l_PKGNAME := p_PortVersion;
+
+    IF p_PortRevision <> \'\' THEN
+        l_PKGNAME := l_PKGNAME || \'_\' || p_PortRevision;
+    END IF;
+
+    IF p_PortEpoch <> \'\' THEN
+        l_PKGNAME := l_PKGNAME || \',\' || p_PortEpoch;
+    END IF;
+
+    RETURN l_PKGNAME;
+END;
+' LANGUAGE 'plpgsql' IMMUTABLE;
