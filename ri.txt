@@ -1,3 +1,7 @@
+--
+-- $Id: ri.txt,v 1.8 2001-11-20 12:23:06 dan Exp $
+--
+
   DROP function check_siblings();
 create function check_siblings() returns OPAQUE as '
    declare 
