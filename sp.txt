@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.122 2004-12-14 01:09:18 dan Exp $
+-- $Id: sp.txt,v 1.123 2005-01-06 04:29:20 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -2145,7 +2145,7 @@ CREATE OR REPLACE FUNCTION currenttimestamputc() RETURNS timestamp without time 
 
 CREATE OR REPLACE FUNCTION WatchersAlsoWatched(int) RETURNS SETOF also_watched_record AS '
 SELECT O.element_id as element_id, 
-       ''<a href="/'' || P.Category || ''/'' || P.name || ''/" TITLE="'' || P.short_description || ''">'' 
+       ''<a href="/'' || P.Category || ''/'' || P.name || ''/" TITLE="'' || replace(P.short_description, \'"\', \'\\\'\') || ''">'' 
                            || P.package_name || ''</a>'' as url
   FROM ports_active P JOIN (
      SELECT W.element_id
