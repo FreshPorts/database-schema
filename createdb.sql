@@ -32,6 +32,33 @@ create sequence watch_notice_id_seq;
   drop sequence watch_notice_log_id_seq;
 create sequence watch_notice_log_id_seq;
 
+create table housekeeping
+(
+    last_port_commit       int4                  not null
+);
+
+create table commits_latest
+(
+    commit_date_raw        timestamp                     ,
+    commit_log_id          int4                          ,
+    commit_description     text                          ,
+    commit_date            text                          ,
+    commit_time            text                          ,
+    port_id                int4                          ,
+    category               text                          ,
+    category_id            int4                          ,
+    port                   text                          ,
+    version                text                          ,
+    status                 char(1)                       ,
+    needs_refresh          smallint                      ,
+    forbidden              text                          ,
+    broken                 text                          ,
+    date_added             double precision              ,
+    element_id             int4                          ,
+    short_description      text                          ,
+    watch                  text                          
+);
+
 create table element
 (
     id                     int4                  not null,
@@ -264,7 +291,6 @@ create table security_notice_log
     change                 text                  not null,
     primary key (id)
 );
-
 alter table element
     add foreign key (parent_id)
        references element (id) on delete cascade;
