@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.83 2003-09-21 12:56:13 dan Exp $
+-- $Id: sp.txt,v 1.84 2003-09-23 13:30:19 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -1482,3 +1482,90 @@ CREATE OR REPLACE FUNCTION watch_list_count(integer) RETURNS bigint
 '
     LANGUAGE sql STABLE;
 
+
+
+CREATE OR REPLACE FUNCTION LastestCommits(int, int) RETURNS SETOF commit_record AS '
+DECLARE
+	MaxCommits	ALIAS for $1;
+	UserID		ALIAS for $2;
+
+	r 	commit_record%rowtype;
+
+BEGIN
+    FOR r IN
+SELECT SECURITY.*,
+       W.*
+FROM (
+SELECT PEC.*,
+       security_notice.id  AS security_notice_id
+FROM (
+SELECT PORTELEMENT.*,
+       categories.name AS category
+FROM (
+SELECT LCPPORTS.*,
+       element.name    AS port,
+       element.status  AS status
+FROM (
+SELECT LCPCLLCP.commit_log_id,
+       LCPCLLCP.commit_date_raw,
+       LCPCLLCP.message_subject,
+       LCPCLLCP.message_id,
+       LCPCLLCP.committer,
+       LCPCLLCP.commit_description,
+       LCPCLLCP.commit_date,
+       LCPCLLCP.commit_time,
+       LCPCLLCP.encoding_losses,
+       LCPCLLCP.port_id,
+       LCPCLLCP.needs_refresh,
+       ports.forbidden,
+       ports.broken,
+       ports.element_id                     AS element_id,
+       CASE when clp_version  IS NULL then ports.version  else clp_version  END as version,
+       CASE when clp_revision IS NULL then ports.revision else clp_revision END AS revision,
+       date_part(\'epoch\', ports.date_added)::integer AS date_added,
+       ports.short_description              AS short_description,
+       ports.category_id
+FROM (
+ SELECT LCPCL.*, 
+         port_id,
+         commit_log_ports.port_version  AS clp_version,
+         commit_log_ports.port_revision AS clp_revision,
+         commit_log_ports.needs_refresh AS needs_refresh
+    FROM 
+   (SELECT commit_log.id     AS commit_log_id, 
+           commit_date       AS commit_date_raw,
+           message_subject,
+           message_id,
+           committer,
+           description       AS commit_description,
+           to_char(commit_log.commit_date - SystemTimeAdjust(), \'DD Mon YYYY\')  AS commit_date,
+           to_char(commit_log.commit_date - SystemTimeAdjust(), \'HH24:MI\')      AS commit_time,
+           encoding_losses
+     FROM commit_log JOIN
+               (SELECT latest_commits_ports.commit_log_id
+                   FROM latest_commits_ports
+               ORDER BY latest_commits_ports.commit_date DESC
+                 LIMIT MaxCommits) AS LCP
+           ON commit_log.id = LCP.commit_log_id) AS LCPCL LEFT OUTER JOIN commit_log_ports
+                         ON commit_log_ports.commit_log_id = LCPCL.commit_log_id
+                         AND commit_log_ports.commit_log_id > latest_commits_ports_anchor()) AS LCPCLLCP LEFT OUTER JOIN ports
+on LCPCLLCP.port_id = ports.id) AS LCPPORTS LEFT OUTER JOIN element
+on LCPPORTS.element_id = element.id) AS PORTELEMENT LEFT OUTER JOIN categories
+on PORTELEMENT.category_id = categories.id) AS PEC LEFT OUTER JOIN security_notice
+ON PEC.commit_log_id = security_notice.commit_log_id
+) AS SECURITY LEFT OUTER JOIN
+(SELECT element_id as wle_element_id, COUNT(watch_list_id) as watch
+  FROM watch_list JOIN watch_list_element
+        ON watch_list.id      = watch_list_element.watch_list_id
+       AND watch_list.user_id = UserID
+       AND watch_list.in_service
+GROUP BY wle_element_id) AS W
+ON        W.wle_element_id = SECURITY.element_id
+order by commit_date_raw desc, category, port
+	LOOP
+        RETURN NEXT r;
+    END LOOP;
+    RETURN;
+END
+'
+LANGUAGE plpgsql;
