@@ -1,3 +1,4 @@
+  drop function IsDescendantOf (int4 ,int4);
 create function IsDescendantOf (int4 ,int4) returns boolean As '
    DECLARE
       element_id ALIAS FOR $1;
@@ -684,3 +685,33 @@ create function CreatePort(int4, int4) returns int4 AS '
 
 	END;
 '  LANGUAGE 'plpgsql';
+
+
+  DROP FUNCTION GetPortNameFromFileName(text);
+CREATE FUNCTION GetPortNameFromFileName(text) RETURNS text AS '
+	DECLARE
+ 		file_name	ALIAS for $1;
+
+		temp		text;
+        port		text;
+		category	text;
+
+		pos			int4;
+
+    BEGIN
+		-- remove the first /
+		temp := substring(file_name from 2);
+
+		-- remove everything before the 2nd /
+		pos := position(\'/\' in temp);
+
+		category := substring(temp from 1 for pos - 1);
+
+		temp := substring(temp from pos + 1);
+
+		port := substring(temp from 1 for pos - 1);
+
+        return category || \'/\' || port;
+    END;
+' LANGUAGE 'plpgsql';
+
