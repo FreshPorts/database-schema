@@ -1,5 +1,5 @@
 --
--- $Id: ri.txt,v 1.14.2.9 2003-04-23 16:29:01 dan Exp $
+-- $Id: ri.txt,v 1.14.2.10 2003-04-23 22:14:56 dan Exp $
 --
 
 CREATE OR REPLACE FUNCTION check_siblings() RETURNS TRIGGER AS '
@@ -398,26 +398,6 @@ AFTER UPDATE on commit_log
 FOR EACH ROW
 EXECUTE PROCEDURE commit_log_update ();
 
-CREATE OR REPLACE FUNCTION commit_log_update () RETURNS "trigger"
-AS '
-BEGIN
-	UPDATE latest_commits_ports
-	   SET commit_date = new.commit_date
-	 WHERE (latest_commits_ports.commit_log_id = new.id);
-
-	UPDATE latest_commits
-	   SET commit_date = new.commit_date
-	 WHERE (latest_commits.commit_log_id = new.id);
-
-	RETURN new;
-END;'
-LANGUAGE plpgsql;
-
-CREATE TRIGGER commit_log_update
-AFTER UPDATE on commit_log
-FOR EACH ROW
-EXECUTE PROCEDURE commit_log_update ();
-
 CREATE OR REPLACE FUNCTION commit_log_ports_insert () RETURNS "trigger"
 AS '
 BEGIN
@@ -442,6 +422,20 @@ AFTER INSERT on commit_log_ports
 FOR EACH ROW
 EXECUTE PROCEDURE commit_log_ports_insert ();
 
+
+CREATE OR REPLACE FUNCTION commit_log_insert () RETURNS "trigger"
+AS '
+BEGIN
+	INSERT INTO latest_commits(new.id,  commit_date);
+	RETURN new;
+END;'
+LANGUAGE plpgsql;
+
+
+CREATE TRIGGER commit_log_insert
+AFTER INSERT on commit_log
+FOR EACH ROW
+EXECUTE PROCEDURE commit_log_insert ();
 
 
 CREATE OR REPLACE FUNCTION ports_categories_set() RETURNS TRIGGER AS '
