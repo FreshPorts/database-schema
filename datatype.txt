@@ -1,0 +1,32 @@
+--
+-- $Id: datatype.txt,v 1.1 2003-09-23 13:29:51 dan Exp $
+--
+-- Copyright (c) 1998-2003 DVL Software Limited
+--
+
+CREATE TYPE commit_record AS (
+	commit_log_id        integer,
+	commit_date_raw      timestamp with time zone,
+	message_subject      text,
+	message_id           text,
+	committer            text,
+	commit_description   text,
+	commit_date          text,
+	commit_time          text,
+	encoding_losses      boolean,
+	port_id              integer,
+	needs_refresh        smallint,
+	forbidden            text,
+	broken               text,
+	element_id           integer,
+	version              text,
+	revision             text,
+	date_added           integer,
+	short_description    text,
+	category_id          integer,
+	port                 text,
+	status               character(1),
+	category             text,
+	security_notice_id   integer,
+	watch                bigint
+);
