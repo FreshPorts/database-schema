@@ -1,5 +1,5 @@
 --
--- $Id: createdb.sql,v 1.58 2003-11-14 04:46:11 dan Exp $
+-- $Id: createdb.sql,v 1.59 2003-11-20 14:21:00 dan Exp $
 --
 -- The following options should be used to create the database schema
 --
@@ -394,14 +394,6 @@ create table system_branch_element_revision
     primary key (system_branch_id, element_id, revision_name)
 );
 
-create table commit_log_port_elements
-(
-    commit_log_id           integer               not null,
-    port_id                 integer               not null,
-    commit_log_element_id   integer               not null,
-    primary key (commit_log_id, port_id, commit_log_element_id)
-);
-
 create table user_confirmations
 (
     user_id                 integer               not null,
@@ -553,6 +545,8 @@ create table commit_log_ports_elements
     primary key (commit_log_id, element_id)
 );
 
+create index commit_log_ports_elements_clid on commit_log_ports_elements (commit_log_id);
+
 create table page_load_detail
 (
     id                      serial                not null,
@@ -672,18 +666,6 @@ alter table system_branch_element_revision
 alter table system_branch_element_revision
     add foreign key  (element_id, revision_name)
        references element_revision (element_id, revision_name) on update cascade on delete cascade;
-
-alter table commit_log_port_elements
-    add foreign key  (commit_log_id)
-       references commit_log (id) on update cascade on delete cascade;
-
-alter table commit_log_port_elements
-    add foreign key  (port_id)
-       references ports (id) on update cascade on delete cascade;
-
-alter table commit_log_port_elements
-    add foreign key  (commit_log_element_id)
-       references commit_log_elements (id) on update cascade on delete cascade;
 
 alter table user_confirmations
     add foreign key  (user_id)
