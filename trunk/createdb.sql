@@ -1,5 +1,5 @@
 --
--- $Id: createdb.sql,v 1.44 2003-02-21 22:17:17 dan Exp $
+-- $Id: createdb.sql,v 1.45 2003-02-25 19:40:13 dan Exp $
 --
 -- The following options should be used to create the database schema
 --
@@ -501,7 +501,7 @@ create table user_tasks
     primary key (task_id, user_id)
 );
 
-create table ports_refresh_ignore
+create table commit_log_ports_ignore
 (
     commit_log_id           integer               not null,
     port_id                 integer               not null,
@@ -712,11 +712,11 @@ alter table user_tasks
     add foreign key  (task_id)
        references tasks (id) on update cascade on delete cascade;
 
-alter table ports_refresh_ignore
+alter table commit_log_ports_ignore
     add foreign key  (port_id)
        references ports (id) on update cascade on delete cascade;
 
-alter table ports_refresh_ignore
+alter table commit_log_ports_ignore
     add foreign key  (commit_log_id)
        references commit_log (id) on update cascade on delete cascade;
 
