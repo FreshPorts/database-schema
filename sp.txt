@@ -584,3 +584,27 @@ CREATE FUNCTION IsLoginValid (text, text ) RETURNS int4 AS '
    END;
 ' LANGUAGE 'plpgsql';
 
+
+
+-- These are mostly for database conversion
+  DROP FUNCTION GetPort(text);
+CREATE FUNCTION "getport" (text ) RETURNS int4 AS '
+   DECLARE
+      category_port ALIAS for $1;  
+      pathname         text;
+      port_element_id  int4;       
+      port_id          int4;
+   BEGIN
+      pathname        := ''ports/'' || category_port;
+      port_element_id := Pathname_ID(pathname);
+      if port_element_id IS NOT NULL THEN
+         select id
+           into port_id
+           from ports    
+          where element_id = port_element_id;    
+      END IF;
+      return port_id;
+   END;
+' LANGUAGE 'plpgsql';
+
+
