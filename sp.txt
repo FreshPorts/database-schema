@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.63 2002-12-04 16:38:18 dan Exp $
+-- $Id: sp.txt,v 1.64 2002-12-04 17:16:58 dan Exp $
 --
 
 CREATE OR REPLACE FUNCTION IsDescendantOf (int4 ,int4) returns boolean As '
@@ -1284,7 +1284,7 @@ CREATE OR REPLACE FUNCTION Stats_CategoryCount() returns int8 AS '
 ' LANGUAGE 'plpgsql';
 
 
-CREATE OR REPLACE FUNCTION Stats_CommitCountPorts() returns int8 AS '
+CREATE OR REPLACE FUNCTION Stats_CommitCount() returns int8 AS '
 	DECLARE
 		RowCount	int8;
 
