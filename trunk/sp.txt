@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.72 2003-04-29 15:13:52 dan Exp $
+-- $Id: sp.txt,v 1.73 2003-04-29 15:59:26 dan Exp $
 --
 
 CREATE OR REPLACE FUNCTION IsDescendantOf (int4 ,int4) returns boolean As '
@@ -866,10 +866,10 @@ CREATE OR REPLACE FUNCTION WatchListDeleteAllElements(int4) RETURNS int4 AS '
 	END
 ' LANGUAGE 'plpgsql';
 
-CREATE OR REPLACE FUNCTION WatchListStagingClear(int4) RETURNS int4 AS '
+CREATE OR REPLACE FUNCTION WatchListStagingClear(int4) RETURNS int8 AS '
 	DECLARE
 		UserID	ALIAS for $1;
-		RowCount	int4;
+		RowCount	int8;
 
 	BEGIN
 
@@ -914,7 +914,7 @@ CREATE OR REPLACE FUNCTION WatchListStagingLogGeneral(int4, int4, int4, int4, in
 	END
 ' LANGUAGE 'plpgsql';
 
-CREATE OR REPLACE FUNCTION WatchListStagingLogClearing(int4, int4) returns int8 AS '
+CREATE OR REPLACE FUNCTION WatchListStagingLogClearing(int8, int8) returns int8 AS '
 	DECLARE
 		UserID			ALIAS for $1;
 		ItemCount		ALIAS for $2;
@@ -1477,4 +1477,116 @@ CREATE OR REPLACE FUNCTION Stats_WatchListElementCount() returns int8 AS '
 ' LANGUAGE 'plpgsql';
 
 
+CREATE OR REPLACE FUNCTION latest_commits_anchor () RETURNS integer
+    AS '
+  SELECT commit_log_id AS RESULT
+    FROM latest_commits
+ORDER BY commit_log_id
+   LIMIT 1;
+'
+    LANGUAGE sql STABLE;
+
+
+CREATE OR REPLACE FUNCTION latest_commits_ports_anchor () RETURNS integer
+    AS '
+  SELECT commit_log_id AS RESULT
+    FROM latest_commits_ports
+ORDER BY commit_log_id
+   LIMIT 1;
+'
+    LANGUAGE sql STABLE;
+
+CREATE OR REPLACE FUNCTION GetPortID(text, text) returns bigint AS '
+	DECLARE
+		CategoryName ALIAS for $1;
+		PortName     ALIAS for $2;
+		PortID       int8;
+
+	BEGIN
+
+		SELECT ports_all.id
+		  INTO PortID
+		  FROM ports_categories, ports_all, categories, element
+		 WHERE ports_categories.port_id     = ports_all.id
+		   AND ports_categories.category_id = categories.id
+		   AND ports_all.element_id         = element.id
+		   AND ports_all.name               = PortName
+		   AND categories.name              = CategoryName;
+
+		return PortID;
+
+	END
+' LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION CategoryPortCount(text) returns bigint AS '
+	SELECT count(*)
+	  FROM categories, ports_categories, ports, element
+	 WHERE categories.name = $1
+	   AND ports_categories.category_id = categories.id
+	   AND ports_categories.port_id     = ports.id
+	   AND ports.element_id             = element.id
+	   AND element.status               = \'A\';
+' LANGUAGE SQL STABLE;
+
+CREATE OR REPLACE FUNCTION SecurityNoticeCreate(integer, inet, text, text) RETURNS bigint
+    AS '
+   DECLARE
+      UserID       ALIAS for $1;
+      IPAddress    ALIAS for $2;
+      NoticeMsg    ALIAS for $3;
+      MessageID    ALIAS for $4;
+
+      CommitLogID       int8;
+      SecurityNoticeID  int8;
+
+   BEGIN
+      SELECT id, commit_log_id
+        INTO SecurityNoticeID, CommitLogID
+        FROM security_notice
+       WHERE commit_log_id =
+                (SELECT id
+                   FROM commit_log
+                  WHERE message_id = MessageID
+                 );
+
+      IF FOUND THEN
+			RAISE NOTICE '' Updating security notice for % MessageID User % from % said %'', MessageID, UserId, IPAddress, NoticeMsg;
+         UPDATE security_notice
+            SET user_id       = UserID,
+                ip_address    = IPAddress,
+                description   = NoticeMsg
+          WHERE id            = SecurityNoticeID;
+      ELSE
+         SELECT id
+           INTO CommitLogID
+           FROM commit_log
+          WHERE message_id = MessageID;
+
+         IF FOUND THEN
+            -- obtain the next number in the sequence
+            SecurityNoticeID := nextval(\'security_notice_id_seq\');
+
+   			RAISE NOTICE '' Creating security notice % for % MessageID User % from % said %'', SecurityNoticeID, MessageID, UserId, IPAddress, NoticeMsg;
+
+            INSERT INTO security_notice
+                   (id,
+                    user_id,
+                    ip_address,
+                    description,
+                    commit_log_id)
+            VALUES (SecurityNoticeID,
+                    UserID,
+                    IPAddress,
+                    NoticeMsg,
+                    CommitLogID);
+         ELSE
+            RAISE NOTICE ''attempt to insert security notice for unknown message % by User % from % message %'', MessageID, UserID, IPAddress, NoticeMsg;
+         END IF;
+      END IF;
+
+      return SecurityNoticeID;
+
+   END
+'
+    LANGUAGE plpgsql;
 
