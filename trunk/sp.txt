@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.128 2005-01-26 14:21:09 dan Exp $
+-- $Id: sp.txt,v 1.129 2005-01-28 14:27:20 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -2333,7 +2333,7 @@ BEGIN
     FROM commit_log_ports_vuxml
    WHERE port_id = p_PortID;
 
-	RAISE NOTICE ''Port % has % vulnerabilities registered'', p_PortID, l_VulnCount;
+--	RAISE NOTICE ''Port % has % vulnerabilities registered'', p_PortID, l_VulnCount;
 
 	IF l_VulnCount > 0 THEN
 
@@ -2355,11 +2355,11 @@ BEGIN
 			l_VulnCurrent := 0;
 		END IF;
 
-		RAISE NOTICE ''Port % has % current vulnerabilities'', p_PortID, l_VulnCurrent;
+--		RAISE NOTICE ''Port % has % current vulnerabilities'', p_PortID, l_VulnCurrent;
 		
 		l_VulnPast := l_VulnCount - l_VulnCurrent;
 
-		RAISE NOTICE ''Port % has % past vulnerabilities'', p_PortID, l_VulnPast;
+--		RAISE NOTICE ''Port % has % past vulnerabilities'', p_PortID, l_VulnPast;
 
 		-- try an update first
 
@@ -2368,6 +2368,8 @@ BEGIN
 		       past    = l_VulnPast
 		 WHERE ports_vulnerable.port_id = p_PortID;
 
+--		RAISE NOTICE ''UPDATE has been attempted'';
+
 		GET DIAGNOSTICS l_RowsModified = ROW_COUNT;
 
 		-- if that fails, do an insert
@@ -2375,8 +2377,10 @@ BEGIN
 		IF l_RowsModified = 0 THEN
 			INSERT INTO ports_vulnerable (port_id, current, past)
 			VALUES (p_PortID, l_VulnCurrent, l_VulnPast);
+--			RAISE NOTICE ''new entry was inserted into ports_vulnerable'';
+		ELSE
+--			RAISE NOTICE ''ports_vulnerable has been updated'';
 		END IF;
-
 	ELSE
 		-- there are no vulnerabilities for this port
 		DELETE FROM ports_vulnerable where port_id = p_PortID;
