@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.120 2004-11-17 13:25:11 dan Exp $
+-- $Id: sp.txt,v 1.121 2004-11-30 12:36:52 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -2103,4 +2103,38 @@ SELECT V.id,
    AND VN.vuxml_affected_id = VA.id
    AND VR.vuxml_affected_id = VA.id
  ORDER BY VN.name, V.vid;
+' LANGUAGE SQL STABLE;
+
+CREATE OR REPLACE FUNCTION vuxml_ranges_package(text) RETURNS SETOF vuxml_record AS '
+SELECT V.id,
+       V.vid,
+       VN.name      AS package_name,
+       VR.operator1 AS op1,
+       VR.version1  AS v1,
+       VR.operator2 AS op2,
+       VR.version2  AS v2
+  FROM vuxml_ranges VR, vuxml_names VN, vuxml_affected VA, vuxml V
+ WHERE VN.name              = $1
+   AND V.id                 = VA.vuxml_id
+   AND VN.vuxml_affected_id = VA.id
+   AND VR.vuxml_affected_id = VA.id
+   AND VA.type              = \'package\'
+ ORDER BY VN.name, V.vid;
+' LANGUAGE SQL STABLE;
+
+CREATE OR REPLACE FUNCTION currenttimestamputc() RETURNS timestamp without time zone
+    AS ' select current_timestamp at time zone ''UTC''; '
+    LANGUAGE sql STABLE;
+
+CREATE OR REPLACE FUNCTION WatchersAlsoWatched(int) RETURNS SETOF also_watched_record AS '
+SELECT O.element_id as element_id, 
+       ''<a href="/'' || P.Category || ''/'' || P.name || ''/">'' || P.package_name || ''</a>'' as url
+  FROM ports_active P JOIN (
+     SELECT W.element_id
+       FROM watch_list_element W
+      WHERE w.watch_list_id in (select watch_list_id from watch_list_element where element_id = $1)
+        AND W.element_id != $1
+   GROUP BY W.element_id
+   ORDER BY count(W.watch_list_id) DESC
+      LIMIT 5) AS O ON P.element_id = O.element_id;
 ' LANGUAGE SQL STABLE;
