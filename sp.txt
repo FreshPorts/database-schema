@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.82 2003-09-10 18:40:26 dan Exp $
+-- $Id: sp.txt,v 1.83 2003-09-21 12:56:13 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -1039,21 +1039,17 @@ CREATE OR REPLACE FUNCTION DailySummaryDateAdd(date) returns int8 AS '
 	DECLARE
         DateToAdd	ALIAS for $1;
 
-		DateFound	date;
 		OID         int8;
 
 	BEGIN
-		SELECT Refresh_Date
-		  INTO DateFound
-		  FROM Daily_Refreshes
-		 WHERE Refresh_Date = DateToAdd;
+		INSERT INTO daily_refreshes
+		SELECT DateToAdd as refresh_date
+		 WHERE NOT EXISTS (
+		           SELECT refresh_date
+		             FROM daily_refreshes
+		            WHERE refresh_date = DateToAdd);
 
-		IF NOT FOUND THEN
-			INSERT INTO Daily_Refreshes (Refresh_Date) values (DateToAdd);
-			GET DIAGNOSTICS OID = RESULT_OID;
-		ELSE
-			OID = 0;
-		END IF;
+		GET DIAGNOSTICS OID = RESULT_OID;
 
 		RETURN OID;
 	END
