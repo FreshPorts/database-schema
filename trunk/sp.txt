@@ -339,10 +339,16 @@ create function ElementRevisionID(int4, text) returns int4 AS '
    END;
 '  LANGUAGE 'plpgsql';
 
+-- Obtain the Element ID for the category supplied
+-- 
+-- FreshPorts2=# select GetCategory('x11-wm');
+--  getcategory
+-- -------------
+--           53
+-- (1 row)
 
-
-  DROP FUNCTION GetCategory (text);
-CREATE FUNCTION GetCategory (text) RETURNS int4 AS '
+  DROP FUNCTION GetCategory (text );
+CREATE FUNCTION GetCategory (text ) RETURNS int4 AS '
    DECLARE
       category_name ALIAS for $1;     
       pathname             text;   
@@ -605,6 +611,15 @@ CREATE FUNCTION IsLoginValid (text, text ) RETURNS int4 AS '
 
 
 -- These are mostly for database conversion
+--
+-- Get the element id for the port supplied.
+--
+-- FreshPorts2=# select GetPort('x11-wm/wmg');
+--  getport
+-- ---------
+--     4403
+-- (1 row)
+
   DROP FUNCTION GetPort(text);
 CREATE FUNCTION GetPort(text) RETURNS int4 AS '
    DECLARE
