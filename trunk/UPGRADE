@@ -11,8 +11,10 @@ Upgrade for:
 
 alter table ports add column no_latest_link text;
 alter table ports add column no_package     text;
-alter table ports add column pkgname        text;
+alter table ports add column package_name   text;
 alter table ports add column portepoch      text;
+
+alter table commit_log_ports add column port_epoch text;
 
 drop view ports_active;
 
