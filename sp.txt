@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.74 2003-04-29 16:25:52 dan Exp $
+-- $Id: sp.txt,v 1.75 2003-05-07 10:44:10 dan Exp $
 --
 
 CREATE OR REPLACE FUNCTION IsDescendantOf (int4 ,int4) returns boolean As '
@@ -1496,27 +1496,47 @@ ORDER BY commit_log_id
 '
     LANGUAGE sql STABLE;
 
+
 CREATE OR REPLACE FUNCTION GetPortID(text, text) returns bigint AS '
-	DECLARE
-		CategoryName ALIAS for $1;
-		PortName     ALIAS for $2;
-		PortID       int8;
+   DECLARE
+      CategoryName ALIAS for $1;
+      PortName     ALIAS for $2;
 
-	BEGIN
+      CategoryID   int8;
+      IsPrimary    boolean;
+      PortID       int8;
 
-		SELECT ports_all.id
-		  INTO PortID
-		  FROM ports_categories, ports_all, categories, element
-		 WHERE ports_categories.port_id     = ports_all.id
-		   AND ports_categories.category_id = categories.id
-		   AND ports_all.element_id         = element.id
-		   AND ports_all.name               = PortName
-		   AND categories.name              = CategoryName;
+   BEGIN
 
-		return PortID;
+      SELECT id, is_primary
+        INTO CategoryID, IsPrimary
+        FROM categories
+       WHERE name = CategoryName;
 
-	END
+      IF FOUND THEN
+         IF IsPrimary THEN
+            SELECT ports_all.id
+              INTO PortID
+              FROM ports_all, categories
+             WHERE ports_all.category_id = categories.id
+               AND ports_all.name        = PortName
+               AND categories.id         = CategoryID;
+         ELSE
+            SELECT ports_all.id
+              INTO PortID
+              FROM ports_categories, ports_all
+             WHERE ports_categories.port_id     = ports_all.id
+               AND ports_categories.category_id = CategoryID
+               AND ports_all.name               = PortName;
+         END IF;
+      ELSE
+      END IF;
+
+      return PortID;
+
+   END
 ' LANGUAGE 'plpgsql';
+
 
 CREATE OR REPLACE FUNCTION CategoryPortCount(text) returns bigint AS '
 	SELECT count(*)
