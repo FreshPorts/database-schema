@@ -48,7 +48,7 @@ FreshPorts2
 PostgreSQL 7.x
 PostgreSQL.def
 --\
--- $Id: FreshPorts2.pdm,v 1.60 2003-02-21 22:17:16 dan Exp $\
+-- $Id: FreshPorts2.pdm,v 1.61 2003-02-25 19:40:13 dan Exp $\
 --\
 -- The following options should be used to create the database schema\
 --\
@@ -80,7 +80,7 @@ PostgreSQL.def
 Dan Langille
 
 968886895
-1045865698
+1046182425
 0
 0
 0
@@ -1364,8 +1364,8 @@ PK_COMMITS_LATEST
 15995
 15995
 2
-ports_refresh_ignore
-ports_refresh_ignore
+commit_log_ports_ignore
+commit_log_ports_ignore
 
 
 
@@ -1377,7 +1377,7 @@ ports_refesh_ignore
 
 
 
-
+PK_COMMIT_LOG_PORTS_IGNORE
 
 
 
@@ -17225,10 +17225,10 @@ OLE     BIN
 0
 0
 0
--25582
--185550
-6892
--179241
+-25583
+-185858
+6891
+-179547
 1
 1
 0
@@ -17244,7 +17244,7 @@ OLE     BIN
 0
 FreshPorts 2 - physical database model\
 Copyright © 2001-2003 DVL Software Limited\
-Wellington, New Zealand  - 20 February 2003
+Wellington, New Zealand  - 25 February 2003
 
 
 2
@@ -18792,10 +18792,10 @@ table.
 0
 0
 0
-7992
--248530
-25616
--243204
+7991
+-248531
+25615
+-243205
 2
 1
 0
@@ -20028,7 +20028,7 @@ f27a0000ec7bfdfff27a0000c362fdff
 0
 0
 2
-cb7d00005f41fcffe56000005f41fcff
+cb7d00005e41fcffe46000005e41fcff
 2
 
 
@@ -20061,7 +20061,7 @@ cb7d00005f41fcffe56000005f41fcff
 0
 0
 3
-c9deffff7866fcffc9deffff603dfcffda240000603dfcff
+c9deffff7866fcffc9deffff5f3dfcffd92400005f3dfcff
 2
 
 
