@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.46.2.5 2003-03-08 13:05:26 dan Exp $
+-- $Id: sp.txt,v 1.46.2.6 2003-03-08 13:32:08 dan Exp $
 --
 
 CREATE OR REPLACE FUNCTION IsDescendantOf (int4 ,int4) returns boolean As '
@@ -1096,6 +1096,7 @@ CREATE FUNCTION anchor_clid () RETURNS integer
     LANGUAGE sql STABLE;
 
 
+
 CREATE OR REPLACE FUNCTION SecurityNoticeCreate(integer, inet, text, text) RETURNS bigint
     AS '
    DECLARE
@@ -1118,7 +1119,7 @@ CREATE OR REPLACE FUNCTION SecurityNoticeCreate(integer, inet, text, text) RETUR
                  );
 
       IF FOUND THEN
-			RAISE NOTICE '' Updating security notice for % MessageID User % from % said % for'', MessageID, UserId, IPAddress, NoticeMsg;
+			RAISE NOTICE '' Updating security notice for % MessageID User % from % said %'', MessageID, UserId, IPAddress, NoticeMsg;
          UPDATE security_notice
             SET user_id       = UserID,
                 ip_address    = IPAddress,
@@ -1131,11 +1132,11 @@ CREATE OR REPLACE FUNCTION SecurityNoticeCreate(integer, inet, text, text) RETUR
           WHERE message_id = MessageID;
 
          IF FOUND THEN
-
-   			RAISE NOTICE '' Creating security notice for % MessageID User % from % said % for'', MessageID, UserId, IPAddress, NoticeMsg;
-
             -- obtain the next number in the sequence
             SecurityNoticeID := nextval(\'security_notice_id_seq\');
+
+   			RAISE NOTICE '' Creating security notice % for % MessageID User % from % said %'', SecurityNoticeID, MessageID, UserId, IPAddress, NoticeMsg;
+
             INSERT INTO security_notice
                    (id,
                     user_id,
@@ -1148,7 +1149,7 @@ CREATE OR REPLACE FUNCTION SecurityNoticeCreate(integer, inet, text, text) RETUR
                     NoticeMsg,
                     CommitLogID);
          ELSE
-            RAISE NOTICE ''attempt to insert security notice for unknown message % by User % from %'', MessageID, UserID, IPAddress;
+            RAISE NOTICE ''attempt to insert security notice for unknown message % by User % from % message %'', MessageID, UserID, IPAddress, NoticeMsg;
          END IF;
       END IF;
 
