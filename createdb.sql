@@ -170,7 +170,7 @@ create table commit_log
     date_added             timestamp             not null,
     commit_date            timestamp             not null,
     committer              varchar(40)           not null,
-    update_description     text                  not null,
+    description            text                  not null,
     system_id              int4                  not null,
     primary key (id)
 );
