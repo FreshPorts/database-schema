@@ -421,3 +421,11 @@ alter table system_branch                  alter column id set default nextval('
 alter table users                          alter column id set default nextval('users_id_seq'::text);
 alter table watch_list                     alter column id set default nextval('watch_list_id_seq'::text);
 alter table watch_notice_log               alter column id set default nextval('watch_notice_log_id_seq'::text);
+
+insert into housekeeping values (0);
+
+INSERT INTO "watch_notice" (id, frequency, description) VALUES (1,'Z','Don''t notify me');
+INSERT INTO "watch_notice" (id, frequency, description) VALUES (3,'W','Week (on Tuesdays)');
+INSERT INTO "watch_notice" (id, frequency, description) VALUES (4,'F','Fortnightly  (9th and 23rd)');
+INSERT INTO "watch_notice" (id, frequency, description) VALUES (5,'M','Month (23rd)');
+INSERT INTO "watch_notice" (id, frequency, description) VALUES (2,'D','Day');
