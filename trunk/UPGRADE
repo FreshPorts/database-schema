@@ -1,6 +1,39 @@
 This file contains notes for upgrading from one database version
 to another.
 
+13 September 2004
+
+Upgrade for:
+  no_latest_link
+  no_package
+  pkgname
+  portepoch
+
+alter table ports add column no_latest_link text;
+alter table ports add column no_package     text;
+alter table ports add column pkgname        text;
+alter table ports add column portepoch      text;
+
+drop view ports_active;
+
+create view ports_active as
+select ports.*, element.name as name, categories.name as category
+from categories, ports, element
+where element.status = 'A'
+and categories.id = ports.category_id
+and ports.element_id = element.id;
+
+
+drop view ports_all;
+
+create view ports_all as
+select ports.*, element.name as name, categories.name as category, element.status
+from categories, ports, element
+where categories.id = ports.category_id
+and ports.element_id = element.id;
+
+
+
 
 Feb 22 2004
 
