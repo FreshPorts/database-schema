@@ -150,25 +150,23 @@ on element for each row
 execute procedure id_change();
 
 
-/*
   DROP function version_revision_uniqueness();
 create function version_revision_uniqueness() returns OPAQUE as '
    declare 
-      ElementID int4;
+      ElementID            int4;
+      ExistingRevisionName text;
 begin
 
-   select element_id 
-     into ElementID
-     from element_revision
-    where id = new.element_revision_id;
+   select revision_name
+     into ExistingRevisionName
+     from system_version_element
+    where system_version_id = new.system_version_id
+      and element_id        = new.element_id;
 
    IF FOUND THEN
       delete from system_version_element 
-       where element_revision_id in 
-            (select id 
-               from element_revision 
-              where element_id        = ElementID)
-                and system_version_id = new.system_version_id;
+       where system_version_id = new.system_version_id
+         and element_id        = new.element_id;
    END IF;
 
    RETURN NEW;
@@ -183,4 +181,4 @@ create trigger version_revision_uniqueness before insert or update
 on system_version_element
 for each row
 execute procedure version_revision_uniqueness();
-*/
+
