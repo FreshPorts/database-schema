@@ -1,0 +1,396 @@
+This file contains notes for upgrading from one database version
+to another.
+
+13 September 2004
+
+Upgrade for:
+  no_latest_link
+  no_package
+  pkgname
+  portepoch
+
+alter table ports add column no_latest_link text;
+alter table ports add column no_package     text;
+alter table ports add column package_name   text;
+alter table ports add column portepoch      text;
+update ports set portepoch = '0' where portepoch is null;
+
+alter table commit_log_ports add column port_epoch text;
+update commit_log_ports set port_epoch = '0' where port_epoch is null;
+
+drop view ports_active;
+
+create view ports_active as
+select ports.*, element.name as name, categories.name as category
+from categories, ports, element
+where element.status = 'A'
+and categories.id = ports.category_id
+and ports.element_id = element.id;
+
+
+drop view ports_all;
+
+create view ports_all as
+select ports.*, element.name as name, categories.name as category, element.status
+from categories, ports, element
+where categories.id = ports.category_id
+and ports.element_id = element.id;
+
+create table commit_log_port_vuxml
+(
+    commit_log_id              integer               not null,
+    port_id                    integer               not null,
+    vuxml_id                   integer               not null,
+    primary key (commit_log_id, port_id)
+);
+
+create table vuxml
+(
+    id                         serial                not null,
+    vid                        text                  not null,
+    topic                      text                  not null,
+    description                text                  not null,
+    date_discovery             text                          ,
+    date_entry                 text                          ,
+    date_modified              text                          ,
+    status                     char(1)               not null,
+    primary key (id)
+);
+
+create table vuxml_affected
+(
+    id                         serial                not null,
+    vuxml_id                   integer               not null,
+    type                       text                  not null,
+    primary key (id)
+);
+
+create table commit_log_ports_vuxml
+(
+    id                         serial                not null,
+    commit_log_id              integer               not null,
+    port_id                    integer               not null,
+    vuxml_id                   integer               not null,
+    primary key (id)
+);
+
+create table vuxml_ranges
+(
+    id                         serial                not null,
+    vuxml_affected_id          integer               not null,
+    operator1                  text                  not null,
+    version1                   text                  not null,
+    operator2                  text                          ,
+    version2                   text                          ,
+    primary key (id)
+);
+
+create table vuxml_references
+(
+    id                         serial                not null,
+    vuxml_id                   integer               not null,
+    type                       text                  not null,
+    reference                  text                  not null,
+    primary key (id)
+);
+
+create table vuxml_names
+(
+    id                         serial                not null,
+    vuxml_affected_id          integer               not null,
+    name                       text                  not null,
+    primary key (id)
+);
+
+alter table vuxml_affected
+    add foreign key  (vuxml_id)
+       references vuxml (id) on update cascade on delete cascade;
+
+alter table commit_log_ports_vuxml
+    add foreign key  (vuxml_id)
+       references vuxml (id) on update cascade on delete cascade;
+
+alter table commit_log_ports_vuxml
+    add foreign key  (port_id)
+       references ports (id) on update cascade on delete cascade;
+
+alter table commit_log_ports_vuxml
+    add foreign key  (commit_log_id)
+       references commit_log (id) on update cascade on delete cascade;
+
+alter table vuxml_ranges
+    add foreign key  (vuxml_affected_id)
+       references vuxml_affected (id) on update cascade on delete cascade;
+
+alter table vuxml_references
+    add foreign key  (vuxml_id)
+       references vuxml (id) on update cascade on delete cascade;
+
+alter table vuxml_names
+    add foreign key  (vuxml_affected_id)
+       references vuxml_affected (id) on update cascade on delete cascade;
+
+
+
+Feb 22 2004
+
+Add deprecated, ignore to ports.
+
+begin;
+
+alter table ports add deprecated text;
+alter table ports add ignore     text;
+
+drop view ports_active cascade;
+
+create view ports_active as
+select ports.*, element.name as name, categories.name as category
+from categories, ports, element
+where element.status = 'A'
+and categories.id = ports.category_id
+and ports.element_id = element.id;
+
+grant select on ports_active to group www;
+
+drop type commit_record cascade;
+\i datatype.txt
+\i sp.txt
+
+commit;
+
+
+
+Feb 13 2004
+
+To upgrade the security_notice and security_notice_table:
+
+begin;
+
+create table security_notice_status
+(
+    id                         char(1)               not null,
+    name                       text                  not null,
+    description                text                  not null,
+    primary key (id)
+);
+
+insert into security_notice_status (id,name,description) 
+values ('A', 'Active', 'A valid security concern');
+
+insert into security_notice_status (id,name,description)
+values ('I', 'Ingore', 'Ingore this notice');
+
+insert into security_notice_status (id,name,description) 
+values ('C', 'Candidate', 'A candidate for becoming a security notice');
+
+alter table security_notice rename status to security_notice_status_id;
+alter table security_notice_audit rename status to security_notice_status_id;
+
+alter table security_notice
+    add foreign key  (security_notice_status_id)
+       references security_notice_status (id) on update restrict on delete restrict;
+
+alter table security_notice_audit
+    add foreign key  (security_notice_status_id)
+       references security_notice_status (id) on update restrict on delete restrict;
+
+alter table security_notice drop constraint security_notice_status;
+alter table security_notice_audit drop constraint security_notice_audit_status;
+
+commit;
+
+Jan 31 2004
+
+begin;
+alter table page_load_summary add column total_tmp int;
+update page_load_summary set total_tmp = non_users;
+update page_load_summary set non_users = users;
+update page_load_summary set users = total_tmp;
+alter table page_load_summary rename users to total;
+alter table page_load_summary rename non_users to users;
+
+Jan 9 2004
+
+alter table page_load_detail add column date date;
+alter table page_load_detail add column time time;
+update page_load_detail set date = timestamp::date, time = timestamp::time;
+
+alter table page_load_detail alter date set not null;
+alter table page_load_detail alter time set not null;
+
+alter table page_load_detail alter date set default current_date;
+alter table page_load_detail alter time set default localtime;
+
+
+December 30 2003
+
+create table ports_moved
+(
+    id            serial                not null,
+    from_port_id  integer               not null,
+    to_port_id    integer                       ,
+    date          date                  not null,
+    reason        text                  not null,
+    primary key (id)
+);
+
+
+alter table ports_moved
+    add foreign key  (from_port_id)
+       references ports (id) on update cascade on delete cascade;
+
+alter table ports_moved
+    add foreign key  (to_port_id)
+       references ports (id) on update cascade on delete cascade;
+
+
+
+
+########
+
+
+14 November 2003
+
+- To add page_load_detail ability:
+
+cd DOCMENT_ROOT/..
+mkdir caching
+mkdir caching/cache
+mkdir caching/tmp
+
+Add this to www/include/common.php
+
+	require_once($_SERVER['DOCUMENT_ROOT'] . '/../classes/page_load_detail.php');
+
+$Statistics = new PageLoadDetail();
+
+
+Add this to configuration/database.php
+
+	$Statistics->DBSet($db);
+
+
+create table page_load_summary
+(
+    id                      serial                not null,
+    date                    date                  not null,
+    name                    text                  not null,
+    users                   integer               not null
+        default 0,
+    non_users               integer               not null
+        default 0,
+    rendering_time_avg      interval              not null,
+    primary key (id)
+);
+
+create unique index page_loads_date_date on page_load_summary (date, name);
+
+create table page_load_detail
+(
+    id                      serial                not null,
+    timestamp               timestamp without time zone not null
+        default current_timestamp,
+    page_name               text                  not null,
+    user_id                 integer                       ,
+    ip_address              inet                  not null,
+    full_url                text                  not null,
+    rendering_time          interval              not null,
+    primary key (id)
+);
+
+create unique index page_loads_date_date2 on page_load_detail (timestamp, page_name);
+
+
+alter table page_load_detail
+    add foreign key  (user_id)
+       references users (id) on update cascade on delete cascade;
+
+Add these permissions:
+
+grant insert                         on page_load_detail               to group www;
+grant update                         on page_load_detail_id_seq        to group www;
+
+
+
+*************************************************
+
+
+2003 September 29
+
+  Add functions: 
+	commit_log_ports_insert
+	LastestCommits
+	IsPort
+	IsCategory
+	elementGet
+    freshports_commit
+	LoginCounts
+
+  Add types:
+	element_type
+	commit_record
+    freshports_commit_record
+	logincounts_record
+
+  Populate commit_log_ports_elements:
+
+
+create table commit_log_ports_elements
+(
+    commit_log_id           integer               not null,
+    element_id              integer               not null,
+    primary key (commit_log_id, element_id)
+);
+
+begin;
+create commit_log_ports_elements;
+
+delete from commit_log_ports_elements;
+
+ insert into commit_log_ports_elements
+ SELECT commit_log_ports.commit_log_id, 
+        ports.element_id
+   FROM commit_log_ports, ports
+  WHERE commit_log_ports.port_id = ports.id;
+
+commit;
+
+ SELECT commit_log_ports.commit_log_id, 
+        ports.element_id,
+        element_pathname(ports.element_id)
+   INTO MASTER
+   FROM commit_log_ports, ports
+  WHERE commit_log_ports.port_id = ports.id;
+
+
+ SELECT commit_log_elements.commit_log_id, 
+        commit_log_elements.element_id,
+        element_pathname(commit_log_elements.element_id)
+   INTO MATCHES
+   FROM commit_log_elements;
+
+
+create index master_commit_log_id  on master (commit_log_id);
+create index matches_commit_log_id on matches(commit_log_id);
+
+create index master_element_pathname  on master (element_pathname);
+create index matches_element_pathname on matches(element_pathname);
+
+
+vacuum analyse master;
+vacuum analyse matches;
+
+begin;
+
+insert into commit_log_ports_elements
+SELECT commit_log_id,
+       element_id
+  FROM matches
+ WHERE NOT EXISTS (
+   SELECT *
+     FROM master
+     WHERE matches.element_pathname LIKE (master.element_pathname || '/%')
+       AND matches.commit_log_id = master.commit_log_id)
+   AND matches.element_pathname LIKE '/ports/%';
+
+commit;

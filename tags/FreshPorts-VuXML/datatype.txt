@@ -1,0 +1,89 @@
+--
+-- $Id: datatype.txt,v 1.12 2004-09-22 15:37:31 dan Exp $
+--
+-- Copyright (c) 1998-2003 DVL Software Limited
+--
+
+CREATE TYPE commit_record AS (
+	commit_log_id        integer,
+	commit_date_raw      timestamp with time zone,
+	message_subject      text,
+	message_id           text,
+	committer            text,
+	commit_description   text,
+	commit_date          text,
+	commit_time          text,
+	encoding_losses      boolean,
+	port_id              integer,
+	needs_refresh        smallint,
+	forbidden            text,
+	broken               text,
+	deprecated           text,
+	ignore               text,
+	element_id           integer,
+	version              text,
+	revision             text,
+	epoch                text,
+	date_added           integer,
+	short_description    text,
+	category_id          integer,
+	port                 text,
+	status               character(1),
+	category             text,
+	security_notice_id   integer,
+	watch                bigint,
+	element_pathname     text
+);
+
+CREATE TYPE element_type AS (
+	id         integer,
+	name       text,
+	type       text,
+	status     text,
+	iscategory boolean,
+	isport     boolean
+);
+
+
+CREATE TYPE freshports_commit_record AS (
+	port_id            integer,
+	short_description  text,
+	category           text,
+	message_id         text,
+	committer          text,
+	commit_description text,
+	commit_log_id      integer,
+	port               text,
+	commit_date        text,
+	commit_time        text,
+	encoding_losses    boolean,
+	status             character(1),
+	port_version       text,
+	port_revision      text,
+	port_epoch         text,
+	revision_name      text,
+	change_type        text,
+	pathname           text,
+    is_port            boolean,
+	element_id         integer,
+	forbidden          text,
+	deprecated         text,
+	ignore             text,
+	broken             text,
+	security_notice_id integer
+);
+
+CREATE TYPE logincounts_record AS (
+	date            date,
+	count           integer
+);
+
+CREATE TYPE vuxml_record AS (
+	id				integer,
+	vid				text,
+	package_name	text,
+	op1				text,
+	v1				text,
+	op2				text,
+	v2				text
+);
