@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.77 2003-05-21 00:43:08 dan Exp $
+-- $Id: sp.txt,v 1.78 2003-09-03 23:19:24 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -82,7 +82,7 @@ begin
   return pathname;
 END;
 '
-    LANGUAGE plpgsql;
+    LANGUAGE plpgsql STABLE;
 
 CREATE OR REPLACE FUNCTION element_pathname (integer) RETURNS text
     AS '
@@ -92,7 +92,7 @@ BEGIN
   return Element_Pathname(element_id, TRUE);
 END;
 '
-    LANGUAGE plpgsql;
+    LANGUAGE plpgsql STABLE;
 
 
 
@@ -192,7 +192,7 @@ begin
 
   return element_parent_id;
 END;
-'  LANGUAGE 'plpgsql';
+'  LANGUAGE 'plpgsql' STABLE;
 
 
 
