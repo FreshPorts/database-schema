@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.124 2005-01-12 13:30:14 dan Exp $
+-- $Id: sp.txt,v 1.125 2005-01-13 22:13:56 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -2156,3 +2156,11 @@ SELECT O.element_id as element_id,
    ORDER BY count(W.watch_list_id) DESC
       LIMIT 5) AS O ON P.element_id = O.element_id;
 ' LANGUAGE SQL STABLE;
+
+CREATE OR REPLACE function WatchListCountDefault(int) returns bigint as '
+	SELECT count(*)
+	  FROM watch_list
+     WHERE in_service
+	   AND user_id = $1;
+' LANGUAGE SQL STABLE;
+
