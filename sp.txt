@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.44 2002-03-17 17:46:06 dan Exp $
+-- $Id: sp.txt,v 1.45 2002-03-19 13:27:55 dan Exp $
 --
 
 CREATE OR REPLACE FUNCTION IsDescendantOf (int4 ,int4) returns boolean As '
@@ -966,7 +966,7 @@ CREATE OR REPLACE FUNCTION PortVerifyBegin() returns int8 AS '
 		RowCount	int8;
 
 	BEGIN
-		UPDATE ports SET found_in_index = FALSE;
+		UPDATE ports SET found_in_index = TRUE;
 
 --		CREATE TEMP TABLE PortsCheck (category_name text, port_name text);
 		DELETE FROM Ports_Check;

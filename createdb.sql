@@ -1,5 +1,5 @@
 #
-# $Id: createdb.sql,v 1.21 2002-03-17 17:45:35 dan Exp $
+# $Id: createdb.sql,v 1.22 2002-03-19 13:27:34 dan Exp $
 #
 # Things which must be done to make this script work with PostgreSQL
 # 
@@ -65,7 +65,8 @@ create table watch_list_staging_log
     date_added             timestamp             not null,
     user_id                int4                  not null,
     action                 char(1)               not null
-        check (action in ('U','W','C','D')),
+        check (
+            action in ('U','W','C','D')),
     count_total            int4                  not null
         default '0',
     count_matches          int4                  not null
@@ -92,6 +93,8 @@ create table ports_check
     port_name              text                  not null,
     category_id            int4                          ,
     port_id                int4                          ,
+    add_to_ports_table     boolean               not null
+        default 'Y',
     primary key (id)
 );
 
@@ -99,13 +102,16 @@ create table ports_check
 create sequence ports_check_id_seq;
 alter table ports_check alter column id set default nextval('ports_check_id_seq'::text);
 
+create index ports_check_category_id on ports_check (category_id);
+
 create table element
 (
     id                     int4                  not null,
     name                   text                  not null,
     parent_id              int4                          ,
     directory_file_flag    char(1)               not null
-        check (directory_file_flag in ('F','D')),
+        check (
+            directory_file_flag in ('F','D')),
     status                 char(1)               not null
         check (
             status in ('A','D')),
@@ -416,7 +422,8 @@ create table watch_list_staging
     port                   text                  not null,
     item_count             int4                  not null,
     from_pkg_info          boolean               not null
-        check (from_pkg_info in ('Y','N')),
+        check (
+            from_pkg_info in ('Y','N')),
     from_watch_list        boolean               not null
         check (
             from_watch_list in ('Y','N')),
@@ -439,10 +446,11 @@ where exists
 order by commit_log.commit_date desc, commit_log.id limit 100;
 
 create view ports_active as
-select ports.*, element.name
-from element, ports
-where ports.element_id = element.id
-and e lement.status;
+select ports.*, element.name as name, categories.name as category
+from categories, ports, element
+where element.status = A
+and categories.id = ports.category_id
+and ports.element_id = element.id;
 
 alter table element
     add foreign key (parent_id)
