@@ -1,5 +1,5 @@
 --
--- $Id: ri.txt,v 1.8 2001-11-20 12:23:06 dan Exp $
+-- $Id: ri.txt,v 1.9 2001-11-20 16:39:12 dan Exp $
 --
 
   DROP function check_siblings();
@@ -164,14 +164,14 @@ begin
 
    select revision_name
      into ExistingRevisionName
-     from system_version_element
-    where system_version_id = new.system_version_id
+     from system_branch_element_revision
+    where system_branch_id = new.system_branch_id
       and element_id        = new.element_id;
 
    IF FOUND THEN
-      delete from system_version_element 
-       where system_version_id = new.system_version_id
-         and element_id        = new.element_id;
+      delete from system_branch_element_revision 
+       where system_branch_id = new.system_branch_id
+         and element_id       = new.element_id;
    END IF;
 
    RETURN NEW;
@@ -181,9 +181,9 @@ end;
 
 
 
-  drop trigger version_revision_uniqueness on system_version_element;
+  drop trigger version_revision_uniqueness on system_branch_element_revision;
 create trigger version_revision_uniqueness before insert or update 
-on system_version_element
+on system_branch_element_revision
 for each row
 execute procedure version_revision_uniqueness();
 
