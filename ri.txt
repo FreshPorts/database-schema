@@ -1,10 +1,10 @@
 --
--- $Id: ri.txt,v 1.29 2003-09-05 20:26:32 dan Exp $
+-- $Id: ri.txt,v 1.30 2003-09-06 12:19:27 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
 
-CREATE OR REPLACE FUNCTION check_siblings() RETURNS OPAQUE as '
+CREATE OR REPLACE FUNCTION check_siblings() RETURNS TRIGGER as '
    declare 
       ElementCount integer;
 		PortCount		integer;
@@ -80,7 +80,7 @@ EXECUTE PROCEDURE check_siblings();
 
 
 
-CREATE OR REPLACE FUNCTION on_delete_remove_children() RETURNS OPAQUE as '
+CREATE OR REPLACE FUNCTION on_delete_remove_children() RETURNS TRIGGER as '
 begin
 
   delete from element 
@@ -96,7 +96,7 @@ EXECUTE PROCEDURE on_delete_remove_children();
 
 
 
-CREATE OR REPLACE FUNCTION check_parent() RETURNS OPAQUE as '
+CREATE OR REPLACE FUNCTION check_parent() RETURNS TRIGGER as '
    declare
       ElementCount int4;
 begin
@@ -128,7 +128,7 @@ EXECUTE PROCEDURE check_parent();
 
 
 
-CREATE OR REPLACE FUNCTION parent_must_be_directory() RETURNS OPAQUE as '
+CREATE OR REPLACE FUNCTION parent_must_be_directory() RETURNS TRIGGER as '
    declare
       ParentType char(1);
 begin
@@ -161,7 +161,7 @@ EXECUTE PROCEDURE parent_must_be_directory();
 
 
 -- the procedure
-CREATE OR REPLACE FUNCTION id_change() RETURNS OPAQUE as '
+CREATE OR REPLACE FUNCTION id_change() RETURNS TRIGGER as '
 begin
    --  message ''check_siblings 4'';
    if (new.id <> old.id) then
@@ -179,7 +179,7 @@ CREATE TRIGGER id_change BEFORE UPDATE ON element FOR EACH ROW
 EXECUTE PROCEDURE id_change();
 
 
-CREATE OR REPLACE FUNCTION version_revision_uniqueness() RETURNS OPAQUE as '
+CREATE OR REPLACE FUNCTION version_revision_uniqueness() RETURNS TRIGGER as '
    declare 
       ElementID            int4;
       ExistingRevisionName text;
@@ -210,7 +210,7 @@ EXECUTE PROCEDURE version_revision_uniqueness();
 
 
 -- the procedure
-CREATE OR REPLACE FUNCTION element_delete_check() RETURNS OPAQUE as '
+CREATE OR REPLACE FUNCTION element_delete_check() RETURNS TRIGGER as '
 begin
 
    -- if we are removing an element, make sure we set the
@@ -247,7 +247,7 @@ EXECUTE PROCEDURE element_delete_check();
 
 
 
-CREATE OR REPLACE FUNCTION commit_log_delete_check() RETURNS OPAQUE as '
+CREATE OR REPLACE FUNCTION commit_log_delete_check() RETURNS TRIGGER as '
 begin
 
 	-- if we are removing a commit_log, make sure we remove
@@ -275,7 +275,7 @@ EXECUTE PROCEDURE commit_log_delete_check();
 
 
 
-CREATE OR REPLACE FUNCTION user_watch_list_create() RETURNS OPAQUE as '
+CREATE OR REPLACE FUNCTION user_watch_list_create() RETURNS TRIGGER as '
 begin
 
 	insert into watch_list (user_id, name) 
@@ -298,7 +298,7 @@ EXECUTE PROCEDURE user_watch_list_create();
 
 
 
-CREATE OR REPLACE FUNCTION user_email_change() RETURNS OPAQUE as '
+CREATE OR REPLACE FUNCTION user_email_change() RETURNS TRIGGER as '
 begin
 
 	if old.email <> new.email then
@@ -340,7 +340,7 @@ CREATE TRIGGER categories_insert AFTER INSERT OR UPDATE ON categories FOR EACH R
 EXECUTE PROCEDURE categories_insert_update();
 
 
-CREATE FUNCTION security_notice_audit () RETURNS "trigger"
+CREATE OR REPLACE FUNCTION security_notice_audit () RETURNS TRIGGER
     AS '
 BEGIN
    INSERT INTO security_notice_audit
@@ -368,7 +368,7 @@ END;
 '
     LANGUAGE plpgsql;
 
-
+  DROP TRIGGER security_notice_audit ON security_notice;
 CREATE TRIGGER security_notice_audit
     BEFORE UPDATE ON security_notice
     FOR EACH ROW
@@ -439,7 +439,7 @@ CREATE OR REPLACE FUNCTION ports_categories_set() RETURNS TRIGGER AS '
    END
 ' LANGUAGE 'plpgsql';
 
-
+  DROP TRIGGER ports_ports_categories ON ports;
 CREATE TRIGGER ports_ports_categories
     AFTER INSERT OR UPDATE ON ports
     FOR EACH ROW
