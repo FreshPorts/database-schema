@@ -1,25 +1,12 @@
 #
+# $Id: createdb.sql,v 1.19 2002-03-14 20:16:19 dan Exp $
+#
 # Things which must be done to make this script work with PostgreSQL
 # 
-# remove asc from indexes.
+# remove asc from indexes. ' asc);' => ');'
 # remove quotes from around current_timestamp
 # remove key names from foreign keys
 #
-
-create table watch_notice_log
-(
-    id                     int4                  not null,
-    notice_date            timestamp             not null
-        default current_timestamp,
-    frequency              char(1)               not null,
-    msg_count              int4                  not null,
-    commit_count           int4                  not null,
-    primary key (id)
-);
-
-  drop sequence watch_notice_log_id_seq;
-create sequence watch_notice_log_id_seq;
-alter table watch_notice_log alter column id set default nextval('watch_notice_log_id_seq'::text);
 
 create table housekeeping
 (
@@ -332,6 +319,21 @@ create table watch_list_element
     primary key (watch_list_id, element_id)
 );
 
+create table watch_notice_log
+(
+    id                     int4                  not null,
+    notice_date            timestamp             not null
+        default current_timestamp,
+    frequency_id           int4                  not null,
+    msg_count              int4                  not null,
+    commit_count           int4                  not null,
+    primary key (id)
+);
+
+  drop sequence watch_notice_log_id_seq;
+create sequence watch_notice_log_id_seq;
+alter table watch_notice_log alter column id set default nextval('watch_notice_log_id_seq'::text);
+
 create table system_branch_element_revision
 (
     system_branch_id       int4                  not null,
@@ -407,6 +409,15 @@ create sequence watch_list_staging_id_seq;
 
 alter table watch_list_staging  alter column id set default nextval('watch_list_staging_id_seq'::text);
 
+create view commits_recent as
+select distinct commit_log.id, commit_log.message_id, commit_log.message_date, 
+commit_log.message_subject, commit_log.date_added, commit_log.commit_date, 
+commit_log.committer, commit_log.description, commit_log.system_id
+from commit_log 
+where exists
+(select * from commit_log_ports where commit_log_ports.commit_log_id = commit_log.id)
+order by commit_log.commit_date desc, commit_log.id limit 100;
+
 alter table element
     add foreign key (parent_id)
        references element (id) on update restrict on delete cascade;
@@ -458,6 +469,10 @@ alter table watch_list_element
 alter table watch_list_element
     add foreign key (watch_list_id)
        references watch_list (id) on update cascade on delete cascade;
+
+alter table watch_notice_log
+    add foreign key (frequency_id)
+       references watch_notice (id) on update cascade on delete cascade;
 
 alter table system_branch_element_revision
     add foreign key (system_branch_id)
