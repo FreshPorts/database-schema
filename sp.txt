@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.84 2003-09-23 13:30:19 dan Exp $
+-- $Id: sp.txt,v 1.85 2003-09-23 17:58:57 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -1569,3 +1569,28 @@ order by commit_date_raw desc, category, port
 END
 '
 LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION commit_log_ports_insert(int) RETURNS boolean
+AS '
+DECLARE
+	CommitLogID	ALIAS for $1;
+BEGIN
+   INSERT INTO latest_commits_ports (commit_log_id, commit_date)
+	      SELECT CommitLogID, 
+            (SELECT commit_log.commit_date
+               FROM commit_log
+              WHERE (commit_log.id = CommitLogID)
+            )
+       WHERE (NOT (EXISTS (SELECT commits_latest_ports.commit_log_id
+                             FROM latest_commits_ports commits_latest_ports
+                            WHERE (commits_latest_ports.commit_log_id = CommitLogID)
+                           )
+                   )
+             );
+
+   RETURN FOUND;
+END;'
+
+LANGUAGE plpgsql;
+
