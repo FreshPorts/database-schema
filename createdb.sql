@@ -1,5 +1,5 @@
 --
--- $Id: createdb.sql,v 1.65 2004-01-31 13:40:13 dan Exp $
+-- $Id: createdb.sql,v 1.66 2004-02-13 15:40:05 dan Exp $
 --
 -- The following options should be used to create the database schema
 --
@@ -27,33 +27,33 @@
 
 create table watch_list_staging_log
 (
-    id                      serial                not null,
-    date_added              timestamp with time zone not null
+    id                         serial                not null,
+    date_added                 timestamp with time zone not null
         default current_timestamp,
-    user_id                 integer                       ,
-    action                  char(1)               not null
+    user_id                    integer                       ,
+    action                     char(1)               not null
         check (action in ('U','W','C','D')),
-    count_total             integer               not null
+    count_total                integer               not null
         default 0,
-    count_matches           integer               not null
+    count_matches              integer               not null
         default 0,
-    count_missing           integer               not null
+    count_missing              integer               not null
         default 0,
-    count_duplicates        integer               not null
+    count_duplicates           integer               not null
         default 0,
-    count_categories        integer               not null
+    count_categories           integer               not null
         default 0,
     primary key (id)
 );
 
 create table ports_check
 (
-    id                      serial                not null,
-    category_name           text                  not null,
-    port_name               text                  not null,
-    category_id             integer                       ,
-    port_id                 integer                       ,
-    add_to_ports_table      boolean               not null
+    id                         serial                not null,
+    category_name              text                  not null,
+    port_name                  text                  not null,
+    category_id                integer                       ,
+    port_id                    integer                       ,
+    add_to_ports_table         boolean               not null
         default 'Y',
     primary key (id)
 );
@@ -62,59 +62,59 @@ create index ports_check_category_id on ports_check (category_id);
 
 create table daily_refreshes
 (
-    refresh_date            date                  not null,
+    refresh_date               date                  not null,
     primary key (refresh_date)
 );
 
 create table graphs
 (
-    id                      serial                not null,
-    title                   text                  not null,
-    query                   text                  not null,
-    label                   text                          ,
-    is_clickable            boolean                       
+    id                         serial                not null,
+    title                      text                  not null,
+    query                      text                  not null,
+    label                      text                          ,
+    is_clickable               boolean                       
         default FALSE,
     primary key (id)
 );
 
 create table commits_latest
 (
-    commit_log_id           integer                       ,
-    commit_date_raw         timestamp with time zone         ,
-    message_subject         text                          ,
-    message_id              text                          ,
-    committer               text                          ,
-    commit_description      text                          ,
-    commit_date             text                          ,
-    commit_time             text                          ,
-    element_id              integer                       ,
-    element_name            text                          ,
-    revision_name           text                          ,
-    status                  char(1)                       ,
-    encoding_losses         boolean                       
+    commit_log_id              integer                       ,
+    commit_date_raw            timestamp with time zone         ,
+    message_subject            text                          ,
+    message_id                 text                          ,
+    committer                  text                          ,
+    commit_description         text                          ,
+    commit_date                text                          ,
+    commit_time                text                          ,
+    element_id                 integer                       ,
+    element_name               text                          ,
+    revision_name              text                          ,
+    status                     char(1)                       ,
+    encoding_losses            boolean                       
 );
 
 create table announcements
 (
-    id                      serial                not null,
-    text                    text                  not null,
-    start_date              date                          ,
-    end_date                date                          ,
+    id                         serial                not null,
+    text                       text                  not null,
+    start_date                 date                          ,
+    end_date                   date                          ,
     primary key (id)
 );
 
 create table page_load_summary
 (
-    id                      serial                not null,
-    date                    date                  not null,
-    page_name               text                  not null,
-    total                   integer               not null
+    id                         serial                not null,
+    date                       date                  not null,
+    page_name                  text                  not null,
+    total                      integer               not null
         default 0,
-    users                   integer               not null
+    users                      integer               not null
         default 0,
-    rendering_time_min      interval                      ,
-    rendering_time_max      interval                      ,
-    rendering_time_avg      interval              not null,
+    rendering_time_min         interval                      ,
+    rendering_time_max         interval                      ,
+    rendering_time_avg         interval              not null,
     primary key (id)
 );
 
@@ -122,10 +122,10 @@ create unique index page_loads_date_date on page_load_summary (date, page_name);
 
 create table element
 (
-    id                      serial                not null,
-    name                    text                  not null,
-    parent_id               integer                       ,
-    status                  char(1)               not null
+    id                         serial                not null,
+    name                       text                  not null,
+    parent_id                  integer                       ,
+    status                     char(1)               not null
         check (status in ('A','D')),
     primary key (id)
 );
@@ -134,11 +134,11 @@ create index element_name on element (name);
 
 create table watch_notice
 (
-    id                      serial                not null,
-    frequency               char(1)               not null
+    id                         serial                not null,
+    frequency                  char(1)               not null
         check (frequency in ('Z','D','W','F','M')),
-    description             text                  not null,
-    last_sent               timestamp with time zone         ,
+    description                text                  not null,
+    last_sent                  timestamp with time zone         ,
     primary key (id)
 );
 
@@ -152,9 +152,9 @@ create index watch_notice_frequency on watch_notice (frequency);
 
 create table system
 (
-    id                      serial                not null,
-    name                    text                  not null,
-    time_adjust             interval              not null
+    id                         serial                not null,
+    name                       text                  not null,
+    time_adjust                interval              not null
         default '0 seconds',
     primary key (id)
 );
@@ -163,17 +163,17 @@ INSERT INTO "system" VALUES (1,'FreeBSD','-03:00');
 
 create table daily_stats
 (
-    id                      serial                not null,
-    title                   text                  not null,
-    query                   text                  not null,
+    id                         serial                not null,
+    title                      text                  not null,
+    query                      text                  not null,
     primary key (id)
 );
 
 create table reports
 (
-    id                      serial                not null,
-    name                    text                  not null,
-    description             text                  not null,
+    id                         serial                not null,
+    name                       text                  not null,
+    description                text                  not null,
     primary key (id)
 );
 
@@ -189,9 +189,9 @@ insert into reports(id, name, description, needs_frequency) values (5, 'Security
 
 create table report_frequency
 (
-    id                      serial                not null,
-    frequency               char(1)               not null,
-    description             text                  not null,
+    id                         serial                not null,
+    frequency                  char(1)               not null,
+    description                text                  not null,
     primary key (id)
 );
 
@@ -203,9 +203,9 @@ INSERT INTO report_frequency (id, frequency, description) VALUES (5,'M','Month (
 
 create table tasks
 (
-    id                      serial                not null,
-    name                    text                  not null,
-    description             text                  not null,
+    id                         serial                not null,
+    name                       text                  not null,
+    description                text                  not null,
     primary key (id)
 );
 
@@ -217,83 +217,91 @@ insert into tasks (name,description) values ('AnnouncementsUpdate', 'Ability to 
 
 create unique index tasks_idx on tasks (name);
 
+create table security_notice_status
+(
+    id                         char(1)               not null,
+    name                       text                  not null,
+    description                text                  not null,
+    primary key (id)
+);
+
 create table element_revision
 (
-    element_id              integer               not null,
-    revision_name           text                  not null,
+    element_id                 integer               not null,
+    revision_name              text                  not null,
     primary key (element_id, revision_name)
 );
 
 create table categories
 (
-    id                      serial                not null,
-    is_primary              boolean               not null,
-    element_id              integer                       ,
-    name                    text                  not null,
-    description             text                          ,
+    id                         serial                not null,
+    is_primary                 boolean               not null,
+    element_id                 integer                       ,
+    name                       text                  not null,
+    description                text                          ,
     primary key (id)
 );
 
 create table ports
 (
-    id                      serial                not null,
-    element_id              integer               not null,
-    category_id             integer               not null,
-    short_description       text                          ,
-    long_description        text                          ,
-    version                 text                          ,
-    revision                text                          ,
-    maintainer              text                          ,
-    homepage                text                          ,
-    master_sites            text                          ,
-    extract_suffix          text                          ,
-    package_exists          boolean                       ,
-    depends_build           text                          ,
-    depends_run             text                          ,
-    last_commit_id          integer                       ,
-    found_in_index          boolean                       ,
-    forbidden               text                          ,
-    broken                  text                          ,
-    date_added              timestamp with time zone         
+    id                         serial                not null,
+    element_id                 integer               not null,
+    category_id                integer               not null,
+    short_description          text                          ,
+    long_description           text                          ,
+    version                    text                          ,
+    revision                   text                          ,
+    maintainer                 text                          ,
+    homepage                   text                          ,
+    master_sites               text                          ,
+    extract_suffix             text                          ,
+    package_exists             boolean                       ,
+    depends_build              text                          ,
+    depends_run                text                          ,
+    last_commit_id             integer                       ,
+    found_in_index             boolean                       ,
+    forbidden                  text                          ,
+    broken                     text                          ,
+    date_added                 timestamp with time zone         
         default current_timestamp,
-    categories              text                          ,
+    categories                 text                          ,
     primary key (id)
 );
 
 create table users
 (
-    id                      serial                not null,
-    name                    text                  not null,
-    password                text                  not null,
-    cookie                  text                  not null,
-    firstlogin              timestamp with time zone         
+    id                         serial                not null,
+    name                       text                  not null,
+    password                   text                  not null,
+    cookie                     text                  not null,
+    firstlogin                 timestamp with time zone         
         default current_timestamp,
-    lastlogin               timestamp with time zone         
+    lastlogin                  timestamp with time zone         
         default current_timestamp,
-    email                   text                          ,
-    watch_notice_id         integer               not null,
-    emailsitenotices_yn     boolean                       ,
-    emailbouncecount        smallint                      
+    email                      text                          ,
+    watch_notice_id            integer               not null,
+    emailsitenotices_yn        boolean                       ,
+    emailbouncecount           smallint                      
         default 0,
-    type                    char(1)               not null
+    type                       char(1)               not null
         default 'U'
         check (type in ('U','S')),
-    status                  char(1)               not null
+    status                     char(1)               not null
         default 'U'
         check (status in ('U','A','D')),
-    ip_address              text                  not null,
-    number_of_commits       smallint                      
+    ip_address                 text                  not null,
+    number_of_commits          smallint                      
         default 100,
-    number_of_days          smallint                      
+    number_of_days             smallint                      
         default 9,
-    watch_list_add_remove   text                  not null
+    watch_list_add_remove      text                  not null
         default 'default'
         check (watch_list_add_remove in ('ask','default')),
-    max_number_watch_lists  integer               not null
+    max_number_watch_lists     integer               not null
         default 5
         check (max_number_watch_lists >= 1),
-    last_watch_list_chosen  integer                       ,
-    page_size               smallint              not null
+    last_watch_list_chosen     integer                       ,
+    page_size                  smallint              not null
         default 25,
     primary key (id)
 );
@@ -306,51 +314,50 @@ create unique index users_name on users (name);
 
 create table watch_list
 (
-    id                      serial                not null,
-    user_id                 integer               not null,
-    name                    text                  not null,
-    awaiting_staging        boolean               not null
+    id                         serial                not null,
+    user_id                    integer               not null,
+    name                       text                  not null,
+    awaiting_staging           boolean               not null
         default FALSE,
-    in_service              boolean               not null
+    in_service                 boolean               not null
         default FALSE,
     primary key (id)
 );
 
 create table security_notice
 (
-    id                      serial                not null,
-    user_id                 integer               not null,
-    date_added              timestamp with time zone not null
+    id                         serial                not null,
+    user_id                    integer               not null,
+    date_added                 timestamp with time zone not null
         default current_timestamp,
-    ip_address              inet                  not null,
-    description             text                  not null,
-    commit_log_id           integer               not null,
-    status                  char(1)               not null
-        default 'A'
-        check (status in ('A','I')),
+    ip_address                 inet                  not null,
+    description                text                  not null,
+    commit_log_id              integer               not null,
+    security_notice_status_id  char(1)               not null
+        default 'C",
     primary key (id)
 );
 
 create table system_branch
 (
-    id                      serial                not null,
-    system_id               integer               not null,
-    branch_name             text                  not null,
+    id                         serial                not null,
+    system_id                  integer               not null,
+    branch_name                text                  not null,
     primary key (id)
 );
 
 create table commit_log
 (
-    id                      serial                not null,
-    message_id              text                  not null,
-    message_date            timestamp with time zone not null,
-    message_subject         text                          ,
-    date_added              timestamp with time zone not null,
-    commit_date             timestamp with time zone not null,
-    committer               text                  not null,
-    description             text                  not null,
-    system_id               integer               not null,
-    encoding_losses         boolean               not null
+    id                         serial                not null,
+    message_id                 text                  not null,
+    message_date               timestamp with time zone not null,
+    message_subject            text                          ,
+    date_added                 timestamp with time zone not null,
+    commit_date                timestamp with time zone not null,
+    committer                  text                  not null,
+    description                text                  not null,
+    system_id                  integer               not null,
+    encoding_losses            boolean               not null
         default FALSE,
     primary key (id)
 );
@@ -361,55 +368,55 @@ create unique index commit_log_message_id on commit_log (message_id);
 
 create table commit_log_elements
 (
-    id                      serial                not null,
-    commit_log_id           integer               not null,
-    element_id              integer               not null,
-    revision_name           text                  not null,
-    change_type             char(1)               not null
+    id                         serial                not null,
+    commit_log_id              integer               not null,
+    element_id                 integer               not null,
+    revision_name              text                  not null,
+    change_type                char(1)               not null
         check (change_type in ('A','M','R')),
     primary key (id)
 );
 
 create table watch_list_element
 (
-    watch_list_id           integer               not null,
-    element_id              integer               not null,
+    watch_list_id              integer               not null,
+    element_id                 integer               not null,
     primary key (watch_list_id, element_id)
 );
 
 create table watch_notice_log
 (
-    id                      serial                not null,
-    notice_date             timestamp with time zone not null
+    id                         serial                not null,
+    notice_date                timestamp with time zone not null
         default current_timestamp,
-    frequency_id            integer               not null,
-    watch_notice_count      integer               not null,
-    commit_count            integer               not null,
+    frequency_id               integer               not null,
+    watch_notice_count         integer               not null,
+    commit_count               integer               not null,
     primary key (id)
 );
 
 create table system_branch_element_revision
 (
-    system_branch_id        integer               not null,
-    element_id              integer               not null,
-    revision_name           text                  not null,
+    system_branch_id           integer               not null,
+    element_id                 integer               not null,
+    revision_name              text                  not null,
     primary key (system_branch_id, element_id, revision_name)
 );
 
 create table user_confirmations
 (
-    user_id                 integer               not null,
-    token                   text                  not null,
+    user_id                    integer               not null,
+    token                      text                  not null,
     primary key (user_id, token)
 );
 
 create table commit_log_ports
 (
-    commit_log_id           integer               not null,
-    port_id                 integer               not null,
-    needs_refresh           smallint              not null,
-    port_version            text                          ,
-    port_revision           text                          ,
+    commit_log_id              integer               not null,
+    port_id                    integer               not null,
+    needs_refresh              smallint              not null,
+    port_version               text                          ,
+    port_revision              text                          ,
     primary key (commit_log_id, port_id)
 );
 
@@ -417,23 +424,23 @@ create index needs_refresh on commit_log_ports (needs_refresh);
 
 create table watch_list_staging
 (
-    id                      serial                not null,
-    user_id                 integer               not null,
-    category                text                  not null,
-    port                    text                  not null,
-    item_count              integer               not null,
-    from_pkg_info           boolean               not null,
-    from_watch_list         boolean               not null,
-    element_id              serial                        ,
+    id                         serial                not null,
+    user_id                    integer               not null,
+    category                   text                  not null,
+    port                       text                  not null,
+    item_count                 integer               not null,
+    from_pkg_info              boolean               not null,
+    from_watch_list            boolean               not null,
+    element_id                 serial                        ,
     primary key (id)
 );
 
 create table daily_stats_data
 (
-    id                      serial                not null,
-    daily_stats_id          integer               not null,
-    date                    date                  not null,
-    value                   integer               not null,
+    id                         serial                not null,
+    daily_stats_id             integer               not null,
+    date                       date                  not null,
+    value                      integer               not null,
     primary key (id)
 );
 
@@ -441,30 +448,30 @@ create unique index daily_stats_data_unique on daily_stats_data (daily_stats_id,
 
 create table report_log
 (
-    id                      serial                not null,
-    report_id               integer               not null,
-    frequency_id            integer               not null,
-    report_date             timestamp with time zone not null
+    id                         serial                not null,
+    report_id                  integer               not null,
+    frequency_id               integer               not null,
+    report_date                timestamp with time zone not null
         default current_timestamp,
-    email_count             integer               not null,
-    commit_count            integer               not null,
-    port_count              integer               not null,
+    email_count                integer               not null,
+    commit_count               integer               not null,
+    port_count                 integer               not null,
     primary key (id)
 );
 
 create table report_subscriptions
 (
-    report_id               integer               not null,
-    user_id                 integer               not null,
-    report_frequency_id     integer               not null,
+    report_id                  integer               not null,
+    user_id                    integer               not null,
+    report_frequency_id        integer               not null,
     primary key (report_id, user_id)
 );
 
 create table committer_notify
 (
-    user_id                 integer               not null,
-    committer               text                  not null,
-    status                  char(1)               not null
+    user_id                    integer               not null,
+    committer                  text                  not null,
+    status                     char(1)               not null
         default 'A'
         check (status in ('A','D')),
     primary key (user_id)
@@ -472,8 +479,8 @@ create table committer_notify
 
 create table element_pathnames
 (
-    element_id              integer               not null,
-    pathname                text                  not null,
+    element_id                 integer               not null,
+    pathname                   text                  not null,
     primary key (element_id)
 );
 
@@ -488,62 +495,60 @@ create unique index element_pathnames_pathname on element_pathnames (pathname);
 
 create table user_tasks
 (
-    user_id                 integer               not null,
-    task_id                 integer               not null,
+    user_id                    integer               not null,
+    task_id                    integer               not null,
     primary key (user_id, task_id)
 );
 
 create table commit_log_ports_ignore
 (
-    commit_log_id           integer               not null,
-    port_id                 integer               not null,
-    date_ignored            timestamp with time zone not null
+    commit_log_id              integer               not null,
+    port_id                    integer               not null,
+    date_ignored               timestamp with time zone not null
         default current_timestamp,
-    reason                  text                  not null,
+    reason                     text                  not null,
     primary key (commit_log_id, port_id)
 );
 
 create table latest_commits_ports
 (
-    commit_log_id           integer               not null,
-    commit_date             timestamp with time zone not null,
+    commit_log_id              integer               not null,
+    commit_date                timestamp with time zone not null,
     primary key (commit_log_id)
 );
 
 create table ports_categories
 (
-    port_id                 integer               not null,
-    category_id             integer               not null,
+    port_id                    integer               not null,
+    category_id                integer               not null,
     primary key (port_id, category_id)
 );
 
 create table security_notice_audit
 (
-    id                      serial                not null,
-    security_notice_id      integer               not null,
-    user_id                 integer               not null,
-    date_added              timestamp with time zone not null
+    id                         serial                not null,
+    security_notice_id         integer               not null,
+    user_id                    integer               not null,
+    date_added                 timestamp with time zone not null
         default current_timestamp,
-    ip_address              inet                  not null,
-    description             text                  not null,
-    commit_log_id           integer               not null,
-    status                  char(1)               not null
-        default 'A'
-        check (status in ('A','I')),
+    ip_address                 inet                  not null,
+    description                text                  not null,
+    commit_log_id              integer               not null,
+    security_notice_status_id  char(1)               not null,
     primary key (id)
 );
 
 create table latest_commits
 (
-    commit_log_id           integer               not null,
-    commit_date             timestamp with time zone not null,
+    commit_log_id              integer               not null,
+    commit_date                timestamp with time zone not null,
     primary key (commit_log_id)
 );
 
 create table commit_log_ports_elements
 (
-    commit_log_id           integer               not null,
-    element_id              integer               not null,
+    commit_log_id              integer               not null,
+    element_id                 integer               not null,
     primary key (commit_log_id, element_id)
 );
 
@@ -551,26 +556,26 @@ create index commit_log_ports_elements_clid on commit_log_ports_elements (commit
 
 create table ports_moved
 (
-    id                      serial                not null,
-    from_port_id            integer               not null,
-    to_port_id              integer                       ,
-    date                    date                  not null,
-    reason                  text                  not null,
+    id                         serial                not null,
+    from_port_id               integer               not null,
+    to_port_id                 integer                       ,
+    date                       date                  not null,
+    reason                     text                  not null,
     primary key (id)
 );
 
 create table page_load_detail
 (
-    id                      serial                not null,
-    date                    date                  not null
+    id                         serial                not null,
+    date                       date                  not null
         default CURRENT_DATE,
-    time                    time                  not null
+    time                       time                  not null
         default LOCALTIME,
-    page_name               text                  not null,
-    user_id                 integer               not null,
-    ip_address              inet                  not null,
-    full_url                text                  not null,
-    rendering_time          interval              not null,
+    page_name                  text                  not null,
+    user_id                    integer               not null,
+    ip_address                 inet                  not null,
+    full_url                   text                  not null,
+    rendering_time             interval              not null,
     primary key (id)
 );
 
@@ -646,6 +651,10 @@ alter table security_notice
 alter table security_notice
     add foreign key  (commit_log_id)
        references commit_log (id) on update cascade on delete cascade;
+
+alter table security_notice
+    add foreign key  (security_notice_status_id)
+       references security_notice_status (id) on update restrict on delete restrict;
 
 alter table system_branch
     add foreign key  (system_id)
@@ -786,6 +795,10 @@ alter table ports_categories
 alter table security_notice_audit
     add foreign key  (security_notice_id)
        references security_notice (id) on update cascade on delete cascade;
+
+alter table security_notice_audit
+    add foreign key  (security_notice_status_id)
+       references security_notice_status (id) on update restrict on delete restrict;
 
 alter table latest_commits
     add foreign key  (commit_log_id)
