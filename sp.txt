@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.30 2002-02-23 23:25:52 dan Exp $
+-- $Id: sp.txt,v 1.31 2002-02-26 00:31:44 dan Exp $
 --
 
   drop function IsDescendantOf (int4 ,int4);
@@ -759,4 +759,87 @@ CREATE FUNCTION ConfirmUserAccount(text) RETURNS int4 AS '
 		RETURN Result;				
 		
     END;
+' LANGUAGE 'plpgsql';
+
+  DROP FUNCTION WatchListStagingExists(int4);
+CREATE FUNCTION WatchListStagingExists(int4) RETURNS int AS '
+
+-- return TRUE or FALSE if the watch list is already being staged.
+
+	DECLARE
+		WatchListID		ALIAS for $1;
+
+		StagingCount	int4;
+
+	BEGIN
+		SELECT	count(*)
+		INTO	StagingCount
+		FROM 	watch_list_staging
+		WHERE	watch_list_id = WatchListID;
+
+		IF StagingCount = 0 THEN
+			RETURN 0;
+		ELSE
+			RETURN 1;
+		END IF;
+	END
+' LANGUAGE 'plpgsql';
+
+
+
+  DROP FUNCTION WatchListStagingAddItem(int4, text, text);
+CREATE FUNCTION WatchListStagingAddItem(int4, text, text) RETURNS int4 AS '
+
+	DECLARE
+		WatchListID	ALIAS for $1;
+		PackageName	ALIAS for $2;
+		PortName	ALIAS for $3;
+		OID			int8;
+
+	BEGIN
+		INSERT INTO watch_list_staging (watch_list_id, package_name, port_name)
+		VALUES (WatchListID, PackageName, PortName);
+
+		GET DIAGNOSTICS OID = RESULT_OID;
+
+		RETURN OID;
+	END
+' LANGUAGE 'plpgsql';
+
+
+
+  DROP FUNCTION WatchListStagingProcess(int4);
+CREATE FUNCTION WatchListStagingProcess(int4) RETURNS int4 AS '
+	DECLARE
+		WatchListID	ALIAS for $1;
+
+		RowCount	int4;
+
+	BEGIN
+--
+-- for each item in watch_list_staging
+-- find matching ports and put them 
+-- into the watch_list_staging_results table
+
+		DELETE FROM watch_list_staging_results
+		 WHERE EXISTS (
+			SELECT id
+			  FROM watch_list_staging
+			 WHERE watch_list_id = WatchListID
+			);
+
+		DELETE FROM watch_list_staging_results 
+		 WHERE watch_list_staging_id = WatchListID;
+
+		INSERT INTO watch_list_staging_results (watch_list_staging_id, element_id)
+		SELECT DISTINCT watch_list_staging.id, element.id
+		  FROM ports, element, watch_list_staging
+		 WHERE element.id   = ports.element_id
+		   AND element.name = watch_list_staging.port_name
+		   AND WatchListID  = watch_list_staging.watch_list_id;
+
+		GET DIAGNOSTICS RowCount = ROW_COUNT;
+
+		RETURN RowCount;
+	END
 ' LANGUAGE 'plpgsql';
