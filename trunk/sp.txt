@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.118 2004-09-20 12:14:39 dan Exp $
+-- $Id: sp.txt,v 1.119 2004-09-22 15:37:31 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -1563,6 +1563,7 @@ SELECT SECURITY.commit_log_id,
        SECURITY.element_id,
        SECURITY.version,
        SECURITY.revision,
+       SECURITY.epoch,
        SECURITY.date_added,
        SECURITY.short_description,
        SECURITY.category_id,
@@ -1584,11 +1585,13 @@ SELECT LCPPORTS.*,
        element.status  AS status,
         CASE WHEN port_id IS NULL THEN commit_log_id ELSE NULL END AS non_port_commit_log_id,
         CASE when clp_version  IS NULL then ports_version  else clp_version  END as version,
-        CASE when clp_revision IS NULL then ports_revision else clp_revision END AS revision
+        CASE when clp_revision IS NULL then ports_revision else clp_revision END AS revision,
+        CASE when clp_epoch    IS NULL then ports_epoch    else clp_epoch    END AS epoch
 FROM (
   SELECT VERSIONS.*, 
         CLP.port_version  AS clp_version,
         CLP.port_revision AS clp_revision,
+        CLP.port_epoch    AS clp_epoch,
         CLP.needs_refresh AS needs_refresh
 FROM
 ( 
@@ -1601,8 +1604,9 @@ SELECT CLPE.*,
          date_part(\'epoch\', P.date_added)::integer AS date_added,
          P.short_description              AS short_description,
          P.category_id,
-         P.revision as ports_revision,
-         P.version  as ports_version
+         P.revision  as ports_revision,
+         P.version   as ports_version,
+         P.portepoch as ports_epoch
     FROM
 
 
@@ -1731,6 +1735,7 @@ SELECT FOURTH1.port_id,
        FOURTH1.status     AS status,
        FOURTH1.port_version,
        FOURTH1.port_revision,
+       FOURTH1.port_epoch,
        NULL::text         AS revision_name,
        NULL::text         AS change_type,
        FOURTH1.pathname   AS pathname,
@@ -1744,7 +1749,8 @@ SELECT FOURTH1.port_id,
 FROM(
 SELECT THIRD1.*,
        CLP.port_version,
-       CLP.port_revision
+       CLP.port_revision,
+       CLP.port_epoch
 FROM 
 (SELECT SECOND1.*,
        element_pathname(E.id)   AS pathname,
