@@ -1,5 +1,5 @@
 --
--- $Id: ri.txt,v 1.14.2.6 2003-04-10 16:32:09 dan Exp $
+-- $Id: ri.txt,v 1.14.2.7 2003-04-16 00:35:43 dan Exp $
 --
 
 CREATE OR REPLACE FUNCTION check_siblings() RETURNS TRIGGER AS '
@@ -399,3 +399,65 @@ ON UPDATE TO commit_log DO
 UPDATE latest_commits_ports
    SET commit_date = new.commit_date
  WHERE (latest_commits_ports.commit_log_id = new.id);
+
+
+CREATE OR REPLACE FUNCTION ports_categories_set() RETURNS TRIGGER AS '
+   DECLARE
+      CategoryCount  integer;
+		CategoryNames	text;
+      Category       text;
+		CategoryID		int8;
+
+   BEGIN
+      RAISE NOTICE ''into ports_categories_set for port = % with categories = %, action = %'', new.id, new.categories, TG_OP;
+		IF TG_OP = ''UPDATE'' AND old.categories = new.categories THEN
+			RAISE NOTICE ''nothing to do because we''''re updating and categories are not changing.'';
+		ELSE
+
+			DELETE 
+			  FROM ports_categories
+			 WHERE port_id = new.id;
+
+	      CategoryCount := 0;
+			CategoryNames := new.categories;
+      	LOOP
+         	CategoryCount := CategoryCount + 1;
+	         Category := split_part(CategoryNames, \' \', CategoryCount);
+
+				-- let us not get carried away....
+   	      IF Category = \'\' OR CategoryCount > 100 THEN
+      	      EXIT;
+         	END IF;
+
+				SELECT id
+				  INTO CategoryID
+				  FROM categories
+				 WHERE name = Category;
+
+				IF NOT FOUND THEN
+					RAISE NOTICE '' we need to create category % '', Category;
+					CategoryID := CreateCategory(Category, ''no description supplied'', FALSE);
+				END IF;
+
+				INSERT INTO ports_categories (port_id, category_id)
+				   SELECT ports.id, CategoryID FROM ports
+				    WHERE ports.id = new.id
+				      AND NOT exists (SELECT * 
+				                        FROM ports_categories
+				                       WHERE port_id     = new.id
+				                         AND category_id = CategoryID);
+
+				RAISE NOTICE '' category % is % with id %'', CategoryCount, Category, CategoryID;
+      	END LOOP;
+		END IF;
+
+      RETURN NEW;
+   END
+' LANGUAGE 'plpgsql';
+
+  DROP TRIGGER ports_ports_categories on ports;
+CREATE TRIGGER ports_ports_categories
+    AFTER INSERT OR UPDATE ON ports
+    FOR EACH ROW
+    EXECUTE PROCEDURE ports_categories_set();
+
