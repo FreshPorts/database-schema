@@ -48,7 +48,7 @@ FreshPorts2
 PostgreSQL 7.x
 PostgreSQL.def
 --\
--- $Id: FreshPorts2.pdm,v 1.62 2003-03-04 22:28:47 dan Exp $\
+-- $Id: FreshPorts2.pdm,v 1.63 2003-03-05 13:13:39 dan Exp $\
 --\
 -- The following options should be used to create the database schema\
 --\
@@ -80,7 +80,7 @@ PostgreSQL.def
 Dan Langille
 
 968886895
-1046706568
+1046869922
 0
 0
 0
@@ -4597,7 +4597,7 @@ integer
 
 0
 1
-1
+0
 1
 0
 0
@@ -10461,7 +10461,7 @@ fk_categories_element
 8
 2
 2
-1
+0
 1
 0
 0
@@ -15256,6 +15256,10 @@ Arial
 Comic Sans MS
 14
 1
+7
+Courier New
+10
+1
 /END_TABLE AMCFONT
 
 /BEGIN_TABLE AMCPENS
@@ -17600,10 +17604,10 @@ OLE     BIN
 0
 0
 0
--25583
--185858
-6891
--179547
+-25584
+-185553
+6890
+-179254
 1
 1
 0
@@ -17619,7 +17623,7 @@ OLE     BIN
 0
 FreshPorts 2 - physical database model\
 Copyright © 2001-2003 DVL Software Limited\
-Wellington, New Zealand  - 25 February 2003
+Wellington, New Zealand  - 5 March 2003
 
 
 4
@@ -18936,10 +18940,10 @@ table.
 0
 0
 0
-30587
--246080
-48811
--225154
+30586
+-246081
+48810
+-225155
 2
 1
 0
@@ -18969,10 +18973,10 @@ table.
 0
 0
 0
-67295
--237258
-76669
--230957
+67293
+-237260
+76667
+-230959
 2
 1
 0
@@ -19233,9 +19237,9 @@ table.
 0
 0
 0
-56009
+56008
 -243788
-65008
+65007
 -240264
 2
 1
@@ -19611,7 +19615,7 @@ eed2ffffd672fcffc34d0000d672fcff
 0
 0
 2
-ca9700001d76fcffdf4100001d76fcff
+c99700001c76fcffdf4100001c76fcff
 2
 
 
@@ -19809,7 +19813,7 @@ d1ecffff9d65fcffd1ecffff185bfcffd1510000185bfcff
 0
 0
 2
-698200007853fcff554d00007853fcff
+688200007753fcff554d00007753fcff
 2
 
 
@@ -20271,7 +20275,7 @@ adcb00009387fdffadcb00001e65fdffb7ea00001e65fdff
 0
 0
 3
-2ee4000001a4fcff2ee400009077fcff560701009077fcff
+2ee4000001a4fcff2ee400008e77fcff540701008e77fcff
 2
 
 
@@ -20304,7 +20308,7 @@ adcb00009387fdffadcb00001e65fdffb7ea00001e65fdff
 0
 0
 3
-28da0000f5acfcff28da00009c86fcff3ca500009c86fcff
+28da0000f5acfcff28da00009b86fcff3ba500009b86fcff
 2
 
 
@@ -20337,7 +20341,7 @@ adcb00009387fdffadcb00001e65fdffb7ea00001e65fdff
 0
 0
 2
-810801008071fcff8dba00008071fcff
+7f0801007d71fcff8cba00007d71fcff
 2
 
 
@@ -20469,7 +20473,7 @@ f27a0000ec7bfdfff27a0000c362fdff
 0
 0
 2
-cb7d00005e41fcffe46000005e41fcff
+ca7d00005d41fcffe46000005d41fcff
 2
 
 
@@ -20568,7 +20572,7 @@ c9deffff7866fcffc9deffff5f3dfcffd92400005f3dfcff
 0
 0
 2
-09ba0000b64dfcffb9dd0000b64dfcff
+08ba0000b54dfcffb8dd0000b54dfcff
 2
 
 
@@ -20601,7 +20605,7 @@ c9deffff7866fcffc9deffff5f3dfcffd92400005f3dfcff
 0
 0
 3
-071601005266fcff07160100b64dfcff51fb0000b64dfcff
+051601005066fcff05160100b64dfcff50fb0000b64dfcff
 2
 
 

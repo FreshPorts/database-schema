@@ -1,5 +1,5 @@
 --
--- $Id: createdb.sql,v 1.45 2003-02-25 19:40:13 dan Exp $
+-- $Id: createdb.sql,v 1.46 2003-03-05 13:13:40 dan Exp $
 --
 -- The following options should be used to create the database schema
 --
@@ -228,7 +228,7 @@ create table categories
 (
     id                      serial                not null,
     is_primary              boolean               not null,
-    element_id              integer               not null,
+    element_id              integer                       ,
     name                    text                  not null,
     description             text                          ,
     primary key (id)
@@ -511,6 +511,24 @@ create table commit_log_ports_ignore
     primary key (commit_log_id, port_id)
 );
 
+create table clp
+(
+    commit_log_id           integer               not null,
+    commit_date             timestamp             not null,
+    primary key (commit_log_id)
+);
+
+create table ports_categories
+(
+    port_id                 integer               not null,
+    category_id             integer               not null,
+    primary key (port_id, category_id)
+);
+
+create index ports_categories_ports_idx on ports_categories (port_id);
+
+create index ports_categories_categories_idx on ports_categories (category_id);
+
 create view commits_recent as
 select distinct commit_log.id, commit_log.message_id, commit_log.message_date,
 commit_log.message_subject, commit_log.date_added, commit_log.commit_date,
@@ -719,4 +737,16 @@ alter table commit_log_ports_ignore
 alter table commit_log_ports_ignore
     add foreign key  (commit_log_id)
        references commit_log (id) on update cascade on delete cascade;
+
+alter table clp
+    add foreign key  (commit_log_id)
+       references commit_log (id) on update cascade on delete cascade;
+
+alter table ports_categories
+    add foreign key  (port_id)
+       references ports (id) on update cascade on delete cascade;
+
+alter table ports_categories
+    add foreign key  (category_id)
+       references categories (id) on update cascade on delete cascade;
 
