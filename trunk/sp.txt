@@ -1,15 +1,3 @@
-CREATE TABLE element (
-   id serial not null,
-   name text NOT NULL,
-   parent_id int4,
-   directory_file_flag char(1) NOT NULL,
-   status char(1)
-);
-
-CREATE INDEX name_element_key ON element (name);
-CREATE INDEX parent_id_element_key ON element (parent_id);
-
-
 drop function IsDescendantOf (int4 ,int4) ;
 create function IsDescendantOf (int4 ,int4) returns boolean As '
    DECLARE
@@ -408,26 +396,8 @@ CREATE FUNCTION RevisionForTagGet(int4, int4 ) RETURNS text AS '
 
 
 
-  DROP FUNCTION SystemIDGet (text );
-CREATE FUNCTION SystemIDGet (text ) RETURNS int4 AS '
-   DECLARE
-      System_Name ALIAS for $1;     
-      System_ID            int4;
-
-   BEGIN
-      select id
-        into System_ID
-        from system
-       where name = System_Name;
-
-      return System_ID;
-   END;
-' LANGUAGE 'plpgsql';
-
-
-
-  DROP FUNCTION SystemVersionGet (int4, text );
-CREATE FUNCTION SystemVersionGet (int4, text ) RETURNS int4 AS '
+  DROP FUNCTION SystemVersionIDGet(int4, text);
+CREATE FUNCTION SystemVersionIDGet(int4, text) RETURNS int4 AS '
    DECLARE
       System_ID           ALIAS for $1;
       System_Version_Name ALIAS for $2;
@@ -453,9 +423,9 @@ create function ElementTagSet(text, int4, text, text) returns boolean AS '
       RevisionName   ALIAS for $3;
       Version_Tag    ALIAS for $4;
 
-      SystemID          int4;
-      SystemVersionID   int4;
-      RevisionFound     boolean;
+      SystemID              int4;
+      SystemVersionID       int4;
+      ExistingRevisionFound text;
 
    BEGIN
 
@@ -466,20 +436,37 @@ create function ElementTagSet(text, int4, text, text) returns boolean AS '
       END IF;
 
 -- get the system_version_id (or tag) for the Version_Tag
-      SystemVersionID := SystemVersionGet(SystemID, Version_Tag);
+      SystemVersionID := SystemVersionIDGet(SystemID, Version_Tag);
       IF SystemVersionID IS NULL THEN
          RAISE EXCEPTION ''cannot find SystemVersionID for Version_Name = % '', Version_Tag;
       END IF;
 
-
+/*
 -- has this element already been tagged with this version?
-      RevisionFound := RevisionExists(ElementID, SystemVersionID);
+      ExistingRevisionFound := RevisionForTagGet(SystemVersionID, ElementID);
 
-      IF NOT RevisionFound THEN
-         RevisionFound := RevisionAdd(ElementID, RevisionName);
+      IF  THEN
+         ExistingRevisionFound := RevisionAdd(ElementID, RevisionName);
       END IF;
 
 -- store things away in the sytem version element table
+*/
+      insert into system_version_element (system_version_id, element_id, revision_name)
+                              values (SystemVersionID, ElementID, RevisionName);
+
+      return 1;
+
+   END;
+'  LANGUAGE 'plpgsql';
+
+  drop function ElementTagSet(int4, int4, text);
+create function ElementTagSet(int4, int4, text) returns boolean AS '
+   DECLARE
+      SystemVersionID ALIAS for $1;
+      ElementID       ALIAS for $2;
+      RevisionName    ALIAS for $3;
+
+   BEGIN  
 
       insert into system_version_element (system_version_id, element_id, revision_name)
                               values (SystemVersionID, ElementID, RevisionName);
@@ -490,4 +477,19 @@ create function ElementTagSet(text, int4, text, text) returns boolean AS '
 '  LANGUAGE 'plpgsql';
 
 
+  DROP FUNCTION SystemIDGet(text);
+CREATE FUNCTION SystemIDGet(text) RETURNS int4 AS '
+   DECLARE
+      SystemName ALIAS for $1;
+      SystemID   int4;
+
+   BEGIN
+      select id
+        into SystemID
+        from system
+       where name = SystemName;
+
+      return SystemID;
+   END;
+' LANGUAGE 'plpgsql';
 
