@@ -681,7 +681,7 @@ user_confirmations
 0
 0
 0
-
+user_confirmations
 
 
 
@@ -3571,7 +3571,7 @@ int4
 1
 0
 0
-
+user_id
 
 1
 3
@@ -3606,7 +3606,7 @@ text
 1
 0
 0
-
+token
 
 2
 /END_TABLE AMCCOLN
@@ -4133,7 +4133,7 @@ Ref_2328
 1
 0
 0
-
+Ref_2328
 
 0
 n
@@ -7793,10 +7793,10 @@ OLE     BIN
 0
 0
 0
--24992
--190295
-7481
--182796
+-25427
+-190642
+7047
+-182103
 1
 1
 0
@@ -7813,7 +7813,7 @@ OLE     BIN
 FreshPorts 2 -physical database model\
 \
 copyright 2001 - DVL Software Limited\
-Wellington, New Zealand  - 20 November 2001
+Wellington, New Zealand  - 28 November 2001
 
 
 1
