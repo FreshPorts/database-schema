@@ -1,5 +1,5 @@
 --
--- $Id: ri.txt,v 1.31 2003-09-09 10:16:34 dan Exp $
+-- $Id: ri.txt,v 1.32 2003-09-09 12:38:52 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -461,6 +461,7 @@ BEGIN
 END;'
 LANGUAGE plpgsql;
 
+  DROP TRIGGER commit_log_insert on commit_log;
 CREATE TRIGGER commit_log_insert
 AFTER INSERT on commit_log
 FOR EACH ROW
@@ -485,6 +486,7 @@ BEGIN
 END;'
 LANGUAGE plpgsql;
 
+  DROP TRIGGER commit_log_update on commit_log;
 CREATE TRIGGER commit_log_update
 AFTER UPDATE on commit_log
 FOR EACH ROW
@@ -511,6 +513,7 @@ BEGIN
 END;'
 LANGUAGE plpgsql;
 
+  DROP TRIGGER commit_log_ports_insert on commit_log_ports;
 CREATE TRIGGER commit_log_ports_insert
 AFTER INSERT on commit_log_ports
 FOR EACH ROW
