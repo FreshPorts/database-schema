@@ -1,5 +1,5 @@
 #
-# $Id: createdb.sql,v 1.32 2002-07-26 15:09:54 dan Exp $
+# $Id: createdb.sql,v 1.33 2002-07-26 15:46:02 dan Exp $
 #
 # Things which must be done to make this script work with PostgreSQL
 # 
@@ -557,7 +557,7 @@ create table report_subscriptions
     primary key (report_id, user_id)
 );
 
-create view commits_recent as
+create view commits_recent_ports as
 select distinct commit_log.id, commit_log.message_id, commit_log.message_date,
 commit_log.message_subject, commit_log.date_added, commit_log.commit_date,
 commit_log.committer, commit_log.description, commit_log.system_id, commit_log.encoding_losses
