@@ -48,7 +48,7 @@ FreshPorts2
 PostgreSQL 7.x
 PostgreSQL.def
 --\
--- $Id: FreshPorts2.pdm,v 1.68 2003-04-23 17:20:59 dan Exp $\
+-- $Id: FreshPorts2.pdm,v 1.69 2003-04-28 03:39:43 dan Exp $\
 --\
 -- The following options should be used to create the database schema\
 --\
@@ -80,7 +80,7 @@ PostgreSQL.def
 Dan Langille
 
 968886895
-1051113499
+1051501035
 0
 0
 0
@@ -1568,7 +1568,7 @@ latest_commits
 0
 0
 0
-
+latest_commits
 
 
 
@@ -3145,6 +3145,47 @@ integer
 last_watch_list_chosen
 
 18
+0
+-100
+0
+0
+0
+0
+3
+19031
+19031
+page_size
+page_size
+
+
+
+22
+0
+smallint
+0
+0
+0
+0
+
+
+
+
+25
+0
+0
+0
+
+
+
+0
+0
+1
+1
+0
+0
+
+
+19
 0
 -100
 0
@@ -9876,7 +9917,7 @@ integer
 1
 0
 0
-
+commit_log_id
 
 1
 0
@@ -9917,7 +9958,7 @@ timestamp with time zone
 1
 0
 0
-
+commit_date
 
 2
 0
@@ -11150,7 +11191,7 @@ Ref_18534
 1
 0
 0
-
+Ref_18534
 
 0
 n
@@ -17145,10 +17186,10 @@ OLE     BIN
 0
 0
 0
-28014
--200512
-49463
--181536
+28006
+-201010
+49455
+-181059
 2
 1
 0
@@ -17178,10 +17219,10 @@ OLE     BIN
 0
 0
 0
-63380
--192357
-74929
--186056
+63378
+-192359
+74927
+-186058
 2
 1
 0
@@ -17310,10 +17351,10 @@ OLE     BIN
 0
 0
 0
-27990
--223998
+27991
+-223999
 51765
--219649
+-219650
 1
 1
 0
@@ -17329,7 +17370,7 @@ OLE     BIN
 0
 FreshPorts 2 - physical database model\
 Copyright © 2001-2003 DVL Software Limited\
-Wellington, New Zealand  - 23 April 2003
+Wellington, New Zealand  - 27 April 2003
 
 
 2
@@ -17536,7 +17577,7 @@ one or more files
 0
 
 3
-15820
+17480
 16
 0
 12
@@ -17573,15 +17614,15 @@ one or more files
 289
 0
 1
-15820
+17480
 0
 0
 0
 0
--6044
--211813
-3780
--207462
+-6480
+-211027
+3344
+-206676
 2
 1
 0
@@ -17606,15 +17647,15 @@ one or more files
 6
 0
 2
-15820
+17480
 0
 0
 0
 0
--11067
--210218
--2893
--206019
+-12376
+-208560
+-4202
+-204361
 1
 1
 0
@@ -17882,9 +17923,9 @@ than once by the same tag.
 0
 0
 0
-38465
+38463
 -205736
-46264
+46262
 -202212
 2
 1
@@ -17948,10 +17989,10 @@ than once by the same tag.
 0
 0
 0
--14778
--197619
-2846
--189368
+-14780
+-197621
+2844
+-189370
 2
 1
 0
@@ -18014,10 +18055,10 @@ than once by the same tag.
 0
 0
 0
-51850
--204537
-62799
--195311
+51848
+-204539
+62797
+-195313
 2
 1
 0
@@ -18443,10 +18484,10 @@ than once by the same tag.
 0
 0
 0
-58398
--173834
-70622
--169483
+58396
+-173836
+70620
+-169485
 2
 1
 0
@@ -18542,10 +18583,10 @@ than once by the same tag.
 0
 0
 0
-66066
--184975
-74390
--180624
+66064
+-184977
+74388
+-180626
 2
 1
 0
@@ -18778,9 +18819,9 @@ table.
 0
 0
 0
-28840
+28838
 -174183
-36114
+36112
 -170659
 2
 1
@@ -19123,7 +19164,7 @@ f4fdffffcb86fcff32300000cb86fcff323000000cacfcff
 0
 0
 2
-630d0100c017fdff630d01009fdcfcff
+610d0100be17fdff610d01009fdcfcff
 2
 
 
@@ -19156,7 +19197,7 @@ f4fdffffcb86fcff32300000cb86fcff323000000cacfcff
 0
 0
 2
-fef8ffff2fd3fcffcc3e00002fd3fcff
+4af7ffffb7d4fcffcc3e0000b7d4fcff
 2
 
 
@@ -19222,7 +19263,7 @@ fef8ffff2fd3fcffcc3e00002fd3fcff
 0
 0
 2
-d4f9ffff29aefcffd4f9ffffb2c6fcff
+f9f8ffff29aefcfff9f8ffffc4c9fcff
 2
 
 
@@ -19255,7 +19296,7 @@ d4f9ffff29aefcffd4f9ffffb2c6fcff
 0
 0
 2
-b1b50000df25fdff61f80000df25fdff
+a9b500003e26fdff5ff800003e26fdff
 2
 
 
@@ -19288,7 +19329,7 @@ b1b50000df25fdff61f80000df25fdff
 0
 0
 3
-4a4e0000223efdff4a4e0000c41bfdff92a70000c41bfdff
+4a4e0000223efdff4a4e0000081cfdff8aa70000081cfdff
 2
 
 
@@ -19486,7 +19527,7 @@ b1fcffff52aefcffb1fcffff9e7bfcff
 0
 0
 3
-ca7900004ef3fcffca79000047e4fcff5d98000047e4fcff
+c27900007ef1fcffc279000047e4fcff5b98000047e4fcff
 2
 
 
@@ -19585,7 +19626,7 @@ ca7900004ef3fcffca79000047e4fcff5d98000047e4fcff
 0
 0
 2
-d27100006013fdffe5d7ffff6013fdff
+ca7100004613fdffe3d7ffff4613fdff
 2
 
 
@@ -19618,7 +19659,7 @@ d27100006013fdffe5d7ffff6013fdff
 0
 0
 2
-78e30000b0affcff78e30000cae4fcff
+76e30000b0affcff76e30000c8e4fcff
 2
 
 
@@ -19684,7 +19725,7 @@ d27100006013fdffe5d7ffff6013fdff
 0
 0
 4
-73930000a335fdff73930000bc4efdffdbf90000bc4efdffdbf900000a5cfdff
+6b9300003c37fdff6b930000bc4efdffd9f90000bc4efdffd9f90000085cfdff
 2
 
 
@@ -19717,7 +19758,7 @@ d27100006013fdffe5d7ffff6013fdff
 0
 0
 2
-aebc00006032fdff5a1501006032fdff
+a6bc00001233fdff581501001233fdff
 2
 
 
@@ -19750,7 +19791,7 @@ aebc00006032fdff5a1501006032fdff
 0
 0
 3
-bdbb0000e912fdff7ede0000e912fdff7ede0000f201fdff
+b5bb0000b912fdff7cde0000b912fdff7cde0000f001fdff
 2
 
 
@@ -19783,7 +19824,7 @@ bdbb0000e912fdff7ede0000e912fdff7ede0000f201fdff
 0
 0
 2
-b0fe0000d01efdffdbbe0000d01efdff
+aefe0000011ffdffd3be0000011ffdff
 2
 
 
@@ -19816,7 +19857,7 @@ b0fe0000d01efdffdbbe0000d01efdff
 0
 0
 4
-0ac7ffffad71fcff72b1ffffad71fcff72b1ffff280afdff8ad2ffff280afdff
+0ac7ffffad71fcff72b1ffffad71fcff72b1ffff260afdff88d2ffff260afdff
 2
 
 
@@ -19849,7 +19890,7 @@ b0fe0000d01efdffdbbe0000d01efdff
 0
 0
 2
-317a0000e333fdff317a0000a05afdff
+277a00006535fdff277a0000a05afdff
 2
 
 
@@ -19948,7 +19989,7 @@ b0fe0000d01efdffdbbe0000d01efdff
 0
 0
 3
-abcb00009187fdffabcb00001c65fdffb5ea00001c65fdff
+abcb00009187fdffabcb00001a65fdffb3ea00001a65fdff
 2
 
 
@@ -19981,7 +20022,7 @@ abcb00009187fdffabcb00001c65fdffb5ea00001c65fdff
 0
 0
 3
-7f270100b48efdff7f2701006d60fdffd10e01006d60fdff
+7f270100b48efdff7f2701006b60fdffcf0e01006b60fdff
 2
 
 
@@ -20179,7 +20220,7 @@ c7ef000045a4fcffc7ef00008885fcffe21b01008885fcff
 0
 0
 2
-e77a0000e97bfdffe77a0000c362fdff
+e57a0000e97bfdffe57a0000c362fdff
 2
 
 
@@ -20377,7 +20418,7 @@ e0d0ffffc774fcffe0d0fffffc55fcff
 0
 0
 3
-e5eaffff0604fdffe5eaffff96f3fcff221e000096f3fcff
+e3eaffff0404fdffe3eaffff96f3fcff221e000096f3fcff
 1
 
 
