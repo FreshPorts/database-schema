@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.105 2004-03-22 19:32:14 dan Exp $
+-- $Id: sp.txt,v 1.106 2004-04-01 18:25:35 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -1632,6 +1632,7 @@ ON PEC.commit_log_id = security_notice.commit_log_id) AS SECURITY LEFT OUTER JOI
        AND watch_list.in_service
 GROUP BY wle_element_id) AS W ON W.wle_element_id = SECURITY.element_id
 order by commit_date_raw desc, category, port
+limit MaxCommits * 3
 
 	LOOP
         RETURN NEXT r;
@@ -1692,7 +1693,13 @@ CREATE OR REPLACE FUNCTION elementGet (text) RETURNS SETOF element_type AS '
     WHERE id = PathName_ID($1);
 ' LANGUAGE SQL STABLE;
 
-CREATE OR REPLACE FUNCTION freshports_commit(text) RETURNS SETOF freshports_commit_record AS '
+CREATE OR REPLACE FUNCTION freshports_commit_count_elements(text) RETURNS bigint AS '
+ SELECT count(*)
+   FROM commit_log CL JOIN commit_log_ports_elements CLPE ON CL.id = CLPE.commit_log_id
+  WHERE CL.message_id = $1;
+' LANGUAGE SQL STABLE;
+
+CREATE OR REPLACE FUNCTION freshports_commit(text, int, int) RETURNS SETOF freshports_commit_record AS '
 SELECT FOURTH1.port_id,
        FOURTH1.short_description,
        C.name   AS category,
@@ -1741,7 +1748,9 @@ FROM
        JOIN element E on SECOND1.element_id = E.id) AS THIRD1
        LEFT OUTER JOIN commit_log_ports CLP ON THIRD1.port_id = CLP.port_ID AND THIRD1.commit_log_id = CLP.commit_log_id) AS FOURTH1
        LEFT OUTER JOIN categories C ON FOURTH1.category_id = C.id
-order by 3, port, pathname;
+order by 3, port, pathname
+   LIMIT $2
+  OFFSET $3;
 
 ' LANGUAGE SQL STABLE;
 
