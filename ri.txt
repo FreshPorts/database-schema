@@ -182,3 +182,35 @@ on system_version_element
 for each row
 execute procedure version_revision_uniqueness();
 
+
+-- the procedure
+  DROP function element_delete_check();
+create function element_delete_check() returns OPAQUE as '
+begin
+
+   -- if we are removing an element, make sure we set the
+   -- element status to deleted.
+
+   if (NEW.change_type = \'R\') then
+--      select Element_SetStatus(new.element_id, \'D\');
+      update element
+         set status = \'D\'
+       where id     = NEW.element_id;
+   end if;
+
+   --
+   -- * * * * * * * * * * * * * * * *
+   -- use a different return value if you change this
+   -- function to a BEFORE
+   -- * * * * * * * * * * * * * * * *
+   RETURN NEW;
+end;
+' LANGUAGE 'plpgsql';
+
+
+-- the trigger
+  drop trigger element_delete_check on commit_log_elements;
+create trigger element_delete_check before insert or update
+on commit_log_elements for each row
+execute procedure element_delete_check();
+
