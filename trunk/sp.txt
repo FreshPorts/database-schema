@@ -342,7 +342,7 @@ CREATE FUNCTION "getcategory" (text ) RETURNS int4 AS '
 
 
 
- DROP FUNCTION RevisionExists (int4, text );
+  DROP FUNCTION RevisionExists (int4, text );
 CREATE FUNCTION RevisionExists (int4, text) RETURNS boolean AS '
    DECLARE
       ElementID     ALIAS for $1;
@@ -369,7 +369,6 @@ CREATE FUNCTION RevisionExists (int4, text) RETURNS boolean AS '
 
 
 
-
   DROP FUNCTION RevisionAdd(int4, text );
 CREATE FUNCTION RevisionAdd(int4, text) RETURNS boolean AS '
    DECLARE
@@ -385,24 +384,27 @@ CREATE FUNCTION RevisionAdd(int4, text) RETURNS boolean AS '
    END;
 ' LANGUAGE 'plpgsql';
 
-  DROP FUNCTION GetRevisionForTag(int4, int4 );
-CREATE FUNCTION GetRevisionForTag(int4, int4) RETURNS text AS '
-   DECLARE
-      SystemVersionID ALIAS for $1;
-      ElementID       ALIAS for $2;
-      RevisionName    text;
 
+  DROP FUNCTION RevisionForTagGet(int4, int4 );
+CREATE FUNCTION RevisionForTagGet(int4, int4 ) RETURNS text AS '
+   DECLARE
+      SystemVersionID  ALIAS for $1;
+      ElementID        ALIAS for $2;
+      TempRevisionName text;
+
+-- for a given Element and TagName (System version id)
+-- return the revision name assocated with it.
+                            
    BEGIN
       select revision_name
-        into RevisionName
+        into TempRevisionName
         from system_version_element
        where system_version_id = SystemVersionID
          and element_id        = ElementID;
 
-      return RevisionName;
+      return TempRevisionName;
    END;
-' LANGUAGE 'plpgsql';
-
+' LANGUAGE 'plpgsql'
 
 
 
@@ -463,16 +465,15 @@ create function ElementTagSet(text, int4, text, text) returns boolean AS '
          RAISE EXCEPTION ''cannot find SystemID for SystemName = % '', System_Name;
       END IF;
 
--- get the system_version_id for the Version_Tag
+-- get the system_version_id (or tag) for the Version_Tag
       SystemVersionID := SystemVersionGet(SystemID, Version_Tag);
       IF SystemVersionID IS NULL THEN
          RAISE EXCEPTION ''cannot find SystemVersionID for Version_Name = % '', Version_Tag;
       END IF;
 
 
--- get a valid revision id
-      
-      RevisionFound := RevisionExists(ElementID, RevisionName);
+-- has this element already been tagged with this version?
+      RevisionFound := RevisionExists(ElementID, SystemVersionID);
 
       IF NOT RevisionFound THEN
          RevisionFound := RevisionAdd(ElementID, RevisionName);
