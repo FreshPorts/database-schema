@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.98 2004-01-29 15:53:36 dan Exp $
+-- $Id: sp.txt,v 1.99 2004-01-29 23:58:00 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -1654,65 +1654,54 @@ CREATE OR REPLACE FUNCTION elementGet (text) RETURNS SETOF element_type AS '
 ' LANGUAGE SQL STABLE;
 
 CREATE OR REPLACE FUNCTION freshports_commit(text) RETURNS SETOF freshports_commit_record AS '
-select * 
-FROM 
-(SELECT NULL::int      as port_id,
-        NULL::text     as short_description,
-        NULL::text     as catgory,
-        CL.message_id  as message_id,
-        CL.committer   as committer,
-        CL.description as commit_description,
-        CL.id          AS commit_log_id,
-        NULL::text     as port,
-        to_char(CL.commit_date - SystemTimeAdjust(), \'DD Mon YYYY\')  AS commit_date, 
-        to_char(CL.commit_date - SystemTimeAdjust(), \'HH24:MI:SS\')   AS commit_time, 
-        CL.encoding_losses,
-        E.status       as status,
-        NULL::text     as port_version,
-        NULL::text     as port_revision,
-        CLE.revision_name  as revision_name,
-        CLE.change_type::text    as change_type,
-        element_pathname(E.id)   AS pathname,
-        FALSE                    AS is_port,
-        NULL::int                AS element_id
-  FROM commit_log CL, commit_log_elements CLE, element E
- WHERE CL.message_id  = $1
-   AND CL.id          = CLE.commit_log_id
-   AND CLE.element_id = E.id) as MASTER
-WHERE NOT EXISTS
-(SELECT * FROM 
-(SELECT element_pathname(P.element_id)::text as pathname
-  FROM commit_log CL, commit_log_ports CLP, ports P
- WHERE CL.message_id = $1
-   AND CL.id         = CLP.commit_log_id
-   AND P.id          = CLP.port_id) as MATCHES
-WHERE (MASTER.pathname LIKE  MATCHES.pathname || \'/%\'))
-union 
-SELECT P.id as port_id,
-       P.short_description,
-       C.name                             AS category,
-       CL.message_id                      AS message_id,  
-       CL.committer,
-       CL.description                     AS commit_description,
-       CL.id                              AS commit_log_id,
-       E.name                             AS port,
-       to_char(CL.commit_date - SystemTimeAdjust(), \'DD Mon YYYY\')  AS commit_date, 
-       to_char(CL.commit_date - SystemTimeAdjust(), \'HH24:MI:SS\')   AS commit_time, 
-       CL.encoding_losses,
-       E.status as status,
+SELECT FOURTH1.port_id,
+       FOURTH1.short_description,
+       C.name   AS category,
+       FOURTH1.message_id,
+       FOURTH1.committer   AS committer,
+       FOURTH1.commit_description AS commit_description,
+       FOURTH1.commit_log_id,
+       CASE WHEN FOURTH1.port_id IS NULL THEN NULL ELSE FOURTH1.name END AS port,
+       to_char(FOURTH1.commit_date - SystemTimeAdjust(), \'DD Mon YYYY\')  AS commit_date,
+       to_char(FOURTH1.commit_date - SystemTimeAdjust(), \'HH24:MI:SS\')   AS commit_time,
+       FOURTH1.encoding_losses,
+       FOURTH1.status       AS status,
+       FOURTH1.port_version,
+       FOURTH1.port_revision,
+       NULL::text AS revision_name,
+       NULL::text    AS change_type,
+       FOURTH1.pathname   AS pathname,
+       CASE WHEN FOURTH1.port_id IS NULL THEN FALSE ELSE TRUE END AS is_port,
+       FOURTH1.element_id
+FROM(
+SELECT THIRD1.*,
        CLP.port_version,
-       CLP.port_revision,
-       NULL::text as revision_name,
-       NULL::text as change_type,
+       CLP.port_revision
+FROM 
+(SELECT SECOND1.*,
        element_pathname(E.id)   AS pathname,
-       TRUE                     AS is_port,
-       P.element_id             AS element_id
-  FROM commit_log CL, commit_log_ports CLP, ports P, element E, categories C
- WHERE CL.message_id = $1
-   AND CL.id         = CLP.commit_log_id
-   AND P.id          = CLP.port_id
-   AND P.element_id  = E.id
-   AND C.id          = P.category_id
+       CASE WHEN port_id IS NULL THEN \'\' ELSE E.name END                  as name,
+       E.status                 AS status
+FROM
+(SELECT FIRST1.*,
+        P.id as port_id,
+        P.short_description,
+        P.category_id
+FROM         
+(SELECT CL.message_id   AS message_id,
+        CL.committer    AS committer,
+        CL.description  AS commit_description,
+        CL.id           AS commit_log_id,
+        CLPE.element_id AS element_id,
+        CL.commit_date,
+        CL.encoding_losses
+   FROM commit_log CL JOIN commit_log_ports_elements CLPE ON CL.id = CLPE.commit_log_id
+  WHERE CL.message_id = $1) AS FIRST1
+       LEFT OUTER JOIN ports P ON P.element_id = FIRST1.element_id) AS SECOND1
+
+       JOIN element E on SECOND1.element_id = E.id) AS THIRD1
+       LEFT OUTER JOIN commit_log_ports CLP ON THIRD1.port_id = CLP.port_ID AND THIRD1.commit_log_id = CLP.commit_log_id) AS FOURTH1
+       LEFT OUTER JOIN categories C ON FOURTH1.category_id = C.id
 order by 3, port, pathname;
 
 ' LANGUAGE SQL STABLE;
