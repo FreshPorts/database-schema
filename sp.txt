@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.69 2003-04-07 17:02:17 dan Exp $
+-- $Id: sp.txt,v 1.70 2003-04-26 12:50:15 dan Exp $
 --
 
 CREATE OR REPLACE FUNCTION IsDescendantOf (int4 ,int4) returns boolean As '
@@ -795,7 +795,7 @@ CREATE OR REPLACE FUNCTION WatchListStagingProcess(int4) RETURNS int4 AS '
 CREATE OR REPLACE FUNCTION WatchListDeleteAllElements(int4) RETURNS int4 AS '
 	DECLARE
 		WatchListID	ALIAS for $1;
-		RowCount	int8;
+		RowCount	int;
 
 	BEGIN
 
@@ -813,7 +813,7 @@ CREATE OR REPLACE FUNCTION WatchListDeleteAllElements(int4) RETURNS int4 AS '
 CREATE OR REPLACE FUNCTION WatchListStagingClear(int4) RETURNS int4 AS '
 	DECLARE
 		UserID	ALIAS for $1;
-		RowCount	int8;
+		RowCount	int4;
 
 	BEGIN
 
