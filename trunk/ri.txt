@@ -56,7 +56,6 @@ end;
 ' LANGUAGE 'plpgsql';
 
   drop trigger on_delete_remove_children on element;
-
 create trigger on_delete_remove_children before delete 
 on element for each row
 execute procedure on_delete_remove_children();
@@ -216,3 +215,24 @@ create trigger element_delete_check before insert or update
 on commit_log_elements for each row
 execute procedure element_delete_check();
 
+  DROP function commit_log_delete_check();
+create function commit_log_delete_check() returns OPAQUE as '
+begin
+
+	-- if we are removing a commit_log, make sure we remove
+	-- the commit_log_elements as well
+
+	delete
+      from commit_log_elements
+     where commit_log_id = old.id;
+
+   RETURN OLD;
+end;
+' LANGUAGE 'plpgsql';
+
+
+
+  drop trigger commit_log_delete_check on commit_log;
+create trigger commit_log_delete_check before delete
+on commit_log for each row
+execute procedure commit_log_delete_check();
