@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.32 2002-02-27 04:55:56 dan Exp $
+-- $Id: sp.txt,v 1.33 2002-02-27 21:10:25 dan Exp $
 --
 
   drop function IsDescendantOf (int4 ,int4);
@@ -787,19 +787,20 @@ CREATE FUNCTION WatchListStagingExists(int4) RETURNS int AS '
 
 
 
-  DROP FUNCTION WatchListStagingAddItem(int4, text, int4);
-CREATE FUNCTION WatchListStagingAddItem(int4, text, int4) RETURNS int4 AS '
+  DROP FUNCTION WatchListStagingAddItem(int4, text, text, int4);
+CREATE FUNCTION WatchListStagingAddItem(int4, text, text, int4) RETURNS int4 AS '
 
 	DECLARE
-		WatchListID	ALIAS for $1;
-		PortName	ALIAS for $2;
-		Count		ALIAS for $3;
+		WatchListID		ALIAS for $1;
+		CategoryName	ALIAS for $2;
+		PortName		ALIAS for $3;
+		Count			ALIAS for $4;
 
 		OID			int8;
 
 	BEGIN
-		INSERT INTO watch_list_staging (watch_list_id, port_name, count_on_pkg_info, from_pkg_info, from_watch_list)
-		VALUES (WatchListID, PortName, Count, \'Y\', \'N\');
+		INSERT INTO watch_list_staging (watch_list_id, category, port, item_count, from_pkg_info, from_watch_list)
+		VALUES (WatchListID, CategoryName, PortName, Count, \'Y\', \'N\');
 
 		GET DIAGNOSTICS OID = RESULT_OID;
 
@@ -865,19 +866,14 @@ CREATE FUNCTION WatchListStagingProcess(int4) RETURNS int4 AS '
 -- find matching ports and put them 
 -- into the watch_list_staging_results table
 
-		DELETE FROM watch_list_staging_results
-		 WHERE EXISTS (
-			SELECT id
-			  FROM watch_list_staging
-			 WHERE watch_list_id = WatchListID
-			);
-
-		INSERT INTO watch_list_staging_results (watch_list_staging_id, watch_list_id, element_id)
-		SELECT DISTINCT watch_list_staging.id, WatchListID, element.id
-		  FROM ports, element, watch_list_staging
-		 WHERE element.id   = ports.element_id
-		   AND element.name = watch_list_staging.port_name
-		   AND WatchListID  = watch_list_staging.watch_list_id;
+		UPDATE watch_list_staging SET element_id =
+			(	SELECT ports.element_id
+				  FROM ports, categories, element
+				 WHERE element.name      = watch_list_staging.port
+				   AND categories.name   = watch_list_staging.category
+				   AND ports.element_id  = element.id
+				   AND ports.category_id = categories.id)
+		 WHERE watch_list_id = WatchListID;
 
 		GET DIAGNOSTICS RowCount = ROW_COUNT;
 
