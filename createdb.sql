@@ -1,10 +1,10 @@
 #
-# $Id: createdb.sql,v 1.22 2002-03-19 13:27:34 dan Exp $
+# $Id: createdb.sql,v 1.23 2002-03-28 03:52:00 dan Exp $
 #
 # Things which must be done to make this script work with PostgreSQL
 # 
 # remove asc from indexes. ' asc);' => ');'
-# remove quotes from around current_timestamp
+# remove quotes from around 'current_timestamp'
 # remove key names from foreign keys
 #
 # The following options should be used to create the database schema
@@ -40,6 +40,7 @@ create table commits_latest
 (
     commit_date_raw        timestamp                     ,
     commit_log_id          int4                          ,
+    committer              text                          ,
     commit_description     text                          ,
     commit_date            text                          ,
     commit_time            text                          ,
@@ -243,7 +244,8 @@ create table users
     email                  text                          ,
     watch_notice_id        int4                  not null,
     emailsitenotices_yn    boolean                       ,
-    emailbouncecount       smallint                      ,
+    emailbouncecount       smallint                      
+        default 0,
     type                   char(1)               not null
         default 'U'
         check (
@@ -338,6 +340,7 @@ create table commit_log_elements
 
 create sequence commit_log_elements_id_seq;
 alter table commit_log_elements alter column id set default nextval('commit_log_elements_id_seq'::text);
+
 
 create table watch_list_element
 (
@@ -452,6 +455,12 @@ where element.status = A
 and categories.id = ports.category_id
 and ports.element_id = element.id;
 
+create view ports_all as
+select ports.*, element.name as name, categories.name as category
+from categories, ports, element
+where categories.id = ports.category_id
+and ports.element_id = element.id;
+
 alter table element
     add foreign key (parent_id)
        references element (id) on update restrict on delete cascade;
@@ -563,4 +572,3 @@ alter table watch_list_staging
 alter table watch_list_staging
     add foreign key (element_id)
        references element (id) on update cascade on delete set null;
-
