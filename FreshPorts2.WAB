@@ -89,22 +89,14 @@ alter table system                         alter column id set default nextval('
 alter table system_branch                  alter column id set default nextval('system_branch_id_seq'::text);\
 alter table users                          alter column id set default nextval('users_id_seq'::text);\
 alter table watch_list                     alter column id set default nextval('watch_list_id_seq'::text);\
-alter table watch_notice_log               alter column id set default nextval('watch_notice_log_id_seq'::text);\
-\
-insert into housekeeping values (0);\
-\
-INSERT INTO "watch_notice" (id, frequency, description) VALUES (1,'Z','Don''t notify me');\
-INSERT INTO "watch_notice" (id, frequency, description) VALUES (3,'W','Week (on Tuesdays)');\
-INSERT INTO "watch_notice" (id, frequency, description) VALUES (4,'F','Fortnightly  (9th and 23rd)');\
-INSERT INTO "watch_notice" (id, frequency, description) VALUES (5,'M','Month (23rd)');\
-INSERT INTO "watch_notice" (id, frequency, description) VALUES (2,'D','Day');
+alter table watch_notice_log               alter column id set default nextval('watch_notice_log_id_seq'::text);
 0
 
 
 Dan Langille
 
 968886895
-1013720748
+1013970938
 0
 0
 0
@@ -551,7 +543,11 @@ watch_notice
 
 
 
-
+INSERT INTO "watch_notice" (id, frequency, description) VALUES (1,'Z','Don''t notify me');\
+INSERT INTO "watch_notice" (id, frequency, description) VALUES (3,'W','Week (on Tuesdays)');\
+INSERT INTO "watch_notice" (id, frequency, description) VALUES (4,'F','Fortnightly  (9th and 23rd)');\
+INSERT INTO "watch_notice" (id, frequency, description) VALUES (5,'M','Month (23rd)');\
+INSERT INTO "watch_notice" (id, frequency, description) VALUES (2,'D','Day');
 0
 3
 197
@@ -705,7 +701,7 @@ system
 
 
 
-
+INSERT INTO "system" VALUES (1,'FreeBSD','-03:00');
 0
 3
 1056
@@ -859,7 +855,7 @@ housekeeping
 
 
 
-
+insert into housekeeping values (0,0);
 0
 3
 4528
@@ -4466,6 +4462,41 @@ int4
 last_port_commit
 
 1
+3
+4873
+4873
+refresh_now
+refresh_now
+
+
+
+4526
+0
+smallint
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+0
+1
+1
+0
+0
+
+
+2
 3
 4529
 4529
@@ -8655,7 +8686,7 @@ no
 0
 WarehouseArchitect
 DBOAltIndex
-yes
+no
 133
 2
 0
@@ -8679,7 +8710,7 @@ no
 0
 WarehouseArchitect
 DBOOthrIndx
-yes
+no
 137
 2
 0
@@ -8697,7 +8728,7 @@ DBOTypeTrgr
 0
 WarehouseArchitect
 DBOAltTrgr
-yes
+no
 140
 2
 0
@@ -8709,7 +8740,7 @@ yes
 0
 WarehouseArchitect
 DBODeltTrgr
-yes
+no
 142
 2
 0
@@ -8721,13 +8752,13 @@ no
 0
 WarehouseArchitect
 DBOInstTrgr
-yes
+no
 144
 2
 0
 WarehouseArchitect
 DBOUpdtTrgr
-yes
+no
 145
 2
 0
@@ -8823,7 +8854,7 @@ DBOMsgTxt
 0
 WarehouseArchitect
 DBOAltView
-yes
+no
 161
 2
 0
@@ -8883,31 +8914,31 @@ no
 0
 WarehouseArchitect
 DBOConsDeft
-yes
+no
 171
 2
 0
 WarehouseArchitect
 DBOConsFkey
-yes
+no
 172
 2
 0
 WarehouseArchitect
 DBOConsIDcl
-yes
+no
 173
 2
 0
 WarehouseArchitect
 DBOConsPkey
-yes
+no
 174
 2
 0
 WarehouseArchitect
 DBOConsUddt
-no
+yes
 175
 2
 0
@@ -8925,7 +8956,7 @@ no
 0
 WarehouseArchitect
 DBOUseUddt
-yes
+no
 178
 2
 0
@@ -9045,7 +9076,7 @@ yes
 0
 WarehouseArchitect
 DBOConsTBSc
-yes
+no
 198
 2
 0
@@ -9057,7 +9088,7 @@ yes
 0
 WarehouseArchitect
 DBOConsTOpt
-yes
+no
 200
 2
 0
@@ -9069,7 +9100,7 @@ yes
 0
 WarehouseArchitect
 DBOAltTable
-yes
+no
 202
 2
 0
@@ -9438,10 +9469,10 @@ OLE     BIN
 0
 0
 0
--29748
--110864
--20374
--105540
+-29749
+-110865
+-20375
+-105541
 2
 1
 0
@@ -9497,17 +9528,17 @@ OLE     BIN
 3
 749
 6
-0
+2
 6
 0
 0
 0
 0
 0
--42313
--156537
--10289
--150838
+-42692
+-157180
+-10218
+-151481
 1
 1
 0
@@ -9522,8 +9553,8 @@ OLE     BIN
 
 0
 FreshPorts 2 -physical database model\
-copyright 2001 - DVL Software Limited\
-Wellington, New Zealand  - 11 December 2001
+Copyright © 2001-2002 DVL Software Limited\
+Wellington, New Zealand  - 17 February 2002
 
 
 2
@@ -9980,10 +10011,10 @@ in the same database
 0
 0
 0
--30826
--144856
--22277
--140507
+-30827
+-144857
+-22278
+-140508
 2
 1
 0
@@ -10246,9 +10277,9 @@ than once by the same tag.
 0
 0
 0
-27093
+26300
 -136628
-36392
+37174
 -133104
 2
 1
@@ -10492,7 +10523,7 @@ ccb1ffffc1f5fdffccb1ffff1108fefff7beffff1108feff
 0
 0
 2
-3aa4ffffc056feff5455ffffc056feff
+39a4ffffbf56feff5455ffffbf56feff
 2
 
 
@@ -10657,7 +10688,7 @@ d34e0000f8e3fdffd34e00008db3fdff
 0
 0
 3
-029bffff59d2fdff4fb7ffff59d2fdff4fb7ffff1ae8fdff
+019bffff58d2fdff4fb7ffff58d2fdff4fb7ffff1ae8fdff
 2
 
 
@@ -10723,7 +10754,7 @@ d8e9ffffc054feff3a440000c054feff3a440000a63cfeff
 0
 0
 2
-679efffffb58feff04f6fffffb58feff
+669efffffa58feff04f6fffffa58feff
 2
 
 
@@ -10921,7 +10952,7 @@ d51100009a18feffd51100006302feff1eeeffff6302feff
 0
 0
 2
-1a8effffc2d2fdff1a8effff6506feff
+198effffc1d2fdff198effff6506feff
 2
 
 
