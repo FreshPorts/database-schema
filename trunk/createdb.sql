@@ -1,5 +1,5 @@
 #
-# $Id: createdb.sql,v 1.37 2002-07-27 23:24:45 dan Exp $
+# $Id: createdb.sql,v 1.38 2002-11-24 05:23:21 dan Exp $
 #
 # Things which must be done to make this script work with PostgreSQL
 # 
@@ -29,6 +29,19 @@
 #    - Create view
 #    - Default value
 #    - Check
+
+create table committer_notify
+(
+    user_id                int4                  not null,
+    committer              text                  not null,
+    status                 char(1)               not null,
+    primary key (user_id)
+);
+
+alter table committer_notify
+    add foreign key (user_id)
+       references users (id) on update cascade on delete cascade;
+
 
 create table housekeeping
 (
