@@ -1,5 +1,5 @@
 --
--- $Id: createdb.sql,v 1.47 2003-03-06 22:23:17 dan Exp $
+-- $Id: createdb.sql,v 1.48 2003-03-07 20:13:22 dan Exp $
 --
 -- The following options should be used to create the database schema
 --
@@ -34,32 +34,6 @@ create table housekeeping
 );
 
 insert into housekeeping values (1,0,0);
-
-create table commits_latest_ports
-(
-    commit_date_raw         timestamp with time zone         ,
-    commit_log_id           integer                       ,
-    encoding_losses         boolean                       ,
-    message_id              text                          ,
-    committer               text                          ,
-    commit_description      text                          ,
-    commit_date             text                          ,
-    commit_time             text                          ,
-    port_id                 integer                       ,
-    category                text                          ,
-    category_id             integer                       ,
-    port                    text                          ,
-    version                 text                          ,
-    revision                text                          ,
-    status                  char(1)                       ,
-    needs_refresh           smallint                      ,
-    forbidden               text                          ,
-    broken                  text                          ,
-    date_added              timestamp with time zone         ,
-    element_id              integer                       ,
-    short_description       text                          ,
-    security_notice_id      integer                       
-);
 
 create table watch_list_staging_log
 (
@@ -513,7 +487,7 @@ create table commit_log_ports_ignore
     primary key (commit_log_id, port_id)
 );
 
-create table clp
+create table commits_latest_ports
 (
     commit_log_id           integer               not null,
     commit_date             timestamp             not null,
@@ -736,7 +710,7 @@ alter table commit_log_ports_ignore
     add foreign key  (commit_log_id)
        references commit_log (id) on update cascade on delete cascade;
 
-alter table clp
+alter table commits_latest_ports
     add foreign key  (commit_log_id)
        references commit_log (id) on update cascade on delete cascade;
 
