@@ -1,11 +1,12 @@
 --
--- $Id: ri.txt,v 1.15 2002-04-22 02:04:23 dan Exp $
+-- $Id: ri.txt,v 1.16 2002-04-22 02:10:29 dan Exp $
 --
 
 CREATE OR REPLACE FUNCTION check_siblings() returns OPAQUE as '
    declare 
       ElementCount integer;
 		ParentStatus	text;
+		PortCount		integer;
 begin
 
   if new.Parent_ID is null then
@@ -29,23 +30,30 @@ begin
   end if;
 
 	if new.name = ''Makefile'' then
-		--
-		-- if we just added a Makefile back in which was previously deleted,
-		-- ensure we activate the parent too
-		--
-		if new.status = ''A'' and old.status = ''D'' then
-			UPDATE element
-			   SET status = ''A''
-			 WHERE id = new.Parent_ID;
-		else
+		SELECT count(*)
+		  INTO PortCount
+		  FROM ports
+		 WHERE element_id = new.Parent_ID;
+
+		IF PortCount > 0 THEN
 			--
-			-- if we just removed a Makefile back in which previously existed,
-			-- ensure we delete the parent too
+			-- if we just added a Makefile back in which was previously deleted,
+			-- ensure we activate the parent too
 			--
-			if new.status = ''D'' and old.status = ''A'' then
+			if new.status = ''A'' and old.status = ''D'' then
 				UPDATE element
-				   SET status = ''D''
+				   SET status = ''A''
 				 WHERE id = new.Parent_ID;
+			else
+				--
+				-- if we just removed a Makefile back in which previously existed,
+				-- ensure we delete the parent too
+				--
+				if new.status = ''D'' and old.status = ''A'' then
+					UPDATE element
+					   SET status = ''D''
+					 WHERE id = new.Parent_ID;
+				end if;
 			end if;
 		end if;
 	end if;
