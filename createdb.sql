@@ -1,5 +1,5 @@
 #
-# $Id: createdb.sql,v 1.24 2002-04-01 20:53:43 dan Exp $
+# $Id: createdb.sql,v 1.25 2002-04-02 04:55:44 dan Exp $
 #
 # Things which must be done to make this script work with PostgreSQL
 # 
@@ -41,6 +41,7 @@ create table commits_latest
 (
     commit_date_raw        timestamp                     ,
     commit_log_id          int4                          ,
+    message_id             text                          ,
     committer              text                          ,
     commit_description     text                          ,
     commit_date            text                          ,
