@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.58 2002-07-27 23:24:45 dan Exp $
+-- $Id: sp.txt,v 1.59 2002-11-24 04:56:29 dan Exp $
 --
 
 CREATE OR REPLACE FUNCTION IsDescendantOf (int4 ,int4) returns boolean As '
@@ -67,7 +67,8 @@ begin
   END IF;
   return pathname;
 END;
-'  LANGUAGE 'plpgsql';
+'  LANGUAGE 'plpgsql'
+WITH (iscachable);
 
 
 
@@ -448,15 +449,9 @@ CREATE OR REPLACE FUNCTION ElementTagSet(int4, int4, text) returns boolean AS '
 
    BEGIN  
 
--- has this element already been tagged with this version?
-      ExistingRevisionFound := RevisionForTagGet(SystemBranchID, ElementID);
-
-      IF ExistingRevisionFound IS NULL THEN
-         insert into system_branch_element_revision
-							 (system_branch_id, element_id, revision_name)
-							values (SystemBranchID, ElementID, RevisionName);
-      END IF;
-
+      insert into system_branch_element_revision
+				 (system_branch_id, element_id, revision_name)
+				values (SystemBranchID, ElementID, RevisionName);
       return 1;
 
    END;
@@ -985,8 +980,8 @@ CREATE OR REPLACE FUNCTION RecordLastestPortCommits() RETURNS INT4 AS '
 			categories.name																		AS category,
 			categories.id																		AS category_id,
 			element.name																		AS port,
-			COALESCE(commit_log_ports.port_version,  ports.version)								AS version,
-			COALESCE(commit_log_ports.port_revision, ports.revision)							AS revision,
+			CASE when commit_log_ports.port_version IS NULL then ports.version  else commit_log_ports.port_version  END as version,
+			CASE when commit_log_ports.port_version is NULL then ports.revision else commit_log_ports.port_revision END AS revision,
 			element.status																		AS status,
 			commit_log_ports.needs_refresh														AS needs_refresh,
 			ports.forbidden																		AS forbidden,
