@@ -1,3 +1,7 @@
+--
+-- $Id: sp.txt,v 1.18 2001-11-20 12:23:06 dan Exp $
+--
+
   drop function IsDescendantOf (int4 ,int4);
 create function IsDescendantOf (int4 ,int4) returns boolean As '
    DECLARE
