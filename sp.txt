@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.108 2004-04-03 01:52:35 dan Exp $
+-- $Id: sp.txt,v 1.109 2004-04-07 15:04:37 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -1722,7 +1722,8 @@ SELECT FOURTH1.port_id,
        FOURTH1.forbidden,
        FOURTH1.deprecated,
        FOURTH1.ignore,
-       FOURTH1.broken
+       FOURTH1.broken,
+       FOURTH1.security_notice_id
 FROM(
 SELECT THIRD1.*,
        CLP.port_version,
@@ -1748,8 +1749,11 @@ FROM
         CL.id           AS commit_log_id,
         CLPE.element_id AS element_id,
         CL.commit_date,
-        CL.encoding_losses
+        CL.encoding_losses,
+        SN.id           AS security_notice_id
    FROM commit_log CL JOIN commit_log_ports_elements CLPE ON CL.id = CLPE.commit_log_id
+                LEFT OUTER JOIN security_notice SN ON CLPE.commit_log_id           = SN.commit_log_id
+                                                  AND SN.security_notice_status_id = \'A\'
   WHERE CL.message_id = $1) AS FIRST1
        LEFT OUTER JOIN ports P ON P.element_id = FIRST1.element_id) AS SECOND1
 
