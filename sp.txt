@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.70 2003-04-26 12:50:15 dan Exp $
+-- $Id: sp.txt,v 1.71 2003-04-29 12:51:55 dan Exp $
 --
 
 CREATE OR REPLACE FUNCTION IsDescendantOf (int4 ,int4) returns boolean As '
@@ -36,6 +36,62 @@ CREATE OR REPLACE FUNCTION IsDescendantOf (int4 ,int4) returns boolean As '
       RETURN IsDescendantOf;
    END;
 '  LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION element_pathname (integer) RETURNS text
+    AS '
+   DECLARE
+      element_id    ALIAS FOR $1;
+BEGIN
+  return Element_Pathname(element_id, TRUE);
+END;
+'
+    LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION element_pathname (integer, boolean) RETURNS text
+    AS '
+   DECLARE
+      element_id    ALIAS FOR $1;
+      leading_slash ALIAS for $2;
+      my_parent_id  int4;
+      element_name  text;
+      pathname      text;
+
+begin
+  pathname = '''';
+  select name, parent_id
+    into element_name, my_parent_id
+    from element
+   where id = element_id;
+
+  IF FOUND THEN
+    pathname := ''/'' || element_name || pathname;
+    WHILE FOUND LOOP
+      select name, parent_id
+        into element_name, my_parent_id
+        from element
+       where id = my_parent_id;
+
+      IF FOUND THEN
+         IF my_parent_id IS NULL THEN
+           IF leading_slash THEN
+              pathname = ''/'' || element_name || pathname;
+           ELSE
+              pathname = element_name || pathname;
+           END IF;
+           EXIT;
+         ELSE
+           pathname = ''/'' || element_name || pathname;
+         END IF;
+      END IF;
+    END LOOP;
+  END IF;
+
+  return pathname;
+END;
+'
+    LANGUAGE plpgsql;
+
 
 
 CREATE OR REPLACE FUNCTION Element_Pathname(int4) returns text AS '
