@@ -1,5 +1,5 @@
 --
--- $Id: createdb.sql,v 1.50 2003-03-08 18:00:04 dan Exp $
+-- $Id: createdb.sql,v 1.51 2003-04-23 17:21:00 dan Exp $
 --
 -- The following options should be used to create the database schema
 --
@@ -490,7 +490,7 @@ create table commit_log_ports_ignore
 create table latest_commits_ports
 (
     commit_log_id           integer               not null,
-    commit_date             timestamp             not null,
+    commit_date             timestamp with time zone not null,
     primary key (commit_log_id)
 );
 
@@ -519,6 +519,13 @@ create table security_notice_audit
         default 'A'
         check (status in ('A','I')),
     primary key (id)
+);
+
+create table latest_commits
+(
+    commit_log_id           integer               not null,
+    commit_date             timestamp with time zone not null,
+    primary key (commit_log_id)
 );
 
 create view commits_recent as
@@ -741,4 +748,8 @@ alter table ports_categories
 alter table security_notice_audit
     add foreign key  (security_notice_id)
        references security_notice (id) on update cascade on delete cascade;
+
+alter table latest_commits
+    add foreign key  (commit_log_id)
+       references commit_log (id) on update cascade on delete cascade;
 
