@@ -429,3 +429,5 @@ INSERT INTO "watch_notice" (id, frequency, description) VALUES (3,'W','Week (on 
 INSERT INTO "watch_notice" (id, frequency, description) VALUES (4,'F','Fortnightly  (9th and 23rd)');
 INSERT INTO "watch_notice" (id, frequency, description) VALUES (5,'M','Month (23rd)');
 INSERT INTO "watch_notice" (id, frequency, description) VALUES (2,'D','Day');
+
+INSERT INTO "system" VALUES (1,'FreeBSD','-03:00');
