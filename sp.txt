@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.65 2002-12-08 04:03:58 dan Exp $
+-- $Id: sp.txt,v 1.66 2003-01-10 17:14:16 dan Exp $
 --
 
 CREATE OR REPLACE FUNCTION IsDescendantOf (int4 ,int4) returns boolean As '
@@ -1003,10 +1003,12 @@ CREATE OR REPLACE FUNCTION RecordLastestPortCommits() RETURNS INT4 AS '
 			commit_log_ports.needs_refresh														AS needs_refresh,
 			ports.forbidden																		AS forbidden,
 			ports.broken																		AS broken,
-			date_part(''epoch'', ports.date_added)												AS date_added,
+			date_part(''epoch'', ports.date_added)												AS date_added, 
 			ports.element_id																	AS element_id,
-			ports.short_description 															AS short_description
-	   FROM commit_log_ports, commits_recent_ports, element, categories, ports
+			ports.short_description 															AS short_description,
+			security_notice.id																	AS security_notice_id
+	   FROM commits_recent_ports, element, categories, ports, commit_log_ports LEFT OUTER JOIN security_notice
+                                 ON commit_log_ports.commit_log_id = security_notice.commit_log_id
 	  WHERE commit_log_ports.commit_log_id = commits_recent_ports.id
 	    AND commit_log_ports.port_id       = ports.id
 	    AND categories.id                  = ports.category_id
@@ -1385,7 +1387,8 @@ CREATE OR REPLACE FUNCTION Stats_UserCount() returns int8 AS '
 
 
 
-CREATE OR REPLACE FUNCTION Stats_WatchListCount() returns int8 AS ' DECLARE
+CREATE OR REPLACE FUNCTION Stats_WatchListCount() returns int8 AS ' 
+	DECLARE
 		RowCount	int8;
 
 	BEGIN
@@ -1399,7 +1402,8 @@ CREATE OR REPLACE FUNCTION Stats_WatchListCount() returns int8 AS ' DECLARE
 
 
 
-CREATE OR REPLACE FUNCTION Stats_WatchListElementCount() returns int8 AS ' DECLARE
+CREATE OR REPLACE FUNCTION Stats_WatchListElementCount() returns int8 AS ' 
+	DECLARE
 		RowCount	int8;
 
 	BEGIN
