@@ -1,0 +1,1592 @@
+--
+-- $Id: sp.txt,v 1.74 2003-04-29 16:25:52 dan Exp $
+--
+
+CREATE OR REPLACE FUNCTION IsDescendantOf (int4 ,int4) returns boolean As '
+   DECLARE
+      element_id ALIAS FOR $1;
+      target_id  ALIAS FOR $2;
+
+      my_parent_id   int4;
+      IsDescendantOf boolean;
+      looping        int4;
+
+   BEGIN
+      IsDescendantOf := 0;
+      IF element_id <> target_id THEN
+         my_parent_id := element_id;
+         looping := 1;
+         WHILE looping=1 LOOP
+
+            select parent_id into my_parent_id
+              from element
+             where id = my_parent_id;
+
+            IF FOUND THEN
+               IF my_parent_id = target_id THEN
+                  IsDescendantOf := 1;
+                  looping        := 0;
+               END IF;
+            ELSE
+               looping := 0;
+            END IF;
+         END LOOP;
+      END IF;
+
+      RETURN IsDescendantOf;
+   END;
+'  LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION element_pathname (integer, boolean) RETURNS text
+    AS '
+   DECLARE
+      element_id    ALIAS FOR $1;
+      leading_slash ALIAS for $2;
+      my_parent_id  int4;
+      element_name  text;
+      pathname      text;
+
+begin
+  pathname = '''';
+  select name, parent_id
+    into element_name, my_parent_id
+    from element
+   where id = element_id;
+
+  IF FOUND THEN
+    pathname := ''/'' || element_name || pathname;
+    WHILE FOUND LOOP
+      select name, parent_id
+        into element_name, my_parent_id
+        from element
+       where id = my_parent_id;
+
+      IF FOUND THEN
+         IF my_parent_id IS NULL THEN
+           IF leading_slash THEN
+              pathname = ''/'' || element_name || pathname;
+           ELSE
+              pathname = element_name || pathname;
+           END IF;
+           EXIT;
+         ELSE
+           pathname = ''/'' || element_name || pathname;
+         END IF;
+      END IF;
+    END LOOP;
+  END IF;
+
+  return pathname;
+END;
+'
+    LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION element_pathname (integer) RETURNS text
+    AS '
+   DECLARE
+      element_id    ALIAS FOR $1;
+BEGIN
+  return Element_Pathname(element_id, TRUE);
+END;
+'
+    LANGUAGE plpgsql;
+
+
+
+CREATE OR REPLACE FUNCTION Element_Pathname(int4) returns text AS '
+   DECLARE
+      element_id   ALIAS FOR $1;
+      my_parent_id int4;
+      element_name text;
+      pathname     text;
+
+begin
+  pathname = \'\';
+  select name, parent_id
+    into element_name, my_parent_id 
+    from element
+   where id = element_id;
+
+  IF FOUND THEN
+    pathname := \'/\' || element_name || pathname;
+    WHILE FOUND LOOP
+      select name, parent_id 
+        into element_name, my_parent_id
+        from element
+       where id = my_parent_id;
+
+      IF FOUND THEN
+        pathname = \'/\' || element_name || pathname;
+      END IF;
+    END LOOP;
+  END IF;
+  return pathname;
+END;
+'  LANGUAGE 'plpgsql'
+WITH (iscachable);
+
+
+
+CREATE OR REPLACE FUNCTION Pathname_ID(text) returns int4 AS '
+
+   DECLARE
+      in_element_pathname ALIAS FOR $1;
+
+      debug_str         text;
+      element_id        int4;
+      element_parent_id int4;
+      element_name      text;
+      element_pathname  text;
+      position          int4;
+      slash             text;
+
+begin
+  slash            := \'/\';
+  element_pathname := in_element_pathname;
+  element_id       := -1;
+
+  IF substr(element_pathname,1,1) = slash THEN
+    element_pathname := substr(element_pathname, 2);
+  END IF;
+
+  position := strpos(element_pathname, slash);
+  IF position = 0 THEN
+    element_name     := element_pathname;
+    element_pathname := \'\';
+  ELSE
+    element_name     := substr(element_pathname, 1, position-1);
+    element_pathname := substr(element_pathname, position+1);
+  END IF;
+
+  select id 
+    into element_parent_id
+    from element 
+   where element.name = element_name
+     and parent_id is null;
+
+  debug_str := debug_str || \'1 = \' || element_name;
+
+  WHILE(char_length(element_pathname) > 0) LOOP
+    position := strpos(element_pathname, slash);
+    if position = 0 then
+       element_name     := element_pathname;
+       element_pathname := \'\';
+    else
+       element_name     := substr(element_pathname, 1, position-1);
+       element_pathname := substr(element_pathname, position+1);
+    end if;
+
+    debug_str := debug_str || \'1 = \' || element_name;
+    select id 
+      into element_parent_id
+      from element 
+     where element.name = element_name 
+       and parent_id    = element_parent_id;
+
+    debug_str := debug_str || \' 2 = \' || element_name;
+    debug_str := debug_str || \' 3 = \' || element_parent_id;
+  end loop;
+
+  return element_parent_id;
+END;
+'  LANGUAGE 'plpgsql';
+
+
+
+CREATE OR REPLACE FUNCTION Element_Add(text, char(1)) returns int4 AS '
+   DECLARE 
+      in_element_pathname         ALIAS for $1;
+      element_directory_file_flag ALIAS for $2;
+      Element_ID          int4;
+      element_parent_id   int4;
+      element_name        text;
+      element_pathname    text;
+      DebugText           text;
+      position            int4;
+      slash               text;
+
+   BEGIN
+      -- constants
+      slash            := \'/\';
+
+      -- put this into a local variable
+      element_pathname := in_element_pathname;
+
+      -- some debugging
+      --DebugText := \'starting with "\' || element_pathname || \'"\\n\';
+
+      -- remove leading /, if any
+      if substr(element_pathname, 1, 1) = slash then
+         element_pathname := substr(element_pathname, 2);
+      end if;
+
+      -- start off with a null parent, as we are in the root directory
+      element_parent_id = null;
+
+      /* on error do something here */
+      while(char_length(element_pathname) > 0) loop
+
+         -- find the first / in the pathname
+         position := strpos(element_pathname, slash);
+
+         if position = 0 then
+            -- no more slashes.  so grab the existing pathname as the element name
+            element_name     := element_pathname;
+            element_pathname := \'\';
+         else
+            -- adjust the pathname and element name accordingly
+            element_name     := substr(element_pathname, 1, position-1);
+            element_pathname := substr(element_pathname,    position+1);
+         end if;
+
+         -- get the id for this element.  how we do that depends
+         -- on whether or not this element has a parent.
+
+         if element_parent_id is null then
+            --DebugText := DebugText || \' element id is null\\n\';
+
+            -- we have no parent_id yet.  so use the correct SQL
+            select id 
+              into element_id
+              from element 
+             where element.name = element_name 
+               and parent_id    is null;
+         else
+            --DebugText := DebugText || \' element id is NOT null\\n\';
+
+            -- we have a parent_id. so use the correct SQL.
+            select id 
+              into element_id
+              from element 
+             where element.name = element_name 
+               and parent_id    = element_parent_id;
+         end if;
+
+
+         if NOT FOUND then
+            -- we did not find a parent for that element, so we insert that element
+            --DebugText := DebugText || \'not found\\n\';
+
+            -- obtain the next number in the sequence
+            element_id := nextval(\'element_id_seq\');
+
+            -- if we have exhausted the pathname, then we are inserting the final element
+            -- otherwise, we are creating one of the final elements parents...
+            -- set the directory/file flag accordingly.
+
+             --DebugText := DebugText || element_id || \',\';
+             
+             --DebugText := DebugText || element_directory_file_flag || \',\' || element_name;
+            if char_length(element_pathname) = 0 then
+               insert into element(id, parent_id, directory_file_flag, name, status) 
+                            values(element_id, element_parent_id, element_directory_file_flag, element_name, \'A\');
+            else
+               insert into element(id, parent_id, directory_file_flag, name, status)
+                            values(element_id, element_parent_id, \'D\', element_name, \'A\');
+             end if;
+         else
+            --DebugText := DebugText || \'found\\n\';
+            -- we found a parent.
+            if element_pathname = \'\' then
+              -- element already exists
+              Element_ID := 0;
+            end if;
+         end if;
+
+        element_parent_id := element_id;
+      end loop;
+
+  return element_id;
+end;
+'  LANGUAGE 'plpgsql';
+
+
+
+
+CREATE OR REPLACE FUNCTION Element_SetStatus(int4, char(1)) returns int4 AS '
+   DECLARE 
+      element_id     ALIAS for $1;
+      element_status ALIAS for $2;
+
+   BEGIN
+      update element 
+         set status = element_status
+       where id     = element_id;
+
+     return element_id;
+   END;
+'  LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION CreateCategory(text, text, bool) returns int4 AS '
+   DECLARE 
+      category_name        ALIAS for $1;
+      category_description ALIAS for $2;
+      category_is_primary  ALIAS for $3;
+
+      pathname             text;
+      category_element_id  int4;
+      category_id          int4;
+
+   BEGIN
+      category_id := nextval(\'categories_id_seq\');
+
+   	IF category_is_primary THEN
+	      pathname            := \'ports/\' || category_name;
+   	   category_element_id := Pathname_ID(pathname);
+
+      	IF category_element_id is NULL THEN
+         	category_element_id := Element_Add(pathname, \'D\');
+      	END IF;
+
+   	   INSERT INTO categories (id,          is_primary,          element_id,          name,          description)
+      	            values     (category_id, category_is_primary, category_element_id, category_name, category_description);
+		ELSE
+   	   INSERT INTO categories (id,          is_primary,          name,          description)
+      	            values     (category_id, category_is_primary, category_name, category_description);
+		END IF;
+
+      return category_id;
+
+   END;
+'  LANGUAGE 'plpgsql';
+
+
+
+CREATE OR REPLACE FUNCTION ElementRevisionID(int4, text) returns int4 AS '
+   DECLARE 
+      in_element_id ALIAS for $1;
+      tag           ALIAS for $2;
+
+      element_revision_id     int4;
+
+   BEGIN
+      select id
+        into element_revision_id
+        from element_revision
+       where element_id    = in_element_id
+         and revision_name = tag;
+
+     return element_revision_id;
+   END;
+'  LANGUAGE 'plpgsql';
+
+-- Obtain the Element ID for the category supplied
+-- 
+-- FreshPorts2=# select GetCategory('x11-wm');
+--  getcategory
+-- -------------
+--           53
+-- (1 row)
+
+CREATE OR REPLACE FUNCTION GetCategory (text ) RETURNS int4 AS '
+   DECLARE
+      category_name ALIAS for $1;     
+      pathname             text;   
+      category_element_id  int4;
+      category_id          int4;
+   BEGIN
+      pathname            := ''ports/'' || category_name;
+      category_element_id := Pathname_ID(pathname);
+      if NOT category_element_id IS NULL THEN
+         select id
+           into category_id
+           from categories
+          where element_id = category_element_id;
+      END IF;
+      return category_id;    
+   END;
+' LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION GetCategory (int4) RETURNS text AS '
+	DECLARE
+		category_id			ALIAS for $1;
+
+		category_name		text;
+
+	BEGIN
+		select name
+		  into category_name
+		  from categories
+		 where id = category_id;
+
+		return category_name;
+	END;
+' LANGUAGE 'plpgsql';
+
+
+
+
+CREATE OR REPLACE FUNCTION RevisionExists (int4, text) RETURNS boolean AS '
+   DECLARE
+      ElementID     ALIAS for $1;
+      RevisionName  ALIAS for $2;
+      TempElementID int4;
+      ExistsResult  boolean;
+
+   BEGIN
+      ExistsResult := 1;
+
+      select element_id
+        into TempElementID
+        from Element_Revision
+       where element_id    = ElementID
+         and revision_name = RevisionName;
+
+      IF NOT FOUND THEN
+         ExistsResult := 0;
+      END IF;      
+
+      return ExistsResult;
+   END;
+' LANGUAGE 'plpgsql';
+
+
+
+CREATE OR REPLACE FUNCTION RevisionAdd(int4, text) RETURNS boolean AS '
+   DECLARE
+      ElementID     ALIAS for $1;
+      RevisionName  ALIAS for $2;
+
+   BEGIN
+
+      insert into element_revision (element_id, revision_name)
+                  values (ElementID, RevisionName);
+
+      return 1;
+   END;
+' LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION RevisionForTagGet(int4, int4 ) RETURNS text AS '
+   DECLARE
+      SystemBranchID   ALIAS for $1;
+      ElementID        ALIAS for $2;
+      TempRevisionName text;
+
+-- for a given Element and TagName (System version id)
+-- return the revision name assocated with it.
+                            
+   BEGIN
+      select revision_name
+        into TempRevisionName
+        from system_branch_element_revision
+       where system_branch_id = SystemBranchID
+         and element_id       = ElementID;
+
+      return TempRevisionName;
+   END;
+' LANGUAGE 'plpgsql';
+
+
+
+CREATE OR REPLACE FUNCTION SystemBranchIDGet(int4, text) RETURNS int4 AS '
+   DECLARE
+      System_ID           ALIAS for $1;
+      System_Branch_Name  ALIAS for $2;
+      System_Branch_ID    int4;
+
+   BEGIN
+      select id
+        into System_Branch_ID
+        from system_branch
+       where system_id    = System_ID
+         and branch_name  = System_Branch_Name;
+
+      return System_Branch_ID;
+   END;
+' LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION ElementTagSet(int4, int4, text) returns boolean AS '
+   DECLARE
+      SystemBranchID  ALIAS for $1;
+      ElementID       ALIAS for $2;
+      RevisionName    ALIAS for $3;
+
+      ExistingRevisionFound text;
+
+   BEGIN  
+
+      insert into system_branch_element_revision
+				 (system_branch_id, element_id, revision_name)
+				values (SystemBranchID, ElementID, RevisionName);
+      return 1;
+
+   END;
+'  LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION SystemIDGet(text) RETURNS int4 AS '
+   DECLARE
+      SystemName ALIAS for $1;
+      SystemID   int4;
+
+   BEGIN
+      select id
+        into SystemID
+        from system
+       where name = SystemName;
+
+      return SystemID;
+   END;
+' LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION WatchListAdd (int4, text) RETURNS boolean AS '
+   DECLARE
+      WatchListID  ALIAS for $1;
+      ElementName  ALIAS for $2;
+
+      EntryExists  boolean = 0;
+      ElementID    int4;
+
+   BEGIN
+      select Pathname_ID(ElementName)
+        into ElementID;
+
+      IF ElementID IS NULL THEN
+         RAISE EXCEPTION ''cannot find ElementID for Element = % '', ElementName;
+      ELSE
+         INSERT INTO Watch_List_Element (watch_list_id, element_id)
+                         values (WatchListid,   ElementID);
+         EntryExists = 1;
+      END IF;
+
+      return EntryExists;
+   END;
+' LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION IsLoginValid (text, text ) RETURNS int4 AS '
+   DECLARE
+      UserName     ALIAS for $1;
+      UserPassWord ALIAS for $2;
+      UserID       int4;
+
+   BEGIN
+      select id
+        into UserID
+        from Users
+       where lower(name) = lower(UserName)
+         and password    = UserPassWord;
+
+      return UserID;
+   END;
+' LANGUAGE 'plpgsql';
+
+
+
+-- These are mostly for database conversion
+--
+-- Get the element id for the port supplied.
+--
+-- FreshPorts2=# select GetPort('x11-wm/wmg');
+--  getport
+-- ---------
+--     4403
+-- (1 row)
+
+CREATE OR REPLACE FUNCTION GetPort(text) RETURNS int4 AS '
+   DECLARE
+      category_port ALIAS for $1;  
+      pathname         text;
+      port_element_id  int4;       
+      port_id          int4;
+   BEGIN
+      pathname        := ''ports/'' || category_port;
+      port_element_id := Pathname_ID(pathname);
+      if port_element_id IS NOT NULL THEN
+         select id
+           into port_id
+           from ports    
+          where element_id = port_element_id;    
+      END IF;
+      return port_id;
+   END;
+' LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION IsPortsTree(text) returns boolean As '
+
+--
+-- return TRUE if the element exists under the ports tree
+---
+   DECLARE
+      element_pathname ALIAS for $1;
+
+      IsPortsTree   boolean;
+   BEGIN
+      IsPortsTree := 0;
+      if (substring(element_pathname from 1 for 6) = \'/ports\') OR
+         (substring(element_pathname from 1 for 5) =  \'ports\')  THEN
+          if Pathname_ID(element_pathname) then
+             IsPortsTree := 1;
+          END IF;
+      END IF;
+
+      RETURN IsPortsTree;
+   END;
+'  LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION CreatePort(int4, int4) returns int4 AS '
+	DECLARE 	
+		port_element_id		ALIAS for $1;
+		port_category_id	ALIAS for $2;
+
+		port_id				int4;
+
+	BEGIN
+		-- this just creates the bare minimum for a port.
+		-- there are many other fields which need to be populated.
+
+		port_id := nextval(\'ports_id_seq\');
+		INSERT INTO ports (id, element_id, category_id)
+				values     (port_id, port_element_id, port_category_id);
+
+		return port_id;
+
+	END;
+'  LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION GetPortNameFromFileName(text) RETURNS text AS '
+	DECLARE
+ 		file_name	ALIAS for $1;
+
+		temp		text;
+        port		text;
+		category	text;
+
+		pos			int4;
+
+    BEGIN
+		-- remove the first /
+		temp := substring(file_name from 2);
+
+		-- remove everything before the 2nd /
+		pos := position(\'/\' in temp);
+
+		category := substring(temp from 1 for pos - 1);
+
+		temp := substring(temp from pos + 1);
+
+		port := substring(temp from 1 for pos - 1);
+
+        return category || \'/\' || port;
+    END;
+' LANGUAGE 'plpgsql';
+
+
+
+CREATE OR REPLACE FUNCTION ConfirmUserAccount(text) RETURNS int4 AS '
+
+-- return values:
+--  0 : no such token found
+-- -1 : some error occurred
+--  1 : confirmed and enabled
+--  2 : more than one user found with that token
+--      very unlikely to occur.
+
+	DECLARE
+ 		TheToken		ALIAS for $1;
+
+		RowsModified	int4;
+		Result			int4;
+
+
+    BEGIN
+
+		UPDATE users
+		   SET status  = \'A\'
+		 WHERE status != \'D\'
+	AND EXISTS (
+			SELECT user_id 
+		      FROM user_confirmations
+		     WHERE token   = TheToken
+		       AND user_id = users.id
+			);
+
+		GET DIAGNOSTICS RowsModified = ROW_COUNT;
+
+		IF RowsModified = 1 THEN
+			Result = 1;
+		ELSE
+			IF RowsModified = 0 THEN
+				Result = 0;
+			ELSE
+				IF RowsModified > 1 THEN
+					Result = 2;
+				ELSE
+					Result = -1;
+				END IF;
+			END IF;
+		END IF;
+
+		RETURN Result;				
+		
+    END;
+' LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION WatchListStagingExists(int4) RETURNS int AS '
+
+-- return TRUE or FALSE if the user is already staging a watch list
+
+	DECLARE
+		UserID			ALIAS for $1;
+		StagingCount	int4;
+
+	BEGIN
+		SELECT count(*)
+		  INTO StagingCount
+		  FROM watch_list_staging
+		 WHERE user_id = UserID;
+
+		IF StagingCount = 0 THEN
+			RETURN 0;
+		ELSE
+			RETURN 1;
+		END IF;
+	END
+' LANGUAGE 'plpgsql';
+
+
+
+CREATE OR REPLACE FUNCTION WatchListStagingAddItem(int4, text, text, int4) RETURNS int8 AS '
+
+	DECLARE
+		UserID			ALIAS for $1;
+		CategoryName	ALIAS for $2;
+		PortName			ALIAS for $3;
+		Count				ALIAS for $4;
+
+		OID			int8;
+
+	BEGIN
+		INSERT INTO watch_list_staging (user_id, category, port, item_count, from_pkg_info, from_watch_list)
+		VALUES (UserID, CategoryName, PortName, Count, \'Y\', \'N\');
+
+		GET DIAGNOSTICS OID = RESULT_OID;
+
+		RETURN OID;
+	END
+' LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION WatchListUserID(int4)
+ RETURNS int4 AS '
+	DECLARE
+		UserID ALIAS for $1;
+
+		WatchListID int4;
+	BEGIN
+		SELECT user_id
+		  INTO WatchListID
+		  FROM watch_list
+		 WHERE id = UserID;
+
+		RETURN WatchListID;
+	END
+' LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION WatchListStagingProcess(int4) RETURNS int4 AS '
+	DECLARE
+		UserID	ALIAS for $1;
+
+		CountTotal			int4;
+		CountMatches		int4;
+		CountMissing		int4;
+		CountDuplicates	int4;
+		CountCategories	int4;
+
+	BEGIN
+	
+-- for each item in watch_list_staging
+-- find matching ports and put them 
+-- into the table
+
+		UPDATE watch_list_staging SET element_id =
+			(	SELECT ports.element_id
+				  FROM ports, categories, element
+				 WHERE element.name      = watch_list_staging.port
+				   AND categories.name   = watch_list_staging.category
+				   AND ports.element_id  = element.id
+				   AND ports.category_id = categories.id)
+		 WHERE user_id = UserID;
+
+		SELECT count(*)
+		  INTO CountTotal
+		  FROM watch_list_staging
+		 WHERE user_id = UserID;
+
+		SELECT count(DISTINCT category)
+		  INTO CountCategories
+		  FROM watch_list_staging
+		 WHERE user_id = UserID
+		   AND element_id IS NOT NULL;
+	
+		SELECT count(*)
+		  INTO CountMissing
+		  FROM watch_list_staging
+		 WHERE user_id = UserID
+		   AND element_id IS NULL;
+
+		SELECT count(*)
+		  INTO CountDuplicates
+		  FROM watch_list_staging
+		 WHERE user_id = UserID;
+
+		CountMatches := CountTotal - CountMissing;
+
+		PERFORM WatchListStagingLogGeneral(UserID, CountTotal, CountMatches, CountMissing, 
+											CountDuplicates, CountCategories);
+
+		RETURN CountTotal;
+	END
+' LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION WatchListDeleteAllElements(int4) RETURNS int4 AS '
+	DECLARE
+		WatchListID	ALIAS for $1;
+		RowCount	int;
+
+	BEGIN
+
+		DELETE FROM watch_list_element
+		      WHERE watch_list_id  = WatchListID;
+
+		GET DIAGNOSTICS RowCount = ROW_COUNT;
+
+		PERFORM WatchListStagingLogDelete(WatchListID, RowCount);
+
+		RETURN RowCount;
+	END
+' LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION WatchListStagingClear(int4) RETURNS int8 AS '
+	DECLARE
+		UserID	ALIAS for $1;
+		RowCount	int8;
+
+	BEGIN
+
+		DELETE FROM watch_list_staging
+		      WHERE user_id  = UserID;
+
+		GET DIAGNOSTICS RowCount = ROW_COUNT;
+
+		PERFORM WatchListStagingLogClearing(UserID, RowCount);
+
+		RETURN RowCount;
+	END
+' LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION WatchListStagingLogGeneral(int4, int4, int4, int4, int4, int4) returns int8 AS '
+	DECLARE
+		UserID			ALIAS for $1;
+		CountTotal		ALIAS for $2;
+		CountMatches	ALIAS for $3;
+		CountMissing	ALIAS for $4;
+		CountDuplicates	ALIAS for $5;
+		CountCategories	ALIAS for $6;
+
+		OID	int8;
+
+	BEGIN
+
+		INSERT INTO watch_list_staging_log (	user_id, 
+												action, 
+												count_total, 
+												count_matches, 
+												count_missing, 
+												count_duplicates, 
+												count_categories)
+					VALUES (UserID, \'U\', CountTotal, CountMatches, 
+							CountMissing, CountDuplicates, CountCategories);
+
+		GET DIAGNOSTICS OID = RESULT_OID;
+
+		RETURN OID;
+	END
+' LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION WatchListStagingLogClearing(int8, int8) returns int8 AS '
+	DECLARE
+		UserID			ALIAS for $1;
+		ItemCount		ALIAS for $2;
+
+		OID	int8;
+
+	BEGIN
+
+		INSERT INTO watch_list_staging_log (	user_id, 
+												action,
+												count_total)
+					VALUES (UserID, \'C\', ItemCount);
+
+		GET DIAGNOSTICS OID = RESULT_OID;
+
+		RETURN OID;
+	END
+' LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION WatchListStagingLogDelete(int4, int4) returns int8 AS '
+	DECLARE
+		UserID			ALIAS for $1;
+		ItemCount		ALIAS for $2;
+
+		OID	int8;
+
+	BEGIN
+
+		INSERT INTO watch_list_staging_log (	user_id, 
+												action,
+												count_total)
+					VALUES (UserID, \'D\', ItemCount);
+
+		GET DIAGNOSTICS OID = RESULT_OID;
+
+		RETURN OID;
+	END
+' LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION WatchListStagingLogWatch(int4, int4) returns int8 AS '
+	DECLARE
+		UserID			ALIAS for $1;
+		CountTotal		ALIAS for $2;
+
+		OID	int8;
+
+	BEGIN
+
+		INSERT INTO watch_list_staging_log (	user_id, 
+												action,
+												count_total)
+					VALUES (UserID, \'W\', CountTotal);
+
+		GET DIAGNOSTICS OID = RESULT_OID;
+
+		RETURN OID;
+	END
+' LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION PortVerifyBegin() returns int8 AS '
+	DECLARE
+		RowCount	int8;
+
+	BEGIN
+		UPDATE ports SET found_in_index = TRUE;
+
+--		CREATE TEMP TABLE PortsCheck (category_name text, port_name text);
+		DELETE FROM Ports_Check;
+
+		GET DIAGNOSTICS RowCount = ROW_COUNT;
+
+		RETURN RowCount;
+
+	END
+' LANGUAGE 'plpgsql';
+
+
+
+CREATE OR REPLACE FUNCTION PortVerifyAddOne(text, text) returns int8 AS '
+	DECLARE
+		CategoryName	ALIAS for $1;
+		PortName		ALIAS for $2;
+		OID	int8;
+
+	BEGIN
+		INSERT INTO Ports_Check (category_name, port_name) values (CategoryName, PortName);
+
+		GET DIAGNOSTICS OID = RESULT_OID;
+
+		RETURN OID;
+	END
+' LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION PortsVerifyProcess() returns int8 AS '
+	DECLARE
+		RowCount    int8;
+
+	BEGIN
+		update ports_check 
+		set category_id = (select id from categories where name = category_name);
+
+		update ports_check set port_id = (
+		select ports.id from ports, element, categories
+                 WHERE ports.category_id = categories.id
+                   AND ports.element_id  = element.id
+                   AND categories.id     = Ports_Check.category_id
+                   AND element.name      = Ports_Check.port_name);
+
+		update ports set found_in_index = TRUE
+		where exists
+			(select * from ports_check where ports_check.port_id = ports.id);
+
+		GET DIAGNOSTICS RowCount = ROW_COUNT;
+
+		RETURN RowCount;
+	END
+' LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION RecordLastestPortCommits() RETURNS INT4 AS '
+	DECLARE
+
+		MaxCommitID	int4;
+		DateNow		timestamp;
+
+	BEGIN
+
+		-- add in the new stuff
+		CREATE TEMP TABLE commits_latest_ports_tmp AS
+		SELECT DISTINCT
+			commits_recent_ports.commit_date													AS commit_date_raw,
+			commits_recent_ports.id																AS commit_log_id,
+			commits_recent_ports.encoding_losses												AS encoding_losses,
+			commits_recent_ports.message_id														AS message_id,
+			commits_recent_ports.committer														AS committer,
+			commits_recent_ports.description													AS commit_description,
+			to_char(commits_recent_ports.commit_date - SystemTimeAdjust(), ''DD Mon YYYY'')		AS commit_date,
+			to_char(commits_recent_ports.commit_date - SystemTimeAdjust(), ''HH24:MI'')			AS commit_time,
+			commit_log_ports.port_id															AS port_id,
+			categories.name																		AS category,
+			categories.id																		AS category_id,
+			element.name																		AS port,
+			CASE when commit_log_ports.port_version IS NULL then ports.version  else commit_log_ports.port_version  END as version,
+			CASE when commit_log_ports.port_version is NULL then ports.revision else commit_log_ports.port_revision END AS revision,
+			element.status																		AS status,
+			commit_log_ports.needs_refresh														AS needs_refresh,
+			ports.forbidden																		AS forbidden,
+			ports.broken																		AS broken,
+			date_part(''epoch'', ports.date_added)												AS date_added, 
+			ports.element_id																	AS element_id,
+			ports.short_description 															AS short_description,
+			security_notice.id																	AS security_notice_id
+	   FROM commits_recent_ports, element, categories, ports, commit_log_ports LEFT OUTER JOIN security_notice
+                                 ON commit_log_ports.commit_log_id = security_notice.commit_log_id
+	  WHERE commit_log_ports.commit_log_id = commits_recent_ports.id
+	    AND commit_log_ports.port_id       = ports.id
+	    AND categories.id                  = ports.category_id
+	    AND element.id                     = ports.element_id
+   ORDER BY commits_recent_ports.commit_date desc,
+			message_id,
+			category,
+			port;
+
+		-- delete what is already there
+		DELETE FROM commits_latest_ports;
+
+		INSERT INTO commits_latest_ports SELECT * FROM commits_latest_ports_tmp;
+
+		SELECT MAX(commit_log_id)
+		  INTO MaxCommitID
+		  FROM commits_latest_ports;
+
+		--
+		-- record that last commit just in case we need it next time...
+		--
+		UPDATE housekeeping
+		   SET last_port_commit = MaxCommitID;
+
+	return MaxCommitID;
+
+	END;
+' LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION RecordLastestCommits() RETURNS INT4 AS '
+	DECLARE
+
+		MaxCommitID	int4;
+		DateNow		timestamp;
+
+	BEGIN
+
+		-- add in the new stuff
+		CREATE TEMP TABLE commits_latest_tmp AS
+		SELECT DISTINCT
+			commits_recent.id																	AS commit_log_id,
+			commits_recent.commit_date															AS commit_date_raw,
+			commits_recent.message_subject														AS message_subject,
+			commits_recent.message_id															AS message_id,
+			commits_recent.committer															AS committer,
+			commits_recent.description															AS commit_description,
+			to_char(commits_recent.commit_date - SystemTimeAdjust(), ''DD Mon YYYY'')			AS commit_date,
+			to_char(commits_recent.commit_date - SystemTimeAdjust(), ''HH24:MI'')				AS commit_time,
+			element.id																			AS element_id,
+			element.name																		AS element_name,
+			commit_log_elements.revision_name													AS revision_name,
+			element.status																		AS status,
+			commits_recent.encoding_losses														AS encoding_losses,
+			element_pathname(element.id)														AS element_pathname
+	   FROM commits_recent, element, commit_log_elements
+	  WHERE commit_log_elements.commit_log_id = commits_recent.id
+	    AND commit_log_elements.element_id    = element.id
+   ORDER BY commits_recent.commit_date desc,
+			commit_log_id;
+
+		-- delete what is already there
+		DELETE FROM commits_latest;
+
+		INSERT INTO commits_latest SELECT * FROM commits_latest_tmp;
+
+		SELECT MAX(commit_log_id)
+		  INTO MaxCommitID
+		  FROM commits_latest;
+
+		--
+		-- record that last commit just in case we need it next time...
+		--
+		UPDATE housekeeping
+		   SET last_port_commit = MaxCommitID;
+
+	return MaxCommitID;
+
+	END;
+' LANGUAGE 'plpgsql';
+
+
+
+CREATE OR REPLACE FUNCTION SystemTimeAdjust() returns interval AS '
+	DECLARE
+        TimeAdjust	interval;
+
+	BEGIN
+        SELECT time_adjust
+		  INTO TimeAdjust
+		  FROM system
+		 LIMIT 1;
+
+		RETURN TimeAdjust;
+	END
+' LANGUAGE 'plpgsql'
+WITH (iscachable);
+
+
+CREATE OR REPLACE FUNCTION DailySummaryDateAdd(date) returns int8 AS '
+	DECLARE
+        DateToAdd	ALIAS for $1;
+
+		DateFound	date;
+		OID         int8;
+
+	BEGIN
+		SELECT Refresh_Date
+		  INTO DateFound
+		  FROM Daily_Refreshes
+		 WHERE Refresh_Date = DateToAdd;
+
+		IF NOT FOUND THEN
+			INSERT INTO Daily_Refreshes (Refresh_Date) values (DateToAdd);
+			GET DIAGNOSTICS OID = RESULT_OID;
+		ELSE
+			OID = 0;
+		END IF;
+
+		RETURN OID;
+	END
+' LANGUAGE 'plpgsql';
+
+
+
+CREATE OR REPLACE FUNCTION DailySummaryDateRemove(date) returns int8 AS '
+	DECLARE
+        DateToDelete	ALIAS for $1;
+
+		RowCount    	int8;
+
+	BEGIN
+		DELETE FROM Daily_Refreshes
+		 WHERE Refresh_Date = DateToDelete;
+
+		GET DIAGNOSTICS RowCount = ROW_COUNT;
+
+		RETURN RowCount;
+	END
+' LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION DailyStatsCaculate() returns int8 AS '
+	DECLARE
+		queries		RECORD;
+		curs1			REFCURSOR;
+		TheDate		date;
+		QueryTotal	int4;
+
+	BEGIN
+		select (current_date - 1)::date
+		INTO TheDate;
+
+		FOR queries IN select id, query from daily_stats LOOP
+			OPEN  curs1 FOR execute queries.query;
+			FETCH curs1 INTO QueryTotal;
+			EXECUTE ''INSERT INTO daily_stats_data (daily_stats_id, date, value) values ('' 
+					|| queries.id || '','' || quote_literal(TheDate) || '','' || quote_literal(QueryTotal) || '')'';
+			CLOSE curs1;
+		END LOOP;
+		return 0;
+	END
+' LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION Stats_PortCount() returns int8 AS '
+	DECLARE
+		PortCount	int8;
+
+	BEGIN
+		SELECT count(*)
+		  INTO PortCount
+		  FROM ports, element
+		 WHERE element.status = \'A\'
+		   AND ports.element_id = element.id;
+
+		return PortCount;
+	END
+' LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION Stats_PortCountDeleted() returns int8 AS '
+	DECLARE
+		PortCount	int8;
+
+	BEGIN
+		SELECT count(*)
+		  INTO PortCount
+		  FROM ports, element
+		 WHERE element.status = \'D\'
+		   AND ports.element_id = element.id;
+
+		return PortCount;
+	END
+' LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION Stats_PortCountBroken() returns int8 AS '
+	DECLARE
+		PortCount	int8;
+
+	BEGIN
+		SELECT count(*)
+		  INTO PortCount
+		  FROM ports, element
+		 WHERE element.status = \'A\'
+		   AND ports.element_id = element.id
+		   AND ports.broken <> \'\';
+
+		return PortCount;
+	END
+' LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION Stats_PortCountForbidden() returns int8 AS '
+	DECLARE
+		PortCount	int8;
+
+	BEGIN
+		SELECT count(*)
+		  INTO PortCount
+		  FROM ports, element
+		 WHERE element.status = \'A\'
+		   AND ports.element_id = element.id
+		   AND ports.forbidden <> \'\';
+
+		return PortCount;
+	END
+' LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION Stats_PortCountNewInterval(interval) returns int8 AS '
+	DECLARE
+		SinceWhen	ALIAS FOR $1;
+		PortCount	int8;
+
+	BEGIN
+		SELECT count(*)
+		  INTO PortCount
+		  FROM ports, element
+		 WHERE element.status = \'A\'
+		   AND ports.element_id = element.id
+		   AND date_added > now() - SinceWhen;
+
+		return PortCount;
+	END
+' LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION Stats_PortCountNewToday() returns int8 AS '
+	DECLARE
+		PortCount	int8;
+
+	BEGIN
+		SELECT Stats_PortCountNewInterval(interval \'1 day\')
+		  INTO PortCount;
+
+		return PortCount;
+	END
+' LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION Stats_PortCountNewYesterday() returns int8 AS '
+	DECLARE
+		PortCount	int8;
+
+	BEGIN
+		SELECT Stats_PortCountNewInterval(interval \'2 days\')
+		  INTO PortCount;
+
+		return PortCount;
+	END
+' LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION Stats_PortCountNewThisWeek() returns int8 AS '
+	DECLARE
+		PortCount	int8;
+
+	BEGIN
+		SELECT Stats_PortCountNewInterval(interval \'7 days\')
+		  INTO PortCount;
+
+		return PortCount;
+	END
+' LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION Stats_CategoryCount() returns int8 AS '
+	DECLARE
+		CategoryCount	int8;
+
+	BEGIN
+		SELECT count(*)
+		  INTO CategoryCount
+		  FROM categories;
+
+		return CategoryCount;
+	END
+' LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION Stats_CommitCount() returns int8 AS '
+	DECLARE
+		RowCount	int8;
+
+	BEGIN
+		select count(*) 
+		  INTO RowCount
+		  from commit_log;
+
+		return RowCount;
+	END
+' LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION Stats_CommitCountPorts() returns int8 AS '
+	DECLARE
+		RowCount	int8;
+
+	BEGIN
+		select count(distinct commit_log_id) 
+		  INTO RowCount
+		  from commit_log_ports;
+
+		return RowCount;
+	END
+' LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION Stats_CommitLogCount() returns int8 AS '
+	DECLARE
+		RowCount	int8;
+
+	BEGIN
+		select count(*) 
+		  INTO RowCount
+		  from commit_log_ports;
+
+		return RowCount;
+	END
+' LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION Stats_CommitCountDaysPorts() returns int8 AS '
+	DECLARE
+		RowCount	int8;
+
+	BEGIN
+		select count(distinct date_trunc(\'day\', commit_date))
+		  INTO RowCount
+		  from commit_log, commit_log_ports
+		 where commit_log_ports.commit_log_id = commit_log.id;
+
+		return RowCount;
+	END
+' LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION Stats_CommitCountDays() returns int8 AS '
+	DECLARE
+		RowCount	int8;
+
+	BEGIN
+		select count(distinct date_trunc(\'day\', commit_date))
+		  INTO RowCount
+		  from commit_log;
+
+		return RowCount;
+	END
+' LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION Stats_UserCount() returns int8 AS '
+	DECLARE
+		RowCount	int8;
+
+	BEGIN
+		select count(*)
+		  INTO RowCount
+		  from users;
+
+		return RowCount;
+	END
+' LANGUAGE 'plpgsql';
+
+
+
+CREATE OR REPLACE FUNCTION Stats_WatchListCount() returns int8 AS ' 
+	DECLARE
+		RowCount	int8;
+
+	BEGIN
+		select count(*)
+		  INTO RowCount
+		  from watch_list;
+
+		return RowCount;
+	END
+' LANGUAGE 'plpgsql';
+
+
+
+CREATE OR REPLACE FUNCTION Stats_WatchListElementCount() returns int8 AS ' 
+	DECLARE
+		RowCount	int8;
+
+	BEGIN
+		select count(*)
+		  INTO RowCount
+		  from watch_list_element;
+
+		return RowCount;
+	END
+' LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION latest_commits_anchor () RETURNS integer
+    AS '
+  SELECT commit_log_id AS RESULT
+    FROM latest_commits
+ORDER BY commit_log_id
+   LIMIT 1;
+'
+    LANGUAGE sql STABLE;
+
+
+CREATE OR REPLACE FUNCTION latest_commits_ports_anchor () RETURNS integer
+    AS '
+  SELECT commit_log_id AS RESULT
+    FROM latest_commits_ports
+ORDER BY commit_log_id
+   LIMIT 1;
+'
+    LANGUAGE sql STABLE;
+
+CREATE OR REPLACE FUNCTION GetPortID(text, text) returns bigint AS '
+	DECLARE
+		CategoryName ALIAS for $1;
+		PortName     ALIAS for $2;
+		PortID       int8;
+
+	BEGIN
+
+		SELECT ports_all.id
+		  INTO PortID
+		  FROM ports_categories, ports_all, categories, element
+		 WHERE ports_categories.port_id     = ports_all.id
+		   AND ports_categories.category_id = categories.id
+		   AND ports_all.element_id         = element.id
+		   AND ports_all.name               = PortName
+		   AND categories.name              = CategoryName;
+
+		return PortID;
+
+	END
+' LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION CategoryPortCount(text) returns bigint AS '
+	SELECT count(*)
+	  FROM categories, ports_categories, ports, element
+	 WHERE categories.name = $1
+	   AND ports_categories.category_id = categories.id
+	   AND ports_categories.port_id     = ports.id
+	   AND ports.element_id             = element.id
+	   AND element.status               = \'A\';
+' LANGUAGE SQL STABLE;
+
+CREATE OR REPLACE FUNCTION SecurityNoticeCreate(integer, inet, text, text) RETURNS bigint
+    AS '
+   DECLARE
+      UserID       ALIAS for $1;
+      IPAddress    ALIAS for $2;
+      NoticeMsg    ALIAS for $3;
+      MessageID    ALIAS for $4;
+
+      CommitLogID       int8;
+      SecurityNoticeID  int8;
+
+   BEGIN
+      SELECT id, commit_log_id
+        INTO SecurityNoticeID, CommitLogID
+        FROM security_notice
+       WHERE commit_log_id =
+                (SELECT id
+                   FROM commit_log
+                  WHERE message_id = MessageID
+                 );
+
+      IF FOUND THEN
+			RAISE NOTICE '' Updating security notice for % MessageID User % from % said %'', MessageID, UserId, IPAddress, NoticeMsg;
+         UPDATE security_notice
+            SET user_id       = UserID,
+                ip_address    = IPAddress,
+                description   = NoticeMsg
+          WHERE id            = SecurityNoticeID;
+      ELSE
+         SELECT id
+           INTO CommitLogID
+           FROM commit_log
+          WHERE message_id = MessageID;
+
+         IF FOUND THEN
+            -- obtain the next number in the sequence
+            SecurityNoticeID := nextval(\'security_notice_id_seq\');
+
+   			RAISE NOTICE '' Creating security notice % for % MessageID User % from % said %'', SecurityNoticeID, MessageID, UserId, IPAddress, NoticeMsg;
+
+            INSERT INTO security_notice
+                   (id,
+                    user_id,
+                    ip_address,
+                    description,
+                    commit_log_id)
+            VALUES (SecurityNoticeID,
+                    UserID,
+                    IPAddress,
+                    NoticeMsg,
+                    CommitLogID);
+         ELSE
+            RAISE NOTICE ''attempt to insert security notice for unknown message % by User % from % message %'', MessageID, UserID, IPAddress, NoticeMsg;
+         END IF;
+      END IF;
+
+      return SecurityNoticeID;
+
+   END
+'
+    LANGUAGE plpgsql;
+
