@@ -1,5 +1,5 @@
 --
--- $Id: ri.txt,v 1.19 2002-11-25 20:46:58 dan Exp $
+-- $Id: ri.txt,v 1.20 2003-03-04 22:28:47 dan Exp $
 --
 
 CREATE OR REPLACE FUNCTION check_siblings() returns OPAQUE as '
@@ -425,3 +425,24 @@ language 'plpgsql';
 create trigger element_insert after insert on element for each row
 execute procedure element_insert();
 
+
+
+create or replace function categories_insert_update() returns trigger as '
+   BEGIN
+   	IF new.element_id IS NULL AND new.is_primary THEN
+         RAISE EXCEPTION ''if is_primary is set, then element_id must be non-null for a category (name=% description=%'', new.name, new.description;
+      end if;
+
+   	IF new.element_id IS NOT NULL AND NOT new.is_primary THEN
+         RAISE EXCEPTION ''Non primary categories must not have a element_id (name=% description=%'', new.name, new.description;
+      end if;
+
+      RETURN new;
+   END;'
+
+language 'plpgsql';
+
+
+  drop trigger categories_insert on categories;
+create trigger categories_insert after INSERT OR UPDATE on categories for each row
+execute procedure categories_insert_update();
