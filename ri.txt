@@ -1,5 +1,5 @@
 --
--- $Id: ri.txt,v 1.33 2003-09-23 16:40:03 dan Exp $
+-- $Id: ri.txt,v 1.34 2003-12-01 18:32:33 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -278,8 +278,8 @@ EXECUTE PROCEDURE commit_log_delete_check();
 CREATE OR REPLACE FUNCTION user_watch_list_create() RETURNS TRIGGER as '
 begin
 
-	insert into watch_list (user_id, name) 
-                    values (new.id, \'main\');
+	insert into watch_list (user_id, name, in_service) 
+                    values (new.id, \'main\', TRUE);
 
 	insert into user_confirmations (user_id, token)
 					values (new.id, ENCODE(DIGEST(random() * 105311100709, \'md5\'), \'hex\'));
