@@ -1,5 +1,5 @@
 --
--- $Id: datatype.txt,v 1.7 2004-02-22 15:58:29 dan Exp $
+-- $Id: datatype.txt,v 1.8 2004-03-22 19:32:14 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -19,6 +19,7 @@ CREATE TYPE commit_record AS (
 	forbidden            text,
 	broken               text,
 	deprecated           text,
+	ignore               text,
 	element_id           integer,
 	version              text,
 	revision             text,
