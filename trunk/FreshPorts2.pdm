@@ -48,7 +48,7 @@ FreshPorts2
 PostgreSQL 7.x
 PostgreSQL.def
 --\
--- $Id: FreshPorts2.pdm,v 1.75 2003-11-14 04:46:11 dan Exp $\
+-- $Id: FreshPorts2.pdm,v 1.76 2003-11-20 14:20:59 dan Exp $\
 --\
 -- The following options should be used to create the database schema\
 --\
@@ -80,7 +80,7 @@ PostgreSQL.def
 Dan Langille
 
 968886895
-1068785008
+1069259825
 0
 0
 0
@@ -923,32 +923,6 @@ INSERT INTO "system" VALUES (1,'FreeBSD','-03:00');
 0
 0
 3
-1056
-1056
-2
-commit_log_port_elements
-commit_log_port_elements
-
-Identifies port files touches by a commit
-
-0
-0
-0
-commit_log_port
-
-
-
-
-PK_COMMIT_LOG_PORT_ELEMENTS
-
-
-
-0
-0
-0
-0
-0
-3
 2324
 2324
 2
@@ -1660,7 +1634,7 @@ page_load_summary
 0
 0
 0
-
+page_load_summary
 
 
 
@@ -1686,7 +1660,7 @@ page_load_detail
 0
 0
 0
-
+page_load_detail
 
 
 
@@ -5438,129 +5412,6 @@ interval
 0
 0
 time_adjust
-
-3
-0
-0
-0
-0
-0
-0
-3
-1057
-1057
-commit_log_id
-commit_log_id
-
-
-
-1056
-16638
-integer
-0
-0
-0
-0
-
-
-
-
-
-0
-0
-0
-
-
-
-1
-1
-1
-1
-0
-0
-commit_log_id
-
-1
-0
-0
-0
-0
-0
-0
-3
-1058
-1058
-port_id
-port_id
-
-
-
-1056
-16638
-integer
-0
-0
-0
-0
-
-
-
-
-
-0
-0
-0
-
-
-
-1
-1
-1
-1
-0
-0
-port_id
-
-2
-0
-0
-0
-0
-0
-0
-3
-1739
-1739
-commit_log_element_id
-commit_log_element_id
-
-
-
-1056
-16638
-integer
-0
-0
-0
-0
-
-
-
-
-
-0
-0
-0
-
-
-
-1
-1
-1
-1
-0
-0
-commit_log_element_id
 
 3
 0
@@ -10240,7 +10091,7 @@ serial
 1
 0
 0
-
+id
 
 1
 0
@@ -10281,7 +10132,7 @@ date
 1
 0
 0
-
+date
 
 2
 0
@@ -10322,7 +10173,7 @@ text
 1
 0
 0
-
+name
 
 3
 0
@@ -10363,7 +10214,7 @@ integer
 1
 0
 0
-
+users
 
 4
 0
@@ -10404,7 +10255,7 @@ integer
 1
 0
 0
-
+non_users
 
 5
 0
@@ -10445,7 +10296,7 @@ interval
 1
 0
 0
-
+rendering_time_avg
 
 6
 0
@@ -10486,7 +10337,7 @@ serial
 1
 0
 0
-
+id
 
 1
 0
@@ -10527,7 +10378,7 @@ current_timestamp
 1
 0
 0
-
+timestamp
 
 2
 0
@@ -10568,7 +10419,7 @@ text
 1
 0
 0
-
+page_name
 
 3
 0
@@ -10609,7 +10460,7 @@ integer
 1
 0
 0
-
+user_id
 
 4
 0
@@ -10650,7 +10501,7 @@ inet
 1
 0
 0
-
+ip_address
 
 5
 0
@@ -10691,7 +10542,7 @@ text
 1
 0
 0
-
+full_url
 
 6
 0
@@ -10732,7 +10583,7 @@ interval
 1
 0
 0
-
+rendering_time
 
 7
 0
@@ -11085,54 +10936,6 @@ n
 0
 0
 3
-1230
-1230
-fk_commit_log_port_commit_log
-fk_commit_log_port_commit_log
-
-
-
-1
-1056
-1
-2
-2
-1
-1
-0
-0
-fk_commit_log_port_commit_log
-
-0
-n
-0
-0
-0
-3
-1231
-1231
-fk_commit_log_port_port
-fk_commit_log_port_port
-
-
-
-209
-1056
-209
-2
-2
-1
-1
-0
-0
-fk_commit_log_port_port
-
-0
-n
-0
-0
-0
-3
 1572
 1572
 Ref_1572
@@ -11175,30 +10978,6 @@ fk_system_branch_element_revision_element_revision
 0
 Ref_1578
 
-0
-n
-0
-0
-0
-3
-2088
-2088
-Ref_2088
-Ref_2088
-
-
-
-4
-1056
-4
-2
-2
-1
-1
-0
-0
-Ref_2088
-commit_log_port_cle_fk
 0
 n
 0
@@ -12037,7 +11816,7 @@ Ref_20926
 1
 0
 0
-
+Ref_20926
 
 0
 n
@@ -12104,16 +11883,6 @@ COLN2   N10
 193
 186
 1
-1232
-1232
-210
-1058
-1
-1234
-1234
-2
-1057
-1
 1573
 1573
 471
@@ -12133,11 +11902,6 @@ COLN2   N10
 1581
 472
 1577
-1
-2089
-2089
-5
-1739
 1
 2097
 2097
@@ -12406,18 +12170,6 @@ NUMR    N8
 967
 1
 3
-1235
-1235
-1230
-1234
-1
-3
-1233
-1233
-1231
-1232
-1
-3
 1574
 1574
 1572
@@ -12441,12 +12193,6 @@ NUMR    N8
 1578
 1581
 2
-3
-2090
-2090
-2088
-2089
-1
 3
 2098
 2098
@@ -13262,11 +13008,11 @@ PK
 
 0
 3
-1304
-1304
-commit_log_port_PK
-commit_log_port_PK
-1056
+1752
+1752
+system_branch_element_PK
+system_branch_element_PK
+468
 
 
 
@@ -13277,16 +13023,16 @@ commit_log_port_PK
 1
 0
 
-PK
+
 30
 
 0
 3
-1307
-1307
-commit_log_port_FK1
-commit_log_port_FK1
-1056
+1756
+1756
+system_branch_element_FK1
+system_branch_element_FK1
+468
 
 
 
@@ -13297,108 +13043,28 @@ commit_log_port_FK1
 0
 0
 
-FK1230
+
 31
 
 0
 3
-1309
-1309
-commit_log_port_FK2
-commit_log_port_FK2
-1056
+4055
+4055
+commit_log_message_id
+commit_log_message_id
+1
 
 
 
+0
+0
+0
 0
 1
 0
-0
-0
-0
 
-FK1231
+
 32
-
-0
-3
-1744
-1744
-commit_log_port_FK3
-commit_log_port_FK3
-1056
-
-
-
-0
-1
-0
-0
-0
-0
-
-
-33
-
-0
-3
-1752
-1752
-system_branch_element_PK
-system_branch_element_PK
-468
-
-
-
-1
-0
-0
-0
-1
-0
-
-
-34
-
-0
-3
-1756
-1756
-system_branch_element_FK1
-system_branch_element_FK1
-468
-
-
-
-0
-1
-0
-0
-0
-0
-
-
-35
-
-0
-3
-4055
-4055
-commit_log_message_id
-commit_log_message_id
-1
-
-
-
-0
-0
-0
-0
-1
-0
-
-
-36
 
 0
 3
@@ -13418,7 +13084,7 @@ needs_refresh
 0
 
 
-37
+33
 
 0
 3
@@ -13438,7 +13104,7 @@ ports_element_id
 0
 
 
-38
+34
 
 0
 3
@@ -13458,7 +13124,7 @@ ports_check_category_id
 0
 
 
-39
+35
 
 0
 3
@@ -13478,7 +13144,7 @@ daily_stats_data_unique
 0
 
 
-40
+36
 
 0
 3
@@ -13498,7 +13164,7 @@ parent_id
 0
 
 
-41
+37
 
 0
 3
@@ -13518,7 +13184,7 @@ element_pathnames_pathname
 0
 
 
-42
+38
 
 0
 3
@@ -13538,7 +13204,7 @@ tasks_idx
 0
 
 
-43
+39
 
 0
 3
@@ -13558,7 +13224,7 @@ ports_categories_ports_idx
 0
 
 
-44
+40
 
 0
 3
@@ -13578,7 +13244,7 @@ ports_categories_categories_idx
 0
 
 
-45
+41
 
 0
 3
@@ -13598,7 +13264,7 @@ page_loads_date_date
 0
 
 
-46
+42
 
 0
 3
@@ -13618,7 +13284,27 @@ page_loads_date_date2
 0
 
 
-47
+43
+
+0
+3
+21403
+21403
+commit_log_ports_elements_clid
+commit_log_ports_elements_clid
+20390
+
+
+
+0
+0
+0
+0
+0
+0
+
+
+44
 
 0
 /END_TABLE AMCINDX
@@ -13857,48 +13543,6 @@ NUMR    N8
 1
 1
 3
-1305
-1305
-1304
-1057
-1
-1
-3
-1306
-1306
-1304
-1058
-1
-2
-3
-1743
-1743
-1304
-1739
-1
-3
-3
-1308
-1308
-1307
-1057
-1
-1
-3
-1310
-1310
-1309
-1058
-1
-1
-3
-1745
-1745
-1744
-1739
-1
-1
-3
 1753
 1753
 1752
@@ -14038,6 +13682,13 @@ NUMR    N8
 20915
 1
 2
+3
+21404
+21404
+21403
+20391
+1
+1
 /END_TABLE AMCCIDX
 
 /BEGIN_TABLE AMCTRGRI
@@ -15903,6 +15554,14 @@ DeleteIndx
 39
 security_notice,security_notice,security_notice_clid_idx,security_notice_clid_idx
 
+1
+18
+DeleteIndx
+2
+0
+39
+commit_log_port_elements,commit_log_port_elements,commit_log_port_FK2,FK1231
+
 /END_TABLE AMCREDO
 
 /BEGIN_TABLE AMCFONT
@@ -15935,10 +15594,6 @@ Arial
 Comic Sans MS
 10
 0
-7
-Comic Sans MS
-14
-1
 /END_TABLE AMCFONT
 
 /BEGIN_TABLE AMCPENS
@@ -18813,43 +18468,10 @@ than once by the same tag.
 0
 
 3
-3904
-289
-0
-15
-0
-0
-0
-0
-0
-8830
--231149
-22854
--226798
-2
-1
-0
-0
-0
-0
-0
-0
-0
-0
-0
-
-0
-
-
-
-2
-1056
-
-3
 4579
 289
 0
-16
+15
 0
 0
 0
@@ -18882,7 +18504,7 @@ than once by the same tag.
 4701
 289
 0
-17
+16
 0
 0
 0
@@ -18915,7 +18537,7 @@ than once by the same tag.
 5215
 289
 0
-18
+17
 0
 0
 0
@@ -18948,7 +18570,7 @@ than once by the same tag.
 5524
 289
 0
-19
+18
 0
 0
 0
@@ -18981,7 +18603,7 @@ than once by the same tag.
 6156
 289
 0
-20
+19
 0
 0
 0
@@ -19014,7 +18636,7 @@ than once by the same tag.
 6313
 289
 0
-21
+20
 0
 0
 0
@@ -19047,7 +18669,7 @@ than once by the same tag.
 6957
 289
 0
-22
+21
 0
 0
 0
@@ -19080,7 +18702,7 @@ than once by the same tag.
 6632
 291
 0
-23
+22
 0
 0
 0
@@ -19113,7 +18735,7 @@ than once by the same tag.
 6795
 291
 0
-24
+23
 0
 0
 0
@@ -19146,7 +18768,7 @@ than once by the same tag.
 6470
 291
 0
-25
+24
 0
 0
 0
@@ -19179,7 +18801,7 @@ than once by the same tag.
 16002
 16
 0
-26
+25
 0
 0
 0
@@ -19311,7 +18933,7 @@ than once by the same tag.
 7652
 289
 0
-27
+26
 0
 0
 0
@@ -19344,7 +18966,7 @@ than once by the same tag.
 7654
 289
 0
-28
+27
 0
 0
 0
@@ -19377,7 +18999,7 @@ than once by the same tag.
 7666
 289
 0
-29
+28
 0
 0
 0
@@ -19410,7 +19032,7 @@ than once by the same tag.
 7685
 289
 0
-30
+29
 0
 0
 0
@@ -19443,7 +19065,7 @@ than once by the same tag.
 7729
 291
 0
-31
+30
 0
 0
 0
@@ -19476,7 +19098,7 @@ than once by the same tag.
 7931
 289
 0
-32
+31
 0
 0
 0
@@ -19509,7 +19131,7 @@ than once by the same tag.
 911
 6
 0
-33
+32
 0
 0
 0
@@ -19544,7 +19166,7 @@ one entry in this table.
 327
 289
 0
-34
+33
 0
 0
 0
@@ -19577,7 +19199,7 @@ one entry in this table.
 622
 289
 0
-35
+34
 0
 0
 0
@@ -19610,7 +19232,7 @@ one entry in this table.
 4
 289
 0
-36
+35
 0
 0
 0
@@ -19643,7 +19265,7 @@ one entry in this table.
 8598
 289
 0
-37
+36
 0
 0
 0
@@ -19676,7 +19298,7 @@ one entry in this table.
 11996
 289
 0
-38
+37
 0
 0
 0
@@ -19709,7 +19331,7 @@ one entry in this table.
 11997
 289
 0
-39
+38
 0
 0
 0
@@ -19742,7 +19364,7 @@ one entry in this table.
 14172
 289
 0
-40
+39
 0
 0
 0
@@ -19775,7 +19397,7 @@ one entry in this table.
 14385
 289
 0
-41
+40
 0
 0
 0
@@ -19808,7 +19430,7 @@ one entry in this table.
 16242
 289
 0
-42
+41
 0
 0
 0
@@ -19841,7 +19463,7 @@ one entry in this table.
 16469
 289
 0
-43
+42
 0
 0
 0
@@ -19874,7 +19496,7 @@ one entry in this table.
 16972
 289
 0
-44
+43
 0
 0
 0
@@ -19907,7 +19529,7 @@ one entry in this table.
 17215
 289
 0
-45
+44
 0
 0
 0
@@ -19940,7 +19562,7 @@ one entry in this table.
 17739
 289
 0
-46
+45
 0
 0
 0
@@ -19973,15 +19595,15 @@ one entry in this table.
 18243
 289
 0
-47
+46
 0
 0
 0
 0
 0
-11350
+11346
 -248423
-22899
+22895
 -244899
 2
 1
@@ -20006,7 +19628,7 @@ one entry in this table.
 18598
 289
 0
-48
+47
 0
 0
 0
@@ -20039,7 +19661,7 @@ one entry in this table.
 18600
 289
 0
-49
+48
 0
 0
 0
@@ -20072,7 +19694,7 @@ one entry in this table.
 4427
 290
 0
-50
+49
 0
 835
 3
@@ -20105,7 +19727,7 @@ one entry in this table.
 9
 290
 0
-51
+50
 0
 2
 3
@@ -20138,7 +19760,7 @@ one entry in this table.
 49
 290
 0
-52
+51
 0
 4
 7
@@ -20171,7 +19793,7 @@ one entry in this table.
 52
 290
 0
-53
+52
 0
 6
 7
@@ -20204,7 +19826,7 @@ one entry in this table.
 843
 290
 0
-54
+53
 0
 837
 836
@@ -20237,7 +19859,7 @@ one entry in this table.
 888
 290
 0
-55
+54
 0
 4
 835
@@ -20270,7 +19892,7 @@ one entry in this table.
 3087
 290
 0
-56
+55
 0
 925
 837
@@ -20303,7 +19925,7 @@ one entry in this table.
 3205
 290
 0
-57
+56
 0
 5
 6
@@ -20336,7 +19958,7 @@ a7b500003a26fdff5df800003a26fdff
 3482
 290
 0
-58
+57
 0
 320
 5
@@ -20366,76 +19988,10 @@ e7370000723dfdffe7370000061cfdff88a70000061cfdff
 964
 
 3
-4006
-290
-0
-59
-0
-2
-3904
-0
-0
-0
-0
-0
-0
-2
-3
-0
-0
-0
-0
-0
-1
-0
-0
-2
-25cffffff885fcffa0440000f885fcff
-2
-
-
-
-2
-1230
-
-3
-4008
-290
-0
-60
-0
-327
-3904
-0
-0
-0
-0
-0
-0
-2
-3
-0
-0
-0
-0
-0
-1
-0
-0
-2
-187c0000a684fcffcd560000a684fcff
-2
-
-
-
-2
-1231
-
-3
 4435
 290
 0
-61
+58
 0
 835
 836
@@ -20465,43 +20021,10 @@ e7370000723dfdffe7370000061cfdff88a70000061cfdff
 1578
 
 3
-4522
-290
-0
-62
-0
-3
-3904
-0
-0
-0
-0
-0
-0
-2
-3
-0
-0
-0
-0
-0
-1
-0
-0
-2
-593c000020b0fcff593c0000247bfcff
-2
-
-
-
-2
-2088
-
-3
 4540
 290
 0
-63
+59
 0
 925
 2
@@ -20534,7 +20057,7 @@ d1edffff07b0fcffd1edffff577efcff
 4580
 290
 0
-64
+60
 0
 5
 4579
@@ -20567,7 +20090,7 @@ c07900007cf1fcffc079000047e4fcff5998000047e4fcff
 4702
 290
 0
-65
+61
 0
 2
 4701
@@ -20600,7 +20123,7 @@ c07900007cf1fcffc079000047e4fcff5998000047e4fcff
 4704
 290
 0
-66
+62
 0
 327
 4701
@@ -20633,7 +20156,7 @@ c07900007cf1fcffc079000047e4fcff5998000047e4fcff
 5216
 290
 0
-67
+63
 0
 5
 5215
@@ -20666,7 +20189,7 @@ c87100007014fdff85d7ffff7014fdff
 6099
 290
 0
-68
+64
 0
 4
 5524
@@ -20699,7 +20222,7 @@ ade30000aeaffcffade30000bfe3fcff
 6476
 290
 0
-69
+65
 0
 320
 321
@@ -20732,7 +20255,7 @@ ade30000aeaffcffade30000bfe3fcff
 7669
 290
 0
-70
+66
 0
 5
 7666
@@ -20765,7 +20288,7 @@ ade30000aeaffcffade30000bfe3fcff
 7932
 290
 0
-71
+67
 0
 5
 7931
@@ -20798,7 +20321,7 @@ a4bc00000e33fdff251101000e33fdff
 11571
 290
 0
-72
+68
 0
 5
 5524
@@ -20831,7 +20354,7 @@ b3bb0000b712fdff9ee20000b712fdff9ee20000ee01fdff
 11658
 290
 0
-73
+69
 0
 6
 5
@@ -20864,7 +20387,7 @@ acfe0000fd1efdffd1be0000fd1efdff
 11967
 290
 0
-74
+70
 0
 2
 5215
@@ -20897,7 +20420,7 @@ b0c6ffff0f74fcff72b1ffff0f74fcff72b1ffff840cfdff2ad2ffff840cfdff
 11998
 290
 0
-75
+71
 0
 5
 11997
@@ -20930,7 +20453,7 @@ b0c6ffff0f74fcff72b1ffff0f74fcff72b1ffff840cfdff2ad2ffff840cfdff
 12815
 290
 0
-76
+72
 0
 7652
 7654
@@ -20963,7 +20486,7 @@ b0c6ffff0f74fcff72b1ffff0f74fcff72b1ffff840cfdff2ad2ffff840cfdff
 12818
 290
 0
-77
+73
 0
 7685
 7654
@@ -20996,7 +20519,7 @@ b0c6ffff0f74fcff72b1ffff0f74fcff72b1ffff840cfdff2ad2ffff840cfdff
 12829
 290
 0
-78
+74
 0
 7652
 7666
@@ -21029,7 +20552,7 @@ a7cb00008d87fdffa7cb00001865fdffb1ea00001865fdff
 12831
 290
 0
-79
+75
 0
 7685
 7666
@@ -21062,7 +20585,7 @@ a7cb00008d87fdffa7cb00001865fdffb1ea00001865fdff
 2809
 290
 0
-80
+76
 0
 4
 622
@@ -21095,7 +20618,7 @@ a7cb00008d87fdffa7cb00001865fdffb1ea00001865fdff
 2812
 290
 0
-81
+77
 0
 4
 327
@@ -21128,7 +20651,7 @@ a7cb00008d87fdffa7cb00001865fdffb1ea00001865fdff
 2815
 290
 0
-82
+78
 0
 622
 327
@@ -21161,7 +20684,7 @@ a7cb00008d87fdffa7cb00001865fdffb1ea00001865fdff
 2986
 290
 0
-83
+79
 0
 4
 4
@@ -21194,7 +20717,7 @@ a7cb00008d87fdffa7cb00001865fdffb1ea00001865fdff
 8599
 290
 0
-84
+80
 0
 4
 8598
@@ -21227,7 +20750,7 @@ daef000043a4fcffdaef00003786fcff321001003786fcff
 13094
 290
 0
-85
+81
 0
 11996
 11997
@@ -21260,7 +20783,7 @@ e07a0000e67bfdffe07a0000c362fdff
 14390
 290
 0
-86
+82
 0
 327
 14385
@@ -21293,7 +20816,7 @@ c57d00003651fcff235d00003651fcff
 14604
 290
 0
-87
+83
 0
 2
 14385
@@ -21326,7 +20849,7 @@ bf090000896afcffbf0900005257fcfff71b00005257fcff
 16244
 290
 0
-88
+84
 0
 2
 16242
@@ -21359,7 +20882,7 @@ afd0ffff2977fcffafd0fffffc55fcff
 16470
 290
 0
-89
+85
 0
 327
 16469
@@ -21392,7 +20915,7 @@ afd0ffff2977fcffafd0fffffc55fcff
 16472
 290
 0
-90
+86
 0
 622
 16469
@@ -21425,7 +20948,7 @@ f80a01000268fcfff80a0100b64dfcfffdf20000b64dfcff
 16982
 290
 0
-91
+87
 0
 5215
 16972
@@ -21458,7 +20981,7 @@ f80a01000268fcfff80a0100b64dfcfffdf20000b64dfcff
 17216
 290
 0
-92
+88
 0
 2
 17215
@@ -21491,7 +21014,7 @@ f6ebffff3669fcfff6ebffff6c45fcff
 18246
 290
 0
-93
+89
 0
 2
 18243
@@ -21512,7 +21035,7 @@ f6ebffff3669fcfff6ebffff6c45fcff
 0
 0
 3
-7bf6ffff6c6bfcff7bf6ffff9a3efcff003400009a3efcff
+7bf6ffff6c6bfcff7bf6ffff9a3efcfffc3300009a3efcff
 2
 
 
@@ -21524,7 +21047,7 @@ f6ebffff3669fcfff6ebffff6c45fcff
 18248
 290
 0
-94
+90
 0
 4
 18243
@@ -21545,7 +21068,7 @@ f6ebffff3669fcfff6ebffff6c45fcff
 0
 0
 4
-91f00000e1acfcff19330100e1acfcff19330100fa39fcffcd550000fa39fcff
+91f00000e1acfcff19330100e1acfcff19330100fa39fcffc9550000fa39fcff
 2
 
 
@@ -21557,7 +21080,7 @@ f6ebffff3669fcfff6ebffff6c45fcff
 18601
 290
 0
-95
+91
 0
 5
 18600
