@@ -1,5 +1,5 @@
 --
--- $Id: createdb.sql,v 1.48 2003-03-07 20:13:22 dan Exp $
+-- $Id: createdb.sql,v 1.49 2003-03-08 17:38:46 dan Exp $
 --
 -- The following options should be used to create the database schema
 --
@@ -290,6 +290,23 @@ create table watch_list
     primary key (id)
 );
 
+create table security_notice
+(
+    id                      serial                not null,
+    user_id                 integer               not null,
+    date_added              timestamp with time zone not null
+        default current_timestamp,
+    ip_address              inet                  not null,
+    description             text                  not null,
+    commit_log_id           integer               not null,
+    status                  char(1)               not null
+        default 'A'
+        check (status in ('A','I')),
+    primary key (id)
+);
+
+create unique index security_notice_clid_idx on security_notice (commit_log_id);
+
 create table system_branch
 (
     id                      serial                not null,
@@ -381,23 +398,6 @@ create table commit_log_ports
 );
 
 create index needs_refresh on commit_log_ports (needs_refresh);
-
-create table security_notice
-(
-    id                      serial                not null,
-    user_id                 integer               not null,
-    date_added              timestamp with time zone not null
-        default current_timestamp,
-    ip_address              inet                  not null,
-    description             text                  not null,
-    commit_log_id           integer               not null,
-    status                  char(1)               not null
-        default 'A'
-        check (status in ('A','I')),
-    primary key (id)
-);
-
-create unique index security_notice_clid_idx on security_notice (commit_log_id);
 
 create table watch_list_staging
 (
@@ -505,6 +505,22 @@ create index ports_categories_ports_idx on ports_categories (port_id);
 
 create index ports_categories_categories_idx on ports_categories (category_id);
 
+create table security_notice_audit
+(
+    id                      serial                not null,
+    security_notice_id      integer               not null,
+    user_id                 integer               not null,
+    date_added              timestamp with time zone not null
+        default current_timestamp,
+    ip_address              inet                  not null,
+    description             text                  not null,
+    commit_log_id           integer               not null,
+    status                  char(1)               not null
+        default 'A'
+        check (status in ('A','I')),
+    primary key (id)
+);
+
 create view commits_recent as
 select distinct commit_log.id, commit_log.message_id, commit_log.message_date,
 commit_log.message_subject, commit_log.date_added, commit_log.commit_date,
@@ -566,6 +582,14 @@ alter table watch_list
     add foreign key  (user_id)
        references users (id) on update cascade on delete cascade;
 
+alter table security_notice
+    add foreign key  (user_id)
+       references users (id) on update cascade on delete cascade;
+
+alter table security_notice
+    add foreign key  (commit_log_id)
+       references commit_log (id) on update cascade on delete cascade;
+
 alter table system_branch
     add foreign key  (system_id)
        references system (id) on update cascade on delete cascade;
@@ -625,14 +649,6 @@ alter table commit_log_ports
 alter table commit_log_ports
     add foreign key  (port_id)
        references ports (id) on update cascade on delete cascade;
-
-alter table security_notice
-    add foreign key  (user_id)
-       references users (id) on update cascade on delete cascade;
-
-alter table security_notice
-    add foreign key  (commit_log_id)
-       references commit_log (id) on update cascade on delete cascade;
 
 alter table watch_list_staging
     add foreign key  (element_id)
@@ -721,4 +737,8 @@ alter table ports_categories
 alter table ports_categories
     add foreign key  (category_id)
        references categories (id) on update cascade on delete cascade;
+
+alter table security_notice_audit
+    add foreign key  (security_notice_id)
+       references security_notice (id) on update cascade on delete cascade;
 
