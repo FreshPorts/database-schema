@@ -29,6 +29,8 @@ create table commit_log_ports_elements
 );
 
 begin;
+create commit_log_ports_elements;
+
 delete from commit_log_ports_elements;
 
  insert into commit_log_ports_elements
