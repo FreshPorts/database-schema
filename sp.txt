@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.78 2003-09-03 23:19:24 dan Exp $
+-- $Id: sp.txt,v 1.79 2003-09-05 20:24:43 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -868,7 +868,7 @@ CREATE OR REPLACE FUNCTION WatchListDeleteAllElements(int4) RETURNS int4 AS '
 	END
 ' LANGUAGE 'plpgsql';
 
-CREATE OR REPLACE FUNCTION WatchListStagingClear(int4) RETURNS int8 AS '
+CREATE OR REPLACE FUNCTION WatchListStagingClear(int8) RETURNS int8 AS '
 	DECLARE
 		UserID	ALIAS for $1;
 		RowCount	int8;
