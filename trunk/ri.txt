@@ -1,5 +1,5 @@
 --
--- $Id: ri.txt,v 1.25 2003-04-29 16:03:12 dan Exp $
+-- $Id: ri.txt,v 1.26 2003-05-12 02:23:28 dan Exp $
 --
 
 CREATE OR REPLACE FUNCTION check_siblings() RETURNS OPAQUE as '
@@ -591,7 +591,7 @@ CREATE OR REPLACE FUNCTION ports_categories_set() RETURNS TRIGGER AS '
 					                       WHERE port_id     = new.id
 					                         AND category_id = CategoryID);
 
-					RAISE NOTICE '' category % is % with id %'', CategoryCount, Category, CategoryID;
+--					RAISE NOTICE '' category % is % with id %'', CategoryCount, Category, CategoryID;
       		END LOOP;
 			END IF;
 		END IF;
