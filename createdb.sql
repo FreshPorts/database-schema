@@ -1,5 +1,5 @@
 #
-# $Id: createdb.sql,v 1.27 2002-04-12 15:08:18 dan Exp $
+# $Id: createdb.sql,v 1.28 2002-04-24 19:35:52 dan Exp $
 #
 # Things which must be done to make this script work with PostgreSQL
 # 
@@ -113,6 +113,25 @@ create table daily_refreshes
     refresh_date           date                  not null,
     primary key (refresh_date)
 );
+
+  drop sequence graphs_id_seq;
+create sequence graphss_id_seq;
+alter table graphs alter column id set default nextval('graphs_id_seq'::text);
+
+create table graphs
+(
+    id                     int4                  not null,
+    title                  text                  not null,
+    query                  text                  not null,
+    label                  text                          ,
+    is_clickable           boolean                       
+        default 'f',
+    primary key (id)
+);
+
+  drop sequence graphs_id_seq;
+create sequence graphs_id_seq;
+alter table graphs alter column id set default nextval('graphs_id_seq'::text);
 
 create table element
 (
@@ -237,8 +256,6 @@ create table ports
   drop sequence ports_id_seq;
 create sequence ports_id_seq;
 alter table ports alter column id set default nextval('ports_id_seq'::text);
-
-create index ports_element_id on ports (element_id);
 
 create table users
 (
