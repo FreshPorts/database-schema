@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.123 2005-01-06 04:29:20 dan Exp $
+-- $Id: sp.txt,v 1.124 2005-01-12 13:30:14 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -1886,7 +1886,7 @@ CREATE OR REPLACE FUNCTION PortsUpdatingPortsXrefAdd (integer, text) returns int
       select GetPort(p_Port)
         INTO l_PortID;
 
-      RAISE NOTICE '' PortsUpdatingPortsXrefAdd p_PortsUpdatingID=% p_Port=% l_PortID=%'', p_PortsUpdatingID, p_Port, l_PortID;
+--      RAISE NOTICE '' PortsUpdatingPortsXrefAdd p_PortsUpdatingID=% p_Port=% l_PortID=%'', p_PortsUpdatingID, p_Port, l_PortID;
       IF l_PortID IS NOT NULL THEN
 
          INSERT INTO ports_updating_ports_xref(ports_updating_id, port_id)
