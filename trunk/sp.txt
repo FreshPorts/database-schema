@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.97 2004-01-12 21:03:21 dan Exp $
+-- $Id: sp.txt,v 1.98 2004-01-29 15:53:36 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -1809,3 +1809,11 @@ CREATE OR REPLACE FUNCTION PageLoadSummaryUpdate(date) returns int AS '
 
     END;
 '  LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION AnnouncementsGet() RETURNS SETOF text AS '
+   SELECT text
+	  FROM announcements
+	 WHERE start_date <= current_date
+	   AND end_date   >= current_date;
+' LANGUAGE SQL STABLE;
+
