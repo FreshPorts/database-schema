@@ -1,5 +1,5 @@
 --
--- $Id: ri.txt,v 1.14.2.5 2003-03-08 17:33:52 dan Exp $
+-- $Id: ri.txt,v 1.14.2.6 2003-04-10 16:32:09 dan Exp $
 --
 
 CREATE OR REPLACE FUNCTION check_siblings() RETURNS TRIGGER AS '
@@ -377,3 +377,25 @@ CREATE TRIGGER security_notice_audit
     FOR EACH ROW
     EXECUTE PROCEDURE security_notice_audit ();
 
+
+CREATE RULE commit_log_ports_insert AS
+ON INSERT TO commit_log_ports DO
+	INSERT INTO latest_commits_ports (commit_log_id, commit_date) 
+		SELECT new.commit_log_id,
+		       (SELECT commit_log.commit_date
+		          FROM commit_log
+		         WHERE (commit_log.id = new.commit_log_id)
+		       )
+		 WHERE (NOT (EXISTS (SELECT commits_latest_ports.commit_log_id 
+		                       FROM latest_commits_ports commits_latest_ports 
+		                      WHERE (commits_latest_ports.commit_log_id = new.commit_log_id)
+                           )
+                   )
+		        );
+
+
+CREATE RULE commit_log_update AS
+ON UPDATE TO commit_log DO
+UPDATE latest_commits_ports
+   SET commit_date = new.commit_date
+ WHERE (latest_commits_ports.commit_log_id = new.id);
