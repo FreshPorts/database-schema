@@ -1,0 +1,32 @@
+Notes on the database schema.
+
+To alter sequences, see Dictionary->Model Properties->Script.
+
+To generate a database, use the following instructions:
+
+Database->Generate Database
+
+   Ensure 'User-defined type' is unchecked. Otherwise you will 
+   get:
+
+       commit_log_id        T_ID                  not null,
+
+   instead of:
+
+       commit_log_id        int4                  not null,
+
+You also can't name a foreign key in PostgreSQL.  Therefore
+you need to modify this:
+
+alter table commit_log_port
+    add foreign key FK_COMMIT_L_FK_COMMIT_COMMIT_L (commit_log_id)
+       references commit_log (id) on delete cascade;
+
+
+to become this:
+
+alter table commit_log_port
+    add foreign key (commit_log_id)
+       references commit_log (id) on delete cascade;
+
+
