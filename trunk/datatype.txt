@@ -1,5 +1,5 @@
 --
--- $Id: datatype.txt,v 1.3 2003-09-24 18:11:36 dan Exp $
+-- $Id: datatype.txt,v 1.4 2003-09-27 18:42:23 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -39,4 +39,26 @@ CREATE TYPE element_type AS (
 	status     text,
 	iscategory boolean,
 	isport     boolean
+);
+
+
+CREATE TYPE freshports_commit_record AS (
+	port_id            integer,
+	short_description  text,
+	category           text,
+	message_id         text,
+	committer          text,
+	commit_description text,
+	commit_log_id      integer,
+	port               text,
+	commit_date        text,
+	commit_time        text,
+	encoding_losses    boolean,
+	status             character(1),
+	port_version       text,
+	port_revision      text,
+	revision_name      text,
+	change_type        text,
+	pathname           text,
+    is_port            boolean
 );
