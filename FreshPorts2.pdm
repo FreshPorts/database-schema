@@ -48,7 +48,7 @@ FreshPorts2
 PostgreSQL 7.x
 PostgreSQL.def
 --\
--- $Id: FreshPorts2.pdm,v 1.55 2003-01-10 17:14:16 dan Exp $\
+-- $Id: FreshPorts2.pdm,v 1.56 2003-02-17 20:42:17 dan Exp $\
 --\
 -- The following options should be used to create the database schema\
 --\
@@ -80,7 +80,7 @@ PostgreSQL.def
 Dan Langille
 
 968886895
-1042218274
+1042466290
 0
 0
 0
@@ -6008,7 +6008,7 @@ id
 
 
 3363
-83
+0
 serial
 0
 0
@@ -6278,7 +6278,7 @@ char(1)
 1
 0
 0
-
+status
 
 7
 0
@@ -7303,7 +7303,7 @@ int4
 1
 0
 0
-
+security_notice_id
 
 22
 0
@@ -9662,7 +9662,7 @@ id
 
 
 14576
-83
+0
 serial
 0
 0
@@ -10914,7 +10914,7 @@ Ref_15187
 1
 0
 0
-
+Ref_15187
 
 0
 n
@@ -12319,7 +12319,7 @@ security_notice_clid_idx
 
 0
 0
-0
+1
 0
 1
 0
@@ -16378,7 +16378,7 @@ yes
 0
 DataArchitect
 DBOConsUddt
-no
+yes
 287
 2
 0
@@ -17565,10 +17565,10 @@ than once by the same tag.
 0
 0
 0
--23036
--201882
--11412
--193631
+-23044
+-201890
+-11420
+-193639
 2
 1
 0
@@ -17789,7 +17789,7 @@ than once by the same tag.
 3
 5368
 289
-2
+0
 24
 0
 0
@@ -18395,10 +18395,10 @@ table.
 0
 0
 0
-28813
--166822
-36837
--162471
+28812
+-166823
+36836
+-162472
 2
 1
 0
@@ -18428,9 +18428,9 @@ table.
 0
 0
 0
-29500
+29498
 -174183
-35499
+35497
 -170659
 2
 1
@@ -19037,7 +19037,7 @@ fbf4ffff5265fcfffbf4fffff852fcff752e0000f852fcff
 0
 0
 4
-57b30000e433fdff11240000e433fdffe0bbffffe433fdffe0bbffff7406fdff
+57b30000e433fdff11240000e433fdffd8bbffffe433fdffd8bbffff6c06fdff
 2
 
 
@@ -19268,7 +19268,7 @@ c2fe0000041ffdffeeb30000041ffdff
 0
 0
 3
-43e7fffff275fcff32bcfffff275fcff32bcffff1beefcff
+43e7fffff275fcff2abcfffff275fcff2abcffff13eefcff
 2
 
 
@@ -19301,7 +19301,7 @@ c2fe0000041ffdffeeb30000041ffdff
 0
 0
 2
-5a8200000534fdff5a820000485afdff
+588200000534fdff58820000485afdff
 2
 
 
@@ -19631,7 +19631,7 @@ fbe400003e90fcfffbe400002b69fcff860a01002b69fcff
 0
 0
 2
-81800000917afdff818000006561fdff
+7e800000907afdff7e8000006561fdff
 2
 
 
