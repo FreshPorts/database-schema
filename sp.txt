@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.130 2005-01-28 19:55:45 dan Exp $
+-- $Id: sp.txt,v 1.131 2005-02-01 13:57:40 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -1597,6 +1597,8 @@ SELECT SECURITY.commit_log_id,
        SECURITY.status,
        SECURITY.category,
        SECURITY.security_notice_id,
+       SECURITY.vulnerable_current,
+       SECURITY.vulnerable_past,
        W.watch,
        element_pathname(SECURITY.element_id, FALSE) as element_pathname
 FROM (
@@ -1614,11 +1616,16 @@ SELECT LCPPORTS.*,
         CASE when clp_revision IS NULL then ports_revision else clp_revision END AS revision,
         CASE when clp_epoch    IS NULL then ports_epoch    else clp_epoch    END AS epoch
 FROM (
-  SELECT VERSIONS.*, 
+  SELECT VERSIONS_VULN.*, 
         CLP.port_version  AS clp_version,
         CLP.port_revision AS clp_revision,
         CLP.port_epoch    AS clp_epoch,
         CLP.needs_refresh AS needs_refresh
+FROM
+(
+SELECT VERSIONS.*,
+       ports_vulnerable.current AS vulnerable_current,
+       ports_vulnerable.past    AS vulnerable_past
 FROM
 ( 
 SELECT CLPE.*,
@@ -1661,8 +1668,9 @@ SELECT CLPE.*,
 
 ) AS CLPE
            LEFT OUTER JOIN ports P ON CLPE.element_id = P.element_id) AS VERSIONS
-           LEFT OUTER JOIN commit_log_ports CLP ON CLP.commit_log_id = VERSIONS.commit_log_id
-                                     AND VERSIONS.port_id = CLP.port_id
+           LEFT OUTER JOIN ports_vulnerable ON VERSIONS.port_id = ports_vulnerable.port_ID) AS VERSIONS_VULN
+           LEFT OUTER JOIN commit_log_ports CLP ON CLP.commit_log_id = VERSIONS_VULN.commit_log_id
+                                     AND VERSIONS_VULN.port_id = CLP.port_id
                                 AND CLP.commit_log_id > latest_commits_ports_anchor()
 
 
@@ -1724,6 +1732,8 @@ SELECT SECURITY.commit_log_id,
        SECURITY.status,
        SECURITY.category,
        SECURITY.security_notice_id,
+       SECURITY.vulnerable_current,
+       SECURITY.vulnerable_past,
        W.watch,
        element_pathname(SECURITY.element_id, FALSE) as element_pathname
 FROM (
@@ -1741,11 +1751,16 @@ SELECT LCPPORTS.*,
         CASE when clp_revision IS NULL then ports_revision else clp_revision END AS revision,
         CASE when clp_epoch    IS NULL then ports_epoch    else clp_epoch    END AS epoch
 FROM (
-  SELECT VERSIONS.*, 
+  SELECT VERSIONS_VULN.*, 
         CLP.port_version  AS clp_version,
         CLP.port_revision AS clp_revision,
         CLP.port_epoch    AS clp_epoch,
         CLP.needs_refresh AS needs_refresh
+FROM
+(
+SELECT VERSIONS.*,
+       ports_vulnerable.current AS vulnerable_current,
+       ports_vulnerable.past    AS vulnerable_past
 FROM
 ( 
 SELECT CLPE.*,
@@ -1788,8 +1803,9 @@ SELECT CLPE.*,
 
 ) AS CLPE
            LEFT OUTER JOIN ports P ON CLPE.element_id = P.element_id) AS VERSIONS
-           LEFT OUTER JOIN commit_log_ports CLP ON CLP.commit_log_id = VERSIONS.commit_log_id
-                                     AND VERSIONS.port_id = CLP.port_id
+           LEFT OUTER JOIN ports_vulnerable ON VERSIONS.port_id = ports_vulnerable.port_ID) AS VERSIONS_VULN
+           LEFT OUTER JOIN commit_log_ports CLP ON CLP.commit_log_id = VERSIONS_VULN.commit_log_id
+                                     AND VERSIONS_VULN.port_id = CLP.port_id
                                 AND CLP.commit_log_id > latest_commits_ports_anchor()
 
 
@@ -1896,8 +1912,15 @@ SELECT FOURTH1.port_id,
        FOURTH1.deprecated,
        FOURTH1.ignore,
        FOURTH1.broken,
-       FOURTH1.security_notice_id
-FROM(
+       FOURTH1.security_notice_id,
+       FOURTH1.vulnerable_current,
+       FOURTH1.vulnerable_past
+FROM
+(SELECT THIRD1b.*,
+        ports_vulnerable.current AS vulnerable_current,
+        ports_vulnerable.past    AS vulnerable_past
+FROM
+(
 SELECT THIRD1.*,
        CLP.port_version,
        CLP.port_revision,
@@ -1930,9 +1953,9 @@ FROM
                                                   AND SN.security_notice_status_id = \'A\'
   WHERE CL.message_id = $1) AS FIRST1
        LEFT OUTER JOIN ports P ON P.element_id = FIRST1.element_id) AS SECOND1
-
        JOIN element E on SECOND1.element_id = E.id) AS THIRD1
-       LEFT OUTER JOIN commit_log_ports CLP ON THIRD1.port_id = CLP.port_ID AND THIRD1.commit_log_id = CLP.commit_log_id) AS FOURTH1
+       LEFT OUTER JOIN commit_log_ports CLP ON THIRD1.port_id = CLP.port_ID AND THIRD1.commit_log_id = CLP.commit_log_id) AS THIRD1b
+   LEFT OUTER JOIN ports_vulnerable ON THIRD1b.port_id = ports_vulnerable.port_ID) AS FOURTH1
        LEFT OUTER JOIN categories C ON FOURTH1.category_id = C.id
 order by 3, port, pathname
    LIMIT $2
