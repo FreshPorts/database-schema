@@ -7,6 +7,8 @@ to another.
 alter table ports add column no_cdrom   text default null;
 alter table ports add column restricted text default null;
 
+run scripts/Verify/set-restricted-no-cdrom.pl
+
 28 January 2005
 
 add ports_vulnerable
