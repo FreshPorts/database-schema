@@ -48,7 +48,7 @@ FreshPorts2
 Sybase SQL Anywhere 5.5
 sqlany55.def
 #\
-# $Id: FreshPorts2.WAB,v 1.40 2002-06-16 15:29:57 dan Exp $\
+# $Id: FreshPorts2.WAB,v 1.41 2002-06-16 20:42:51 dan Exp $\
 #\
 # Things which must be done to make this script work with PostgreSQL\
 # \

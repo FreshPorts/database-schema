@@ -1,5 +1,5 @@
 #
-# $Id: createdb.sql,v 1.30 2002-06-16 15:29:58 dan Exp $
+# $Id: createdb.sql,v 1.31 2002-06-16 20:42:52 dan Exp $
 #
 # Things which must be done to make this script work with PostgreSQL
 # 
@@ -578,6 +578,14 @@ select ports.*, element.name as name, categories.name as category, element.statu
 from categories, ports, element
 where categories.id = ports.category_id
 and ports.element_id = element.id;
+
+create view report_log_latest as
+select report_log.report_id, report_log.frequency_id, report_frequency.frequency, 
+max(report_log.report_date) AS last_sent
+from report_log, report_frequency
+where ( report_log.frequency_id = report_frequency.id )
+group by report_log.report_id, report_log.frequency_id, report_frequency.frequency;;
+
 
 create view report_log_latest as
 select report_log.frequency_id, report_frequency.frequency, 

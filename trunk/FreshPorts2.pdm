@@ -48,7 +48,7 @@ FreshPorts2
 Sybase SQL Anywhere 5.5
 sqlany55.def
 #\
-# $Id: FreshPorts2.pdm,v 1.44 2002-06-16 15:29:58 dan Exp $\
+# $Id: FreshPorts2.pdm,v 1.45 2002-06-16 20:42:52 dan Exp $\
 #\
 # Things which must be done to make this script work with PostgreSQL\
 # \
@@ -85,7 +85,7 @@ sqlany55.def
 Dan Langille
 
 968886895
-1024239039
+1024253239
 0
 0
 0
@@ -10456,11 +10456,11 @@ report_log_latest
 10814\
 10838\
 10848
-select report_log.frequency_id, report_frequency.frequency, \
+select report_log.report_id, report_log.frequency_id, report_frequency.frequency, \
 max(report_log.report_date) AS last_sent\
 from report_log, report_frequency\
 where ( report_log.frequency_id = report_frequency.id )\
-group by report_log.frequency_id, report_frequency.frequency;
+group by report_log.report_id, report_log.frequency_id, report_frequency.frequency;
 1
 1
 0
@@ -14029,17 +14029,17 @@ than once by the same tag.
 3
 7729
 291
-0
+2
 44
 0
 0
 0
 0
 0
-6173
--97070
-26222
--90121
+6169
+-97560
+26218
+-89636
 2
 6
 0
