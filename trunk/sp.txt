@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.91 2003-10-06 17:10:50 dan Exp $
+-- $Id: sp.txt,v 1.92 2003-11-20 14:19:45 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -1568,8 +1568,9 @@ SELECT CLPE.*,
                    FROM latest_commits_ports
                ORDER BY latest_commits_ports.commit_date DESC
                   LIMIT MaxCommits) AS 
-                  LCP ON commit_log.id = LCP.commit_log_id) AS 
-                  LCPCL JOIN commit_log_ports_elements CLPE on CLPE.commit_log_id = LCPCL.commit_log_id
+                  LCP ON commit_log.id = LCP.commit_log_id) AS LCPCL
+                      JOIN commit_log_ports_elements CLPE on CLPE.commit_log_id = LCPCL.commit_log_id
+                                                         AND CLPE.commit_log_id > latest_commits_ports_anchor()
 
 
 ) AS CLPE
