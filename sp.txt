@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.94 2003-12-31 01:49:52 dan Exp $
+-- $Id: sp.txt,v 1.95 2004-01-02 18:16:47 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -1757,12 +1757,9 @@ CREATE OR REPLACE FUNCTION PortsMovedAdd (text, text, text, text) returns int AS
         INTO l_FromPortID;
 
       if l_FromPortID IS NOT NULL then
-         RAISE NOTICE '' found % with id = %'', p_FromPort, l_FromPortID;
 
          -- obtain the next number in the sequence
          l_PortsMovedID := nextval(''ports_moved_id_seq'');
-
-         RAISE NOTICE '' using nextvalu of %'', l_PortsMovedID;
 
          INSERT INTO ports_moved (id, from_port_id, to_port_id, date, reason)
              VALUES (l_PortsMovedID, l_FromPortID, GetPort(p_ToPort),
