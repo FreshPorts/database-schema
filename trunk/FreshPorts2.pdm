@@ -61,7 +61,7 @@ sqlany55.def
 Dan Langille
 
 968886895
-1014677172
+1014785706
 0
 0
 0
@@ -937,7 +937,7 @@ watch_list_staging
 0
 0
 0
-
+watch_list_staging
 
 
 
@@ -949,28 +949,6 @@ watch_list_staging
 create sequence watch_list_staging_id_seq;\
 \
 alter table watch_list_staging  alter column id set default nextval('watch_list_staging_id_seq'::text);
-0
-3
-5708
-5708
-2
-watch_list_staging_results
-watch_list_staging_results
-
-
-
-0
-0
-0
-
-
-
-
-
-
-
-
-
 0
 /END_TABLE AMCTABL
 
@@ -2276,7 +2254,7 @@ N	nothing in staging list waiting
 1
 0
 0
-
+awaiting_staging
 
 4
 3
@@ -5360,7 +5338,7 @@ int4
 1
 0
 0
-
+id
 
 1
 3
@@ -5395,14 +5373,14 @@ int4
 1
 0
 0
-
+watch_list_id
 
 2
 3
-5706
-5706
-port_name
-port_name
+6041
+6041
+category
+category
 
 
 
@@ -5434,10 +5412,10 @@ text
 
 3
 3
-5723
-5723
-package_name
-package_name
+5706
+5706
+port
+port
 
 
 
@@ -5465,14 +5443,49 @@ text
 1
 0
 0
-
+port_name
 
 4
 3
-5707
-5707
-processed
-processed
+6048
+6048
+item_count
+item_count
+
+
+
+5703
+0
+int4
+4
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+0
+1
+1
+0
+0
+
+
+5
+3
+6033
+6033
+from_pkg_info
+from_pkg_info
 
 
 
@@ -5487,12 +5500,12 @@ boolean
 
 
 
-N
+
 0
 0
 0
-Y	has been processed\
-N	is awaiting processing
+Y	\
+N	
 
 
 0
@@ -5503,16 +5516,52 @@ N	is awaiting processing
 0
 
 
-5
+6
 3
-5709
-5709
-watch_list_staging_id
-watch_list_staging_id
+6032
+6032
+from_watch_list
+from_watch_list
 
 
 
-5708
+5703
+0
+boolean
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+Y	\
+N	
+
+
+0
+0
+1
+1
+0
+0
+
+
+7
+3
+6042
+6042
+element_id
+element_id
+
+
+
+5703
 83
 int4
 4
@@ -5530,42 +5579,7 @@ int4
 
 
 
-1
-1
-1
-1
 0
-0
-
-
-1
-3
-5710
-5710
-element_id
-element_id
-
-
-
-5708
-83
-int4
-4
-0
-0
-0
-
-
-
-
-
-0
-0
-0
-
-
-
-1
 1
 1
 1
@@ -5573,7 +5587,7 @@ int4
 0
 
 
-2
+8
 /END_TABLE AMCCOLN
 
 /BEGIN_TABLE AMCREFR
@@ -6245,21 +6259,21 @@ Ref_5711
 1
 0
 0
-
+Ref_5711
 
 0
 n
 0
 3
-5716
-5716
-Ref_5716
-Ref_5716
+6034
+6034
+Ref_6034
+Ref_6034
 
 
 
+25
 5703
-5708
 2
 2
 1
@@ -6272,15 +6286,15 @@ Ref_5716
 n
 0
 3
-5719
-5719
-Ref_5719
-Ref_5719
+6043
+6043
+Ref_6043
+Ref_6043
 
 
 
 8
-5708
+5703
 2
 2
 1
@@ -6467,15 +6481,15 @@ COLN2   N8
 26
 5704
 1
-5717
-5717
-5705
-5709
+6039
+6039
+26
+5704
 1
-5720
-5720
+6046
+6046
 9
-5710
+6042
 /END_TABLE AMCCCOL
 
 /BEGIN_TABLE AMCCREF
@@ -6685,16 +6699,16 @@ NUMR    N8
 5714
 1
 3
-5718
-5718
-5716
-5717
+6040
+6040
+6034
+6039
 1
 3
-5721
-5721
-5719
-5720
+6047
+6047
+6043
+6046
 1
 /END_TABLE AMCCREF
 
@@ -8346,17 +8360,21 @@ Arial
 MS Sans Serif
 8
 0
-3
-Arial
-8
-8
-4
-Arial
-6
-0
 5
 Comic Sans MS
 14
+1
+6
+Arial
+8
+8
+7
+Arial
+6
+0
+8
+Courier New
+10
 1
 /END_TABLE AMCFONT
 
@@ -9933,7 +9951,7 @@ OLE     BIN
 
 
 
-2
+5858
 22
 
 3
@@ -9946,10 +9964,10 @@ OLE     BIN
 0
 0
 0
-12286
--115756
-23235
--110432
+12035
+-115672
+22984
+-109594
 2
 1
 0
@@ -9966,7 +9984,7 @@ OLE     BIN
 
 
 
-2
+5858
 25
 
 3
@@ -9999,7 +10017,7 @@ OLE     BIN
 
 
 
-2
+5858
 29
 
 3
@@ -10032,7 +10050,7 @@ OLE     BIN
 
 
 
-2
+5858
 192
 
 3
@@ -10065,7 +10083,7 @@ OLE     BIN
 
 
 
-2
+5858
 197
 
 3
@@ -10100,7 +10118,7 @@ Copyright © 2001-2002 DVL Software Limited\
 Wellington, New Zealand  - 23 February 2002
 
 
-2
+5858
 0
 
 3
@@ -10133,7 +10151,7 @@ Wellington, New Zealand  - 23 February 2002
 
 
 
-2
+5858
 467
 
 3
@@ -10166,7 +10184,7 @@ Wellington, New Zealand  - 23 February 2002
 
 
 
-2
+5858
 468
 
 3
@@ -10199,7 +10217,7 @@ Wellington, New Zealand  - 23 February 2002
 
 
 
-2
+5858
 209
 
 3
@@ -10212,10 +10230,10 @@ Wellington, New Zealand  - 23 February 2002
 0
 0
 0
-14412
--153646
-23186
--147347
+11981
+-153563
+20755
+-147264
 2
 1
 0
@@ -10232,7 +10250,7 @@ Wellington, New Zealand  - 23 February 2002
 
 
 
-2
+5858
 304
 
 3
@@ -10265,7 +10283,7 @@ Wellington, New Zealand  - 23 February 2002
 
 
 
-2
+5858
 8
 
 3
@@ -10303,7 +10321,7 @@ one entry in this \
 table.
 
 
-2
+5858
 0
 
 3
@@ -10336,7 +10354,7 @@ table.
 
 
 
-2
+5858
 1
 
 3
@@ -10370,7 +10388,7 @@ Each commit will be \
 stored in this table.
 
 
-2
+5858
 0
 
 3
@@ -10403,7 +10421,7 @@ stored in this table.
 
 
 
-2
+5858
 4
 
 3
@@ -10437,7 +10455,7 @@ each commit modifies \
 one or more files
 
 
-2
+5858
 0
 
 3
@@ -10470,7 +10488,7 @@ one or more files
 
 
 
-2
+5858
 469
 
 3
@@ -10506,7 +10524,7 @@ Sample entries are \
 5.0-CURRENT
 
 
-2
+5858
 0
 
 3
@@ -10541,7 +10559,7 @@ Operating Systems\
 in the same database
 
 
-2
+5858
 0
 
 3
@@ -10574,7 +10592,7 @@ in the same database
 
 
 
-2
+5858
 505
 
 3
@@ -10609,7 +10627,7 @@ same element referred to more \
 than once by the same tag.
 
 
-2
+5858
 0
 
 3
@@ -10642,7 +10660,7 @@ than once by the same tag.
 
 
 
-2
+5858
 1056
 
 3
@@ -10675,7 +10693,7 @@ than once by the same tag.
 
 
 
-2
+5858
 2324
 
 3
@@ -10708,7 +10726,7 @@ than once by the same tag.
 
 
 
-2
+5858
 2836
 
 3
@@ -10741,7 +10759,7 @@ than once by the same tag.
 
 
 
-2
+5858
 3093
 
 3
@@ -10754,10 +10772,10 @@ than once by the same tag.
 0
 0
 0
-38017
--132194
-48366
--128670
+36508
+-131356
+46857
+-127832
 2
 1
 0
@@ -10774,7 +10792,7 @@ than once by the same tag.
 
 
 
-2
+5858
 3094
 
 3
@@ -10807,7 +10825,7 @@ than once by the same tag.
 
 
 
-2
+5858
 3363
 
 3
@@ -10820,10 +10838,10 @@ than once by the same tag.
 0
 0
 0
-26299
--136628
-37173
--133104
+36022
+-136125
+46896
+-132601
 2
 1
 0
@@ -10840,7 +10858,7 @@ than once by the same tag.
 
 
 
-2
+5858
 4526
 
 3
@@ -10853,10 +10871,10 @@ than once by the same tag.
 0
 0
 0
-24620
--157476
-39769
--138502
+31912
+-155884
+47061
+-136910
 2
 1
 0
@@ -10873,7 +10891,7 @@ than once by the same tag.
 
 
 
-2
+5858
 4528
 
 3
@@ -10886,10 +10904,10 @@ than once by the same tag.
 0
 0
 0
-26535
--116773
-36809
--110474
+25211
+-122793
+35560
+-113569
 2
 1
 0
@@ -10906,47 +10924,14 @@ than once by the same tag.
 
 
 
-2
+5858
 5703
-
-3
-5529
-289
-2
-31
-0
-0
-0
-0
-0
-26058
--123423
-37007
--119899
-2
-1
-0
-0
-0
-0
-0
-0
-0
-0
-0
-
-0
-
-
-
-2
-5708
 
 3
 9
 290
 0
-32
+31
 0
 2
 3
@@ -10972,14 +10957,14 @@ than once by the same tag.
 
 
 
-2
+5858
 32
 
 3
 49
 290
 0
-33
+32
 0
 4
 7
@@ -11000,19 +10985,19 @@ than once by the same tag.
 0
 0
 2
-5c420000edf2fdff5c4200000f24feff
+d43a000046f2fdffd43a00006823feff
 2
 
 
 
-2
+5858
 41
 
 3
 52
 290
 0
-34
+33
 0
 6
 7
@@ -11033,19 +11018,19 @@ than once by the same tag.
 0
 0
 2
-924300002450feff924300008428feff
+ea420000883ffeffea4200008428feff
 2
 
 
 
-2
+5858
 44
 
 3
 843
 290
 0
-35
+34
 0
 837
 836
@@ -11071,14 +11056,14 @@ cab1ffffbff5fdffcab1ffff1008fefff6beffff1008feff
 
 
 
-2
+5858
 479
 
 3
 888
 290
 0
-36
+35
 0
 4
 835
@@ -11099,19 +11084,19 @@ cab1ffffbff5fdffcab1ffff1008fefff6beffff1008feff
 0
 0
 3
-3e3600000bf4fdff3e3600004e15feff2d1300004e15feff
+053000005ff4fdff053000004e15feff2d1300004e15feff
 2
 
 
 
-2
+5858
 495
 
 3
 2800
 290
 0
-37
+36
 0
 320
 321
@@ -11137,14 +11122,14 @@ cab1ffffbff5fdffcab1ffff1008fefff6beffff1008feff
 
 
 
-2
+5858
 666
 
 3
 2809
 290
 0
-38
+37
 0
 4
 622
@@ -11165,19 +11150,19 @@ cab1ffffbff5fdffcab1ffff1008fefff6beffff1008feff
 0
 0
 2
-cd4e0000f6e3fdffcd4e000089b3fdff
+e8480000a7e2fdffe848000035b3fdff
 2
 
 
 
-2
+5858
 671
 
 3
 2812
 290
 0
-39
+38
 0
 4
 327
@@ -11198,19 +11183,19 @@ cd4e0000f6e3fdffcd4e000089b3fdff
 0
 0
 3
-533400006ce7fdff5334000069cffdff23f4ffff69cffdff
+6a2f00006ce7fdff6a2f000069cffdff23f4ffff69cffdff
 2
 
 
 
-2
+5858
 674
 
 3
 2815
 290
 0
-40
+39
 0
 622
 327
@@ -11231,19 +11216,19 @@ cd4e0000f6e3fdffcd4e000089b3fdff
 0
 0
 2
-84480000c4acfdff95e8ffffc4acfdff
+5d3e0000d1b2fdffede7ffffd1b2fdff
 2
 
 
 
-2
+5858
 677
 
 3
 2986
 290
 0
-41
+40
 0
 4
 4
@@ -11264,19 +11249,19 @@ cd4e0000f6e3fdffcd4e000089b3fdff
 0
 0
 4
-483300008bf3fdff545b00008bf3fdff545b0000c0e2fdff9d290000c0e2fdff
+443400008bf3fdff545b00008bf3fdff545b0000c0e2fdff9d290000c0e2fdff
 2
 
 
 
-2
+5858
 751
 
 3
 3087
 290
 0
-42
+41
 0
 925
 837
@@ -11302,14 +11287,14 @@ ff9affff56d2fdff4db7ffff56d2fdff4db7ffff18e8fdff
 
 
 
-2
+5858
 821
 
 3
 3205
 290
 0
-43
+42
 0
 5
 6
@@ -11329,20 +11314,20 @@ ff9affff56d2fdff4db7ffff56d2fdff4db7ffff18e8fdff
 1
 0
 0
-3
-cde9ffff2756feff294400002756feff29440000b03dfeff
+2
+600100001150feff8a2f00001150feff
 2
 
 
 
-2
+5858
 893
 
 3
 3482
 290
 0
-44
+43
 0
 320
 5
@@ -11368,14 +11353,14 @@ cde9ffff2756feff294400002756feff29440000b03dfeff
 
 
 
-2
+5858
 964
 
 3
 4006
 290
 0
-45
+44
 0
 2
 3904
@@ -11401,14 +11386,14 @@ cde9ffff2756feff294400002756feff29440000b03dfeff
 
 
 
-2
+5858
 1230
 
 3
 4008
 290
 0
-46
+45
 0
 327
 3904
@@ -11434,14 +11419,14 @@ d8efffff0cb3fdff064cffff0cb3fdff064cfffffd26feff
 
 
 
-2
+5858
 1231
 
 3
 4427
 290
 0
-47
+46
 0
 835
 3
@@ -11467,14 +11452,14 @@ d8efffff0cb3fdff064cffff0cb3fdff064cfffffd26feff
 
 
 
-2
+5858
 1572
 
 3
 4435
 290
 0
-48
+47
 0
 835
 836
@@ -11500,14 +11485,14 @@ d41100009a18feffd41100006202feff1deeffff6202feff
 
 
 
-2
+5858
 1578
 
 3
 4522
 290
 0
-49
+48
 0
 3
 3904
@@ -11533,14 +11518,14 @@ d41100009a18feffd41100006202feff1deeffff6202feff
 
 
 
-2
+5858
 2088
 
 3
 4540
 290
 0
-50
+49
 0
 925
 2
@@ -11566,14 +11551,14 @@ d41100009a18feffd41100006202feff1deeffff6202feff
 
 
 
-2
+5858
 2092
 
 3
 4580
 290
 0
-51
+50
 0
 5
 4579
@@ -11599,14 +11584,14 @@ d41100009a18feffd41100006202feff1deeffff6202feff
 
 
 
-2
+5858
 2328
 
 3
 4702
 290
 0
-52
+51
 0
 2
 4701
@@ -11632,14 +11617,14 @@ d41100009a18feffd41100006202feff1deeffff6202feff
 
 
 
-2
+5858
 2840
 
 3
 4704
 290
 0
-53
+52
 0
 327
 4701
@@ -11665,14 +11650,14 @@ cbdbffff1fbcfdff4678ffff1fbcfdff
 
 
 
-2
+5858
 2841
 
 3
 4839
 290
 0
-54
+53
 0
 4837
 4838
@@ -11693,19 +11678,19 @@ cbdbffff1fbcfdff4678ffff1fbcfdff
 0
 0
 2
-3ea60000c626feff3ea600006703feff
+c0a50000c626feffc0a50000ad06feff
 2
 
 
 
-2
+5858
 3101
 
 3
 4867
 290
 0
-55
+54
 0
 4
 4838
@@ -11726,19 +11711,19 @@ cbdbffff1fbcfdff4678ffff1fbcfdff
 0
 0
 3
-464e000052f5fdff464e00009d03feffdc9800009d03feff
+ed4e0000acf4fdffed4e0000e306fefff7920000e306feff
 2
 
 
 
-2
+5858
 3108
 
 3
 5216
 290
 0
-56
+55
 0
 5
 5215
@@ -11764,14 +11749,14 @@ cbdbffff1fbcfdff4678ffff1fbcfdff
 
 
 
-2
+5858
 3368
 
 3
 5219
 290
 0
-57
+56
 0
 4837
 5215
@@ -11797,14 +11782,14 @@ cbdbffff1fbcfdff4678ffff1fbcfdff
 
 
 
-2
+5858
 3371
 
 3
-5530
+6047
 290
 0
-58
+57
 0
 6
 5524
@@ -11824,56 +11809,23 @@ cbdbffff1fbcfdff4678ffff1fbcfdff
 1
 0
 0
-2
-184e00006243feffd96e00006243feff
+3
+31540000794dfeffb3750000794dfeffb3750000d743feff
 2
 
 
 
-2
-5711
+5858
+6034
 
 3
-5541
+6074
 290
 0
-59
+58
 0
+4
 5524
-5529
-0
-0
-0
-0
-0
-0
-2
-3
-0
-0
-0
-0
-0
-1
-0
-0
-2
-677900003044feff67790000c629feff
-2
-
-
-
-2
-5716
-
-3
-5551
-290
-0
-60
-0
-4
-5529
 0
 0
 0
@@ -11891,13 +11843,13 @@ cbdbffff1fbcfdff4678ffff1fbcfdff
 0
 0
 4
-70470000adf0fdff70470000950ffeff6f790000950ffeff6f790000f220feff
+ac43000093f3fdffac4300004b15feff0f7600004b15feff0f760000f925feff
 2
 
 
 
-2
-5719
+5858
+6043
 
 /END_TABLE AMCSYMB
 
