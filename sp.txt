@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.114 2004-08-11 14:48:07 dan Exp $
+-- $Id: sp.txt,v 1.115 2004-08-23 15:31:40 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -2016,3 +2016,50 @@ CREATE OR REPLACE FUNCTION SetSlavePort(text, text) returns int4 AS '
 ' LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION GetCategoryPortFromLatestLink(text) RETURNS TEXT AS '
+--
+-- This function takes a package name, as taken from LATEST_LINK
+-- and returns the CATEGORY/PORT for that package.
+-- It returns "0" if nothing found.
+-- It returns "-1" if more than one match found. 
+--
+   DECLARE
+      p_PackageName ALIAS FOR $1;
+
+      l_Count       int;
+      l_Category    TEXT;
+      l_Port        TEXT;
+      l_Result      TEXT;
+
+   BEGIN
+      SELECT count(*)
+        INTO l_Count
+        FROM ports_active
+       WHERE latest_link = p_PackageName;
+RAISE NOTICE '' first '';
+      IF l_Count = 1 THEN
+         SELECT category,   name
+           INTO l_Category, l_Port
+           FROM ports_active
+          WHERE latest_link = p_PackageName;
+
+RAISE NOTICE '' second '';
+         l_Result := l_Category || \'/\' || l_Port;
+RAISE NOTICE '' third '';
+
+      ELSE
+         IF l_Count = 0 THEN
+            l_Result := \'0\';
+         ELSE
+            IF l_Count > 1 THEN
+               l_Result := l_Count;
+            END IF;
+        END IF;
+      END IF;
+
+      return l_Result;
+
+RAISE NOTICE '' fourth '';
+
+   END;
+' LANGUAGE plpgsql STABLE;
