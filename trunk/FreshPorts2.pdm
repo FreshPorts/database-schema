@@ -48,7 +48,7 @@ FreshPorts2
 Sybase SQL Anywhere 5.5
 sqlany55.def
 #\
-# $Id: FreshPorts2.pdm,v 1.48 2002-11-25 20:47:14 dan Exp $\
+# $Id: FreshPorts2.pdm,v 1.49 2002-12-03 20:18:24 dan Exp $\
 #\
 # Things which must be done to make this script work with PostgreSQL\
 # \
@@ -85,7 +85,7 @@ sqlany55.def
 Dan Langille
 
 968886895
-1038256984
+1038943156
 0
 0
 0
@@ -3507,7 +3507,7 @@ name
 awaiting_staging
 awaiting_staging
 
-
+I'm not sure this is actually used.  We have watch_list_staging.
 
 25
 0
@@ -9582,8 +9582,8 @@ status
 3
 11728
 11728
-id
-id
+element_id
+element_id
 
 
 
@@ -14757,7 +14757,7 @@ yes
 0
 DataArchitect
 DBOCreaView
-yes
+no
 274
 2
 0
@@ -15252,10 +15252,10 @@ OLE     BIN
 0
 0
 0
-15979
--114128
-26928
--108804
+15676
+-114130
+27225
+-108809
 2
 1
 0
@@ -15285,10 +15285,10 @@ OLE     BIN
 0
 0
 0
-8308
+8232
 -122576
-16407
--119052
+16481
+-119055
 2
 1
 0
@@ -15485,10 +15485,10 @@ Wellington, New Zealand  - 24 November 2002
 0
 0
 0
--10009
--165444
-1615
--144520
+-10312
+-165438
+1912
+-144533
 2
 1
 0
@@ -15584,10 +15584,10 @@ Wellington, New Zealand  - 24 November 2002
 0
 0
 0
-3819
--140385
-11093
--134236
+2492
+-141079
+9766
+-134930
 1
 1
 0
@@ -15789,10 +15789,10 @@ one or more files
 0
 0
 0
--17697
--145813
--9523
--141614
+-17381
+-145560
+-9207
+-141361
 1
 1
 0
@@ -15893,10 +15893,10 @@ in the same database
 0
 0
 0
--12466
--135080
-283
--131856
+-10822
+-132047
+1927
+-128823
 1
 1
 0
@@ -16159,10 +16159,10 @@ than once by the same tag.
 0
 0
 0
-17533
--128115
-27882
--118891
+17232
+-128113
+28181
+-118896
 2
 1
 0
@@ -16713,16 +16713,16 @@ than once by the same tag.
 3
 8598
 289
-2
+0
 46
 0
 0
 0
 0
 0
--8516
+-8522
 -140401
-33
+27
 -136880
 2
 1
@@ -16834,7 +16834,7 @@ ce0200008e17feffce0200001b25feffeca7ffff1b25feff
 0
 0
 2
-9729000012d7fdff972900001323feff
+8629000012d7fdff862900001323feff
 2
 
 
@@ -16867,7 +16867,7 @@ ce0200008e17feffce0200001b25feffeca7ffff1b25feff
 0
 0
 4
-c23e0000304bfeffb02d0000304bfeffb02d00009338feffb02d0000d728feff
+983d00002d4bfeffa32d00002d4bfeffa32d00009138feffa32d0000d628feff
 2
 
 
@@ -16932,8 +16932,8 @@ c23e0000304bfeffb02d0000304bfeffb02d00009338feffb02d0000d728feff
 1
 0
 0
-4
-131c0000dbd7fdff131c0000bdf5fdff64020000bdf5fdff64020000af12feff
+3
+bd22000095d9fdffbd220000af12feff64020000af12feff
 2
 
 
@@ -16999,7 +16999,7 @@ f92c000015cafdfff92c0000678cfdff
 0
 0
 3
-e1200000abd4fdffe120000036b8fdff16f6ffff36b8fdff
+e1200000abd4fdffe12000002eb8fdff69f6ffff2eb8fdff
 2
 
 
@@ -17032,7 +17032,7 @@ e1200000abd4fdffe120000036b8fdff16f6ffff36b8fdff
 0
 0
 3
-cc1c0000828bfdffcc1c000023a6fdff60ddffff23a6fdff
+cc1c0000828bfdffcc1c00001fa6fdff6cdcffff1fa6fdff
 2
 
 
@@ -17131,7 +17131,7 @@ cc1c0000828bfdffcc1c000023a6fdff60ddffff23a6fdff
 0
 0
 2
-62140000a855fefff23e0000a855feff
+62140000a555feffca3d0000a555feff
 2
 
 
@@ -17230,7 +17230,7 @@ cc1c0000828bfdffcc1c000023a6fdff60ddffff23a6fdff
 0
 0
 3
-83edfffff89efdfffb4cfffff89efdfffb4cffff6c1dfeff
+64edfffff69efdfffb4cfffff69efdfffb4cffff6c1dfeff
 2
 
 
@@ -17428,7 +17428,7 @@ f472ffff92e4fdfff472ffff44b4fdff
 0
 0
 2
-c7daffff07a8fdff5b6fffff07a8fdff
+b1d9ffff04a8fdff5b6fffff04a8fdff
 2
 
 
@@ -17593,7 +17593,7 @@ ea3f000078d9fdffea3f0000e306fefff1920000e306feff
 0
 0
 2
-63560000d645feff635600000d2ffeff
+61560000d445feff61560000092ffeff
 2
 
 
@@ -17626,7 +17626,7 @@ ea3f000078d9fdffea3f0000e306fefff1920000e306feff
 0
 0
 3
-5237000093dafdff52370000cd11feff93540000cd11feff
+5237000093dafdff52370000ce11feff55540000ce11feff
 2
 
 
@@ -17923,7 +17923,7 @@ bbf2ffff4d6afeffbbf2ffffab73feff92d7ffffab73feff
 0
 0
 3
-d5210000e7d1fdff6cf1ffffe7d1fdff6cf1ffff7edefdff
+d5210000e7d1fdff66f1ffffe7d1fdff66f1ffff7edefdff
 2
 
 
