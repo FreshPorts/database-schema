@@ -137,7 +137,7 @@ END;
   drop function Element_Add(text, char(1));
 create function Element_Add(text, char(1)) returns int4 AS '
    DECLARE 
-      in_element_pathname ALIAS for $1;
+      in_element_pathname         ALIAS for $1;
       element_directory_file_flag ALIAS for $2;
       Element_ID          int4;
       element_parent_id   int4;
@@ -166,8 +166,8 @@ create function Element_Add(text, char(1)) returns int4 AS '
             element_name     := element_pathname;
             element_pathname := \'\';
          else
-            element_name     := substr(element_pathname,1, position-1);
-            element_pathname := substr(element_pathname,position+1);
+            element_name     := substr(element_pathname, 1, position-1);
+            element_pathname := substr(element_pathname,    position+1);
          end if;
 
          if element_parent_id is null then
@@ -192,8 +192,17 @@ create function Element_Add(text, char(1)) returns int4 AS '
 
             element_id := nextval(\'element_id_seq\');
 
-            insert into element(id, parent_id, directory_file_flag, name) 
-                         values(element_id, element_parent_id, element_directory_file_flag, element_name);
+            -- if we have exhausted the pathname, then we are inserting the final element
+            -- otherwise, we are creating one of the final elements parents...
+            -- set the directory/file flag accordingly.
+
+            if char_length(element_pathname) = 0 then
+               insert into element(id, parent_id, directory_file_flag, name) 
+                            values(element_id, element_parent_id, element_directory_file_flag, element_name);
+            else
+               insert into element(id, parent_id, directory_file_flag, name)
+                            values(element_id, element_parent_id, \'D\', element_name);
+             end if;
          else
             DebugText := DebugText || \'found\';
             if element_pathname = \'\' then
