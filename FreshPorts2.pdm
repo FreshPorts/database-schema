@@ -48,7 +48,7 @@ FreshPorts2
 PostgreSQL 7.x
 PostgreSQL.def
 --\
--- $Id: FreshPorts2.pdm,v 1.78 2003-12-30 14:08:11 dan Exp $\
+-- $Id: FreshPorts2.pdm,v 1.79 2003-12-30 17:33:17 dan Exp $\
 --\
 -- The following options should be used to create the database schema\
 --\
@@ -80,7 +80,7 @@ PostgreSQL.def
 Dan Langille
 
 968886895
-1072793196
+1072805461
 0
 0
 0
@@ -10687,7 +10687,7 @@ integer
 
 0
 1
-0
+1
 1
 0
 0
@@ -10735,6 +10735,88 @@ integer
 to_port_id
 
 3
+0
+-100
+0
+0
+0
+0
+3
+22004
+22004
+date
+date
+
+
+
+21523
+0
+date
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+0
+1
+1
+0
+0
+
+
+4
+0
+-100
+0
+0
+0
+0
+3
+22005
+22005
+reason
+reason
+
+
+
+21523
+84
+text
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+0
+1
+1
+0
+0
+
+
+5
 0
 -100
 0
@@ -11985,7 +12067,7 @@ Ref_21527
 209
 2
 2
-0
+1
 1
 0
 0
@@ -19932,17 +20014,17 @@ one entry in this table.
 3
 18816
 289
-32
+34
 49
 0
 0
 0
 0
 0
-13349
--227438
-22798
--223087
+13345
+-228417
+22794
+-222116
 2
 1
 0
@@ -21406,7 +21488,7 @@ e5840000052ffdff334f0000052ffdff334f00003163fdff
 0
 0
 2
-80780000298cfcff64590000298cfcff
+80780000458bfcff60590000458bfcff
 2
 
 
@@ -21439,7 +21521,7 @@ e5840000052ffdff334f0000052ffdff334f00003163fdff
 0
 0
 3
-b2800000037dfcff01490000037dfcff01490000f289fcff
+b2800000037dfcfffd480000037dfcfffd4800003087fcff
 2
 
 

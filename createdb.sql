@@ -1,5 +1,5 @@
 --
--- $Id: createdb.sql,v 1.61 2003-12-30 14:08:12 dan Exp $
+-- $Id: createdb.sql,v 1.62 2003-12-30 17:33:18 dan Exp $
 --
 -- The following options should be used to create the database schema
 --
@@ -567,8 +567,10 @@ create index page_load_ip_address on page_load_detail (ip_address);
 create table ports_moved
 (
     id                      serial                not null,
-    from_port_id            integer                       ,
+    from_port_id            integer               not null,
     to_port_id              integer                       ,
+    date                    date                  not null,
+    reason                  text                  not null,
     primary key (id)
 );
 
