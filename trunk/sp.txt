@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.99 2004-01-29 23:58:00 dan Exp $
+-- $Id: sp.txt,v 1.100 2004-02-13 15:10:13 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -1411,14 +1411,14 @@ CREATE OR REPLACE FUNCTION CategoryPortCount(text) returns bigint AS '
 	   AND element.status               = \'A\';
 ' LANGUAGE SQL STABLE;
 
-CREATE OR REPLACE FUNCTION SecurityNoticeCreate(integer, inet, text, text) RETURNS bigint
+CREATE OR REPLACE FUNCTION SecurityNoticeCreate(integer, inet, text, text, text) RETURNS bigint
     AS '
    DECLARE
       UserID       ALIAS for $1;
       IPAddress    ALIAS for $2;
       NoticeMsg    ALIAS for $3;
       MessageID    ALIAS for $4;
-
+      p_Status     ALIAS for $5;
       CommitLogID       int8;
       SecurityNoticeID  int8;
 
@@ -1437,7 +1437,8 @@ CREATE OR REPLACE FUNCTION SecurityNoticeCreate(integer, inet, text, text) RETUR
          UPDATE security_notice
             SET user_id       = UserID,
                 ip_address    = IPAddress,
-                description   = NoticeMsg
+                description   = NoticeMsg,
+                status        = p_Status
           WHERE id            = SecurityNoticeID;
       ELSE
          SELECT id
@@ -1456,12 +1457,14 @@ CREATE OR REPLACE FUNCTION SecurityNoticeCreate(integer, inet, text, text) RETUR
                     user_id,
                     ip_address,
                     description,
-                    commit_log_id)
+                    commit_log_id,
+                    status)
             VALUES (SecurityNoticeID,
                     UserID,
                     IPAddress,
                     NoticeMsg,
-                    CommitLogID);
+                    CommitLogID,
+                    p_Status);
          ELSE
             RAISE NOTICE ''attempt to insert security notice for unknown message % by User % from % message %'', MessageID, UserID, IPAddress, NoticeMsg;
          END IF;
