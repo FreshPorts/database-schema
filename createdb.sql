@@ -1,5 +1,5 @@
 --
--- $Id: createdb.sql,v 1.77 2004-09-20 13:11:52 dan Exp $
+-- $Id: createdb.sql,v 1.78 2004-10-21 01:55:55 dan Exp $
 --
 -- The following options should be used to create the database schema
 --
@@ -120,7 +120,7 @@ create table page_load_summary
 
 create unique index page_loads_date_date on page_load_summary (date, page_name);
 
-create table commit_log_port_vxuml
+create table commit_log_port_vuxml
 (
     commit_log_id              integer               not null,
     port_id                    integer               not null,

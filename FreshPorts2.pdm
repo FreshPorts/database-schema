@@ -48,7 +48,7 @@ FreshPorts2
 PostgreSQL 7.x
 PostgreSQL.def
 --\
--- $Id: FreshPorts2.pdm,v 1.96 2004-09-20 13:12:05 dan Exp $\
+-- $Id: FreshPorts2.pdm,v 1.97 2004-10-21 01:55:55 dan Exp $\
 --\
 -- The following options should be used to create the database schema\
 --\
@@ -80,7 +80,7 @@ PostgreSQL.def
 Dan Langille
 
 968886895
-1095683159
+1095685733
 0
 0
 0
@@ -21173,17 +21173,17 @@ OLE     BIN
 3
 749
 6
-0
+2
 6
 0
 0
 0
 0
 0
-49775
--241515
-72049
--237391
+49774
+-241516
+72048
+-237392
 1
 1
 0
@@ -21199,7 +21199,7 @@ OLE     BIN
 0
 FreshPorts 2 - physical database model\
 Copyright © 2001-2004 DVL Software Limited\
-Wellington, New Zealand  - 20 September 2004
+Wellington, New Zealand  - 25 September 2004
 
 
 2
