@@ -606,7 +606,7 @@ CREATE FUNCTION IsLoginValid (text, text ) RETURNS int4 AS '
 
 -- These are mostly for database conversion
   DROP FUNCTION GetPort(text);
-CREATE FUNCTION "getport" (text ) RETURNS int4 AS '
+CREATE FUNCTION GetPort(text) RETURNS int4 AS '
    DECLARE
       category_port ALIAS for $1;  
       pathname         text;
@@ -624,7 +624,6 @@ CREATE FUNCTION "getport" (text ) RETURNS int4 AS '
       return port_id;
    END;
 ' LANGUAGE 'plpgsql';
-
 
   drop function IsPortsTree(text) ;
 create function IsPortsTree(text) returns boolean As '
