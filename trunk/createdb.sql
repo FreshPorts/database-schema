@@ -1,5 +1,5 @@
 --
--- $Id: createdb.sql,v 1.67 2004-02-13 15:43:49 dan Exp $
+-- $Id: createdb.sql,v 1.68 2004-03-22 19:32:14 dan Exp $
 --
 -- The following options should be used to create the database schema
 --
@@ -271,6 +271,8 @@ create table ports
     date_added                 timestamp with time zone         
         default current_timestamp,
     categories                 text                          ,
+    deprecated                 text                          ,
+    ignore                     text                          ,
     primary key (id)
 );
 

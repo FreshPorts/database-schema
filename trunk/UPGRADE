@@ -4,11 +4,12 @@ to another.
 
 Feb 22 2004
 
-Add deprecated to ports.
+Add deprecated, ignore to ports.
 
 begin;
 
 alter table ports add deprecated text;
+alter table ports add ignore     text;
 
 drop view ports_active cascade;
 
@@ -18,6 +19,8 @@ from categories, ports, element
 where element.status = 'A'
 and categories.id = ports.category_id
 and ports.element_id = element.id;
+
+grant select on ports_active to group www;
 
 drop type commit_record cascade;
 \i datatype.txt
