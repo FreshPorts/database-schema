@@ -1,5 +1,5 @@
 --
--- $Id: ri.txt,v 1.14 2002-03-12 19:25:39 dan Exp $
+-- $Id: ri.txt,v 1.14.2.1 2003-03-05 18:44:09 dan Exp $
 --
 
 CREATE OR REPLACE FUNCTION check_siblings() returns OPAQUE as '
@@ -270,3 +270,27 @@ create trigger user_watch_list_create AFTER insert
 on users for
 each row execute procedure user_watch_list_create();
 
+
+
+CREATE FUNCTION categories_insert_update () RETURNS "trigger"
+    AS '
+   BEGIN
+   IF new.element_id IS NULL AND new.is_primary THEN
+         RAISE EXCEPTION ''if is_primary is set, then element_id must be non-null for a category (name=% description=%'', new.name,
+ new.description;
+      end if;
+
+   IF new.element_id IS NOT NULL AND NOT new.is_primary THEN
+         RAISE EXCEPTION ''Non primary categories must not have a element_id (name=% description=%'', new.name, new.description;
+      end if;
+
+      RETURN new;
+   END;'
+LANGUAGE plpgsql;
+
+
+  DROP TRIGGER categories_insert ON categories;
+CREATE TRIGGER categories_insert 
+    AFTER INSERT OR UPDATE ON categories
+    FOR EACH ROW
+    EXECUTE PROCEDURE categories_insert_update ();
