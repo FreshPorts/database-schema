@@ -1,5 +1,5 @@
 --
--- $Id: createdb.sql,v 1.75 2004-09-20 11:45:05 dan Exp $
+-- $Id: createdb.sql,v 1.76 2004-09-20 12:13:12 dan Exp $
 --
 -- The following options should be used to create the database schema
 --
@@ -420,14 +420,6 @@ create table vuxml_affected
     primary key (id)
 );
 
-create table vuxml_names
-(
-    id                         serial                not null,
-    vuxml_affected_id          integer               not null,
-    name                       text                  not null,
-    primary key (id)
-);
-
 create table commit_log_elements
 (
     id                         serial                not null,
@@ -664,7 +656,7 @@ create table commit_log_ports_vuxml
 create table vuxml_ranges
 (
     id                         serial                not null,
-    vuxml_name_id              integer               not null,
+    vuxml_affected_id          integer               not null,
     version1                   text                  not null,
     operator1                  text                  not null,
     version2                   text                          ,
@@ -678,6 +670,14 @@ create table vuxml_references
     vuxml_id                   integer               not null,
     type                       text                  not null,
     reference                  text                  not null,
+    primary key (id)
+);
+
+create table vuxml_names
+(
+    id                         serial                not null,
+    vuxml_affected_id          integer               not null,
+    name                       text                  not null,
     primary key (id)
 );
 
@@ -765,10 +765,6 @@ alter table commit_log
 alter table vuxml_affected
     add foreign key  (vuxml_id)
        references vuxml (id) on update cascade on delete cascade;
-
-alter table vuxml_names
-    add foreign key  (vuxml_affected_id)
-       references vuxml_affected (id) on update cascade on delete cascade;
 
 alter table commit_log_elements
     add foreign key  (commit_log_id)
@@ -951,10 +947,14 @@ alter table commit_log_ports_vuxml
        references commit_log (id) on update cascade on delete cascade;
 
 alter table vuxml_ranges
-    add foreign key  (vuxml_name_id)
-       references vuxml_names (id) on update cascade on delete cascade;
+    add foreign key  (vuxml_affected_id)
+       references vuxml_affected (id) on update cascade on delete cascade;
 
 alter table vuxml_references
     add foreign key  (vuxml_id)
        references vuxml (id) on update cascade on delete cascade;
+
+alter table vuxml_names
+    add foreign key  (vuxml_affected_id)
+       references vuxml_affected (id) on update cascade on delete cascade;
 
