@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.92 2003-11-20 14:19:45 dan Exp $
+-- $Id: sp.txt,v 1.93 2003-11-27 20:15:46 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -1673,7 +1673,8 @@ FROM
         CLE.revision_name  as revision_name,
         CLE.change_type::text    as change_type,
         element_pathname(E.id)   AS pathname,
-        FALSE                    AS is_port
+        FALSE                    AS is_port,
+        NULL::int                AS element_id
   FROM commit_log CL, commit_log_elements CLE, element E
  WHERE CL.message_id  = $1
    AND CL.id          = CLE.commit_log_id
@@ -1704,7 +1705,8 @@ SELECT P.id as port_id,
        NULL::text as revision_name,
        NULL::text as change_type,
        element_pathname(E.id)   AS pathname,
-       TRUE                     AS is_port
+       TRUE                     AS is_port,
+       P.element_id             AS element_id
   FROM commit_log CL, commit_log_ports CLP, ports P, element E, categories C
  WHERE CL.message_id = $1
    AND CL.id         = CLP.commit_log_id
