@@ -1,0 +1,272 @@
+--
+-- $Id: ri.txt,v 1.14 2002-03-12 19:25:39 dan Exp $
+--
+
+CREATE OR REPLACE FUNCTION check_siblings() returns OPAQUE as '
+   declare 
+      ElementCount integer;
+begin
+
+  if new.Parent_ID is null then
+    select count(*) 
+      into ElementCount
+      from element
+     where element.name=new.name
+       and element.Parent_ID is null
+     group by element.name;
+  else
+    select count(*) 
+      into ElementCount
+      from element
+     where element.name=new.name
+       and element.Parent_ID=new.Parent_ID
+     group by element.name;
+  end if;
+
+  if (ElementCount > 1) then
+    RAISE EXCEPTION ''element % cannot be created as it already exists under that parent %'', new.name, new.parent_id;
+  end if;
+  RETURN NEW;
+
+end;
+' LANGUAGE 'plpgsql';
+
+
+  drop trigger check_siblings on element;
+create trigger check_siblings after insert or update 
+on element
+for each row
+execute procedure check_siblings();
+
+
+
+
+
+
+
+
+
+CREATE OR REPLACE FUNCTION on_delete_remove_children() returns OPAQUE as '
+begin
+
+  delete from element 
+   where parent_id=old.id;
+
+  RETURN old;
+end;
+' LANGUAGE 'plpgsql';
+
+  drop trigger on_delete_remove_children on element;
+create trigger on_delete_remove_children before delete 
+on element for each row
+execute procedure on_delete_remove_children();
+
+
+
+CREATE OR REPLACE FUNCTION check_parent() returns OPAQUE as '
+   declare
+      ElementCount int4;
+begin
+   --  message ''check_parent'';
+   if new.parent_id is not null then
+      --    message ''check_parent 2'';
+      select count(*) 
+        into ElementCount
+        from element
+       where element.id = new.parent_id;
+      --    message ''check_parent 3'';
+      if (ElementCount = 0) then
+         -- message ''no such parent '' || NOW(*);
+         RAISE EXCEPTION ''modifications to element % with name=% cannot be completed as the parent % does not exist.'', new.id, new.name, new.parent_id;
+      end if;
+      if new.parent_id = new.id then
+         RAISE EXCEPTION ''modifications to element % with name=% cannot be completed as the an element cannot be a child of itself.'', new.id, new.name, new.parent_id;
+      end if;
+   end if;
+   --    message ''check_parent 4''
+
+   RETURN NEW;
+end;
+' LANGUAGE 'plpgsql';
+
+  drop trigger check_parent on element;
+create trigger check_parent before insert or update
+on element for each row
+execute procedure check_parent();
+
+
+
+CREATE OR REPLACE FUNCTION parent_must_be_directory() returns OPAQUE as '
+   declare
+      ParentType char(1);
+begin
+   --  message ''parent_must_be_directory'';
+
+   if new.Parent_Id is not null then
+      select directory_file_flag 
+        into ParentType
+       from element
+      where element.id = new.parent_id;
+
+      if (ParentType = ''F'') then
+         -- message ''parent cannot be a file '' || NOW(*);
+         RAISE NOTICE ''modifications to element % with name=% required modifying the the parent % from a file to directory.'', new.id, new.name, new.parent_id;
+		UPDATE element
+		   SET directory_file_flag = ''D''
+		 WHERE element.id          = new.parent_id;
+     end if;
+   end if;
+
+   RETURN NEW;
+end;
+' LANGUAGE 'plpgsql';
+
+drop trigger parent_must_be_directory on element;
+create trigger parent_must_be_directory before insert or update
+on element for each row
+execute procedure parent_must_be_directory();
+
+
+
+
+-- the procedure
+CREATE OR REPLACE FUNCTION id_change() returns OPAQUE as '
+begin
+   --  message ''check_siblings 4'';
+   if (new.id <> old.id) then
+      -- message ''change of id not allowed '' || NOW(*);
+      RAISE EXCEPTION ''modifications to element % with name=% cannot be completed as you are not allowed to change id (new value was %).'', old.id, old.name, new.id;
+   end if;
+
+   RETURN NEW;
+end;
+' LANGUAGE 'plpgsql';
+
+-- the trigger
+  drop trigger id_change on element;
+create trigger id_change before update
+on element for each row
+execute procedure id_change();
+
+
+CREATE OR REPLACE FUNCTION version_revision_uniqueness() returns OPAQUE as '
+   declare 
+      ElementID            int4;
+      ExistingRevisionName text;
+begin
+
+   select revision_name
+     into ExistingRevisionName
+     from system_branch_element_revision
+    where system_branch_id = new.system_branch_id
+      and element_id        = new.element_id;
+
+   IF FOUND THEN
+      delete from system_branch_element_revision 
+       where system_branch_id = new.system_branch_id
+         and element_id       = new.element_id;
+   END IF;
+
+   RETURN NEW;
+
+end;
+' LANGUAGE 'plpgsql';
+
+
+
+  drop trigger version_revision_uniqueness on system_branch_element_revision;
+create trigger version_revision_uniqueness before insert or update 
+on system_branch_element_revision
+for each row
+execute procedure version_revision_uniqueness();
+
+
+-- the procedure
+CREATE OR REPLACE FUNCTION element_delete_check() returns OPAQUE as '
+begin
+
+   -- if we are removing an element, make sure we set the
+   -- element status to deleted.
+
+   if (NEW.change_type = \'R\') then
+--      select Element_SetStatus(new.element_id, \'D\');
+      update element
+         set status = \'D\'
+       where id     = NEW.element_id;
+   end if;
+
+   --
+   -- * * * * * * * * * * * * * * * *
+   -- use a different return value if you change this
+   -- function to a BEFORE
+   -- * * * * * * * * * * * * * * * *
+   RETURN NEW;
+end;
+' LANGUAGE 'plpgsql';
+
+
+-- the trigger
+  drop trigger element_delete_check on commit_log_elements;
+create trigger element_delete_check before insert or update
+on commit_log_elements for each row
+execute procedure element_delete_check();
+
+
+
+
+
+
+
+
+
+
+CREATE OR REPLACE FUNCTION commit_log_delete_check() returns OPAQUE as '
+begin
+
+	-- if we are removing a commit_log, make sure we remove
+	-- the commit_log_elements as well
+
+	delete
+      from commit_log_elements
+     where commit_log_id = old.id;
+
+   RETURN OLD;
+end;
+' LANGUAGE 'plpgsql';
+
+
+
+  drop trigger commit_log_delete_check on commit_log;
+create trigger commit_log_delete_check before delete
+on commit_log for each row
+execute procedure commit_log_delete_check();
+
+
+
+
+
+
+
+
+
+CREATE OR REPLACE FUNCTION user_watch_list_create() returns OPAQUE as '
+begin
+
+	insert into watch_list (user_id, name) 
+                    values (new.id, \'main\');
+
+	insert into user_confirmations (user_id, token)
+					values (new.id, ENCODE(DIGEST(random() * 105311100709, \'md5\'), \'hex\'));
+
+   RETURN OLD;
+end;
+' LANGUAGE 'plpgsql';
+
+
+
+-- the trigger
+  drop trigger user_watch_list_create on users; 
+create trigger user_watch_list_create AFTER insert
+on users for
+each row execute procedure user_watch_list_create();
+
