@@ -48,13 +48,14 @@ FreshPorts2
 Sybase SQL Anywhere 5.5
 sqlany55.def
 #\
-# $Id: FreshPorts2.WAB,v 1.34 2002-04-01 20:45:02 dan Exp $\
+# $Id: FreshPorts2.WAB,v 1.35 2002-04-01 20:54:56 dan Exp $\
 #\
 # Things which must be done to make this script work with PostgreSQL\
 # \
 # remove asc from indexes. ' asc);' => ');'\
 # remove quotes from around 'current_timestamp'\
 # remove key names from foreign keys\
+# in ports_active, put quotes around status.\
 #\
 # The following options should be used to create the database schema\
 #\
@@ -83,7 +84,7 @@ sqlany55.def
 Dan Langille
 
 968886895
-1017659901
+1017694130
 0
 0
 0
@@ -1210,7 +1211,7 @@ daily_refreshes
 0
 0
 0
-
+daily_refreshes
 
 
 
@@ -7575,7 +7576,7 @@ date
 1
 0
 0
-
+refresh_date
 
 1
 /END_TABLE AMCCOLN
@@ -11678,7 +11679,7 @@ yes
 0
 WarehouseArchitect
 DBODropView
-yes
+no
 163
 2
 0
@@ -12788,10 +12789,10 @@ Sample entries are \
 0
 0
 0
--30521
--150808
--18747
--147584
+-27078
+-152571
+-15304
+-149347
 1
 1
 0
@@ -12957,10 +12958,10 @@ than once by the same tag.
 0
 0
 0
--42588
--150052
--32539
--143753
+-42168
+-155258
+-32119
+-148959
 2
 1
 0
@@ -14028,7 +14029,7 @@ d11c0000878bfdffd11c000028a6fdff65ddffff28a6fdff
 0
 0
 2
-3672ffff46e6fdff3672ffffa1c8fdff
+0873ffff46e6fdff0873ffff4bb4fdff
 2
 
 
@@ -14060,8 +14061,8 @@ d11c0000878bfdffd11c000028a6fdff65ddffff28a6fdff
 1
 0
 0
-4
-ccdaffff61a8fdffe9acffff61a8fdffe9acffffcfb9fdffb96effffcfb9fdff
+2
+ccdaffff13a8fdff626fffff13a8fdff
 2
 
 
