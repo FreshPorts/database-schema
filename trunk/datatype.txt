@@ -1,5 +1,5 @@
 --
--- $Id: datatype.txt,v 1.13 2004-11-30 12:37:10 dan Exp $
+-- $Id: datatype.txt,v 1.14 2004-12-14 01:09:55 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -89,6 +89,6 @@ CREATE TYPE vuxml_record AS (
 );
 
 CREATE TYPE also_watched_record AS (
-	element_id		integer,
-	url				text
+	element_id			integer,
+	url					text
 );
