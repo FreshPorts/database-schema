@@ -48,7 +48,7 @@ FreshPorts2
 Sybase SQL Anywhere 5.5
 sqlany55.def
 #\
-# $Id: FreshPorts2.pdm,v 1.41 2002-04-24 19:35:52 dan Exp $\
+# $Id: FreshPorts2.pdm,v 1.42 2002-04-24 19:37:38 dan Exp $\
 #\
 # Things which must be done to make this script work with PostgreSQL\
 # \
@@ -11202,10 +11202,10 @@ OLE     BIN
 0
 0
 0
--42614
--165191
--10140
--158400
+-42615
+-165486
+-10141
+-158947
 1
 1
 0
@@ -11221,7 +11221,7 @@ OLE     BIN
 0
 FreshPorts 2 -physical database model\
 Copyright © 2001-2002 DVL Software Limited\
-Wellington, New Zealand  - 1 April 2002
+Wellington, New Zealand  - 24 April 2002
 
 
 2
