@@ -1,6 +1,53 @@
 This file contains notes for upgrading from one database version
 to another.
 
+28 January 2005
+
+add ports_vulnerable
+
+create table ports_vulnerable
+(
+    port_id                    integer               not null,
+    current                    integer               not null
+        default 1,
+    past                       integer               not null
+        default 0,
+    primary key (port_id)
+);
+
+
+alter table ports_vulnerable
+    add foreign key  (port_id)
+       references ports (id) on update restrict on delete cascade;
+
+insert into ports_vulnerable
+SELECT port_id, 0, count(distinct vuxml_id)
+  FROM commit_log_ports_vuxml
+ GROUP BY port_id;
+
+UPDATE ports_vulnerable
+   SET current = temp.current_vuln_count,
+       past    = past - temp.current_vuln_count
+FROM
+
+(select CLPV.port_id, count(distinct vuxml_id) as current_vuln_count
+  from commit_log_ports_vuxml CLPV, commit_log_ports CLP, ports P, ports_vulnerable PV
+ where CLP.commit_log_id = CLPV.commit_log_id
+   and CLPV.port_id      = CLP.port_id
+   and P.id              = CLP.port_id
+   and P.version         = CLP.port_version
+   and P.revision        = CLP.port_revision
+   and CLP.port_epoch    = P.portepoch
+   AND PV.port_id        = P.id
+group by 1
+order by 1, 2) as temp
+
+where ports_vulnerable.port_id = temp.port_id;
+
+
+
+
+
 13 September 2004
 
 Upgrade for:
