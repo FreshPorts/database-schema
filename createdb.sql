@@ -1,5 +1,5 @@
 --
--- $Id: createdb.sql,v 1.68 2004-03-22 19:32:14 dan Exp $
+-- $Id: createdb.sql,v 1.69 2004-06-22 14:59:09 dan Exp $
 --
 -- The following options should be used to create the database schema
 --
@@ -273,6 +273,8 @@ create table ports
     categories                 text                          ,
     deprecated                 text                          ,
     ignore                     text                          ,
+    is_slave_port              text                          ,
+    latest_link                text                          ,
     primary key (id)
 );
 
