@@ -1,5 +1,5 @@
 --
--- $Id: ri.txt,v 1.32 2003-09-09 12:38:52 dan Exp $
+-- $Id: ri.txt,v 1.33 2003-09-23 16:40:03 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -453,7 +453,7 @@ CREATE TRIGGER ports_ports_categories
 
 
 
-CREATE OR REPLACE FUNCTION commit_log_insert () RETURNS "trigger"
+CREATE OR REPLACE FUNCTION commit_log_insert () RETURNS trigger
 AS '
 BEGIN
    INSERT INTO latest_commits (commit_log_id, commit_date) values (new.id,  new.commit_date);
@@ -471,7 +471,7 @@ EXECUTE PROCEDURE commit_log_insert ();
 
 
 
-CREATE OR REPLACE FUNCTION commit_log_update () RETURNS "trigger"
+CREATE OR REPLACE FUNCTION commit_log_update () RETURNS TRIGGER
 AS '
 BEGIN
    UPDATE latest_commits_ports
@@ -494,7 +494,7 @@ EXECUTE PROCEDURE commit_log_update ();
 
 
 
-CREATE OR REPLACE FUNCTION commit_log_ports_insert () RETURNS "trigger"
+CREATE OR REPLACE FUNCTION commit_log_ports_insert () RETURNS TRIGGER
 AS '
 BEGIN
    INSERT INTO latest_commits_ports (commit_log_id, commit_date)
@@ -518,5 +518,4 @@ CREATE TRIGGER commit_log_ports_insert
 AFTER INSERT on commit_log_ports
 FOR EACH ROW
 EXECUTE PROCEDURE commit_log_ports_insert ();
-
 
