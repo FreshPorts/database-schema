@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.37 2002-03-02 21:12:27 dan Exp $
+-- $Id: sp.txt,v 1.38 2002-03-03 00:37:49 dan Exp $
 --
 
   drop function IsDescendantOf (int4 ,int4);
@@ -997,3 +997,54 @@ CREATE FUNCTION WatchListStagingLogWatch(int4, int4) returns int8 AS '
 	END
 ' LANGUAGE 'plpgsql';
 
+
+  DROP FUNCTION PortVerifyBegin();
+CREATE FUNCTION PortVerifyBegin()returns int8 AS '
+	DECLARE
+		RowCount	int8;
+
+	BEGIN
+		UPDATE ports SET found_in_index = FALSE;
+
+		CREATE TEMP TABLE PortsCheck (category_name text, port_name text);
+
+		GET DIAGNOSTICS RowCount = ROW_COUNT;
+
+		RETURN RowCount;
+
+	END
+' LANGUAGE 'plpgsql';
+
+
+
+  DROP FUNCTION PortVerifyAddOne(text, text);
+CREATE FUNCTION PortVerifyAddOne(text, text) returns int8 AS '
+	DECLARE
+		CategoryName	ALIAS for $1;
+		PortName		ALIAS for $2;
+		OID	int8;
+
+	BEGIN
+		INSERT INTO PortsCheck values (CategoryName, PortName);
+
+		GET DIAGNOSTICS OID = RESULT_OID;
+
+		RETURN OID;
+	END
+' LANGUAGE 'plpgsql';
+
+
+  DROP FUNCTION PortsVerifyProcess();
+CREATE FUNCTION PortsVerifyProcess() returns int8 AS '
+	DECLARE
+		UPDATE ports SET found_in_index = TRUE
+		WHERE EXISTS
+			(	SELECT *
+				  FROM categories, element, PortsCheck
+				 WHERE element.name      = PortsCheck.port_name
+				   AND categories.name   = PortsCheck.category_name
+				   AND ports.element_id  = element.id
+				   AND ports.category_id = categories.id);
+
+	END
+' LANGUAGE 'plpgsql';
