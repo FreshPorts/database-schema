@@ -20,6 +20,14 @@ to another.
 
   Populate commit_log_ports_elements:
 
+
+create table commit_log_ports_elements
+(
+    commit_log_id           integer               not null,
+    element_id              integer               not null,
+    primary key (commit_log_id, element_id)
+);
+
 begin;
 delete from commit_log_ports_elements;
 
@@ -43,7 +51,7 @@ commit;
         commit_log_elements.element_id,
         element_pathname(commit_log_elements.element_id)
    INTO MATCHES
-   FROM commit_log_elements
+   FROM commit_log_elements;
 
 
 create index master_commit_log_id  on master (commit_log_id);
