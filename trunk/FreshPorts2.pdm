@@ -48,7 +48,7 @@ FreshPorts2
 PostgreSQL 7.x
 PostgreSQL.def
 --\
--- $Id: FreshPorts2.pdm,v 1.87 2004-03-22 19:32:13 dan Exp $\
+-- $Id: FreshPorts2.pdm,v 1.88 2004-06-22 14:59:09 dan Exp $\
 --\
 -- The following options should be used to create the database schema\
 --\
@@ -80,7 +80,7 @@ PostgreSQL.def
 Dan Langille
 
 968886895
-1079983021
+1087916253
 0
 0
 0
@@ -4912,7 +4912,7 @@ text
 1
 0
 0
-
+deprecated
 
 21
 0
@@ -4953,9 +4953,91 @@ text
 1
 0
 0
-
+ignore
 
 22
+0
+-100
+0
+0
+0
+0
+3
+23746
+23746
+is_slave_port
+is_slave_port
+
+
+
+209
+84
+text
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+0
+0
+1
+0
+0
+is_slave_port
+
+23
+0
+-100
+0
+0
+0
+0
+3
+23747
+23747
+latest_link
+latest_link
+
+
+
+209
+84
+text
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+0
+0
+1
+0
+0
+latest_link
+
+24
 0
 -100
 0
@@ -16401,6 +16483,10 @@ Arial
 Comic Sans MS
 10
 0
+7
+Courier New
+10
+1
 /END_TABLE AMCFONT
 
 /BEGIN_TABLE AMCPENS
@@ -18600,7 +18686,7 @@ OLE     BIN
 
 
 
-2
+20321
 22
 
 3
@@ -18633,7 +18719,7 @@ OLE     BIN
 
 
 
-2
+20321
 25
 
 3
@@ -18666,7 +18752,7 @@ OLE     BIN
 
 
 
-2
+20321
 29
 
 3
@@ -18699,7 +18785,7 @@ OLE     BIN
 
 
 
-2
+20321
 192
 
 3
@@ -18732,7 +18818,7 @@ OLE     BIN
 
 
 
-2
+20321
 197
 
 3
@@ -18745,10 +18831,10 @@ OLE     BIN
 0
 0
 0
-27980
--224010
-51754
--219661
+27104
+-222876
+50878
+-218527
 1
 1
 0
@@ -18764,10 +18850,10 @@ OLE     BIN
 0
 FreshPorts 2 - physical database model\
 Copyright © 2001-2004 DVL Software Limited\
-Wellington, New Zealand  - 22 March 2004
+Wellington, New Zealand  - 22 June 2004
 
 
-2
+20321
 0
 
 3
@@ -18800,7 +18886,7 @@ Wellington, New Zealand  - 22 March 2004
 
 
 
-2
+20321
 467
 
 3
@@ -18833,7 +18919,7 @@ Wellington, New Zealand  - 22 March 2004
 
 
 
-2
+20321
 1
 
 3
@@ -18866,7 +18952,7 @@ Wellington, New Zealand  - 22 March 2004
 
 
 
-2
+20321
 0
 
 3
@@ -18900,7 +18986,7 @@ Each commit will be \
 stored in this table.
 
 
-2
+20321
 0
 
 3
@@ -18933,7 +19019,7 @@ stored in this table.
 
 
 
-2
+20321
 4
 
 3
@@ -18967,7 +19053,7 @@ each commit modifies \
 one or more files
 
 
-2
+20321
 0
 
 3
@@ -19000,7 +19086,7 @@ one or more files
 
 
 
-2
+20321
 0
 
 3
@@ -19033,7 +19119,7 @@ one or more files
 
 
 
-2
+20321
 469
 
 3
@@ -19069,7 +19155,7 @@ Sample entries are \
 5.0-CURRENT
 
 
-2
+20321
 0
 
 3
@@ -19102,7 +19188,7 @@ Sample entries are \
 
 
 
-2
+20321
 0
 
 3
@@ -19137,7 +19223,7 @@ Operating Systems\
 in the same database
 
 
-2
+20321
 0
 
 3
@@ -19170,7 +19256,7 @@ in the same database
 
 
 
-2
+20321
 505
 
 3
@@ -19203,7 +19289,7 @@ in the same database
 
 
 
-2
+20321
 0
 
 3
@@ -19236,7 +19322,7 @@ in the same database
 
 
 
-2
+20321
 468
 
 3
@@ -19271,7 +19357,7 @@ same element referred to more \
 than once by the same tag.
 
 
-2
+20321
 0
 
 3
@@ -19304,7 +19390,7 @@ than once by the same tag.
 
 
 
-2
+20321
 2324
 
 3
@@ -19317,10 +19403,10 @@ than once by the same tag.
 0
 0
 0
-10515
--238384
-21164
--232083
+10514
+-238385
+21163
+-232084
 2
 1
 0
@@ -19337,7 +19423,7 @@ than once by the same tag.
 
 
 
-2
+20321
 2836
 
 3
@@ -19370,7 +19456,7 @@ than once by the same tag.
 
 
 
-2
+20321
 3363
 
 3
@@ -19403,7 +19489,7 @@ than once by the same tag.
 
 
 
-2
+20321
 5703
 
 3
@@ -19436,7 +19522,7 @@ than once by the same tag.
 
 
 
-2
+20321
 6230
 
 3
@@ -19469,7 +19555,7 @@ than once by the same tag.
 
 
 
-2
+20321
 6547
 
 3
@@ -19502,7 +19588,7 @@ than once by the same tag.
 
 
 
-2
+20321
 8543
 
 3
@@ -19515,10 +19601,10 @@ than once by the same tag.
 0
 0
 0
-28515
--115899
-40539
--107975
+28512
+-115902
+40536
+-107978
 2
 7
 0
@@ -19535,7 +19621,7 @@ than once by the same tag.
 
 
 
-2
+20321
 7239
 
 3
@@ -19548,10 +19634,10 @@ than once by the same tag.
 0
 0
 0
-28076
--126385
-43325
--117486
+28071
+-126390
+43320
+-117491
 2
 7
 0
@@ -19568,7 +19654,7 @@ than once by the same tag.
 
 
 
-2
+20321
 7906
 
 3
@@ -19601,7 +19687,7 @@ than once by the same tag.
 
 
 
-2
+20321
 6871
 
 3
@@ -19634,7 +19720,7 @@ than once by the same tag.
 
 
 
-2
+20321
 0
 
 3
@@ -19667,7 +19753,7 @@ than once by the same tag.
 
 
 
-2
+20321
 9430
 
 3
@@ -19700,7 +19786,7 @@ than once by the same tag.
 
 
 
-2
+20321
 10451
 
 3
@@ -19733,7 +19819,7 @@ than once by the same tag.
 
 
 
-2
+20321
 10456
 
 3
@@ -19766,7 +19852,7 @@ than once by the same tag.
 
 
 
-2
+20321
 10812
 
 3
@@ -19799,7 +19885,7 @@ than once by the same tag.
 
 
 
-2
+20321
 10814
 
 3
@@ -19832,7 +19918,7 @@ than once by the same tag.
 
 
 
-2
+20321
 10829
 
 3
@@ -19865,7 +19951,7 @@ than once by the same tag.
 
 
 
-2
+20321
 10838
 
 3
@@ -19898,7 +19984,7 @@ than once by the same tag.
 
 
 
-2
+20321
 10864
 
 3
@@ -19931,7 +20017,7 @@ than once by the same tag.
 
 
 
-2
+20321
 11332
 
 3
@@ -19966,7 +20052,7 @@ the source tree will have exactly\
 one entry in this table.
 
 
-2
+20321
 0
 
 3
@@ -19979,10 +20065,10 @@ one entry in this table.
 0
 0
 0
-30577
--247065
-48801
--224189
+30573
+-248569
+48797
+-223743
 2
 1
 0
@@ -19999,7 +20085,7 @@ one entry in this table.
 
 
 
-2
+20321
 209
 
 3
@@ -20012,10 +20098,10 @@ one entry in this table.
 0
 0
 0
-64463
--236827
-73837
--230526
+65948
+-236740
+75322
+-230439
 2
 1
 0
@@ -20032,7 +20118,7 @@ one entry in this table.
 
 
 
-2
+20321
 304
 
 3
@@ -20065,7 +20151,7 @@ one entry in this table.
 
 
 
-2
+20321
 8
 
 3
@@ -20098,7 +20184,7 @@ one entry in this table.
 
 
 
-2
+20321
 11727
 
 3
@@ -20131,7 +20217,7 @@ one entry in this table.
 
 
 
-2
+20321
 14576
 
 3
@@ -20164,7 +20250,7 @@ one entry in this table.
 
 
 
-2
+20321
 14577
 
 3
@@ -20197,7 +20283,7 @@ one entry in this table.
 
 
 
-2
+20321
 15520
 
 3
@@ -20210,10 +20296,10 @@ one entry in this table.
 0
 0
 0
-7028
--244516
-24652
--239190
+7027
+-244517
+24651
+-239191
 2
 1
 0
@@ -20230,7 +20316,7 @@ one entry in this table.
 
 
 
-2
+20321
 15995
 
 3
@@ -20263,7 +20349,7 @@ one entry in this table.
 
 
 
-2
+20321
 17130
 
 3
@@ -20276,10 +20362,10 @@ one entry in this table.
 0
 0
 0
-53875
--243788
-62874
--240264
+54048
+-245362
+63047
+-241838
 2
 1
 0
@@ -20296,7 +20382,7 @@ one entry in this table.
 
 
 
-2
+20321
 17588
 
 3
@@ -20329,7 +20415,7 @@ one entry in this table.
 
 
 
-2
+20321
 18036
 
 3
@@ -20362,7 +20448,7 @@ one entry in this table.
 
 
 
-2
+20321
 18531
 
 3
@@ -20395,7 +20481,7 @@ one entry in this table.
 
 
 
-2
+20321
 19455
 
 3
@@ -20428,7 +20514,7 @@ one entry in this table.
 
 
 
-2
+20321
 20390
 
 3
@@ -20461,7 +20547,7 @@ one entry in this table.
 
 
 
-2
+20321
 20903
 
 3
@@ -20474,10 +20560,10 @@ one entry in this table.
 0
 0
 0
-13342
--228420
-22791
--222119
+13340
+-228422
+22789
+-222121
 2
 1
 0
@@ -20494,7 +20580,7 @@ one entry in this table.
 
 
 
-2
+20321
 21523
 
 3
@@ -20527,7 +20613,7 @@ one entry in this table.
 
 
 
-2
+20321
 22267
 
 3
@@ -20560,7 +20646,7 @@ one entry in this table.
 
 
 
-2
+20321
 22810
 
 3
@@ -20593,7 +20679,7 @@ one entry in this table.
 
 
 
-2
+20321
 1572
 
 3
@@ -20626,7 +20712,7 @@ one entry in this table.
 
 
 
-2
+20321
 32
 
 3
@@ -20659,7 +20745,7 @@ one entry in this table.
 
 
 
-2
+20321
 41
 
 3
@@ -20692,7 +20778,7 @@ one entry in this table.
 
 
 
-2
+20321
 44
 
 3
@@ -20725,7 +20811,7 @@ one entry in this table.
 
 
 
-2
+20321
 479
 
 3
@@ -20758,7 +20844,7 @@ one entry in this table.
 
 
 
-2
+20321
 495
 
 3
@@ -20791,7 +20877,7 @@ one entry in this table.
 
 
 
-2
+20321
 821
 
 3
@@ -20824,7 +20910,7 @@ a6b500003826fdff5cf800003826fdff
 
 
 
-2
+20321
 893
 
 3
@@ -20857,7 +20943,7 @@ e6370000713dfdffe63700000d23fdfff1a600000d23fdff
 
 
 
-2
+20321
 964
 
 3
@@ -20890,7 +20976,7 @@ e6370000713dfdffe63700000d23fdfff1a600000d23fdff
 
 
 
-2
+20321
 1578
 
 3
@@ -20923,7 +21009,7 @@ e6370000713dfdffe63700000d23fdfff1a600000d23fdff
 
 
 
-2
+20321
 2092
 
 3
@@ -20956,7 +21042,7 @@ bf7900007bf1fcffbf79000047e4fcff5898000047e4fcff
 
 
 
-2
+20321
 2328
 
 3
@@ -20984,12 +21070,12 @@ bf7900007bf1fcffbf79000047e4fcff5898000047e4fcff
 0
 0
 2
-09070000b269fcffdc420000b269fcff
+09070000b169fcffdb420000b169fcff
 2
 
 
 
-2
+20321
 2840
 
 3
@@ -21017,12 +21103,12 @@ bf7900007bf1fcffbf79000047e4fcff5898000047e4fcff
 0
 0
 2
-088200007961fcff603e00007961fcff
+048200002b60fcff5f3e00002b60fcff
 2
 
 
 
-2
+20321
 2841
 
 3
@@ -21055,7 +21141,7 @@ bf7900007bf1fcffbf79000047e4fcff5898000047e4fcff
 
 
 
-2
+20321
 3368
 
 3
@@ -21088,7 +21174,7 @@ abe30000adaffcffabe30000bee3fcff
 
 
 
-2
+20321
 6049
 
 3
@@ -21121,7 +21207,7 @@ abe30000adaffcffabe30000bee3fcff
 
 
 
-2
+20321
 6875
 
 3
@@ -21154,7 +21240,7 @@ abe30000adaffcffabe30000bee3fcff
 
 
 
-2
+20321
 10833
 
 3
@@ -21187,7 +21273,7 @@ a3bc00000c33fdff241101000c33fdff
 
 
 
-2
+20321
 11336
 
 3
@@ -21220,7 +21306,7 @@ b2bb0000b612fdff9de20000b612fdff9de20000ed01fdff
 
 
 
-2
+20321
 12188
 
 3
@@ -21253,7 +21339,7 @@ abfe0000fb1efdffd0be0000fb1efdff
 
 
 
-2
+20321
 13301
 
 3
@@ -21286,7 +21372,7 @@ afc6ffff0e74fcff4babffff0e74fcff4babffff9fe4fcff432400009fe4fcff
 
 
 
-2
+20321
 14563
 
 3
@@ -21319,7 +21405,7 @@ afc6ffff0e74fcff4babffff0e74fcff4babffff9fe4fcff432400009fe4fcff
 
 
 
-2
+20321
 14585
 
 3
@@ -21352,7 +21438,7 @@ afc6ffff0e74fcff4babffff0e74fcff4babffff9fe4fcff432400009fe4fcff
 
 
 
-2
+20321
 14986
 
 3
@@ -21385,7 +21471,7 @@ afc6ffff0e74fcff4babffff0e74fcff4babffff9fe4fcff432400009fe4fcff
 
 
 
-2
+20321
 14989
 
 3
@@ -21418,7 +21504,7 @@ a6cb00008c87fdffa6cb00001765fdffb0ea00001765fdff
 
 
 
-2
+20321
 14998
 
 3
@@ -21451,7 +21537,7 @@ a6cb00008c87fdffa6cb00001765fdffb0ea00001765fdff
 
 
 
-2
+20321
 14999
 
 3
@@ -21479,12 +21565,12 @@ a6cb00008c87fdffa6cb00001765fdffb0ea00001765fdff
 0
 0
 3
-3ee40000fca3fcff3ee400003f79fcff46fc00003f79fcff
+3ee40000fca3fcff3ee400009679fcff130201009679fcff
 2
 
 
 
-2
+20321
 671
 
 3
@@ -21512,12 +21598,12 @@ a6cb00008c87fdffa6cb00001765fdffb0ea00001765fdff
 0
 0
 3
-38da0000f0acfcff38da00007589fcff32a500007589fcff
+38da0000f0acfcff38da0000478afcff2ea50000478afcff
 2
 
 
 
-2
+20321
 674
 
 3
@@ -21545,12 +21631,12 @@ a6cb00008c87fdffa6cb00001765fdffb0ea00001765fdff
 0
 0
 2
-71fd0000ca72fcff83ba0000ca72fcff
+3e0301006672fcff7fba00006672fcff
 2
 
 
 
-2
+20321
 677
 
 3
@@ -21583,7 +21669,7 @@ a6cb00008c87fdffa6cb00001765fdffb0ea00001765fdff
 
 
 
-2
+20321
 751
 
 3
@@ -21616,7 +21702,7 @@ d9ef000042a4fcffd9ef00003786fcff311001003786fcff
 
 
 
-2
+20321
 11730
 
 3
@@ -21649,7 +21735,7 @@ de7a0000e57bfdffde7a0000c362fdff
 
 
 
-2
+20321
 15187
 
 3
@@ -21677,12 +21763,12 @@ de7a0000e57bfdffde7a0000c362fdff
 0
 0
 2
-c07d00002450fcff215d00002450fcff
+bc7d0000184efcff205d0000184efcff
 2
 
 
 
-2
+20321
 16003
 
 3
@@ -21710,12 +21796,12 @@ c07d00002450fcff215d00002450fcff
 0
 0
 3
-be090000886afcffbe0900005057fcfff51b00005057fcff
+be090000886afcffbe0900004f57fcfff41b00004f57fcff
 2
 
 
 
-2
+20321
 16442
 
 3
@@ -21748,7 +21834,7 @@ add0ffff2877fcffadd0fffffc55fcff
 
 
 
-2
+20321
 17133
 
 3
@@ -21776,12 +21862,12 @@ add0ffff2877fcffadd0fffffc55fcff
 0
 0
 2
-ffb90000774cfcff63d50000774cfcff
+4cb900002543fcff10d600002543fcff
 2
 
 
 
-2
+20321
 17591
 
 3
@@ -21809,12 +21895,12 @@ ffb90000774cfcff63d50000774cfcff
 0
 0
 3
-f70a01000168fcfff70a0100b64dfcfffbf20000b64dfcff
+c41001005868fcffc41001009047fcffa8f300009047fcff
 2
 
 
 
-2
+20321
 17592
 
 3
@@ -21847,7 +21933,7 @@ c7280000e6f5fcffc7280000b011fdffb6050000b011fdff
 
 
 
-2
+20321
 18047
 
 3
@@ -21880,7 +21966,7 @@ f4ebffff3569fcfff4ebffff6c45fcff
 
 
 
-2
+20321
 18534
 
 3
@@ -21913,7 +21999,7 @@ f4ebffff3569fcfff4ebffff6c45fcff
 
 
 
-2
+20321
 20397
 
 3
@@ -21946,7 +22032,7 @@ f4ebffff3569fcfff4ebffff6c45fcff
 
 
 
-2
+20321
 20398
 
 3
@@ -21974,12 +22060,12 @@ f4ebffff3569fcfff4ebffff6c45fcff
 0
 0
 2
-7b7800004e8dfcff385800004e8dfcff
+77780000dd8dfcff36580000dd8dfcff
 2
 
 
 
-2
+20321
 21527
 
 3
@@ -22007,12 +22093,12 @@ f4ebffff3569fcfff4ebffff6c45fcff
 0
 0
 3
-ad800000fd7efcff56480000fd7efcff564800002388fcff
+a9800000eb7efcff54480000eb7efcff544800002188fcff
 2
 
 
 
-2
+20321
 21530
 
 3
@@ -22045,7 +22131,7 @@ eb6d0000d835fdff2c500000d835fdff2c5000008d55fdff
 
 
 
-2
+20321
 22282
 
 3
@@ -22078,7 +22164,7 @@ eb6d0000d835fdff2c500000d835fdff2c5000008d55fdff
 
 
 
-2
+20321
 22814
 
 3
@@ -22111,7 +22197,7 @@ eb6d0000d835fdff2c500000d835fdff2c5000008d55fdff
 
 
 
-2
+20321
 22817
 
 /END_TABLE AMCSYMB
