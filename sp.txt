@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.48 2002-04-01 20:45:02 dan Exp $
+-- $Id: sp.txt,v 1.49 2002-04-02 02:59:26 dan Exp $
 --
 
 CREATE OR REPLACE FUNCTION IsDescendantOf (int4 ,int4) returns boolean As '
@@ -977,8 +977,8 @@ CREATE OR REPLACE FUNCTION RecordLastestPortCommits() RETURNS INT4 AS '
 			commits_recent.id																	AS commit_log_id,
 			commits_recent.committer															AS committer,
 			commits_recent.description															AS commit_description,
-			to_char(commits_recent.commit_date + SystemTimeAdjust(), ''DD Mon YYYY'')			AS commit_date,
-			to_char(commits_recent.commit_date + SystemTimeAdjust(), ''HH24:MI'')				AS commit_time,
+			to_char(commits_recent.commit_date - SystemTimeAdjust(), ''DD Mon YYYY'')			AS commit_date,
+			to_char(commits_recent.commit_date - SystemTimeAdjust(), ''HH24:MI'')				AS commit_time,
 			commit_log_ports.port_id															AS port_id,
 			categories.name																		AS category,
 			categories.id																		AS category_id,
@@ -1036,7 +1036,8 @@ CREATE OR REPLACE FUNCTION SystemTimeAdjust() returns interval AS '
 
 		RETURN TimeAdjust;
 	END
-' LANGUAGE 'plpgsql';
+' LANGUAGE 'plpgsql'
+WITH (iscachable);
 
 
 CREATE OR REPLACE FUNCTION DailySummaryDateAdd(date) returns int8 AS '
