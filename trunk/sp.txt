@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.111 2004-06-09 13:16:49 dan Exp $
+-- $Id: sp.txt,v 1.112 2004-06-09 13:28:22 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -1883,22 +1883,30 @@ CREATE OR REPLACE FUNCTION AnnouncementsGet() RETURNS SETOF text AS '
 	   AND end_date   >= current_date;
 ' LANGUAGE SQL STABLE;
 
-CREATE OR REPLACE FUNCTION ClearSlavePort(int) returns int AS '
+CREATE OR REPLACE FUNCTION ClearSlavePort(text) returns int4 AS '
 	DECLARE
-		p_SlavePortID ALIAS FOR $1;
-		p_MasterPort  ALIAS FOR $2;
-
-		l_MasterPortID  int;
+		p_SlaveCategoryPort	ALIAS FOR $1;
+	
+		position			int;
+		l_SlavePortCategory	text;
+		l_SlavePortName		text;
+		l_SlavePortID		int4;
 
 	BEGIN
-		DELETE FROM master_slave
-		WHERE  slave_port_id = p_SlavePortID;
+		position := strpos(p_SlaveCategoryPort, \'/\');
+		l_SlavePortCategory := substr(p_SlaveCategoryPort, 1, position - 1);
+		l_SlavePortName     := substr(p_SlaveCategoryPort, position + 1);
+
+		l_SlavePortID := GetPort(l_SlavePortCategory, l_SlavePortName);
+		
+		DELETE FROM master_slave_ports
+		WHERE  slave_port_id = l_SlavePortID;
 
 		UPDATE ports
 		   SET is_slave_port = FALSE
-		 WHERE id            = p_SlavePortID;
+		 WHERE id            = l_SlavePortID;
 
-		return 0;
+		return l_SlavePortID;
 	END
 ' LANGUAGE plpgsql;
 
@@ -1916,9 +1924,6 @@ CREATE OR REPLACE FUNCTION SetSlavePort(text, text) returns int4 AS '
 
 		l_MasterPortCategory	text;
 		l_MasterPortName		text;
-
-		l_SlavePortCategory		text;
-		l_SlavePortName			text;
 
 		position				int;
 
