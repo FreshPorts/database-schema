@@ -134,6 +134,8 @@ begin
 END;
 '  LANGUAGE 'plpgsql';
 
+
+
   drop function Element_Add(text, char(1));
 create function Element_Add(text, char(1)) returns int4 AS '
    DECLARE 
@@ -148,10 +150,16 @@ create function Element_Add(text, char(1)) returns int4 AS '
       slash               text;
 
    BEGIN
+      -- constants
       slash            := \'/\';
+
+      -- put this into a local variable
       element_pathname := in_element_pathname;
 
-      -- remove leading /
+      -- some debugging
+      --DebugText := \'starting with "\' || element_pathname || \'"\\n\';
+
+      -- remove leading /, if any
       if substr(element_pathname, 1, 1) = slash then
          element_pathname := substr(element_pathname, 2);
       end if;
@@ -161,24 +169,36 @@ create function Element_Add(text, char(1)) returns int4 AS '
 
       /* on error do something here */
       while(char_length(element_pathname) > 0) loop
+
+         -- find the first / in the pathname
          position := strpos(element_pathname, slash);
+
          if position = 0 then
+            -- no more slashes.  so grab the existing pathname as the element name
             element_name     := element_pathname;
             element_pathname := \'\';
          else
+            -- adjust the pathname and element name accordingly
             element_name     := substr(element_pathname, 1, position-1);
             element_pathname := substr(element_pathname,    position+1);
          end if;
 
+         -- get the id for this element.  how we do that depends
+         -- on whether or not this element has a parent.
+
          if element_parent_id is null then
-            DebugText := DebugText || \' element id is null\';
+            --DebugText := DebugText || \' element id is null\\n\';
+
+            -- we have no parent_id yet.  so use the correct SQL
             select id 
               into element_id
               from element 
              where element.name = element_name 
                and parent_id    is null;
          else
-            DebugText := DebugText || \' element id is NOT null\';
+            --DebugText := DebugText || \' element id is NOT null\\n\';
+
+            -- we have a parent_id. so use the correct SQL.
             select id 
               into element_id
               from element 
@@ -186,16 +206,21 @@ create function Element_Add(text, char(1)) returns int4 AS '
                and parent_id    = element_parent_id;
          end if;
 
-         if NOT FOUND then
-            -- not found, we insert
-            -- DebugText := DebugText || \'not found\';
 
+         if NOT FOUND then
+            -- we did not find a parent for that element, so we insert that element
+            --DebugText := DebugText || \'not found\\n\';
+
+            -- obtain the next number in the sequence
             element_id := nextval(\'element_id_seq\');
 
             -- if we have exhausted the pathname, then we are inserting the final element
             -- otherwise, we are creating one of the final elements parents...
             -- set the directory/file flag accordingly.
 
+             --DebugText := DebugText || element_id || \',\';
+             
+             --DebugText := DebugText || element_directory_file_flag || \',\' || element_name;
             if char_length(element_pathname) = 0 then
                insert into element(id, parent_id, directory_file_flag, name) 
                             values(element_id, element_parent_id, element_directory_file_flag, element_name);
@@ -204,7 +229,8 @@ create function Element_Add(text, char(1)) returns int4 AS '
                             values(element_id, element_parent_id, \'D\', element_name);
              end if;
          else
-            DebugText := DebugText || \'found\';
+            --DebugText := DebugText || \'found\\n\';
+            -- we found a parent.
             if element_pathname = \'\' then
               -- element already exists
               Element_ID := 0;
@@ -217,7 +243,6 @@ create function Element_Add(text, char(1)) returns int4 AS '
   return element_id;
 end;
 '  LANGUAGE 'plpgsql';
-
 
 
 
