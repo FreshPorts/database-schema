@@ -88,7 +88,7 @@ begin
 end;
 ' LANGUAGE 'plpgsql';
 
-  drop trigger check_parent on element;
+--  drop trigger check_parent on element;
 
 create trigger check_parent before insert or update
 on element for each row
@@ -122,6 +122,7 @@ end;
 
   drop trigger check_parent on element;
 
+drop trigger parent_must_be_directory on element;
 create trigger parent_must_be_directory before insert or update
 on element for each row
 execute procedure parent_must_be_directory();
