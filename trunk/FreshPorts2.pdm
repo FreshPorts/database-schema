@@ -48,7 +48,7 @@ FreshPorts2
 PostgreSQL 7.x
 PostgreSQL.def
 --\
--- $Id: FreshPorts2.pdm,v 1.80 2004-01-09 19:22:32 dan Exp $\
+-- $Id: FreshPorts2.pdm,v 1.81 2004-01-12 21:02:40 dan Exp $\
 --\
 -- The following options should be used to create the database schema\
 --\
@@ -80,7 +80,7 @@ PostgreSQL.def
 Dan Langille
 
 968886895
-1073674116
+1073675921
 0
 0
 0
