@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.46.2.8 2003-04-16 00:35:28 dan Exp $
+-- $Id: sp.txt,v 1.46.2.9 2003-04-16 02:02:48 dan Exp $
 --
 
 CREATE OR REPLACE FUNCTION IsDescendantOf (int4 ,int4) returns boolean As '
@@ -1001,7 +1001,7 @@ CREATE OR REPLACE FUNCTION PortsVerifyProcess() returns int8 AS '
 ' LANGUAGE 'plpgsql';
 
 
-CREATE OR REPLACE FUNCTION GetPortID(text, text) returns int8 AS '
+CREATE OR REPLACE FUNCTION GetPortID(text, text) returns bigint AS '
 	DECLARE
 		CategoryName ALIAS for $1;
 		PortName     ALIAS for $2;
@@ -1023,30 +1023,6 @@ CREATE OR REPLACE FUNCTION GetPortID(text, text) returns int8 AS '
 	END
 ' LANGUAGE 'plpgsql';
 
-
-CREATE OR REPLACE FUNCTION GetPortID(text, text) RETURNS bigint
-    AS '
-   DECLARE
-      CategoryName ALIAS for $1;
-      PortName     ALIAS for $2;
-      PortID       int8;
-
-   BEGIN
-
-      SELECT ports_all.id
-        INTO PortID
-        FROM ports_categories, ports_all, categories, element
-       WHERE ports_categories.port_id     = ports_all.id
-         AND ports_categories.category_id = categories.id
-         AND ports_all.element_id         = element.id
-         AND ports_all.name               = PortName
-         AND categories.name              = CategoryName;
-
-      return PortID;
-
-   END
-'
-    LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION CategoryPortCount(text) returns bigint AS '
 	SELECT count(*)
