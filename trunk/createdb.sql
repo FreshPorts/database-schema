@@ -1,5 +1,5 @@
 --
--- $Id: createdb.sql,v 1.70 2004-08-02 01:14:37 dan Exp $
+-- $Id: createdb.sql,v 1.71 2004-08-27 14:48:36 dan Exp $
 --
 -- The following options should be used to create the database schema
 --
@@ -119,6 +119,14 @@ create table page_load_summary
 );
 
 create unique index page_loads_date_date on page_load_summary (date, page_name);
+
+create table commit_log_port_vxuml
+(
+    commit_log_id              integer               not null,
+    port_id                    integer               not null,
+    vuxml_id                   integer               not null,
+    primary key (commit_log_id, port_id)
+);
 
 create table element
 (
@@ -241,6 +249,19 @@ create table ports_updating
     primary key (id)
 );
 
+create table vuxml
+(
+    id                         serial                not null,
+    vid                        text                  not null,
+    topic                      text                  not null,
+    description                text                  not null,
+    date_discovery             text                          ,
+    date_entry                 text                          ,
+    date_modified              text                          ,
+    status                     char(1)               not null,
+    primary key (id)
+);
+
 create table element_revision
 (
     element_id                 integer               not null,
@@ -285,6 +306,9 @@ create table ports
     ignore                     text                          ,
     is_slave_port              text                          ,
     latest_link                text                          ,
+    no_latest_link             text                          ,
+    no_package                 text                          ,
+    pkgname                    text                          ,
     primary key (id)
 );
 
@@ -386,6 +410,22 @@ create index commit_log_commit_date on commit_log (commit_date);
 
 create unique index commit_log_message_id on commit_log (message_id);
 
+create table vuxml_affected
+(
+    id                         serial                not null,
+    vuxml_id                   integer               not null,
+    type                       text                  not null,
+    primary key (id)
+);
+
+create table vuxml_names
+(
+    id                         serial                not null,
+    vuxml_affected_id          integer               not null,
+    name                       text                  not null,
+    primary key (id)
+);
+
 create table commit_log_elements
 (
     id                         serial                not null,
@@ -437,6 +477,7 @@ create table commit_log_ports
     needs_refresh              smallint              not null,
     port_version               text                          ,
     port_revision              text                          ,
+    port_epoch                 text                          ,
     primary key (commit_log_id, port_id)
 );
 
@@ -609,6 +650,35 @@ create table ports_updating_ports_xref
     port_id                    integer               not null
 );
 
+create table commit_log_ports_vuxml
+(
+    id                         serial                not null,
+    commit_log_id              integer               not null,
+    port_id                    integer               not null,
+    vuxml_id                   integer               not null,
+    primary key (id)
+);
+
+create table vuxml_ranges
+(
+    id                         serial                not null,
+    vuxml_name_id              integer               not null,
+    range_operator_start       text                          ,
+    range_operator_end         text                          ,
+    range_version_start        text                          ,
+    range_version_end          text                          ,
+    primary key (id)
+);
+
+create table vuxml_references
+(
+    id                         serial                not null,
+    vuxml_id                   integer               not null,
+    type                       text                  not null,
+    reference                  text                  not null,
+    primary key (id)
+);
+
 create view commits_recent as
 select distinct commit_log.id, commit_log.message_id, commit_log.message_date,
 commit_log.message_subject, commit_log.date_added, commit_log.commit_date,
@@ -689,6 +759,14 @@ alter table system_branch
 alter table commit_log
     add foreign key  (system_id)
        references system (id) on update cascade on delete cascade;
+
+alter table vuxml_affected
+    add foreign key  (vuxml_id)
+       references vuxml (id) on update cascade on delete cascade;
+
+alter table vuxml_names
+    add foreign key  (vuxml_affected_id)
+       references vuxml_affected (id) on update cascade on delete cascade;
 
 alter table commit_log_elements
     add foreign key  (commit_log_id)
@@ -857,4 +935,24 @@ alter table ports_updating_ports_xref
 alter table ports_updating_ports_xref
     add foreign key  (ports_updating_id)
        references ports_updating (id) on update cascade on delete cascade;
+
+alter table commit_log_ports_vuxml
+    add foreign key  (vuxml_id)
+       references vuxml (id) on update cascade on delete cascade;
+
+alter table commit_log_ports_vuxml
+    add foreign key  (port_id)
+       references ports (id) on update cascade on delete cascade;
+
+alter table commit_log_ports_vuxml
+    add foreign key  (commit_log_id)
+       references commit_log (id) on update cascade on delete cascade;
+
+alter table vuxml_ranges
+    add foreign key  (vuxml_name_id)
+       references vuxml_names (id) on update cascade on delete cascade;
+
+alter table vuxml_references
+    add foreign key  (vuxml_id)
+       references vuxml (id) on update cascade on delete cascade;
 
