@@ -1,5 +1,5 @@
 --
--- $Id: createdb.sql,v 1.79 2004-12-14 01:10:47 dan Exp $
+-- $Id: createdb.sql,v 1.80 2005-01-26 14:39:20 dan Exp $
 --
 -- The following options should be used to create the database schema
 --
@@ -106,8 +106,7 @@ create table announcements
 create table page_load_summary
 (
     id                         serial                not null,
-    timestamp                  timestamp without time zone not null
-        default CurrentTimestampUTC(),
+    date                       date                  not null,
     page_name                  text                  not null,
     total                      integer               not null
         default 0,
@@ -119,15 +118,7 @@ create table page_load_summary
     primary key (id)
 );
 
-create unique index page_loads_date_date on page_load_summary (timestamp, page_name);
-
-create table commit_log_port_vxuml
-(
-    commit_log_id              integer               not null,
-    port_id                    integer               not null,
-    vuxml_id                   integer               not null,
-    primary key (commit_log_id, port_id)
-);
+create unique index page_loads_date_date on page_load_summary (date, page_name);
 
 create table commits_latest_ports
 (
@@ -321,6 +312,9 @@ create table ports
     portepoch                  text                          ,
     primary key (id)
 );
+
+create index ports_ignore on ports(ignore) where ignore <> '';
+create index ports_broken on ports(broken) where broken <> '';
 
 create table users
 (
@@ -691,6 +685,16 @@ create table vuxml_names
     primary key (id)
 );
 
+create table ports_vulnerable
+(
+    port_id                    integer               not null,
+    current                    integer               not null
+        default 1,
+    past                       integer               not null
+        default 0,
+    primary key (port_id)
+);
+
 create view commits_recent as
 select distinct commit_log.id, commit_log.message_id, commit_log.message_date,
 commit_log.message_subject, commit_log.date_added, commit_log.commit_date,
@@ -967,4 +971,8 @@ alter table vuxml_references
 alter table vuxml_names
     add foreign key  (vuxml_affected_id)
        references vuxml_affected (id) on update cascade on delete cascade;
+
+alter table ports_vulnerable
+    add foreign key  (port_id)
+       references ports (id) on update restrict on delete cascade;
 
