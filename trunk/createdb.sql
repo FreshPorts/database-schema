@@ -1,5 +1,5 @@
 #
-# $Id: createdb.sql,v 1.29 2002-05-19 22:22:38 dan Exp $
+# $Id: createdb.sql,v 1.30 2002-06-16 15:29:58 dan Exp $
 #
 # Things which must be done to make this script work with PostgreSQL
 # 
@@ -216,6 +216,42 @@ create table daily_stats
   drop sequence daily_stats_seq;
 create sequence daily_stats_seq;
 alter table daily_stats alter column id set default nextval('daily_stats_seq'::text);
+
+create table reports
+(
+    id                     int4                  not null,
+    name                   text                  not null,
+    description            text                  not null,
+    primary key (id)
+);
+
+insert into reports(id, name, description) values (1, 'Watch List Notification', 'Details of any changes to any items on your watch list');
+
+insert into reports(id, name, description) values (2, 'New Ports', 'Lists the new ports which have been added to the ports tree');
+
+  drop sequence reports_id_seq;
+create sequence reports_id_seq;
+alter table reports alter column id set default nextval('reports_id_seq'::text);
+select setval('reports_id_seq'::text, 2);
+
+create table report_frequency
+(
+    id                     int4                  not null,
+    frequency              char(1)               not null,
+    description            text                  not null,
+    primary key (id)
+);
+
+INSERT INTO report_frequency (id, frequency, description) VALUES (1,'Z','Don''t notify me');
+INSERT INTO report_frequency (id, frequency, description) VALUES (2,'D','Day');
+INSERT INTO report_frequency (id, frequency, description) VALUES (3,'W','Week (on Tuesdays)');
+INSERT INTO report_frequency (id, frequency, description) VALUES (4,'F','Fortnightly  (9th and 23rd)');
+INSERT INTO report_frequency (id, frequency, description) VALUES (5,'M','Month (23rd)');
+
+  drop sequence report_frequency_id_seq;
+create sequence report_frequency_id_seq;
+alter table report_frequency alter column id set default nextval('report_frequency_id_seq'::text);
+select setval('report_frequency_id_seq'::text, 5);
 
 create table element_revision
 (
@@ -496,6 +532,31 @@ alter table daily_stats_data alter column id set default nextval('daily_stats_da
 
 create unique index daily_stats_data_unique on daily_stats_data (daily_stats_id, date);
 
+create table report_log
+(
+    id                     int4                  not null,
+    report_id              int4                  not null,
+    frequency_id           int4                          ,
+    report_date            timestamp             not null
+        default current_timestamp,
+    email_count            int4                  not null,
+    commit_count           int4                  not null,
+    port_count             int4                  not null,
+    primary key (id)
+);
+
+  drop sequence report_log_id_seq;
+create sequence report_log_id_seq;
+alter table report_log alter column id set default nextval('report_log_id_seq'::text);
+
+create table report_subscriptions
+(
+    report_id              int4                  not null,
+    user_id                int4                  not null,
+    report_frequency_id    int4                  not null,
+    primary key (report_id, user_id)
+);
+
 create view commits_recent as
 select distinct commit_log.id, commit_log.message_id, commit_log.message_date,
 commit_log.message_subject, commit_log.date_added, commit_log.commit_date,
@@ -517,6 +578,13 @@ select ports.*, element.name as name, categories.name as category, element.statu
 from categories, ports, element
 where categories.id = ports.category_id
 and ports.element_id = element.id;
+
+create view report_log_latest as
+select report_log.frequency_id, report_frequency.frequency, 
+max(report_log.report_date) AS last_sent
+from report_log, report_frequency
+where ( report_log.frequency_id = report_frequency.id )
+group by report_log.frequency_id, report_frequency.frequency;;
 
 alter table element
     add foreign key (parent_id)
@@ -633,4 +701,24 @@ alter table watch_list_staging
 alter table daily_stats_data
     add foreign key (daily_stats_id)
        references daily_stats (id) on delete cascade;
+
+alter table report_log
+    add foreign key (report_id)
+       references reports (id) on update cascade on delete cascade;
+
+alter table report_log
+    add foreign key (frequency_id)
+       references report_frequency (id) on update cascade on delete cascade;
+
+alter table report_subscriptions
+    add foreign key (report_id)
+       references reports (id) on update cascade on delete cascade;
+
+alter table report_subscriptions
+    add foreign key (user_id)
+       references users (id) on update cascade on delete cascade;
+
+alter table report_subscriptions
+    add foreign key (report_frequency_id)
+       references report_frequency (id) on update cascade on delete cascade;
 
