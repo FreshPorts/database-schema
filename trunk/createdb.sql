@@ -1,5 +1,5 @@
 --
--- $Id: createdb.sql,v 1.46 2003-03-05 13:13:40 dan Exp $
+-- $Id: createdb.sql,v 1.47 2003-03-06 22:23:17 dan Exp $
 --
 -- The following options should be used to create the database schema
 --
@@ -214,6 +214,8 @@ create table tasks
 );
 
 insert into tasks (name,description) values ('SecurityNoticeAdd', 'Ability to designate a given commit as security related');
+
+insert into tasks (name,description) values ('CategoryVirtualDescriptionSet', 'Ability to set the description for a virtual category');
 
 create unique index tasks_idx on tasks (name);
 
@@ -496,9 +498,9 @@ create unique index element_pathnames_pathname on element_pathnames (pathname);
 
 create table user_tasks
 (
-    task_id                 integer               not null,
     user_id                 integer               not null,
-    primary key (task_id, user_id)
+    task_id                 integer               not null,
+    primary key (user_id, task_id)
 );
 
 create table commit_log_ports_ignore
@@ -721,10 +723,6 @@ alter table element_pathnames
 alter table user_tasks
     add foreign key  (user_id)
        references users (id) on update cascade on delete cascade;
-
-alter table user_tasks
-    add foreign key  (task_id)
-       references tasks (id) on update cascade on delete cascade;
 
 alter table user_tasks
     add foreign key  (task_id)
