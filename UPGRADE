@@ -1,6 +1,45 @@
 This file contains notes for upgrading from one database version
 to another.
 
+Feb 13 2004
+
+To upgrade the security_notice and security_notice_table:
+
+begin;
+
+create table security_notice_status
+(
+    id                         char(1)               not null,
+    name                       text                  not null,
+    description                text                  not null,
+    primary key (id)
+);
+
+insert into security_notice_status (id,name,description) 
+values ('A', 'Active', 'A valid security concern');
+
+insert into security_notice_status (id,name,description)
+values ('I', 'Ingore', 'Ingore this notice');
+
+insert into security_notice_status (id,name,description) 
+values ('C', 'Candidate', 'A candidate for becoming a security notice');
+
+alter table security_notice rename status to security_notice_status_id;
+alter table security_notice_audit rename status to security_notice_status_id;
+
+alter table security_notice
+    add foreign key  (security_notice_status_id)
+       references security_notice_status (id) on update restrict on delete restrict;
+
+alter table security_notice_audit
+    add foreign key  (security_notice_status_id)
+       references security_notice_status (id) on update restrict on delete restrict;
+
+alter table security_notice drop constraint security_notice_status;
+alter table security_notice_audit drop constraint security_notice_audit_status;
+
+commit;
+
 Jan 31 2004
 
 begin;
