@@ -1,5 +1,5 @@
 --
--- $Id: createdb.sql,v 1.54 2003-05-09 19:39:24 dan Exp $
+-- $Id: createdb.sql,v 1.55 2003-10-04 21:32:11 dan Exp $
 --
 -- The following options should be used to create the database schema
 --
@@ -24,16 +24,6 @@
 -- Under columns check this:
 --    - Default value
 --    - Check
-
-create table housekeeping
-(
-    id                      serial                not null,
-    last_port_commit        integer               not null,
-    refresh_now             smallint              not null,
-    primary key (id)
-);
-
-insert into housekeeping values (1,0,0);
 
 create table watch_list_staging_log
 (
@@ -309,23 +299,6 @@ create table watch_list
     primary key (id)
 );
 
-create table security_notice
-(
-    id                      serial                not null,
-    user_id                 integer               not null,
-    date_added              timestamp with time zone not null
-        default current_timestamp,
-    ip_address              inet                  not null,
-    description             text                  not null,
-    commit_log_id           integer               not null,
-    status                  char(1)               not null
-        default 'A'
-        check (status in ('A','I')),
-    primary key (id)
-);
-
-create unique index security_notice_clid_idx on security_notice (commit_log_id);
-
 create table system_branch
 (
     id                      serial                not null,
@@ -362,6 +335,21 @@ create table commit_log_elements
     revision_name           text                  not null,
     change_type             char(1)               not null
         check (change_type in ('A','M','R')),
+    primary key (id)
+);
+
+create table security_notice
+(
+    id                      serial                not null,
+    user_id                 integer               not null,
+    date_added              timestamp with time zone not null
+        default current_timestamp,
+    ip_address              inet                  not null,
+    description             text                  not null,
+    commit_log_id           integer               not null,
+    status                  char(1)               not null
+        default 'A'
+        check (status in ('A','I')),
     primary key (id)
 );
 
@@ -520,10 +508,6 @@ create table ports_categories
     primary key (port_id, category_id)
 );
 
-create index ports_categories_ports_idx on ports_categories (port_id);
-
-create index ports_categories_categories_idx on ports_categories (category_id);
-
 create table security_notice_audit
 (
     id                      serial                not null,
@@ -545,6 +529,13 @@ create table latest_commits
     commit_log_id           integer               not null,
     commit_date             timestamp with time zone not null,
     primary key (commit_log_id)
+);
+
+create table commit_log_port_extras
+(
+    commit_log_id           integer               not null,
+    element_id              integer               not null,
+    primary key (commit_log_id, element_id)
 );
 
 create view commits_recent as
@@ -608,14 +599,6 @@ alter table watch_list
     add foreign key  (user_id)
        references users (id) on update cascade on delete cascade;
 
-alter table security_notice
-    add foreign key  (user_id)
-       references users (id) on update cascade on delete cascade;
-
-alter table security_notice
-    add foreign key  (commit_log_id)
-       references commit_log (id) on update cascade on delete cascade;
-
 alter table system_branch
     add foreign key  (system_id)
        references system (id) on update cascade on delete cascade;
@@ -631,6 +614,14 @@ alter table commit_log_elements
 alter table commit_log_elements
     add foreign key  (element_id, revision_name)
        references element_revision (element_id, revision_name) on update cascade on delete cascade;
+
+alter table security_notice
+    add foreign key  (user_id)
+       references users (id) on update cascade on delete cascade;
+
+alter table security_notice
+    add foreign key  (commit_log_id)
+       references commit_log (id) on update cascade on delete cascade;
 
 alter table watch_list_element
     add foreign key  (element_id)
@@ -771,4 +762,12 @@ alter table security_notice_audit
 alter table latest_commits
     add foreign key  (commit_log_id)
        references commit_log (id) on update cascade on delete cascade;
+
+alter table commit_log_port_extras
+    add foreign key  (commit_log_id)
+       references commit_log (id) on update cascade on delete cascade;
+
+alter table commit_log_port_extras
+    add foreign key  (element_id)
+       references element (id) on update cascade on delete cascade;
 
