@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.133 2005-02-17 01:54:37 dan Exp $
+-- $Id: sp.txt,v 1.134 2005-02-17 04:46:48 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -1171,6 +1171,38 @@ CREATE OR REPLACE FUNCTION Stats_PortCountDeprecated() returns int8 AS '
 		 WHERE element.status   = \'A\'
 		   AND ports.element_id = element.id
 		   AND ports.deprecated <> \'\';
+
+		return PortCount;
+	END
+' LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION Stats_PortCountRestricted() returns int8 AS '
+	DECLARE
+		PortCount	int8;
+
+	BEGIN
+		SELECT count(*)
+		  INTO PortCount
+		  FROM ports, element
+		 WHERE element.status   = \'A\'
+		   AND ports.element_id = element.id
+		   AND ports.restricted <> \'\';
+
+		return PortCount;
+	END
+' LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION Stats_PortCountNoCDROM() returns int8 AS '
+	DECLARE
+		PortCount	int8;
+
+	BEGIN
+		SELECT count(*)
+		  INTO PortCount
+		  FROM ports, element
+		 WHERE element.status   = \'A\'
+		   AND ports.element_id = element.id
+		   AND ports.no_cdrom <> \'\';
 
 		return PortCount;
 	END
