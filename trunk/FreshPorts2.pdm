@@ -48,7 +48,7 @@ FreshPorts2
 Sybase SQL Anywhere 5.5
 sqlany55.def
 #\
-# $Id: FreshPorts2.pdm,v 1.35 2002-03-28 03:51:59 dan Exp $\
+# $Id: FreshPorts2.pdm,v 1.36 2002-04-01 20:45:02 dan Exp $\
 #\
 # Things which must be done to make this script work with PostgreSQL\
 # \
@@ -83,7 +83,7 @@ sqlany55.def
 Dan Langille
 
 968886895
-1017286573
+1017659901
 0
 0
 0
@@ -1197,6 +1197,28 @@ categories2
   drop sequence categories_id_seq;
 create sequence categories_id_seq;\
 alter table categories alter column id set default nextval('categories_id_seq'::text);
+0
+3
+8543
+8543
+2
+daily_refreshes
+daily_refreshes
+
+
+
+0
+0
+0
+
+
+
+
+
+PK_daily_refreshes
+
+
+
 0
 /END_TABLE AMCTABL
 
@@ -5061,7 +5083,7 @@ text
 1
 0
 0
-
+committer
 
 3
 3
@@ -7521,6 +7543,41 @@ text
 description
 
 5
+3
+8544
+8544
+refresh_date
+refresh_date
+
+
+
+8543
+0
+date
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+1
+0
+1
+1
+0
+0
+
+
+1
 /END_TABLE AMCCOLN
 
 /BEGIN_TABLE AMCREFR
@@ -11621,7 +11678,7 @@ yes
 0
 WarehouseArchitect
 DBODropView
-yes
+no
 163
 2
 0
@@ -12290,10 +12347,10 @@ OLE     BIN
 0
 0
 0
--42613
--164098
--10139
--158399
+-42614
+-165191
+-10140
+-158400
 1
 1
 0
@@ -12309,7 +12366,7 @@ OLE     BIN
 0
 FreshPorts 2 -physical database model\
 Copyright © 2001-2002 DVL Software Limited\
-Wellington, New Zealand  - 19 March 2002
+Wellington, New Zealand  - 1 April 2002
 
 
 2
@@ -12731,10 +12788,10 @@ Sample entries are \
 0
 0
 0
--30521
--150808
--18747
--147584
+-27078
+-152571
+-15304
+-149347
 1
 1
 0
@@ -12900,10 +12957,10 @@ than once by the same tag.
 0
 0
 0
--42588
--150052
--32539
--143753
+-42168
+-155258
+-32119
+-148959
 2
 1
 0
@@ -13287,10 +13344,43 @@ than once by the same tag.
 7906
 
 3
+6957
+289
+0
+36
+0
+0
+0
+0
+0
+24874
+-132410
+32523
+-129726
+2
+1
+0
+0
+0
+0
+0
+0
+0
+0
+0
+
+0
+
+
+
+2
+8543
+
+3
 9
 290
 0
-36
+37
 0
 2
 3
@@ -13323,7 +13413,7 @@ b28effffb5fdfdffb28effffcb3cfeff
 49
 290
 0
-37
+38
 0
 4
 7
@@ -13356,7 +13446,7 @@ b28effffb5fdfdffb28effffcb3cfeff
 52
 290
 0
-38
+39
 0
 6
 7
@@ -13389,7 +13479,7 @@ cb3e0000394bfeffcb3e00009838feffb42d00009838feffb42d0000d728feff
 843
 290
 0
-39
+40
 0
 837
 836
@@ -13422,7 +13512,7 @@ cb3e0000394bfeffcb3e00009838feffb42d00009838feffb42d0000d728feff
 888
 290
 0
-40
+41
 0
 4
 835
@@ -13455,7 +13545,7 @@ e71f00001ed6fdffe71f0000a714feff64030000a714feff
 2809
 290
 0
-41
+42
 0
 4
 622
@@ -13475,8 +13565,8 @@ e71f00001ed6fdffe71f0000a714feff64030000a714feff
 1
 0
 0
-4
-962e000058c8fdff962e000099aefdffdc32000099aefdffdc320000c48bfdff
+2
+eb2e000058c8fdffeb2e00006c8cfdff
 2
 
 
@@ -13488,7 +13578,7 @@ e71f00001ed6fdffe71f0000a714feff64030000a714feff
 2812
 290
 0
-42
+43
 0
 4
 327
@@ -13521,7 +13611,7 @@ e71f00001ed6fdffe71f0000a714feff64030000a714feff
 2815
 290
 0
-43
+44
 0
 622
 327
@@ -13554,7 +13644,7 @@ d11c0000878bfdffd11c000028a6fdff65ddffff28a6fdff
 2986
 290
 0
-44
+45
 0
 4
 4
@@ -13587,7 +13677,7 @@ d11c0000878bfdffd11c000028a6fdff65ddffff28a6fdff
 3087
 290
 0
-45
+46
 0
 925
 837
@@ -13620,7 +13710,7 @@ d11c0000878bfdffd11c000028a6fdff65ddffff28a6fdff
 3205
 290
 0
-46
+47
 0
 5
 6
@@ -13653,7 +13743,7 @@ d11c0000878bfdffd11c000028a6fdff65ddffff28a6fdff
 3482
 290
 0
-47
+48
 0
 320
 5
@@ -13686,7 +13776,7 @@ d11c0000878bfdffd11c000028a6fdff65ddffff28a6fdff
 4006
 290
 0
-48
+49
 0
 2
 3904
@@ -13719,7 +13809,7 @@ d11c0000878bfdffd11c000028a6fdff65ddffff28a6fdff
 4008
 290
 0
-49
+50
 0
 327
 3904
@@ -13752,7 +13842,7 @@ d11c0000878bfdffd11c000028a6fdff65ddffff28a6fdff
 4427
 290
 0
-50
+51
 0
 835
 3
@@ -13785,7 +13875,7 @@ d11c0000878bfdffd11c000028a6fdff65ddffff28a6fdff
 4435
 290
 0
-51
+52
 0
 835
 836
@@ -13818,7 +13908,7 @@ d11c0000878bfdffd11c000028a6fdff65ddffff28a6fdff
 4522
 290
 0
-52
+53
 0
 3
 3904
@@ -13851,7 +13941,7 @@ d11c0000878bfdffd11c000028a6fdff65ddffff28a6fdff
 4540
 290
 0
-53
+54
 0
 925
 2
@@ -13884,7 +13974,7 @@ d11c0000878bfdffd11c000028a6fdff65ddffff28a6fdff
 4580
 290
 0
-54
+55
 0
 5
 4579
@@ -13917,7 +14007,7 @@ d11c0000878bfdffd11c000028a6fdff65ddffff28a6fdff
 4702
 290
 0
-55
+56
 0
 2
 4701
@@ -13938,7 +14028,7 @@ d11c0000878bfdffd11c000028a6fdff65ddffff28a6fdff
 0
 0
 2
-3672ffff46e6fdff3672ffffa1c8fdff
+0873ffff46e6fdff0873ffff4bb4fdff
 2
 
 
@@ -13950,7 +14040,7 @@ d11c0000878bfdffd11c000028a6fdff65ddffff28a6fdff
 4704
 290
 0
-56
+57
 0
 327
 4701
@@ -13970,8 +14060,8 @@ d11c0000878bfdffd11c000028a6fdff65ddffff28a6fdff
 1
 0
 0
-4
-ccdaffff61a8fdffe9acffff61a8fdffe9acffffcfb9fdffb96effffcfb9fdff
+2
+ccdaffff13a8fdff626fffff13a8fdff
 2
 
 
@@ -13983,7 +14073,7 @@ ccdaffff61a8fdffe9acffff61a8fdffe9acffffcfb9fdffb96effffcfb9fdff
 4839
 290
 0
-57
+58
 0
 4837
 4838
@@ -14016,7 +14106,7 @@ bea50000c526feffbea50000ad06feff
 4867
 290
 0
-58
+59
 0
 4
 4838
@@ -14049,7 +14139,7 @@ be430000bbd7fdffbe430000e306fefff6920000e306feff
 5216
 290
 0
-59
+60
 0
 5
 5215
@@ -14082,7 +14172,7 @@ de1600000e5dfeff6f9500000e5dfeff
 5219
 290
 0
-60
+61
 0
 4837
 5215
@@ -14115,7 +14205,7 @@ de1600000e5dfeff6f9500000e5dfeff
 6047
 290
 0
-61
+62
 0
 6
 5524
@@ -14148,7 +14238,7 @@ de1600000e5dfeff6f9500000e5dfeff
 6099
 290
 0
-62
+63
 0
 4
 5524
@@ -14181,7 +14271,7 @@ de1600000e5dfeff6f9500000e5dfeff
 6476
 290
 0
-63
+64
 0
 320
 321
