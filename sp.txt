@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.71 2003-04-29 12:51:55 dan Exp $
+-- $Id: sp.txt,v 1.72 2003-04-29 15:13:52 dan Exp $
 --
 
 CREATE OR REPLACE FUNCTION IsDescendantOf (int4 ,int4) returns boolean As '
@@ -1308,7 +1308,7 @@ CREATE OR REPLACE FUNCTION Stats_PortCountNewInterval(interval) returns int8 AS 
 		  FROM ports, element
 		 WHERE element.status = \'A\'
 		   AND ports.element_id = element.id
-		   AND date_added > now() - SinceWhen - SystemTimeAdjust();
+		   AND date_added > now() - SinceWhen;
 
 		return PortCount;
 	END
