@@ -48,7 +48,7 @@ FreshPorts2
 PostgreSQL 7.x
 PostgreSQL.def
 --\
--- $Id: FreshPorts2.pdm,v 1.58 2003-02-20 22:29:19 dan Exp $\
+-- $Id: FreshPorts2.pdm,v 1.59 2003-02-21 15:51:31 dan Exp $\
 --\
 -- The following options should be used to create the database schema\
 --\
@@ -80,7 +80,7 @@ PostgreSQL.def
 Dan Langille
 
 968886895
-1045775907
+1045842344
 0
 0
 0
@@ -126,8 +126,8 @@ ID
 
 
 unique identifier
-int4
-4
+serial
+0
 0
 0
 0
@@ -177,39 +177,10 @@ text
 0
 0
 3
-85
-85
-FLAG
-FLAG
-
-
-flag for anything
-char(1)
-1
-0
-0
-0
-1
-
-
-
-
-
-0
-0
-0
-
-
-
-0
-0
-0
-0
-3
 131
 131
-DATETIME
-DATETIME
+DATETIME_NOT_NULL
+DATETIME_NOT_NULL
 
 
 date time field with timestamp
@@ -266,8 +237,8 @@ text
 3
 190
 190
-FLAG_YN
-FLAG_YN
+BOOLEAN
+BOOLEAN
 
 
 flag for showing true or false, yes or no
@@ -277,64 +248,6 @@ boolean
 0
 0
 0
-
-
-
-
-
-0
-0
-0
-
-
-
-0
-0
-0
-0
-3
-191
-191
-SMALLCOUNT
-SMALLCOUNT
-
-
-for counting small things.
-smallint
-0
-0
-0
-0
-0
-
-
-
-
-
-0
-0
-0
-
-
-
-0
-0
-0
-0
-3
-2572
-2572
-INTERVAL
-INTERVAL
-
-
-
-interval
-0
-0
-0
-0
-1
 
 
 
@@ -379,475 +292,11 @@ double precision
 0
 0
 0
-1
-5076
-5076
-TEXT2
-TEXT2
-
-
-long varchar type fields
-text
-0
-0
-0
-0
-0
-
-
-
-
-
-0
-0
-0
-
-
-
-0
-0
-0
-0
-1
-5077
-5077
-DFLOAT2
-DFLOAT2
-
-
-
-double precision
-0
-0
-0
-0
-0
-
-
-
-
-
-0
-0
-0
-
-
-
-0
-0
-0
-0
-1
-7842
-7842
-ID2
-ID2
-
-
-unique identifier
-int4
-4
-0
-0
-0
-1
-
-
-
-
-
-0
-0
-0
-
-
-
-0
-0
-0
-0
-1
-7843
-7843
-TEXT3
-TEXT3
-
-
-long varchar type fields
-text
-0
-0
-0
-0
-0
-
-
-
-
-
-0
-0
-0
-
-
-
-0
-0
-0
-0
-1
-7844
-7844
-EMAIL2
-EMAIL2
-
-
-email address
-text
-0
-0
-0
-0
-0
-
-
-
-
-
-0
-0
-0
-
-
-
-0
-0
-0
-0
-1
-7845
-7845
-FLAG_YN2
-FLAG_YN2
-
-
-flag for showing true or false, yes or no
-boolean
-0
-0
-0
-0
-0
-
-
-
-
-
-0
-0
-0
-
-
-
-0
-0
-0
-0
-1
-9959
-9959
-FLAG_YN3
-FLAG_YN3
-
-
-flag for showing true or false, yes or no
-boolean
-0
-0
-0
-0
-0
-
-
-
-
-
-0
-0
-0
-
-
-
-0
-0
-0
-0
-1
-9960
-9960
-TEXT4
-TEXT4
-
-
-long varchar type fields
-text
-0
-0
-0
-0
-0
-
-
-
-
-
-0
-0
-0
-
-
-
-0
-0
-0
-0
-1
-9961
-9961
-DFLOAT3
-DFLOAT3
-
-
-
-double precision
-0
-0
-0
-0
-0
-
-
-
-
-
-0
-0
-0
-
-
-
-0
-0
-0
-0
-1
-9985
-9985
-FLAG_YN4
-FLAG_YN4
-
-
-flag for showing true or false, yes or no
-boolean
-0
-0
-0
-0
-0
-
-
-
-
-
-0
-0
-0
-
-
-
-0
-0
-0
-0
-1
-9986
-9986
-TEXT5
-TEXT5
-
-
-long varchar type fields
-text
-0
-0
-0
-0
-0
-
-
-
-
-
-0
-0
-0
-
-
-
-0
-0
-0
-0
-1
-9987
-9987
-DFLOAT4
-DFLOAT4
-
-
-
-double precision
-0
-0
-0
-0
-0
-
-
-
-
-
-0
-0
-0
-
-
-
-0
-0
-0
-0
-1
-10011
-10011
-FLAG_YN5
-FLAG_YN5
-
-
-flag for showing true or false, yes or no
-boolean
-0
-0
-0
-0
-0
-
-
-
-
-
-0
-0
-0
-
-
-
-0
-0
-0
-0
-1
-10012
-10012
-TEXT6
-TEXT6
-
-
-long varchar type fields
-text
-0
-0
-0
-0
-0
-
-
-
-
-
-0
-0
-0
-
-
-
-0
-0
-0
-0
-1
-10013
-10013
-DFLOAT5
-DFLOAT5
-
-
-
-double precision
-0
-0
-0
-0
-0
-
-
-
-
-
-0
-0
-0
-
-
-
-0
-0
-0
-0
-1
-10853
-10853
-ID3
-ID3
-
-
-unique identifier
-int4
-4
-0
-0
-0
-1
-
-
-
-
-
-0
-0
-0
-
-
-
-0
-0
-0
-0
 3
 10854
 10854
-DATETIME2
-DATETIME2
+DATETIME
+DATETIME
 
 
 date time field with timestamp
@@ -872,103 +321,45 @@ timestamp with time zone
 0
 0
 0
-1
-15516
-15516
-FLAG_YN6
-FLAG_YN6
+3
+16638
+16638
+ID_FK
+ID_FK
 
 
-flag for showing true or false, yes or no
+
+integer
+0
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+0
+0
+0
+3
+16640
+16640
+BOOLEAN_NOT_NULL
+BOOLEAN_NOT_NULL
+
+
+
 boolean
 0
-0
-0
-0
-0
-
-
-
-
-
-0
-0
-0
-
-
-
-0
-0
-0
-0
-1
-15517
-15517
-TEXT7
-TEXT7
-
-
-long varchar type fields
-text
-0
-0
-0
-0
-0
-
-
-
-
-
-0
-0
-0
-
-
-
-0
-0
-0
-0
-1
-15518
-15518
-DFLOAT6
-DFLOAT6
-
-
-
-double precision
-0
-0
-0
-0
-0
-
-
-
-
-
-0
-0
-0
-
-
-
-0
-0
-0
-0
-1
-15519
-15519
-ID4
-ID4
-
-
-unique identifier
-int4
-4
 0
 0
 0
@@ -1037,9 +428,8 @@ commit_log
 
 
 
-  drop sequence commit_log_id_seq;
-create sequence commit_log_id_seq;\
-alter table commit_log alter column id set default nextval('commit_log_id_seq'::text);
+
+
 0
 0
 0
@@ -1064,9 +454,8 @@ commit_log_elements
 
 
 
-  drop sequence commit_log_elements_id_seq;
-create sequence commit_log_elements_id_seq;\
-alter table commit_log_elements alter column id set default nextval('commit_log_elements_id_seq'::text);
+
+
 0
 0
 0
@@ -1092,10 +481,7 @@ element
 
 
 
-  drop sequence element_id_seq;\
-create sequence element_id_seq;\
-\
-alter table element alter column id set default nextval('element_id_seq'::text);
+
 0
 0
 0
@@ -1121,10 +507,7 @@ user
 
 
 
-  drop sequence users_id_seq;\
-create sequence users_id_seq;\
-\
-alter table users alter column id set default nextval('users_id_seq'::text);
+
 0
 0
 0
@@ -1150,10 +533,7 @@ watch_list
 
 
 
-  drop sequence watch_list_id_seq;\
-create sequence watch_list_id_seq;\
-\
-alter table watch_list alter column id set default nextval('watch_list_id_seq'::text);
+
 0
 0
 0
@@ -1205,11 +585,6 @@ watch_notice
 
 
 
-  drop sequence watch_notice_id_seq;\
-create sequence watch_notice_id_seq;\
-\
-alter table watch_notice alter column id set default nextval('watch_notice_id_seq'::text);\
-\
 INSERT INTO "watch_notice" (id, frequency, description) VALUES (1,'Z','Don''t notify me');\
 INSERT INTO "watch_notice" (id, frequency, description) VALUES (3,'W','Week (on Tuesdays)');\
 INSERT INTO "watch_notice" (id, frequency, description) VALUES (4,'F','Fortnightly  (9th and 23rd)');\
@@ -1240,9 +615,7 @@ watch_notice_log
 
 
 
-  drop sequence watch_notice_log_id_seq;\
-create sequence watch_notice_log_id_seq;\
-alter table watch_notice_log alter column id set default nextval('watch_notice_log_id_seq'::text);
+
 0
 0
 0
@@ -1268,9 +641,7 @@ Ports
 
 
 
-  drop sequence ports_id_seq;\
-create sequence ports_id_seq;\
-alter table ports alter column id set default nextval('ports_id_seq'::text);
+
 0
 0
 0
@@ -1296,9 +667,7 @@ categories
 
 
 
-  drop sequence categories_id_seq;\
-create sequence categories_id_seq;\
-alter table categories alter column id set default nextval('categories_id_seq'::text);
+
 0
 0
 0
@@ -1376,10 +745,7 @@ system_version
 pk_system_branch
 
 
-  drop sequence system_branch_id_seq;\
-create sequence system_branch_id_seq;\
-\
-alter table system_branch alter column id set default nextval('system_branch_id_seq'::text);
+
 0
 0
 0
@@ -1405,11 +771,6 @@ system
 
 
 
-  drop sequence system_id_seq;\
-create sequence system_id_seq;\
-\
-alter table system alter column id set default nextval('system_id_seq'::text);\
-\
 INSERT INTO "system" VALUES (1,'FreeBSD','-03:00');
 0
 0
@@ -1592,10 +953,7 @@ watch_list_staging
 
 
 
-  drop sequence watch_list_staging_id_seq;\
-create sequence watch_list_staging_id_seq;\
-\
-alter table watch_list_staging  alter column id set default nextval('watch_list_staging_id_seq'::text);
+
 0
 0
 0
@@ -1621,11 +979,7 @@ watch_list_staging_log
 
 
 
-  drop sequence watch_list_staging_log_id_seq;\
-create sequence watch_list_staging_log_id_seq;\
-\
-alter table watch_list_staging_log alter column id set default nextval('watch_list_staging_log_id_seq'::text);\
-alter table watch_list_staging_log alter column date_added set default current_timestamp;
+
 0
 0
 0
@@ -1651,9 +1005,7 @@ ports_check
 
 
 
-  drop sequence ports_check_id_seq;\
-create sequence ports_check_id_seq;\
-alter table ports_check alter column id set default nextval('ports_check_id_seq'::text);
+
 0
 0
 0
@@ -1705,9 +1057,7 @@ graphs
 
 
 
-  drop sequence graphs_id_seq;\
-create sequence graphs_id_seq;\
-alter table graphs alter column id set default nextval('graphs_id_seq'::text);
+
 0
 0
 0
@@ -1733,9 +1083,7 @@ daily_stats_data
 
 
 
-  drop sequence daily_stats_data_seq;\
-create sequence daily_stats_data_seq;\
-alter table daily_stats_data alter column id set default nextval('daily_stats_data_seq'::text);
+
 0
 0
 0
@@ -1761,9 +1109,7 @@ daily_stats
 
 
 
-  drop sequence daily_stats_seq;\
-create sequence daily_stats_seq;\
-alter table daily_stats alter column id set default nextval('daily_stats_seq'::text);
+
 0
 0
 0
@@ -1791,12 +1137,7 @@ reports
 
 insert into reports(id, name, description) values (1, 'Watch List Notification', 'Details of any changes to any items on your watch list');\
 \
-insert into reports(id, name, description) values (2, 'New Ports', 'Lists the new ports which have been added to the ports tree');\
-\
-  drop sequence reports_id_seq;\
-create sequence reports_id_seq;\
-alter table reports alter column id set default nextval('reports_id_seq'::text);\
-select setval('reports_id_seq'::text, 2);
+insert into reports(id, name, description) values (2, 'New Ports', 'Lists the new ports which have been added to the ports tree');
 0
 0
 0
@@ -1822,9 +1163,7 @@ report_log
 
 
 
-  drop sequence report_log_id_seq;\
-create sequence report_log_id_seq;\
-alter table report_log alter column id set default nextval('report_log_id_seq'::text);
+
 0
 0
 0
@@ -1880,12 +1219,7 @@ INSERT INTO report_frequency (id, frequency, description) VALUES (1,'Z','Don''t 
 INSERT INTO report_frequency (id, frequency, description) VALUES (2,'D','Day');\
 INSERT INTO report_frequency (id, frequency, description) VALUES (3,'W','Week (on Tuesdays)');\
 INSERT INTO report_frequency (id, frequency, description) VALUES (4,'F','Fortnightly  (9th and 23rd)');\
-INSERT INTO report_frequency (id, frequency, description) VALUES (5,'M','Month (23rd)');\
-\
-  drop sequence report_frequency_id_seq;\
-create sequence report_frequency_id_seq;\
-alter table report_frequency alter column id set default nextval('report_frequency_id_seq'::text);\
-select setval('report_frequency_id_seq'::text, 5);
+INSERT INTO report_frequency (id, frequency, description) VALUES (5,'M','Month (23rd)');
 0
 0
 0
@@ -2107,8 +1441,8 @@ unique ID for this table
 
 1
 83
-int4
-4
+serial
+0
 0
 0
 0
@@ -2147,7 +1481,7 @@ message_id
 
 
 1
-0
+84
 text
 0
 0
@@ -2229,7 +1563,7 @@ message_subject
 
 
 1
-0
+84
 text
 0
 0
@@ -2352,7 +1686,7 @@ committer
 
 
 1
-0
+84
 text
 0
 0
@@ -2393,7 +1727,7 @@ description of changes
 
 
 1
-0
+84
 text
 0
 0
@@ -2434,9 +1768,9 @@ system_id
 
 
 1
-83
-int4
-4
+16638
+integer
+0
 0
 0
 0
@@ -2475,7 +1809,7 @@ encoding_losses
 
 
 1
-0
+190
 boolean
 0
 0
@@ -2517,8 +1851,8 @@ unique id for this table
 
 4
 83
-int4
-4
+serial
+0
 0
 0
 0
@@ -2557,9 +1891,9 @@ link to change_log table
 
 
 4
-83
-int4
-4
+16638
+integer
+0
 0
 0
 0
@@ -2598,9 +1932,9 @@ element affected by this change
 
 
 4
-83
-int4
-4
+16638
+integer
+0
 0
 0
 0
@@ -2658,7 +1992,7 @@ text
 
 0
 1
-0
+1
 1
 0
 0
@@ -2724,8 +2058,8 @@ id
 
 8
 83
-int4
-4
+serial
+0
 0
 0
 0
@@ -2764,7 +2098,7 @@ name
 
 
 8
-0
+84
 text
 0
 0
@@ -2805,9 +2139,9 @@ parent_id
 
 
 8
-83
-int4
-4
+16638
+integer
+0
 0
 0
 0
@@ -2889,8 +2223,8 @@ id
 
 22
 83
-int4
-4
+serial
+0
 0
 0
 0
@@ -2929,7 +2263,7 @@ name
 
 
 22
-0
+84
 text
 0
 0
@@ -2970,7 +2304,7 @@ password
 
 
 22
-0
+84
 text
 0
 0
@@ -3011,7 +2345,7 @@ cookie
 
 
 22
-0
+84
 text
 0
 0
@@ -3175,9 +2509,9 @@ watch_notice_id
 
 
 22
-83
-int4
-4
+16638
+integer
+0
 0
 0
 0
@@ -3383,7 +2717,7 @@ ip_address
 
 
 22
-0
+84
 text
 0
 0
@@ -3506,7 +2840,7 @@ watch_list_add_remove
 
 
 22
-0
+84
 text
 0
 0
@@ -3520,8 +2854,8 @@ text
 0
 0
 0
-'ask'	ask\
-'default'	default
+'ask'	\
+'default'	
 
 
 0
@@ -3549,8 +2883,8 @@ max_number_watch_lists
 
 22
 0
-int4
-4
+integer
+0
 0
 0
 0
@@ -3589,9 +2923,9 @@ last_watch_list_chosen
 
 
 22
-83
-int4
-4
+16638
+integer
+0
 0
 0
 0
@@ -3631,8 +2965,8 @@ id
 
 25
 83
-int4
-4
+serial
+0
 0
 0
 0
@@ -3671,9 +3005,9 @@ user_id
 
 
 25
-83
-int4
-4
+16638
+integer
+0
 0
 0
 0
@@ -3712,7 +3046,7 @@ name
 
 
 25
-0
+84
 text
 0
 0
@@ -3753,7 +3087,7 @@ awaiting_staging
 I'm not sure this is actually used.  We have watch_list_staging.
 
 25
-0
+190
 boolean
 0
 0
@@ -3794,7 +3128,7 @@ in_service
 
 
 25
-0
+190
 boolean
 0
 0
@@ -3835,9 +3169,9 @@ watch_list_id
 
 
 29
-83
-int4
-4
+16638
+integer
+0
 0
 0
 0
@@ -3876,9 +3210,9 @@ element_id
 
 
 29
-83
-int4
-4
+16638
+integer
+0
 0
 0
 0
@@ -3918,8 +3252,8 @@ id
 
 192
 83
-int4
-4
+serial
+0
 0
 0
 0
@@ -4003,7 +3337,7 @@ description
 
 
 192
-0
+84
 text
 0
 0
@@ -4086,8 +3420,8 @@ id
 
 197
 83
-int4
-4
+serial
+0
 0
 0
 0
@@ -4167,9 +3501,9 @@ frequency_id
 
 
 197
-83
-int4
-4
+16638
+integer
+0
 0
 0
 0
@@ -4209,8 +3543,8 @@ watch_notice_count
 
 197
 0
-int4
-4
+integer
+0
 0
 0
 0
@@ -4250,8 +3584,8 @@ commit_count
 
 197
 0
-int4
-4
+integer
+0
 0
 0
 0
@@ -4291,8 +3625,8 @@ id
 
 209
 83
-int4
-4
+serial
+0
 0
 0
 0
@@ -4331,9 +3665,9 @@ element_id
 
 
 209
-83
-int4
-4
+16638
+integer
+0
 0
 0
 0
@@ -4372,9 +3706,9 @@ category_id
 
 
 209
-83
-int4
-4
+16638
+integer
+0
 0
 0
 0
@@ -4577,7 +3911,7 @@ maintainer
 
 
 209
-179
+84
 text
 0
 0
@@ -4864,9 +4198,9 @@ last_commit_id
 
 
 209
+16638
+integer
 0
-int4
-4
 0
 0
 0
@@ -5111,8 +4445,8 @@ id
 
 304
 83
-int4
-4
+serial
+0
 0
 0
 0
@@ -5151,7 +4485,7 @@ is_primary
 
 
 304
-0
+190
 boolean
 0
 0
@@ -5192,9 +4526,9 @@ element_id
 
 
 304
-83
-int4
-4
+16638
+integer
+0
 0
 0
 0
@@ -5233,7 +4567,7 @@ name
 
 
 304
-0
+84
 text
 0
 0
@@ -5315,9 +4649,9 @@ element_id
 
 
 467
-83
-int4
-4
+16638
+integer
+0
 0
 0
 0
@@ -5375,7 +4709,7 @@ text
 
 1
 0
-0
+1
 1
 0
 0
@@ -5397,9 +4731,9 @@ system_branch_id
 
 
 468
-83
-int4
-4
+16638
+integer
+0
 0
 0
 0
@@ -5438,9 +4772,9 @@ element_id
 
 
 468
-83
-int4
-4
+16638
+integer
+0
 0
 0
 0
@@ -5521,8 +4855,8 @@ id
 
 469
 83
-int4
-4
+serial
+0
 0
 0
 0
@@ -5561,9 +4895,9 @@ system_id
 
 
 469
-83
-int4
-4
+16638
+integer
+0
 0
 0
 0
@@ -5621,7 +4955,7 @@ text
 
 0
 0
-0
+1
 1
 0
 0
@@ -5644,8 +4978,8 @@ ID
 
 505
 83
-int4
-4
+serial
+0
 0
 0
 0
@@ -5684,7 +5018,7 @@ NAME
 
 
 505
-0
+84
 text
 0
 0
@@ -5766,9 +5100,9 @@ commit_log_id
 
 
 1056
-83
-int4
-4
+16638
+integer
+0
 0
 0
 0
@@ -5807,9 +5141,9 @@ port_id
 
 
 1056
-83
-int4
-4
+16638
+integer
+0
 0
 0
 0
@@ -5848,9 +5182,9 @@ commit_log_element_id
 
 
 1056
-83
-int4
-4
+16638
+integer
+0
 0
 0
 0
@@ -5889,9 +5223,9 @@ user_id
 
 
 2324
-83
-int4
-4
+16638
+integer
+0
 0
 0
 0
@@ -5930,7 +5264,7 @@ token
 
 
 2324
-0
+84
 text
 0
 0
@@ -5971,9 +5305,9 @@ commit_log_id
 
 
 2836
-83
-int4
-4
+16638
+integer
+0
 0
 0
 0
@@ -6012,9 +5346,9 @@ port_id
 
 
 2836
-83
-int4
-4
+16638
+integer
+0
 0
 0
 0
@@ -6217,9 +5551,9 @@ user_id
 
 
 3363
-83
-int4
-4
+16638
+integer
+0
 0
 0
 0
@@ -6340,7 +5674,7 @@ description
 
 
 3363
-0
+84
 text
 0
 0
@@ -6381,9 +5715,9 @@ commit_log_id
 
 
 3363
-83
-int4
-4
+16638
+integer
+0
 0
 0
 0
@@ -6465,8 +5799,8 @@ id
 
 4526
 83
-int4
-4
+serial
+0
 0
 0
 0
@@ -6505,9 +5839,9 @@ last_port_commit
 
 
 4526
-83
-int4
-4
+16638
+integer
+0
 0
 0
 0
@@ -6629,8 +5963,8 @@ commit_log_id
 
 4528
 0
-int4
-4
+integer
+0
 0
 0
 0
@@ -6915,9 +6249,9 @@ port_id
 
 
 4528
+16638
+integer
 0
-int4
-4
 0
 0
 0
@@ -6997,9 +6331,9 @@ category_id
 
 
 4528
+16638
+integer
 0
-int4
-4
 0
 0
 0
@@ -7325,8 +6659,8 @@ date_added
 
 
 4528
-4547
-double precision
+10854
+timestamp with time zone
 0
 0
 0
@@ -7366,9 +6700,9 @@ element_id
 
 
 4528
+16638
+integer
 0
-int4
-4
 0
 0
 0
@@ -7448,9 +6782,9 @@ security_notice_id
 
 
 4528
-83
-int4
-4
+16638
+integer
+0
 0
 0
 0
@@ -7490,8 +6824,8 @@ id
 
 5703
 83
-int4
-4
+serial
+0
 0
 0
 0
@@ -7530,9 +6864,9 @@ user_id
 
 
 5703
-83
-int4
-4
+16638
+integer
+0
 0
 0
 0
@@ -7571,7 +6905,7 @@ category
 
 
 5703
-0
+84
 text
 0
 0
@@ -7612,7 +6946,7 @@ port
 
 
 5703
-0
+84
 text
 0
 0
@@ -7654,8 +6988,8 @@ item_count
 
 5703
 0
-int4
-4
+integer
+0
 0
 0
 0
@@ -7694,7 +7028,7 @@ from_pkg_info
 
 
 5703
-0
+190
 boolean
 0
 0
@@ -7735,7 +7069,7 @@ from_watch_list
 
 
 5703
-0
+190
 boolean
 0
 0
@@ -7777,8 +7111,8 @@ element_id
 
 5703
 83
-int4
-4
+serial
+0
 0
 0
 0
@@ -7818,8 +7152,8 @@ id
 
 6230
 83
-int4
-4
+serial
+0
 0
 0
 0
@@ -7868,7 +7202,7 @@ timestamp with time zone
 
 
 
-
+current_timestamp
 0
 0
 0
@@ -7899,26 +7233,26 @@ user_id
 
 
 6230
+16638
+integer
 0
-int4
-4
-0
-0
-0
-
-
-
-
-
 0
 0
 0
 
 
 
+
+
 0
 0
-1
+0
+
+
+
+0
+0
+0
 1
 0
 0
@@ -7985,8 +7319,8 @@ count_total
 
 6230
 0
-int4
-4
+integer
+0
 0
 0
 0
@@ -8026,8 +7360,8 @@ count_matches
 
 6230
 0
-int4
-4
+integer
+0
 0
 0
 0
@@ -8067,8 +7401,8 @@ count_missing
 
 6230
 0
-int4
-4
+integer
+0
 0
 0
 0
@@ -8108,8 +7442,8 @@ count_duplicates
 
 6230
 0
-int4
-4
+integer
+0
 0
 0
 0
@@ -8149,8 +7483,8 @@ count_categories
 
 6230
 0
-int4
-4
+integer
+0
 0
 0
 0
@@ -8190,8 +7524,8 @@ id
 
 6547
 83
-int4
-4
+serial
+0
 0
 0
 0
@@ -8230,7 +7564,7 @@ category_name
 
 
 6547
-0
+84
 text
 0
 0
@@ -8271,7 +7605,7 @@ port_name
 
 
 6547
-0
+84
 text
 0
 0
@@ -8312,9 +7646,9 @@ category_id
 
 
 6547
+16638
+integer
 0
-int4
-4
 0
 0
 0
@@ -8353,9 +7687,9 @@ port_id
 
 
 6547
+16638
+integer
 0
-int4
-4
 0
 0
 0
@@ -8477,8 +7811,8 @@ id
 
 9430
 83
-int4
-4
+serial
+0
 0
 0
 0
@@ -8517,7 +7851,7 @@ title
 
 
 9430
-0
+84
 text
 0
 0
@@ -8558,7 +7892,7 @@ query
 
 
 9430
-0
+84
 text
 0
 0
@@ -8640,7 +7974,7 @@ is_clickable
 
 
 9430
-0
+190
 boolean
 0
 0
@@ -8682,8 +8016,8 @@ id
 
 10451
 83
-int4
-4
+serial
+0
 0
 0
 0
@@ -8722,9 +8056,9 @@ daily_stats_id
 
 
 10451
-83
-int4
-4
+16638
+integer
+0
 0
 0
 0
@@ -8741,7 +8075,7 @@ int4
 
 0
 1
-0
+1
 1
 0
 0
@@ -8845,9 +8179,9 @@ id
 
 
 10456
+83
+serial
 0
-int4
-4
 0
 0
 0
@@ -8886,7 +8220,7 @@ title
 
 
 10456
-0
+84
 text
 0
 0
@@ -8905,7 +8239,7 @@ text
 
 0
 0
-0
+1
 1
 0
 0
@@ -8927,7 +8261,7 @@ query
 
 
 10456
-0
+84
 text
 0
 0
@@ -8946,7 +8280,7 @@ text
 
 0
 0
-0
+1
 1
 0
 0
@@ -8969,8 +8303,8 @@ id
 
 10812
 83
-int4
-4
+serial
+0
 0
 0
 0
@@ -9009,7 +8343,7 @@ name
 
 
 10812
-0
+84
 text
 0
 0
@@ -9050,7 +8384,7 @@ description
 
 
 10812
-0
+84
 text
 0
 0
@@ -9092,8 +8426,8 @@ id
 
 10814
 83
-int4
-4
+serial
+0
 0
 0
 0
@@ -9132,9 +8466,9 @@ report_id
 
 
 10814
-83
-int4
-4
+16638
+integer
+0
 0
 0
 0
@@ -9173,9 +8507,9 @@ frequency_id
 
 
 10814
+16638
+integer
 0
-int4
-4
 0
 0
 0
@@ -9192,7 +8526,7 @@ int4
 
 0
 1
-0
+1
 1
 0
 0
@@ -9255,9 +8589,9 @@ email_count
 
 
 10814
-83
-int4
-4
+0
+integer
+0
 0
 0
 0
@@ -9297,8 +8631,8 @@ commit_count
 
 10814
 0
-int4
-4
+integer
+0
 0
 0
 0
@@ -9338,8 +8672,8 @@ port_count
 
 10814
 0
-int4
-4
+integer
+0
 0
 0
 0
@@ -9378,9 +8712,9 @@ report_id
 
 
 10829
-83
-int4
-4
+16638
+integer
+0
 0
 0
 0
@@ -9419,9 +8753,9 @@ user_id
 
 
 10829
-83
-int4
-4
+16638
+integer
+0
 0
 0
 0
@@ -9460,9 +8794,9 @@ report_frequency_id
 
 
 10829
-83
-int4
-4
+16638
+integer
+0
 0
 0
 0
@@ -9502,8 +8836,8 @@ id
 
 10838
 83
-int4
-4
+serial
+0
 0
 0
 0
@@ -9583,7 +8917,7 @@ description
 
 
 10838
-0
+84
 text
 0
 0
@@ -9624,9 +8958,9 @@ user_id
 
 
 11332
-83
-int4
-4
+16638
+integer
+0
 0
 0
 0
@@ -9748,9 +9082,9 @@ element_id
 
 
 11727
-83
-int4
-4
+16638
+integer
+0
 0
 0
 0
@@ -9953,9 +9287,9 @@ task_id
 
 
 14577
-83
-int4
-4
+16638
+integer
+0
 0
 0
 0
@@ -9994,9 +9328,9 @@ user_id
 
 
 14577
-83
-int4
-4
+16638
+integer
+0
 0
 0
 0
@@ -10035,9 +9369,9 @@ commit_log_id
 
 
 15520
+16638
+integer
 0
-int4
-4
 0
 0
 0
@@ -10117,7 +9451,7 @@ message_subject
 
 
 15520
-0
+84
 text
 0
 0
@@ -10158,7 +9492,7 @@ message_id
 
 
 15520
-15517
+84
 text
 0
 0
@@ -10199,7 +9533,7 @@ committer
 
 
 15520
-15517
+84
 text
 0
 0
@@ -10240,7 +9574,7 @@ commit_description
 
 
 15520
-15517
+84
 text
 0
 0
@@ -10281,7 +9615,7 @@ commit_date
 
 
 15520
-15517
+84
 text
 0
 0
@@ -10322,7 +9656,7 @@ commit_time
 
 
 15520
-15517
+84
 text
 0
 0
@@ -10363,9 +9697,9 @@ element_id
 
 
 15520
+16638
+integer
 0
-int4
-4
 0
 0
 0
@@ -10404,7 +9738,7 @@ element_name
 
 
 15520
-0
+84
 text
 0
 0
@@ -10445,7 +9779,7 @@ revision_name
 
 
 15520
-15517
+84
 text
 0
 0
@@ -10527,7 +9861,7 @@ encoding_losses
 
 
 15520
-15516
+190
 boolean
 0
 0
@@ -10568,9 +9902,9 @@ commit_log_id
 
 
 15995
-83
-int4
-4
+16638
+integer
+0
 0
 0
 0
@@ -10609,9 +9943,9 @@ port_id
 
 
 15995
-83
-int4
-4
+16638
+integer
+0
 0
 0
 0
@@ -10691,7 +10025,7 @@ reason
 
 
 15995
-0
+84
 text
 0
 0
@@ -11127,7 +10461,7 @@ Ref_1572
 467
 2
 2
-0
+1
 1
 0
 0
@@ -11367,7 +10701,7 @@ Ref_10462
 10456
 2
 2
-0
+1
 1
 0
 0
@@ -11487,7 +10821,7 @@ Ref_10848
 10838
 2
 2
-0
+1
 1
 0
 0
@@ -11703,7 +11037,7 @@ Ref_14989
 10838
 1
 1
-0
+1
 1
 0
 0
@@ -11828,6 +11162,30 @@ Ref_16442
 0
 0
 Ref_16442
+
+0
+n
+0
+0
+0
+3
+16641
+16641
+Ref_16641
+Ref_16641
+
+
+
+10456
+10451
+10456
+2
+2
+1
+1
+0
+0
+
 
 0
 n
@@ -12073,6 +11431,11 @@ COLN2   N10
 16443
 2
 15996
+1
+16648
+16648
+10457
+10453
 /END_TABLE AMCCCOL
 
 /BEGIN_TABLE AMCCREF
@@ -12358,6 +11721,12 @@ NUMR    N8
 16444
 16442
 16443
+1
+3
+16649
+16649
+16641
+16648
 1
 /END_TABLE AMCCREF
 
@@ -15320,12 +14689,6 @@ EXAT    N10
 VALE    A254
 OBJT    N10
 /BEGIN_DATA AMCEXAV
-3
-8
-2
-1
-nextval('element_id_seq'::text)
-9
 /END_TABLE AMCEXAV
 
 /BEGIN_TABLE PBEDTS
@@ -17697,10 +17060,10 @@ OLE     BIN
 0
 0
 0
-28040
--200486
-49489
--181510
+28016
+-200510
+49465
+-181534
 2
 1
 0
@@ -17717,7 +17080,7 @@ OLE     BIN
 
 
 
-14626
+15459
 22
 
 3
@@ -17730,10 +17093,10 @@ OLE     BIN
 0
 0
 0
-63395
--192342
-74944
--186041
+63382
+-192355
+74931
+-186054
 2
 1
 0
@@ -17750,7 +17113,7 @@ OLE     BIN
 
 
 
-14626
+15459
 25
 
 3
@@ -17763,9 +17126,9 @@ OLE     BIN
 0
 0
 0
-64593
+63946
 -207625
-72842
+73470
 -204101
 2
 1
@@ -17783,7 +17146,7 @@ OLE     BIN
 
 
 
-14626
+15459
 29
 
 3
@@ -17796,10 +17159,10 @@ OLE     BIN
 0
 0
 0
-7442
--201584
-23416
--196258
+7437
+-201589
+23411
+-196263
 2
 1
 0
@@ -17816,7 +17179,7 @@ OLE     BIN
 
 
 
-14626
+15459
 192
 
 3
@@ -17829,10 +17192,10 @@ OLE     BIN
 0
 0
 0
--6963
--194664
-12536
--188363
+-6971
+-194672
+12528
+-188371
 2
 1
 0
@@ -17849,7 +17212,7 @@ OLE     BIN
 
 
 
-14626
+15459
 197
 
 3
@@ -17884,7 +17247,7 @@ Copyright © 2001-2003 DVL Software Limited\
 Wellington, New Zealand  - 20 February 2003
 
 
-14626
+15459
 0
 
 3
@@ -17897,9 +17260,9 @@ Wellington, New Zealand  - 20 February 2003
 0
 0
 0
-38570
+37927
 -210520
-47419
+48051
 -206996
 2
 1
@@ -17917,12 +17280,12 @@ Wellington, New Zealand  - 20 February 2003
 
 
 
-14626
+15459
 467
 
 3
-14610
-16
+2
+289
 0
 8
 0
@@ -17930,45 +17293,34 @@ Wellington, New Zealand  - 20 February 2003
 0
 0
 0
+-14674
+-236573
+3700
+-225397
+2
+1
 0
 0
 0
 0
--1
--1
 0
 0
 0
 0
-0
-0
-0
-0
-0
-
 0
 
-
-
-14626
 0
+
+
+
+15459
+1
 
 3
-2
-289
+15839
+16
 0
-1
-14610
-0
-0
-0
-0
--14664
--236563
-3710
--225387
-2
-1
+9
 0
 0
 0
@@ -17978,20 +17330,31 @@ Wellington, New Zealand  - 20 February 2003
 0
 0
 0
-
+-1
+-1
+0
+0
+0
+0
+0
+0
+0
+0
 0
 
+0
 
 
-14626
-1
+
+15459
+0
 
 3
 915
 6
 0
-2
-14610
+1
+15839
 0
 0
 0
@@ -18017,23 +17380,23 @@ Each commit will be \
 stored in this table.
 
 
-14626
+15459
 0
 
 3
 3
 289
 0
-9
+10
 0
 0
 0
 0
 0
-10626
--221069
-20900
--214768
+10581
+-221077
+20930
+-214776
 2
 1
 0
@@ -18050,14 +17413,14 @@ stored in this table.
 
 
 
-14626
+15459
 4
 
 3
 913
 6
 0
-10
+11
 0
 0
 0
@@ -18084,113 +17447,11 @@ each commit modifies \
 one or more files
 
 
-14626
+15459
 0
 
 3
-12840
-16
-0
-11
-0
-0
-0
-0
-0
-0
-0
-0
-0
--1
--1
-0
-0
-0
-0
-0
-0
-0
-0
-0
-
-0
-
-
-
-14626
-0
-
-3
-837
-289
-0
-1
-12840
-0
-0
-0
-0
--9077
--210833
--528
--206482
-2
-1
-0
-0
-0
-0
-0
-0
-0
-0
-0
-
-0
-
-
-
-14626
-469
-
-3
-917
-6
-0
-2
-12840
-0
-0
-0
-0
--14517
--209243
--6343
--205044
-1
-1
-0
-1
-529
-0
-0
-0
-0
-0
-0
-
-0
-Sample entries are \
-4.2-RELEASE,\
-4.2-STABLE, \
-5.0-CURRENT
-
-
-14626
-0
-
-3
-12841
+15820
 16
 0
 12
@@ -18219,23 +17480,56 @@ Sample entries are \
 
 
 
-14626
+15459
 0
 
 3
-919
-6
+837
+289
 0
 1
-12841
+15820
 0
 0
 0
 0
--17291
--217014
--5517
--213790
+-9719
+-210838
+105
+-206487
+2
+1
+0
+0
+0
+0
+0
+0
+0
+0
+0
+
+0
+
+
+
+15459
+469
+
+3
+917
+6
+0
+2
+15820
+0
+0
+0
+0
+-14742
+-209243
+-6568
+-205044
 1
 1
 0
@@ -18249,49 +17543,17 @@ Sample entries are \
 0
 
 0
-SYSTEM allows for multiple \
-Operating Systems\
-in the same database
+Sample entries are \
+4.2-RELEASE,\
+4.2-STABLE, \
+5.0-CURRENT
 
 
-14626
+15459
 0
-
-3
-925
-289
-0
-2
-12841
-0
-0
-0
-0
--8903
--219204
-246
--214853
-2
-1
-0
-0
-0
-0
-0
-0
-0
-0
-0
-
-0
-
-
-
-14626
-505
 
 3
-12839
+15825
 16
 0
 13
@@ -18320,7 +17582,108 @@ in the same database
 
 
 
-14626
+15459
+0
+
+3
+919
+6
+0
+1
+15825
+0
+0
+0
+0
+-17291
+-217014
+-5517
+-213790
+1
+1
+0
+1
+529
+0
+0
+0
+0
+0
+0
+
+0
+SYSTEM allows for multiple \
+Operating Systems\
+in the same database
+
+
+15459
+0
+
+3
+925
+289
+0
+2
+15825
+0
+0
+0
+0
+-8906
+-219207
+243
+-214856
+2
+1
+0
+0
+0
+0
+0
+0
+0
+0
+0
+
+0
+
+
+
+15459
+505
+
+3
+15805
+16
+0
+14
+0
+0
+0
+0
+0
+0
+0
+0
+0
+-1
+-1
+0
+0
+0
+0
+0
+0
+0
+0
+0
+
+0
+
+
+
+15459
 0
 
 3
@@ -18328,15 +17691,15 @@ in the same database
 289
 0
 1
-12839
+15805
 0
 0
 0
 0
-9380
--210700
-22804
--206349
+9373
+-210707
+22797
+-206356
 2
 1
 0
@@ -18353,7 +17716,7 @@ in the same database
 
 
 
-14626
+15459
 468
 
 3
@@ -18361,7 +17724,7 @@ in the same database
 6
 0
 2
-12839
+15805
 0
 0
 0
@@ -18388,23 +17751,23 @@ same element referred to more \
 than once by the same tag.
 
 
-14626
+15459
 0
 
 3
 3904
 289
 0
-14
+15
 0
 0
 0
 0
 0
-11734
--234104
-24483
--229753
+11082
+-234119
+25106
+-229768
 2
 1
 0
@@ -18421,22 +17784,22 @@ than once by the same tag.
 
 
 
-14626
+15459
 1056
 
 3
 4579
 289
 0
-15
+16
 0
 0
 0
 0
 0
-38475
+38467
 -205736
-46274
+46266
 -202212
 2
 1
@@ -18454,44 +17817,11 @@ than once by the same tag.
 
 
 
-14626
+15459
 2324
 
 3
 4701
-289
-0
-16
-0
-0
-0
-0
-0
-14353
--242214
-25002
--235913
-2
-1
-0
-0
-0
-0
-0
-0
-0
-0
-0
-
-0
-
-
-
-14626
-2836
-
-3
-5215
 289
 0
 17
@@ -18500,10 +17830,10 @@ than once by the same tag.
 0
 0
 0
--25962
--201902
--8338
--193651
+14344
+-242223
+24993
+-235922
 2
 1
 0
@@ -18520,11 +17850,11 @@ than once by the same tag.
 
 
 
-14626
-3363
+15459
+2836
 
 3
-5367
+5215
 289
 0
 18
@@ -18533,10 +17863,10 @@ than once by the same tag.
 0
 0
 0
-66692
--141197
-78166
--136846
+-25974
+-201914
+-8350
+-193663
 2
 1
 0
@@ -18553,11 +17883,11 @@ than once by the same tag.
 
 
 
-14626
-4526
+15459
+3363
 
 3
-5524
+5367
 289
 0
 19
@@ -18566,10 +17896,10 @@ than once by the same tag.
 0
 0
 0
-51870
--204517
-62819
--195291
+66689
+-141200
+78163
+-136849
 2
 1
 0
@@ -18586,11 +17916,11 @@ than once by the same tag.
 
 
 
-14626
-5703
+15459
+4526
 
 3
-6156
+5524
 289
 0
 20
@@ -18599,10 +17929,10 @@ than once by the same tag.
 0
 0
 0
-27343
--160483
-45717
--150282
+51852
+-204535
+62801
+-195309
 2
 1
 0
@@ -18619,11 +17949,11 @@ than once by the same tag.
 
 
 
-14626
-6230
+15459
+5703
 
 3
-6313
+6156
 289
 0
 21
@@ -18632,10 +17962,10 @@ than once by the same tag.
 0
 0
 0
-51440
--139862
-63889
--132586
+27337
+-160489
+45711
+-150288
 2
 1
 0
@@ -18652,14 +17982,47 @@ than once by the same tag.
 
 
 
-14626
+15459
+6230
+
+3
+6313
+289
+0
+22
+0
+0
+0
+0
+0
+51437
+-139865
+63886
+-132589
+2
+1
+0
+0
+0
+0
+0
+0
+0
+0
+0
+
+0
+
+
+
+15459
 6547
 
 3
 6957
 289
 0
-22
+23
 0
 0
 0
@@ -18685,23 +18048,23 @@ than once by the same tag.
 
 
 
-14626
+15459
 8543
 
 3
 6632
 291
 0
-23
+24
 0
 0
 0
 0
 0
-28528
--115886
-40552
--107962
+28521
+-115893
+40545
+-107969
 2
 7
 0
@@ -18718,23 +18081,23 @@ than once by the same tag.
 
 
 
-14626
+15459
 7239
 
 3
 5368
 289
 0
-24
+25
 0
 0
 0
 0
 0
-48957
--130415
-68306
--107539
+48349
+-130048
+67698
+-107172
 2
 1
 0
@@ -18751,23 +18114,23 @@ than once by the same tag.
 
 
 
-14626
+15459
 4528
 
 3
 6795
 291
 0
-25
+26
 0
 0
 0
 0
 0
-28089
--126372
-43338
--117473
+28082
+-126379
+43331
+-117480
 2
 7
 0
@@ -18784,14 +18147,14 @@ than once by the same tag.
 
 
 
-14626
+15459
 7906
 
 3
 6470
 291
 0
-26
+27
 0
 0
 0
@@ -18817,144 +18180,12 @@ than once by the same tag.
 
 
 
-14626
+15459
 6871
 
 3
-12230
+16002
 16
-0
-27
-0
-0
-0
-0
-0
-0
-0
-0
-0
--1
--1
-0
-0
-0
-0
-0
-0
-0
-0
-0
-
-0
-
-
-
-14626
-0
-
-3
-7119
-289
-0
-1
-12230
-0
-0
-0
-0
-68984
--114030
-78358
--107735
-2
-1
-0
-0
-0
-0
-0
-0
-0
-0
-0
-
-0
-
-
-
-14626
-9430
-
-3
-7483
-289
-0
-2
-12230
-0
-0
-0
-0
-68797
--120229
-78546
--114908
-2
-1
-0
-0
-0
-0
-0
-0
-0
-0
-0
-
-0
-
-
-
-14626
-10451
-
-3
-7484
-289
-0
-3
-12230
-0
-0
-0
-0
-70905
--129685
-76439
--125337
-2
-1
-0
-0
-0
-0
-0
-0
-0
-0
-0
-
-0
-
-
-
-14626
-10456
-
-3
-7652
-289
 0
 28
 0
@@ -18962,10 +18193,76 @@ than once by the same tag.
 0
 0
 0
-49052
--162837
-56476
--158486
+0
+0
+0
+0
+-1
+-1
+0
+0
+0
+0
+0
+0
+0
+0
+0
+
+0
+
+
+
+15459
+0
+
+3
+15703
+290
+0
+1
+16002
+7484
+7483
+0
+0
+0
+0
+0
+0
+2
+3
+0
+0
+0
+0
+0
+1
+0
+0
+2
+3d1f01004012feff3d1f0100e42cfeff
+2
+
+
+
+15459
+16641
+
+3
+7119
+289
+0
+2
+16002
+0
+0
+0
+0
+68978
+-114039
+78352
+-107738
 2
 1
 0
@@ -18982,11 +18279,77 @@ than once by the same tag.
 
 
 
-14626
-10812
+15459
+9430
 
 3
-7654
+7483
+289
+0
+3
+16002
+0
+0
+0
+0
+68787
+-120241
+78536
+-114915
+2
+1
+0
+0
+0
+0
+0
+0
+0
+0
+0
+
+0
+
+
+
+15459
+10451
+
+3
+7484
+289
+0
+4
+16002
+0
+0
+0
+0
+70708
+-129690
+76632
+-125339
+2
+1
+0
+0
+0
+0
+0
+0
+0
+0
+0
+
+0
+
+
+
+15459
+10456
+
+3
+7652
 289
 0
 29
@@ -18995,10 +18358,10 @@ than once by the same tag.
 0
 0
 0
-54785
--154577
-72034
--146326
+50024
+-162840
+58048
+-158489
 2
 1
 0
@@ -19015,11 +18378,11 @@ than once by the same tag.
 
 
 
-14626
-10814
+15459
+10812
 
 3
-7666
+7654
 289
 0
 30
@@ -19028,10 +18391,10 @@ than once by the same tag.
 0
 0
 0
-57778
--173816
-68727
--169465
+56036
+-154601
+73285
+-146350
 2
 1
 0
@@ -19048,11 +18411,11 @@ than once by the same tag.
 
 
 
-14626
-10829
+15459
+10814
 
 3
-7685
+7666
 289
 0
 31
@@ -19061,10 +18424,10 @@ than once by the same tag.
 0
 0
 0
-68671
--162485
-77295
--158134
+58400
+-173832
+70624
+-169481
 2
 1
 0
@@ -19081,12 +18444,12 @@ than once by the same tag.
 
 
 
-14626
-10838
+15459
+10829
 
 3
-7729
-291
+7685
+289
 0
 32
 0
@@ -19094,10 +18457,43 @@ than once by the same tag.
 0
 0
 0
-28313
--149137
-48362
--141213
+69943
+-162488
+78567
+-158137
+2
+1
+0
+0
+0
+0
+0
+0
+0
+0
+0
+
+0
+
+
+
+15459
+10838
+
+3
+7729
+291
+0
+33
+0
+0
+0
+0
+0
+28270
+-149143
+48394
+-141219
 2
 7
 0
@@ -19114,23 +18510,23 @@ than once by the same tag.
 
 
 
-14626
+15459
 10864
 
 3
 7931
 289
 0
-33
+34
 0
 0
 0
 0
 0
-66113
--184965
-74362
--180614
+66068
+-184973
+74392
+-180622
 2
 1
 0
@@ -19147,14 +18543,14 @@ than once by the same tag.
 
 
 
-14626
+15459
 11332
 
 3
 911
 6
 0
-34
+35
 0
 0
 0
@@ -19185,44 +18581,11 @@ one entry in this \
 table.
 
 
-14626
+15459
 0
 
 3
 327
-289
-0
-35
-0
-0
-0
-0
-0
-30601
--246066
-48825
--225140
-2
-1
-0
-0
-0
-0
-0
-0
-0
-0
-0
-
-0
-
-
-
-14626
-209
-
-3
-622
 289
 0
 36
@@ -19231,10 +18594,10 @@ table.
 0
 0
 0
-52605
--243773
-61979
--237472
+30587
+-246080
+48811
+-225154
 2
 1
 0
@@ -19251,11 +18614,11 @@ table.
 
 
 
-14626
-304
+15459
+209
 
 3
-4
+622
 289
 0
 37
@@ -19264,10 +18627,10 @@ table.
 0
 0
 0
-54545
--226421
-62644
--221095
+52595
+-243783
+61969
+-237482
 2
 1
 0
@@ -19284,11 +18647,11 @@ table.
 
 
 
-14626
-8
+15459
+304
 
 3
-8598
+4
 289
 0
 38
@@ -19297,9 +18660,42 @@ table.
 0
 0
 0
-68251
+54501
+-226428
+62675
+-221102
+2
+1
+0
+0
+0
+0
+0
+0
+0
+0
+0
+
+0
+
+
+
+15459
+8
+
+3
+8598
+289
+0
+39
+0
+0
+0
+0
+0
+68058
 -235711
-76800
+76982
 -232187
 2
 1
@@ -19317,23 +18713,23 @@ table.
 
 
 
-14626
+15459
 11727
 
 3
 11996
 289
 0
-39
+40
 0
 0
 0
 0
 0
-28811
--166824
-36835
--162473
+28810
+-166825
+36834
+-162474
 2
 1
 0
@@ -19350,22 +18746,22 @@ table.
 
 
 
-14626
+15459
 14576
 
 3
 11997
 289
 0
-40
+41
 0
 0
 0
 0
 0
-29495
+28848
 -174183
-35494
+36122
 -170659
 2
 1
@@ -19383,44 +18779,11 @@ table.
 
 
 
-14626
+15459
 14577
 
 3
 14172
-289
-0
-41
-0
-0
-0
-0
-0
-45231
--127606
-64580
--113505
-2
-1
-0
-0
-0
-0
-0
-0
-0
-0
-0
-
-0
-
-
-
-14626
-15520
-
-3
-14385
 289
 0
 42
@@ -19429,10 +18792,10 @@ table.
 0
 0
 0
-8003
--248519
-25627
--243193
+45223
+-127614
+64572
+-113513
 2
 1
 0
@@ -19449,14 +18812,47 @@ table.
 
 
 
-14626
+15459
+15520
+
+3
+14385
+289
+0
+43
+0
+0
+0
+0
+0
+7993
+-248529
+25617
+-243203
+2
+1
+0
+0
+0
+0
+0
+0
+0
+0
+0
+
+0
+
+
+
+15459
 15995
 
 3
 4427
 290
 0
-43
+44
 0
 835
 3
@@ -19477,19 +18873,19 @@ table.
 0
 0
 3
-68a7000010d3fcff68a70000c1b1fcff4a440000c1b1fcff
+4fa7000010d3fcff4fa70000b9b1fcff4f440000b9b1fcff
 2
 
 
 
-14626
+15459
 1572
 
 3
 9
 290
 0
-44
+45
 0
 2
 3
@@ -19510,19 +18906,19 @@ table.
 0
 0
 3
-03feffffda86fcff56300000da86fcff5630000017acfcff
+f9fdffffd086fcff35300000d086fcff353000000facfcff
 2
 
 
 
-14626
+15459
 32
 
 3
 49
 290
 0
-45
+46
 0
 4
 7
@@ -19543,19 +18939,19 @@ table.
 0
 0
 3
-15ef0000799ffcff15ef00005bd7fcffc2fc00005bd7fcff
+26ef0000729ffcff26ef00005bd7fcff4cfa00005bd7fcff
 2
 
 
 
-14626
+15459
 41
 
 3
 52
 290
 0
-46
+47
 0
 6
 7
@@ -19576,19 +18972,19 @@ table.
 0
 0
 2
-6b0d0100cf17fdff6b0d01009fdcfcff
+670d0100c217fdff670d01009fdcfcff
 2
 
 
 
-14626
+15459
 44
 
 3
 843
 290
 0
-47
+48
 0
 837
 836
@@ -19609,19 +19005,19 @@ table.
 0
 0
 2
-fdeaffff23d5fcffd33e000023d5fcff
+a3eaffff17d5fcffcc3e000017d5fcff
 2
 
 
 
-14626
+15459
 479
 
 3
 888
 290
 0
-48
+49
 0
 4
 835
@@ -19642,19 +19038,19 @@ fdeaffff23d5fcffd33e000023d5fcff
 0
 0
 3
-22d90000699dfcff22d9000022cdfcfff6a6000022cdfcff
+ffd80000629dfcffffd8000022cdfcffcca6000022cdfcff
 2
 
 
 
-14626
+15459
 495
 
 3
 3087
 290
 0
-49
+50
 0
 925
 837
@@ -19675,19 +19071,19 @@ fdeaffff23d5fcffd33e000023d5fcff
 0
 0
 2
-a0ebffffeeaffcffa0ebffff0fc9fcff
+7aebffffebaffcff7aebffff0ac9fcff
 2
 
 
 
-14626
+15459
 821
 
 3
 3205
 290
 0
-50
+51
 0
 5
 6
@@ -19708,19 +19104,19 @@ a0ebffffeeaffcffa0ebffff0fc9fcff
 0
 0
 2
-cbb500000826fdff70f800000826fdff
+b3b50000e325fdff63f80000e325fdff
 2
 
 
 
-14626
+15459
 893
 
 3
 3482
 290
 0
-51
+52
 0
 320
 5
@@ -19741,19 +19137,19 @@ cbb500000826fdff70f800000826fdff
 0
 0
 3
-de4e000098fcfcffde4e0000100efdff03a80000100efdff
+d94e000093fcfcffd94e0000f80dfdffeba70000f80dfdff
 2
 
 
 
-14626
+15459
 964
 
 3
 4006
 290
 0
-52
+53
 0
 2
 3904
@@ -19774,19 +19170,19 @@ de4e000098fcfcffde4e0000100efdff03a80000100efdff
 0
 0
 2
-f8d2ffffef72fcff2d4d0000ef72fcff
+eed2ffffd672fcffc34d0000d672fcff
 2
 
 
 
-14626
+15459
 1230
 
 3
 4008
 290
 0
-53
+54
 0
 327
 3904
@@ -19807,19 +19203,19 @@ f8d2ffffef72fcff2d4d0000ef72fcff
 0
 0
 2
-d89700003a76fcff5e4200003a76fcff
+ca9700001d76fcffdf4100001d76fcff
 2
 
 
 
-14626
+15459
 1231
 
 3
 4435
 290
 0
-54
+55
 0
 835
 836
@@ -19840,19 +19236,19 @@ d89700003a76fcff5e4200003a76fcff
 0
 0
 2
-84a50000c4d0fcffaf400000c4d0fcff
+25a50000bdd0fcffa8400000bdd0fcff
 2
 
 
 
-14626
+15459
 1578
 
 3
 4522
 290
 0
-55
+56
 0
 3
 3904
@@ -19873,19 +19269,19 @@ d89700003a76fcff5e4200003a76fcff
 0
 0
 2
-e44900007eaffcffe44900006670fcff
+014a000076affcff014a00005770fcff
 2
 
 
 
-14626
+15459
 2088
 
 3
 4540
 290
 0
-56
+57
 0
 925
 2
@@ -19906,19 +19302,19 @@ e44900007eaffcffe44900006670fcff
 0
 0
 2
-baefffff17b0fcffbaefffff8e7cfcff
+adefffff14b0fcffadefffff847cfcff
 2
 
 
 
-14626
+15459
 2092
 
 3
 4580
 290
 0
-57
+58
 0
 5
 4579
@@ -19939,19 +19335,19 @@ baefffff17b0fcffbaefffff8e7cfcff
 0
 0
 3
-e479000068f3fcffe479000047e4fcff6798000047e4fcff
+cc79000050f3fcffcc79000047e4fcff5f98000047e4fcff
 2
 
 
 
-14626
+15459
 2328
 
 3
 4702
 290
 0
-58
+59
 0
 2
 4701
@@ -19972,19 +19368,19 @@ e479000068f3fcffe479000047e4fcff6798000047e4fcff
 0
 0
 3
-dbecffffa765fcffdbecffff215bfcffda510000215bfcff
+d1ecffff9d65fcffd1ecffff185bfcffd1510000185bfcff
 2
 
 
 
-14626
+15459
 2840
 
 3
 4704
 290
 0
-59
+60
 0
 327
 4701
@@ -20005,19 +19401,19 @@ dbecffffa765fcffdbecffff215bfcffda510000215bfcff
 0
 0
 2
-778200008f53fcff5e4d00008f53fcff
+698200007853fcff554d00007853fcff
 2
 
 
 
-14626
+15459
 2841
 
 3
 5216
 290
 0
-60
+61
 0
 5
 5215
@@ -20037,20 +19433,20 @@ dbecffffa765fcffdbecffff215bfcffda510000215bfcff
 1
 0
 0
-4
-6b6e0000a024fdff7f260000a024fdffbbbbffffa024fdffbbbbffff6006fdff
+3
+536e00008824fdff80aeffff8824fdff80aeffff040bfdff
 2
 
 
 
-14626
+15459
 3368
 
 3
 6099
 290
 0
-61
+62
 0
 4
 5524
@@ -20071,19 +19467,19 @@ dbecffffa765fcffdbecffff215bfcffda510000215bfcff
 0
 0
 2
-07e40000ae9cfcff07e40000dee4fcff
+ede30000a79cfcffede30000cce4fcff
 2
 
 
 
-14626
+15459
 6049
 
 3
 6476
 290
 0
-62
+63
 0
 320
 321
@@ -20104,19 +19500,19 @@ dbecffffa765fcffdbecffff215bfcffda510000215bfcff
 0
 0
 3
-113b0000faf5fcff02100000faf5fcff02100000fc12fdff
+0c3b0000f5f5fcfffa0f0000f5f5fcfffa0f0000f412fdff
 2
 
 
 
-14626
+15459
 6875
 
 3
 7669
 290
 0
-63
+64
 0
 5
 7666
@@ -20137,19 +19533,19 @@ dbecffffa765fcffdbecffff215bfcffda510000215bfcff
 0
 0
 4
-8d930000bd35fdff8d930000bc4efdff2bf50000bc4efdff2bf500001c5cfdff
+75930000a535fdff75930000bc4efdffddf90000bc4efdffddf900000c5cfdff
 2
 
 
 
-14626
+15459
 10833
 
 3
 7932
 290
 0
-64
+65
 0
 5
 7931
@@ -20170,19 +19566,19 @@ dbecffffa765fcffdbecffff215bfcffda510000215bfcff
 0
 0
 2
-c8bc00008432fdff5d1501008432fdff
+b0bc00006432fdff5c1501006432fdff
 2
 
 
 
-14626
+15459
 11336
 
 3
 11571
 290
 0
-65
+66
 0
 5
 5524
@@ -20203,19 +19599,19 @@ c8bc00008432fdff5d1501008432fdff
 0
 0
 3
-d7bb00000313fdff92de00000313fdff92de00000602fdff
+bfbb0000eb12fdff80de0000eb12fdff80de0000f401fdff
 2
 
 
 
-14626
+15459
 12188
 
 3
 11658
 290
 0
-66
+67
 0
 6
 5
@@ -20236,19 +19632,19 @@ d7bb00000313fdff92de00000313fdff92de00000602fdff
 0
 0
 2
-bffe0000f91efdfff5be0000f91efdff
+b2fe0000d41efdffddbe0000d41efdff
 2
 
 
 
-14626
+15459
 13301
 
 3
 11967
 290
 0
-67
+68
 0
 2
 5215
@@ -20269,19 +19665,19 @@ bffe0000f91efdfff5be0000f91efdff
 0
 0
 3
-7cd8ffff4776fcff37bcffff4776fcff37bcffff07eefcff
+72d8ffff3d76fcff2bbcffff3d76fcff2bbcfffffbedfcff
 2
 
 
 
-14626
+15459
 14563
 
 3
 11998
 290
 0
-68
+69
 0
 5
 11997
@@ -20302,19 +19698,19 @@ bffe0000f91efdfff5be0000f91efdff
 0
 0
 2
-cb7a0000fd33fdffcb7a0000a05afdff
+3b7a0000e533fdff3b7a0000a05afdff
 2
 
 
 
-14626
+15459
 14585
 
 3
 12815
 290
 0
-69
+70
 0
 7652
 7654
@@ -20335,19 +19731,19 @@ cb7a0000fd33fdffcb7a0000a05afdff
 0
 0
 3
-37c50000c590fdff37c500008db9fdfff7d600008db9fdff
+77c90000c290fdff77c9000075b9fdffdadb000075b9fdff
 2
 
 
 
-14626
+15459
 14986
 
 3
 12818
 290
 0
-70
+71
 0
 7685
 7654
@@ -20367,20 +19763,20 @@ cb7a0000fd33fdffcb7a0000a05afdff
 1
 0
 0
-4
-3c240100d393fdff3c240100159dfdff3c240100c9b5fdffb7160100c9b5fdff
+3
+34290100d093fdff34290100b1b5fdff9a1b0100b1b5fdff
 2
 
 
 
-14626
+15459
 14989
 
 3
 12829
 290
 0
-71
+72
 0
 7652
 7666
@@ -20400,20 +19796,20 @@ cb7a0000fd33fdffcb7a0000a05afdff
 1
 0
 0
-4
-43c700009687fdff43c700004975fdff99e700004975fdff99e700002e65fdff
+3
+adcb00009387fdffadcb00001e65fdffb7ea00001e65fdff
 2
 
 
 
-14626
+15459
 14998
 
 3
 12831
 290
 0
-72
+73
 0
 7685
 7666
@@ -20433,20 +19829,20 @@ cb7a0000fd33fdffcb7a0000a05afdff
 1
 0
 0
-4
-89220100b98efdff892201008277fdff1f0101008277fdff1f0101002f65fdff
+3
+81270100b68efdff812701006f60fdffd30e01006f60fdff
 2
 
 
 
-14626
+15459
 14999
 
 3
 2809
 290
 0
-73
+74
 0
 4
 622
@@ -20467,19 +19863,19 @@ cb7a0000fd33fdffcb7a0000a05afdff
 0
 0
 2
-1fe50000fd90fcff1fe500008451fcff
+0fe50000f690fcff0fe500007a51fcff
 2
 
 
 
-14626
+15459
 671
 
 3
 2812
 290
 0
-74
+75
 0
 4
 327
@@ -20500,19 +19896,19 @@ cb7a0000fd33fdffcb7a0000a05afdff
 0
 0
 3
-27db0000f199fcff27db00004a7dfcff4aa500004a7dfcff
+09db0000ea99fcff09db00003c7dfcff3ca500003c7dfcff
 2
 
 
 
-14626
+15459
 674
 
 3
 2815
 290
 0
-75
+76
 0
 622
 327
@@ -20533,19 +19929,19 @@ cb7a0000fd33fdffcb7a0000a05afdff
 0
 0
 3
-fbd400009f50fcfffbd40000376bfcff8c7e0000376bfcff
+f1d400009550fcfff1d40000296bfcff7e7e0000296bfcff
 2
 
 
 
-14626
+15459
 677
 
 3
 2986
 290
 0
-76
+77
 0
 4
 4
@@ -20566,19 +19962,19 @@ fbd400009f50fcfffbd40000376bfcff8c7e0000376bfcff
 0
 0
 4
-ccf00000719cfcff14fe0000719cfcff14fe0000738ffcff3cf20000738ffcff
+e1f000006a9cfcff33fe00006a9cfcff33fe00006c8ffcff55f200006c8ffcff
 2
 
 
 
-14626
+15459
 751
 
 3
 8599
 290
 0
-77
+78
 0
 4
 8598
@@ -20599,19 +19995,19 @@ ccf00000719cfcff14fe0000719cfcff14fe0000738ffcff3cf20000738ffcff
 0
 0
 3
-95f000004391fcff95f00000ec6cfcff4b1d0100ec6cfcff
+aaf000003c91fcffaaf00000ec6cfcff5b1d0100ec6cfcff
 2
 
 
 
-14626
+15459
 11730
 
 3
 13094
 290
 0
-78
+79
 0
 11996
 11997
@@ -20632,19 +20028,19 @@ ccf00000719cfcff14fe0000719cfcff14fe0000738ffcff3cf20000738ffcff
 0
 0
 2
-5b7b0000ed7bfdff5b7b0000c362fdff
+f27a0000ec7bfdfff27a0000c362fdff
 2
 
 
 
-14626
+15459
 15187
 
 3
 14390
 290
 0
-79
+80
 0
 327
 14385
@@ -20665,19 +20061,19 @@ ccf00000719cfcff14fe0000719cfcff14fe0000738ffcff3cf20000738ffcff
 0
 0
 2
-d97d00007841fcfff06000007841fcff
+cb7d00006041fcffe66000006041fcff
 2
 
 
 
-14626
+15459
 16003
 
 3
 14604
 290
 0
-80
+81
 0
 2
 14385
@@ -20698,12 +20094,12 @@ d97d00007841fcfff06000007841fcff
 0
 0
 3
-d3deffff8266fcffd3deffff6b3dfcffe52400006b3dfcff
+c9deffff7866fcffc9deffff613dfcffdb240000613dfcff
 2
 
 
 
-14626
+15459
 16442
 
 /END_TABLE AMCSYMB

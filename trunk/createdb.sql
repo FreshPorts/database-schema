@@ -1,5 +1,5 @@
 --
--- $Id: createdb.sql,v 1.42 2003-02-20 22:28:29 dan Exp $
+-- $Id: createdb.sql,v 1.43 2003-02-21 15:51:32 dan Exp $
 --
 -- The following options should be used to create the database schema
 --
@@ -27,8 +27,8 @@
 
 create table housekeeping
 (
-    id                      int4                  not null,
-    last_port_commit        int4                  not null,
+    id                      serial                not null,
+    last_port_commit        integer               not null,
     refresh_now             smallint              not null,
     primary key (id)
 );
@@ -38,16 +38,16 @@ insert into housekeeping values (1,0,0);
 create table commits_latest_ports
 (
     commit_date_raw         timestamp with time zone         ,
-    commit_log_id           int4                          ,
+    commit_log_id           integer                       ,
     encoding_losses         boolean                       ,
     message_id              text                          ,
     committer               text                          ,
     commit_description      text                          ,
     commit_date             text                          ,
     commit_time             text                          ,
-    port_id                 int4                          ,
+    port_id                 integer                       ,
     category                text                          ,
-    category_id             int4                          ,
+    category_id             integer                       ,
     port                    text                          ,
     version                 text                          ,
     revision                text                          ,
@@ -55,53 +55,44 @@ create table commits_latest_ports
     needs_refresh           smallint                      ,
     forbidden               text                          ,
     broken                  text                          ,
-    date_added              double precision              ,
-    element_id              int4                          ,
+    date_added              timestamp with time zone         ,
+    element_id              integer                       ,
     short_description       text                          ,
-    security_notice_id      int4                          
+    security_notice_id      integer                       
 );
 
 create table watch_list_staging_log
 (
-    id                      int4                  not null,
-    date_added              timestamp with time zone not null,
-    user_id                 int4                  not null,
+    id                      serial                not null,
+    date_added              timestamp with time zone not null
+        default current_timestamp,
+    user_id                 integer                       ,
     action                  char(1)               not null
         check (action in ('U','W','C','D')),
-    count_total             int4                  not null
+    count_total             integer               not null
         default 0,
-    count_matches           int4                  not null
+    count_matches           integer               not null
         default 0,
-    count_missing           int4                  not null
+    count_missing           integer               not null
         default 0,
-    count_duplicates        int4                  not null
+    count_duplicates        integer               not null
         default 0,
-    count_categories        int4                  not null
+    count_categories        integer               not null
         default 0,
     primary key (id)
 );
 
-  drop sequence watch_list_staging_log_id_seq;
-create sequence watch_list_staging_log_id_seq;
-
-alter table watch_list_staging_log alter column id set default nextval('watch_list_staging_log_id_seq'::text);
-alter table watch_list_staging_log alter column date_added set default current_timestamp;
-
 create table ports_check
 (
-    id                      int4                  not null,
+    id                      serial                not null,
     category_name           text                  not null,
     port_name               text                  not null,
-    category_id             int4                          ,
-    port_id                 int4                          ,
+    category_id             integer                       ,
+    port_id                 integer                       ,
     add_to_ports_table      boolean               not null
         default 'Y',
     primary key (id)
 );
-
-  drop sequence ports_check_id_seq;
-create sequence ports_check_id_seq;
-alter table ports_check alter column id set default nextval('ports_check_id_seq'::text);
 
 create index ports_check_category_id on ports_check (category_id);
 
@@ -113,7 +104,7 @@ create table daily_refreshes
 
 create table graphs
 (
-    id                      int4                  not null,
+    id                      serial                not null,
     title                   text                  not null,
     query                   text                  not null,
     label                   text                          ,
@@ -122,13 +113,9 @@ create table graphs
     primary key (id)
 );
 
-  drop sequence graphs_id_seq;
-create sequence graphs_id_seq;
-alter table graphs alter column id set default nextval('graphs_id_seq'::text);
-
 create table commits_latest
 (
-    commit_log_id           int4                          ,
+    commit_log_id           integer                       ,
     commit_date_raw         timestamp with time zone         ,
     message_subject         text                          ,
     message_id              text                          ,
@@ -136,7 +123,7 @@ create table commits_latest
     commit_description      text                          ,
     commit_date             text                          ,
     commit_time             text                          ,
-    element_id              int4                          ,
+    element_id              integer                       ,
     element_name            text                          ,
     revision_name           text                          ,
     status                  char(1)                       ,
@@ -145,35 +132,25 @@ create table commits_latest
 
 create table element
 (
-    id                      int4                  not null,
+    id                      serial                not null,
     name                    text                  not null,
-    parent_id               int4                          ,
+    parent_id               integer                       ,
     status                  char(1)               not null
         check (status in ('A','D')),
     primary key (id)
 );
 
-  drop sequence element_id_seq;
-create sequence element_id_seq;
-
-alter table element alter column id set default nextval('element_id_seq'::text);
-
 create index element_name on element (name);
 
 create table watch_notice
 (
-    id                      int4                  not null,
+    id                      serial                not null,
     frequency               char(1)               not null
         check (frequency in ('Z','D','W','F','M')),
     description             text                  not null,
     last_sent               timestamp with time zone         ,
     primary key (id)
 );
-
-  drop sequence watch_notice_id_seq;
-create sequence watch_notice_id_seq;
-
-alter table watch_notice alter column id set default nextval('watch_notice_id_seq'::text);
 
 INSERT INTO "watch_notice" (id, frequency, description) VALUES (1,'Z','Don''t notify me');
 INSERT INTO "watch_notice" (id, frequency, description) VALUES (3,'W','Week (on Tuesdays)');
@@ -185,35 +162,26 @@ create index watch_notice_frequency on watch_notice (frequency);
 
 create table system
 (
-    id                      int4                  not null,
+    id                      serial                not null,
     name                    text                  not null,
     time_adjust             interval              not null
         default '0 seconds',
     primary key (id)
 );
 
-  drop sequence system_id_seq;
-create sequence system_id_seq;
-
-alter table system alter column id set default nextval('system_id_seq'::text);
-
 INSERT INTO "system" VALUES (1,'FreeBSD','-03:00');
 
 create table daily_stats
 (
-    id                      int4                  not null,
-    title                   text                          ,
-    query                   text                          ,
+    id                      serial                not null,
+    title                   text                  not null,
+    query                   text                  not null,
     primary key (id)
 );
 
-  drop sequence daily_stats_seq;
-create sequence daily_stats_seq;
-alter table daily_stats alter column id set default nextval('daily_stats_seq'::text);
-
 create table reports
 (
-    id                      int4                  not null,
+    id                      serial                not null,
     name                    text                  not null,
     description             text                  not null,
     primary key (id)
@@ -223,14 +191,9 @@ insert into reports(id, name, description) values (1, 'Watch List Notification',
 
 insert into reports(id, name, description) values (2, 'New Ports', 'Lists the new ports which have been added to the ports tree');
 
-  drop sequence reports_id_seq;
-create sequence reports_id_seq;
-alter table reports alter column id set default nextval('reports_id_seq'::text);
-select setval('reports_id_seq'::text, 2);
-
 create table report_frequency
 (
-    id                      int4                  not null,
+    id                      serial                not null,
     frequency               char(1)               not null,
     description             text                  not null,
     primary key (id)
@@ -241,11 +204,6 @@ INSERT INTO report_frequency (id, frequency, description) VALUES (2,'D','Day');
 INSERT INTO report_frequency (id, frequency, description) VALUES (3,'W','Week (on Tuesdays)');
 INSERT INTO report_frequency (id, frequency, description) VALUES (4,'F','Fortnightly  (9th and 23rd)');
 INSERT INTO report_frequency (id, frequency, description) VALUES (5,'M','Month (23rd)');
-
-  drop sequence report_frequency_id_seq;
-create sequence report_frequency_id_seq;
-alter table report_frequency alter column id set default nextval('report_frequency_id_seq'::text);
-select setval('report_frequency_id_seq'::text, 5);
 
 create table tasks
 (
@@ -261,30 +219,26 @@ create unique index tasks_idx on tasks (name);
 
 create table element_revision
 (
-    element_id              int4                  not null,
-    revision_name           text                          ,
+    element_id              integer               not null,
+    revision_name           text                  not null,
     primary key (element_id, revision_name)
 );
 
 create table categories
 (
-    id                      int4                  not null,
+    id                      serial                not null,
     is_primary              boolean               not null,
-    element_id              int4                  not null,
+    element_id              integer               not null,
     name                    text                  not null,
     description             text                          ,
     primary key (id)
 );
 
-  drop sequence categories_id_seq;
-create sequence categories_id_seq;
-alter table categories alter column id set default nextval('categories_id_seq'::text);
-
 create table ports
 (
-    id                      int4                  not null,
-    element_id              int4                  not null,
-    category_id             int4                  not null,
+    id                      serial                not null,
+    element_id              integer               not null,
+    category_id             integer               not null,
     short_description       text                          ,
     long_description        text                          ,
     version                 text                          ,
@@ -296,7 +250,7 @@ create table ports
     package_exists          boolean                       ,
     depends_build           text                          ,
     depends_run             text                          ,
-    last_commit_id          int4                          ,
+    last_commit_id          integer                       ,
     found_in_index          boolean                       ,
     forbidden               text                          ,
     broken                  text                          ,
@@ -306,13 +260,9 @@ create table ports
     primary key (id)
 );
 
-  drop sequence ports_id_seq;
-create sequence ports_id_seq;
-alter table ports alter column id set default nextval('ports_id_seq'::text);
-
 create table users
 (
-    id                      int4                  not null,
+    id                      serial                not null,
     name                    text                  not null,
     password                text                  not null,
     cookie                  text                  not null,
@@ -321,7 +271,7 @@ create table users
     lastlogin               timestamp with time zone         
         default current_timestamp,
     email                   text                          ,
-    watch_notice_id         int4                  not null,
+    watch_notice_id         integer               not null,
     emailsitenotices_yn     boolean                       ,
     emailbouncecount        smallint                      
         default 0,
@@ -339,17 +289,12 @@ create table users
     watch_list_add_remove   text                  not null
         default 'default'
         check (watch_list_add_remove in ('ask','default')),
-    max_number_watch_lists  int4                  not null
+    max_number_watch_lists  integer               not null
         default 5
         check (max_number_watch_lists >= 1),
-    last_watch_list_chosen  int4                          ,
+    last_watch_list_chosen  integer                       ,
     primary key (id)
 );
-
-  drop sequence users_id_seq;
-create sequence users_id_seq;
-
-alter table users alter column id set default nextval('users_id_seq'::text);
 
 create index users_cookie on users (cookie);
 
@@ -359,8 +304,8 @@ create unique index users_name on users (name);
 
 create table watch_list
 (
-    id                      int4                  not null,
-    user_id                 int4                  not null,
+    id                      serial                not null,
+    user_id                 integer               not null,
     name                    text                  not null,
     awaiting_staging        boolean               not null
         default FALSE,
@@ -369,30 +314,17 @@ create table watch_list
     primary key (id)
 );
 
-  drop sequence watch_list_id_seq;
-create sequence watch_list_id_seq;
-
-alter table watch_list alter column id set default nextval('watch_list_id_seq'::text);
-
 create table system_branch
 (
-    id                      int4                  not null,
-    system_id               int4                  not null,
-    branch_name             text                          ,
+    id                      serial                not null,
+    system_id               integer               not null,
+    branch_name             text                  not null,
     primary key (id)
 );
 
-  drop sequence system_branch_id_seq;
-create sequence system_branch_id_seq;
-
-alter table system_branch alter column id set default nextval('system_branch_id_seq'::text);
-
-
-  drop sequence commit_log_id_seq;
-
 create table commit_log
 (
-    id                      int4                  not null,
+    id                      serial                not null,
     message_id              text                  not null,
     message_date            timestamp with time zone not null,
     message_subject         text                          ,
@@ -400,85 +332,72 @@ create table commit_log
     commit_date             timestamp with time zone not null,
     committer               text                  not null,
     description             text                  not null,
-    system_id               int4                  not null,
+    system_id               integer               not null,
     encoding_losses         boolean               not null
         default FALSE,
     primary key (id)
 );
 
-create sequence commit_log_id_seq;
-alter table commit_log alter column id set default nextval('commit_log_id_seq'::text);
-
 create index commit_log_commit_date on commit_log (commit_date);
 
 create unique index commit_log_message_id on commit_log (message_id);
 
-
-  drop sequence commit_log_elements_id_seq;
-
 create table commit_log_elements
 (
-    id                      int4                  not null,
-    commit_log_id           int4                  not null,
-    element_id              int4                  not null,
-    revision_name           text                          ,
+    id                      serial                not null,
+    commit_log_id           integer               not null,
+    element_id              integer               not null,
+    revision_name           text                  not null,
     change_type             char(1)               not null
         check (change_type in ('A','M','R')),
     primary key (id)
 );
 
-create sequence commit_log_elements_id_seq;
-alter table commit_log_elements alter column id set default nextval('commit_log_elements_id_seq'::text);
-
 create table watch_list_element
 (
-    watch_list_id           int4                  not null,
-    element_id              int4                  not null,
+    watch_list_id           integer               not null,
+    element_id              integer               not null,
     primary key (watch_list_id, element_id)
 );
 
 create table watch_notice_log
 (
-    id                      int4                  not null,
+    id                      serial                not null,
     notice_date             timestamp with time zone not null
         default current_timestamp,
-    frequency_id            int4                  not null,
-    watch_notice_count      int4                  not null,
-    commit_count            int4                  not null,
+    frequency_id            integer               not null,
+    watch_notice_count      integer               not null,
+    commit_count            integer               not null,
     primary key (id)
 );
 
-  drop sequence watch_notice_log_id_seq;
-create sequence watch_notice_log_id_seq;
-alter table watch_notice_log alter column id set default nextval('watch_notice_log_id_seq'::text);
-
 create table system_branch_element_revision
 (
-    system_branch_id        int4                  not null,
-    element_id              int4                  not null,
+    system_branch_id        integer               not null,
+    element_id              integer               not null,
     revision_name           text                  not null,
     primary key (system_branch_id, element_id, revision_name)
 );
 
 create table commit_log_port_elements
 (
-    commit_log_id           int4                  not null,
-    port_id                 int4                  not null,
-    commit_log_element_id   int4                  not null,
+    commit_log_id           integer               not null,
+    port_id                 integer               not null,
+    commit_log_element_id   integer               not null,
     primary key (commit_log_id, port_id, commit_log_element_id)
 );
 
 create table user_confirmations
 (
-    user_id                 int4                  not null,
+    user_id                 integer               not null,
     token                   text                  not null,
     primary key (user_id, token)
 );
 
 create table commit_log_ports
 (
-    commit_log_id           int4                  not null,
-    port_id                 int4                  not null,
+    commit_log_id           integer               not null,
+    port_id                 integer               not null,
     needs_refresh           smallint              not null,
     port_version            text                          ,
     port_revision           text                          ,
@@ -490,12 +409,12 @@ create index needs_refresh on commit_log_ports (needs_refresh);
 create table security_notice
 (
     id                      serial                not null,
-    user_id                 int4                  not null,
+    user_id                 integer               not null,
     date_added              timestamp with time zone not null
         default current_timestamp,
     ip_address              inet                  not null,
     description             text                  not null,
-    commit_log_id           int4                  not null,
+    commit_log_id           integer               not null,
     status                  char(1)               not null
         default 'A'
         check (status in ('A','I')),
@@ -506,65 +425,52 @@ create unique index security_notice_clid_idx on security_notice (commit_log_id);
 
 create table watch_list_staging
 (
-    id                      int4                  not null,
-    user_id                 int4                  not null,
+    id                      serial                not null,
+    user_id                 integer               not null,
     category                text                  not null,
     port                    text                  not null,
-    item_count              int4                  not null,
+    item_count              integer               not null,
     from_pkg_info           boolean               not null,
     from_watch_list         boolean               not null,
-    element_id              int4                          ,
+    element_id              serial                        ,
     primary key (id)
 );
 
-  drop sequence watch_list_staging_id_seq;
-create sequence watch_list_staging_id_seq;
-
-alter table watch_list_staging  alter column id set default nextval('watch_list_staging_id_seq'::text);
-
 create table daily_stats_data
 (
-    id                      int4                  not null,
-    daily_stats_id          int4                          ,
+    id                      serial                not null,
+    daily_stats_id          integer               not null,
     date                    date                  not null,
     value                   integer               not null,
     primary key (id)
 );
 
-  drop sequence daily_stats_data_seq;
-create sequence daily_stats_data_seq;
-alter table daily_stats_data alter column id set default nextval('daily_stats_data_seq'::text);
-
 create unique index daily_stats_data_unique on daily_stats_data (daily_stats_id, date);
 
 create table report_log
 (
-    id                      int4                  not null,
-    report_id               int4                  not null,
-    frequency_id            int4                          ,
+    id                      serial                not null,
+    report_id               integer               not null,
+    frequency_id            integer               not null,
     report_date             timestamp with time zone not null
         default current_timestamp,
-    email_count             int4                  not null,
-    commit_count            int4                  not null,
-    port_count              int4                  not null,
+    email_count             integer               not null,
+    commit_count            integer               not null,
+    port_count              integer               not null,
     primary key (id)
 );
 
-  drop sequence report_log_id_seq;
-create sequence report_log_id_seq;
-alter table report_log alter column id set default nextval('report_log_id_seq'::text);
-
 create table report_subscriptions
 (
-    report_id               int4                  not null,
-    user_id                 int4                  not null,
-    report_frequency_id     int4                  not null,
+    report_id               integer               not null,
+    user_id                 integer               not null,
+    report_frequency_id     integer               not null,
     primary key (report_id, user_id)
 );
 
 create table committer_notify
 (
-    user_id                 int4                  not null,
+    user_id                 integer               not null,
     committer               text                  not null,
     status                  char(1)               not null
         default 'A'
@@ -574,7 +480,7 @@ create table committer_notify
 
 create table element_pathnames
 (
-    element_id              int4                  not null,
+    element_id              integer               not null,
     pathname                text                  not null,
     primary key (element_id)
 );
@@ -590,15 +496,15 @@ create unique index element_pathnames_pathname on element_pathnames (pathname);
 
 create table user_tasks
 (
-    task_id                 int4                  not null,
-    user_id                 int4                  not null,
+    task_id                 integer               not null,
+    user_id                 integer               not null,
     primary key (task_id, user_id)
 );
 
 create table ports_refesh_ignore
 (
-    commit_log_id           int4                  not null,
-    port_id                 int4                  not null,
+    commit_log_id           integer               not null,
+    port_id                 integer               not null,
     date_ignored            timestamp with time zone not null
         default current_timestamp,
     reason                  text                  not null,
@@ -741,6 +647,10 @@ alter table watch_list_staging
 alter table watch_list_staging
     add foreign key  (user_id)
        references users (id) on update cascade on delete cascade;
+
+alter table daily_stats_data
+    add foreign key  (daily_stats_id)
+       references daily_stats (id) on update cascade on delete cascade;
 
 alter table daily_stats_data
     add foreign key  (daily_stats_id)
