@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.35 2002-03-02 17:09:04 dan Exp $
+-- $Id: sp.txt,v 1.36 2002-03-02 17:22:24 dan Exp $
 --
 
   drop function IsDescendantOf (int4 ,int4);
@@ -816,10 +816,10 @@ CREATE FUNCTION WatchListStagingProcess(int4) RETURNS int4 AS '
 		RowCount	int4;
 
 	BEGIN
---
+
 -- for each item in watch_list_staging
 -- find matching ports and put them 
--- into the watch_list_staging_results table
+-- into the table
 
 		UPDATE watch_list_staging SET element_id =
 			(	SELECT ports.element_id
@@ -869,8 +869,4 @@ CREATE FUNCTION WatchListStagingClear(int4) RETURNS int4 AS '
 		RETURN RowCount;
 	END
 ' LANGUAGE 'plpgsql';
-
-
-
-
 
