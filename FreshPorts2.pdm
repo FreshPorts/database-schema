@@ -89,14 +89,24 @@ alter table system                         alter column id set default nextval('
 alter table system_branch                  alter column id set default nextval('system_branch_id_seq'::text);\
 alter table users                          alter column id set default nextval('users_id_seq'::text);\
 alter table watch_list                     alter column id set default nextval('watch_list_id_seq'::text);\
-alter table watch_notice_log               alter column id set default nextval('watch_notice_log_id_seq'::text);
+alter table watch_notice_log               alter column id set default nextval('watch_notice_log_id_seq'::text);\
+\
+insert into housekeeping values (0);\
+\
+INSERT INTO "watch_notice" (id, frequency, description) VALUES (1,'Z','Don''t notify me');\
+INSERT INTO "watch_notice" (id, frequency, description) VALUES (3,'W','Week (on Tuesdays)');\
+INSERT INTO "watch_notice" (id, frequency, description) VALUES (4,'F','Fortnightly  (9th and 23rd)');\
+INSERT INTO "watch_notice" (id, frequency, description) VALUES (5,'M','Month (23rd)');\
+INSERT INTO "watch_notice" (id, frequency, description) VALUES (2,'D','Day');\
+\
+INSERT INTO "system" VALUES (1,'FreeBSD','-03:00');
 0
 
 
 Dan Langille
 
 968886895
-1013717291
+1013720976
 0
 0
 0
@@ -843,7 +853,7 @@ housekeeping
 0
 0
 0
-
+housekeeping
 
 
 
@@ -865,7 +875,7 @@ commits_latest
 0
 0
 0
-
+commits_latest
 
 
 
@@ -4455,7 +4465,7 @@ int4
 1
 0
 0
-
+last_port_commit
 
 1
 3
@@ -4490,7 +4500,7 @@ timestamp
 1
 0
 0
-
+commit_date_raw
 
 1
 3
@@ -4525,7 +4535,7 @@ int4
 1
 0
 0
-
+commit_log_id
 
 2
 3
@@ -4560,7 +4570,7 @@ text
 1
 0
 0
-
+commit_description
 
 3
 3
@@ -4595,7 +4605,7 @@ text
 1
 0
 0
-
+commit_date
 
 4
 3
@@ -4630,7 +4640,7 @@ text
 1
 0
 0
-
+commit_time
 
 5
 3
@@ -4665,7 +4675,7 @@ int4
 1
 0
 0
-
+port_id
 
 6
 3
@@ -4700,7 +4710,7 @@ text
 1
 0
 0
-
+category
 
 7
 3
@@ -4735,7 +4745,7 @@ int4
 1
 0
 0
-
+category_id
 
 8
 3
@@ -4770,7 +4780,7 @@ text
 1
 0
 0
-
+port
 
 9
 3
@@ -4805,7 +4815,7 @@ text
 1
 0
 0
-
+version
 
 10
 3
@@ -4840,7 +4850,7 @@ char(1)
 1
 0
 0
-
+status
 
 11
 3
@@ -4875,7 +4885,7 @@ smallint
 1
 0
 0
-
+needs_refresh
 
 12
 3
@@ -4910,7 +4920,7 @@ text
 1
 0
 0
-
+forbidden
 
 13
 3
@@ -4945,7 +4955,7 @@ text
 1
 0
 0
-
+broken
 
 14
 3
@@ -4980,7 +4990,7 @@ double precision
 1
 0
 0
-
+date_added
 
 15
 3
@@ -5015,7 +5025,7 @@ int4
 1
 0
 0
-
+element_id
 
 16
 3
@@ -5050,7 +5060,7 @@ text
 1
 0
 0
-
+short_description
 
 17
 3
@@ -5085,7 +5095,7 @@ text
 1
 0
 0
-
+watch
 
 18
 /END_TABLE AMCCOLN
@@ -8647,7 +8657,7 @@ no
 0
 WarehouseArchitect
 DBOAltIndex
-yes
+no
 133
 2
 0
@@ -8671,7 +8681,7 @@ no
 0
 WarehouseArchitect
 DBOOthrIndx
-yes
+no
 137
 2
 0
@@ -8689,7 +8699,7 @@ DBOTypeTrgr
 0
 WarehouseArchitect
 DBOAltTrgr
-yes
+no
 140
 2
 0
@@ -8701,7 +8711,7 @@ yes
 0
 WarehouseArchitect
 DBODeltTrgr
-yes
+no
 142
 2
 0
@@ -8713,13 +8723,13 @@ no
 0
 WarehouseArchitect
 DBOInstTrgr
-yes
+no
 144
 2
 0
 WarehouseArchitect
 DBOUpdtTrgr
-yes
+no
 145
 2
 0
@@ -8815,7 +8825,7 @@ DBOMsgTxt
 0
 WarehouseArchitect
 DBOAltView
-yes
+no
 161
 2
 0
@@ -8875,31 +8885,31 @@ no
 0
 WarehouseArchitect
 DBOConsDeft
-yes
+no
 171
 2
 0
 WarehouseArchitect
 DBOConsFkey
-yes
+no
 172
 2
 0
 WarehouseArchitect
 DBOConsIDcl
-yes
+no
 173
 2
 0
 WarehouseArchitect
 DBOConsPkey
-yes
+no
 174
 2
 0
 WarehouseArchitect
 DBOConsUddt
-no
+yes
 175
 2
 0
@@ -8917,7 +8927,7 @@ no
 0
 WarehouseArchitect
 DBOUseUddt
-yes
+no
 178
 2
 0
@@ -9037,19 +9047,19 @@ yes
 0
 WarehouseArchitect
 DBOConsTBSc
-yes
+no
 198
 2
 0
 WarehouseArchitect
 DBOConsTESc
-yes
+no
 199
 2
 0
 WarehouseArchitect
 DBOConsTOpt
-yes
+no
 200
 2
 0
@@ -9061,7 +9071,7 @@ yes
 0
 WarehouseArchitect
 DBOAltTable
-yes
+no
 202
 2
 0
