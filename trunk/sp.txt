@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.25 2002-02-14 20:37:16 dan Exp $
+-- $Id: sp.txt,v 1.26 2002-02-17 19:59:43 dan Exp $
 --
 
   drop function IsDescendantOf (int4 ,int4);
@@ -699,7 +699,8 @@ CREATE FUNCTION RecordLastestPortCommits(timestamp) RETURNS INT4 AS '
 		  FROM commits_latest;
 
 		UPDATE housekeeping
-		   SET last_port_commit = MaxCommitID;
+		   SET last_port_commit = MaxCommitID,
+			   refresh_now      = 0;
 
 	return MaxCommitID;
 
