@@ -88,14 +88,16 @@ alter table system                 alter column id set default nextval('system_i
 alter table system_version         alter column id set default nextval('system_version_id_seq'::text);\
 alter table users                  alter column id set default nextval('users_id_seq'::text);\
 alter table watch_list             alter column id set default nextval('watch_list_id_seq'::text);\
-alter table watch_notice_log       alter column id set default nextval('watch_notice_log_id_seq'::text);
+alter table watch_notice_log       alter column id set default nextval('watch_notice_log_id_seq'::text);\
+\
+alter table element alter column status set default 'A';
 0
 
 
 Dan Langille
 
 968886895
-984266569
+984273990
 0
 0
 0
@@ -7061,7 +7063,7 @@ tracked in this table
 3
 4
 289
-0
+2
 13
 0
 0
