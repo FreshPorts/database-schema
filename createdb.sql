@@ -37,7 +37,9 @@ create table element
     id                     int4                  not null,
     name                   text                  not null,
     parent_id              int4                          ,
-    directory_file_flag    char(1)               not null,
+    directory_file_flag    char(1)               not null
+        check (
+            directory_file_flag in ('F','D')),
     status                 char(1)               not null
         check (
             status in ('A','D')),
@@ -247,7 +249,7 @@ alter table commit_log_elements
 
 alter table commit_log_elements
     add foreign key (element_id, revision_name)
-       references element_revision (element_id, revision_name) on delete restrict;
+       references element_revision (element_id, revision_name) on delete cascade;
 
 alter table users
     add foreign key (watch_notice_id)
@@ -287,7 +289,7 @@ alter table system_branch_element_revision
 
 alter table system_branch_element_revision
     add foreign key (element_id, revision_name)
-       references element_revision (element_id, revision_name) on delete restrict;
+       references element_revision (element_id, revision_name) on delete cascade;
 
 alter table commit_log_port
     add foreign key (commit_log_id)
