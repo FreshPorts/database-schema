@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.79 2003-09-05 20:24:43 dan Exp $
+-- $Id: sp.txt,v 1.80 2003-09-05 20:26:39 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -776,23 +776,6 @@ CREATE OR REPLACE FUNCTION WatchListStagingAddItem(int4, text, text, int4) RETUR
 	END
 ' LANGUAGE 'plpgsql';
 
-CREATE OR REPLACE FUNCTION WatchListUserID(int4)
- RETURNS int4 AS '
-	DECLARE
-		UserID ALIAS for $1;
-
-		WatchListID int4;
-	BEGIN
-		SELECT user_id
-		  INTO WatchListID
-		  FROM watch_list
-		 WHERE id = UserID;
-
-		RETURN WatchListID;
-	END
-' LANGUAGE 'plpgsql';
-
-
 CREATE OR REPLACE FUNCTION WatchListStagingProcess(int4) RETURNS int4 AS '
 	DECLARE
 		UserID	ALIAS for $1;
@@ -1036,123 +1019,6 @@ CREATE OR REPLACE FUNCTION PortsVerifyProcess() returns int8 AS '
 		RETURN RowCount;
 	END
 ' LANGUAGE 'plpgsql';
-
-CREATE OR REPLACE FUNCTION RecordLastestPortCommits() RETURNS INT4 AS '
-	DECLARE
-
-		MaxCommitID	int4;
-		DateNow		timestamp;
-
-	BEGIN
-
-		-- add in the new stuff
-		CREATE TEMP TABLE commits_latest_ports_tmp AS
-		SELECT DISTINCT
-			commits_recent_ports.commit_date													AS commit_date_raw,
-			commits_recent_ports.id																AS commit_log_id,
-			commits_recent_ports.encoding_losses												AS encoding_losses,
-			commits_recent_ports.message_id														AS message_id,
-			commits_recent_ports.committer														AS committer,
-			commits_recent_ports.description													AS commit_description,
-			to_char(commits_recent_ports.commit_date - SystemTimeAdjust(), ''DD Mon YYYY'')		AS commit_date,
-			to_char(commits_recent_ports.commit_date - SystemTimeAdjust(), ''HH24:MI'')			AS commit_time,
-			commit_log_ports.port_id															AS port_id,
-			categories.name																		AS category,
-			categories.id																		AS category_id,
-			element.name																		AS port,
-			CASE when commit_log_ports.port_version IS NULL then ports.version  else commit_log_ports.port_version  END as version,
-			CASE when commit_log_ports.port_version is NULL then ports.revision else commit_log_ports.port_revision END AS revision,
-			element.status																		AS status,
-			commit_log_ports.needs_refresh														AS needs_refresh,
-			ports.forbidden																		AS forbidden,
-			ports.broken																		AS broken,
-			date_part(''epoch'', ports.date_added)												AS date_added, 
-			ports.element_id																	AS element_id,
-			ports.short_description 															AS short_description,
-			security_notice.id																	AS security_notice_id
-	   FROM commits_recent_ports, element, categories, ports, commit_log_ports LEFT OUTER JOIN security_notice
-                                 ON commit_log_ports.commit_log_id = security_notice.commit_log_id
-	  WHERE commit_log_ports.commit_log_id = commits_recent_ports.id
-	    AND commit_log_ports.port_id       = ports.id
-	    AND categories.id                  = ports.category_id
-	    AND element.id                     = ports.element_id
-   ORDER BY commits_recent_ports.commit_date desc,
-			message_id,
-			category,
-			port;
-
-		-- delete what is already there
-		DELETE FROM commits_latest_ports;
-
-		INSERT INTO commits_latest_ports SELECT * FROM commits_latest_ports_tmp;
-
-		SELECT MAX(commit_log_id)
-		  INTO MaxCommitID
-		  FROM commits_latest_ports;
-
-		--
-		-- record that last commit just in case we need it next time...
-		--
-		UPDATE housekeeping
-		   SET last_port_commit = MaxCommitID;
-
-	return MaxCommitID;
-
-	END;
-' LANGUAGE 'plpgsql';
-
-CREATE OR REPLACE FUNCTION RecordLastestCommits() RETURNS INT4 AS '
-	DECLARE
-
-		MaxCommitID	int4;
-		DateNow		timestamp;
-
-	BEGIN
-
-		-- add in the new stuff
-		CREATE TEMP TABLE commits_latest_tmp AS
-		SELECT DISTINCT
-			commits_recent.id																	AS commit_log_id,
-			commits_recent.commit_date															AS commit_date_raw,
-			commits_recent.message_subject														AS message_subject,
-			commits_recent.message_id															AS message_id,
-			commits_recent.committer															AS committer,
-			commits_recent.description															AS commit_description,
-			to_char(commits_recent.commit_date - SystemTimeAdjust(), ''DD Mon YYYY'')			AS commit_date,
-			to_char(commits_recent.commit_date - SystemTimeAdjust(), ''HH24:MI'')				AS commit_time,
-			element.id																			AS element_id,
-			element.name																		AS element_name,
-			commit_log_elements.revision_name													AS revision_name,
-			element.status																		AS status,
-			commits_recent.encoding_losses														AS encoding_losses,
-			element_pathname(element.id)														AS element_pathname
-	   FROM commits_recent, element, commit_log_elements
-	  WHERE commit_log_elements.commit_log_id = commits_recent.id
-	    AND commit_log_elements.element_id    = element.id
-   ORDER BY commits_recent.commit_date desc,
-			commit_log_id;
-
-		-- delete what is already there
-		DELETE FROM commits_latest;
-
-		INSERT INTO commits_latest SELECT * FROM commits_latest_tmp;
-
-		SELECT MAX(commit_log_id)
-		  INTO MaxCommitID
-		  FROM commits_latest;
-
-		--
-		-- record that last commit just in case we need it next time...
-		--
-		UPDATE housekeeping
-		   SET last_port_commit = MaxCommitID;
-
-	return MaxCommitID;
-
-	END;
-' LANGUAGE 'plpgsql';
-
-
 
 CREATE OR REPLACE FUNCTION SystemTimeAdjust() returns interval AS '
 	DECLARE
