@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.119 2004-09-22 15:37:31 dan Exp $
+-- $Id: sp.txt,v 1.120 2004-11-17 13:25:11 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -2041,13 +2041,13 @@ CREATE OR REPLACE FUNCTION GetCategoryPortFromLatestLink(text) RETURNS TEXT AS '
       SELECT count(*)
         INTO l_Count
         FROM ports_active
-       WHERE latest_link = p_PackageName;
+       WHERE package_name = p_PackageName;
 
       IF l_Count = 1 THEN
          SELECT category,   name
            INTO l_Category, l_Port
            FROM ports_active
-          WHERE latest_link = p_PackageName;
+          WHERE package_name = p_PackageName;
 
          l_Result := l_Category || \'/\' || l_Port;
 
@@ -2104,5 +2104,3 @@ SELECT V.id,
    AND VR.vuxml_affected_id = VA.id
  ORDER BY VN.name, V.vid;
 ' LANGUAGE SQL STABLE;
-
-
