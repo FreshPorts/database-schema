@@ -1,5 +1,5 @@
 --
--- $Id: ri.txt,v 1.14.2.11 2003-04-23 22:29:51 dan Exp $
+-- $Id: ri.txt,v 1.14.2.12 2003-11-05 02:04:02 dan Exp $
 --
 
 CREATE OR REPLACE FUNCTION check_siblings() RETURNS TRIGGER AS '
@@ -393,6 +393,7 @@ BEGIN
 END;'
 LANGUAGE plpgsql;
 
+  DROP TRIGGER commit_log_update on commit_log;
 CREATE TRIGGER commit_log_update
 AFTER UPDATE on commit_log
 FOR EACH ROW
@@ -417,6 +418,7 @@ BEGIN
 END;'
 LANGUAGE plpgsql;
 
+  DROP TRIGGER commit_log_ports_insert on commit_log_ports;
 CREATE TRIGGER commit_log_ports_insert
 AFTER INSERT on commit_log_ports
 FOR EACH ROW
@@ -432,7 +434,7 @@ END;'
 LANGUAGE plpgsql;
 
 
-
+  DROP TRIGGER commit_log_insert on commit_log;
 CREATE TRIGGER commit_log_insert
 AFTER INSERT on commit_log
 FOR EACH ROW
