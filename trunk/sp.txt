@@ -318,3 +318,175 @@ create function ElementRevisionID(int4, text) returns int4 AS '
    END;
 '  LANGUAGE 'plpgsql';
 
+
+
+  DROP FUNCTION "getcategory" (text );
+CREATE FUNCTION "getcategory" (text ) RETURNS int4 AS '
+   DECLARE
+      category_name ALIAS for $1;     
+      pathname             text;   
+      category_element_id  int4;
+      category_id          int4;
+   BEGIN
+      pathname            := ''ports/'' || category_name;
+      category_element_id := Pathname_ID(pathname);
+      if NOT category_element_id IS NULL THEN
+         select id
+           into category_id
+           from categories
+          where element_id = category_element_id;
+      END IF;
+      return category_id;    
+   END;
+' LANGUAGE 'plpgsql';
+
+
+
+ DROP FUNCTION RevisionExists (int4, text );
+CREATE FUNCTION RevisionExists (int4, text) RETURNS boolean AS '
+   DECLARE
+      ElementID     ALIAS for $1;
+      RevisionName  ALIAS for $2;
+      TempElementID int4;
+      ExistsResult  boolean;
+
+   BEGIN
+      ExistsResult := 1;
+
+      select element_id
+        into TempElementID
+        from Element_Revision
+       where element_id    = ElementID
+         and revision_name = RevisionName;
+
+      IF NOT FOUND THEN
+         ExistsResult := 0;
+      END IF;      
+
+      return ExistsResult;
+   END;
+' LANGUAGE 'plpgsql';
+
+
+
+
+  DROP FUNCTION RevisionAdd(int4, text );
+CREATE FUNCTION RevisionAdd(int4, text) RETURNS boolean AS '
+   DECLARE
+      ElementID     ALIAS for $1;
+      RevisionName  ALIAS for $2;
+
+   BEGIN
+
+      insert into element_revision (element_id, revision_name)
+                  values (ElementID, RevisionName);
+
+      return 1;
+   END;
+' LANGUAGE 'plpgsql';
+
+  DROP FUNCTION GetRevisionForTag(int4, int4 );
+CREATE FUNCTION GetRevisionForTag(int4, int4) RETURNS text AS '
+   DECLARE
+      SystemVersionID ALIAS for $1;
+      ElementID       ALIAS for $2;
+      RevisionName    text;
+
+   BEGIN
+      select revision_name
+        into RevisionName
+        from system_version_element
+       where system_version_id = SystemVersionID
+         and element_id        = ElementID;
+
+      return RevisionName;
+   END;
+' LANGUAGE 'plpgsql';
+
+
+
+
+  DROP FUNCTION SystemIDGet (text );
+CREATE FUNCTION SystemIDGet (text ) RETURNS int4 AS '
+   DECLARE
+      System_Name ALIAS for $1;     
+      System_ID            int4;
+
+   BEGIN
+      select id
+        into System_ID
+        from system
+       where name = System_Name;
+
+      return System_ID;
+   END;
+' LANGUAGE 'plpgsql';
+
+
+
+  DROP FUNCTION SystemVersionGet (int4, text );
+CREATE FUNCTION SystemVersionGet (int4, text ) RETURNS int4 AS '
+   DECLARE
+      System_ID           ALIAS for $1;
+      System_Version_Name ALIAS for $2;
+      System_Version_ID int4;
+
+   BEGIN
+      select id
+        into System_Version_ID
+        from system_version
+       where system_id    = System_ID
+         and version_name = System_Version_Name;
+
+      return System_Version_ID;
+   END;
+' LANGUAGE 'plpgsql';
+
+
+  drop function ElementTagSet(text, int4, text, text);
+create function ElementTagSet(text, int4, text, text) returns boolean AS '
+   DECLARE 
+      System_Name    ALIAS for $1;
+      ElementID      ALIAS for $2;
+      RevisionName   ALIAS for $3;
+      Version_Tag    ALIAS for $4;
+
+      SystemID          int4;
+      SystemVersionID   int4;
+      RevisionFound     boolean;
+
+   BEGIN
+
+-- Get the System ID for this system name
+      SystemID := SystemIDGet(System_Name);
+      IF SystemID IS NULL THEN
+         RAISE EXCEPTION ''cannot find SystemID for SystemName = % '', System_Name;
+      END IF;
+
+-- get the system_version_id for the Version_Tag
+      SystemVersionID := SystemVersionGet(SystemID, Version_Tag);
+      IF SystemVersionID IS NULL THEN
+         RAISE EXCEPTION ''cannot find SystemVersionID for Version_Name = % '', Version_Tag;
+      END IF;
+
+
+-- get a valid revision id
+      
+      RevisionFound := RevisionExists(ElementID, RevisionName);
+
+      IF NOT RevisionFound THEN
+         RevisionFound := RevisionAdd(ElementID, RevisionName);
+      END IF;
+
+-- store things away in the sytem version element table
+
+      insert into system_version_element (system_version_id, element_id, revision_name)
+                              values (SystemVersionID, ElementID, RevisionName);
+
+      return 1;
+
+   END;
+'  LANGUAGE 'plpgsql';
+
+
+
