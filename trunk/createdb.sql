@@ -73,7 +73,8 @@ create table system
 create table security_notice
 (
     id                     int4                  not null,
-    date_added             timestamp             not null,
+    date_added             timestamp             not null
+        default 'current_timestamp',
     status                 char                  not null,
     synopsis               text                  not null,
     primary key (id)
@@ -113,14 +114,13 @@ create table ports
     depends_build          text                          ,
     depends_run            text                          ,
     last_commit_id         int4                          ,
-    needs_refresh          smallint                      ,
     found_in_index         boolean                       ,
     forbidden              text                          ,
     broken                 text                          ,
+    date_added             timestamp                     
+        default 'current_timestamp',
     primary key (id)
 );
-
-create index ports_needs_refresh on ports (needs_refresh asc);
 
 create table users
 (
@@ -128,8 +128,10 @@ create table users
     name                   text                  not null,
     password               text                  not null,
     cookie                 text                  not null,
-    firstlogin             timestamp                     ,
-    lastlogin              timestamp                     ,
+    firstlogin             timestamp                     
+        default 'current_timestamp',
+    lastlogin              timestamp                     
+        default 'current_timestamp',
     email                  text                          ,
     watch_notice_id        int4                  not null,
     emailsitenotices_yn    boolean                       ,
@@ -178,6 +180,8 @@ create table commit_log
 
 create index commit_log_commit_date on commit_log (commit_date asc);
 
+create unique index commit_log_message_id on commit_log (message_id asc);
+
 create table commit_log_elements
 (
     id                     int4                  not null,
@@ -201,7 +205,8 @@ create table watch_notice_log
 (
     id                     int4                  not null,
     watch_notice_id        int4                  not null,
-    notice_date            timestamp             not null,
+    notice_date            timestamp             not null
+        default 'current_timestamp',
     watch_notice_count     smallint              not null,
     primary key (id)
 );
@@ -233,6 +238,8 @@ create table commit_log_ports
 (
     commit_log_id          int4                  not null,
     port_id                int4                  not null,
+    needs_refresh          smallint              not null,
+    port_version           text                          ,
     primary key (commit_log_id, port_id)
 );
 
@@ -248,13 +255,14 @@ create table security_notice_log
     id                     int4                  not null,
     security_notice_id     int4                  not null,
     user_id                int4                  not null,
-    date_added             timestamp             not null,
+    date_added             timestamp             not null
+        default 'current_timestamp',
     change                 text                  not null,
     primary key (id)
 );
 
 alter table element
-    add foreign key fk_parent_id_element (parent_id)
+    add foreign key (parent_id)
        references element (id) on delete cascade;
 
 alter table categories
