@@ -1,6 +1,19 @@
 This file contains notes for upgrading from one database version
 to another.
 
+Jan 9 2004
+
+alter table page_load_detail add column date date;
+alter table page_load_detail add column time time;
+update page_load_detail set date = timestamp::date, time = timestamp::time;
+
+alter table page_load_detail alter date set not null;
+alter table page_load_detail alter time set not null;
+
+alter table page_load_detail alter date set default current_date;
+alter table page_load_detail alter time set default localtime;
+
+
 December 30 2003
 
 create table ports_moved
