@@ -36,6 +36,99 @@ from categories, ports, element
 where categories.id = ports.category_id
 and ports.element_id = element.id;
 
+create table commit_log_port_vuxml
+(
+    commit_log_id              integer               not null,
+    port_id                    integer               not null,
+    vuxml_id                   integer               not null,
+    primary key (commit_log_id, port_id)
+);
+
+create table vuxml
+(
+    id                         serial                not null,
+    vid                        text                  not null,
+    topic                      text                  not null,
+    description                text                  not null,
+    date_discovery             text                          ,
+    date_entry                 text                          ,
+    date_modified              text                          ,
+    status                     char(1)               not null,
+    primary key (id)
+);
+
+create table vuxml_affected
+(
+    id                         serial                not null,
+    vuxml_id                   integer               not null,
+    type                       text                  not null,
+    primary key (id)
+);
+
+create table commit_log_ports_vuxml
+(
+    id                         serial                not null,
+    commit_log_id              integer               not null,
+    port_id                    integer               not null,
+    vuxml_id                   integer               not null,
+    primary key (id)
+);
+
+create table vuxml_ranges
+(
+    id                         serial                not null,
+    vuxml_affected_id          integer               not null,
+    operator1                  text                  not null,
+    version1                   text                  not null,
+    operator2                  text                          ,
+    version2                   text                          ,
+    primary key (id)
+);
+
+create table vuxml_references
+(
+    id                         serial                not null,
+    vuxml_id                   integer               not null,
+    type                       text                  not null,
+    reference                  text                  not null,
+    primary key (id)
+);
+
+create table vuxml_names
+(
+    id                         serial                not null,
+    vuxml_affected_id          integer               not null,
+    name                       text                  not null,
+    primary key (id)
+);
+
+alter table vuxml_affected
+    add foreign key  (vuxml_id)
+       references vuxml (id) on update cascade on delete cascade;
+
+alter table commit_log_ports_vuxml
+    add foreign key  (vuxml_id)
+       references vuxml (id) on update cascade on delete cascade;
+
+alter table commit_log_ports_vuxml
+    add foreign key  (port_id)
+       references ports (id) on update cascade on delete cascade;
+
+alter table commit_log_ports_vuxml
+    add foreign key  (commit_log_id)
+       references commit_log (id) on update cascade on delete cascade;
+
+alter table vuxml_ranges
+    add foreign key  (vuxml_affected_id)
+       references vuxml_affected (id) on update cascade on delete cascade;
+
+alter table vuxml_references
+    add foreign key  (vuxml_id)
+       references vuxml (id) on update cascade on delete cascade;
+
+alter table vuxml_names
+    add foreign key  (vuxml_affected_id)
+       references vuxml_affected (id) on update cascade on delete cascade;
 
 
 
