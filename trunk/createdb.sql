@@ -1,5 +1,5 @@
 --
--- $Id: createdb.sql,v 1.56 2003-10-06 17:29:48 dan Exp $
+-- $Id: createdb.sql,v 1.57 2003-10-06 17:32:13 dan Exp $
 --
 -- The following options should be used to create the database schema
 --
