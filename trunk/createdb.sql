@@ -1,5 +1,5 @@
 --
--- $Id: createdb.sql,v 1.53 2003-05-02 18:38:00 dan Exp $
+-- $Id: createdb.sql,v 1.54 2003-05-09 19:39:24 dan Exp $
 --
 -- The following options should be used to create the database schema
 --
@@ -104,6 +104,15 @@ create table commits_latest
     encoding_losses         boolean                       
 );
 
+create table announcements
+(
+    id                      serial                not null,
+    text                    text                  not null,
+    start_date              timestamp with time zone         ,
+    end_date                timestamp with time zone         ,
+    primary key (id)
+);
+
 create table element
 (
     id                      serial                not null,
@@ -196,6 +205,8 @@ create table tasks
 insert into tasks (name,description) values ('SecurityNoticeAdd', 'Ability to designate a given commit as security related');
 
 insert into tasks (name,description) values ('CategoryVirtualDescriptionSet', 'Ability to set the description for a virtual category');
+
+insert into tasks (name,description) values ('AnnouncementsUpdate', 'Ability to maintain the announcements table');
 
 create unique index tasks_idx on tasks (name);
 
