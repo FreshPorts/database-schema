@@ -81,6 +81,9 @@ begin
          -- message ''no such parent '' || NOW(*);
          RAISE EXCEPTION ''modifications to element % with name=% cannot be completed as the parent % does not exist.'', new.id, new.name, new.parent_id;
       end if;
+      if new.parent_id = new.id then
+         RAISE EXCEPTION ''modifications to element % with name=% cannot be completed as the an element cannot be a child of itself.'', new.id, new.name, new.parent_id;
+      end if;
    end if;
    --    message ''check_parent 4''
 
@@ -119,8 +122,6 @@ begin
    RETURN NEW;
 end;
 ' LANGUAGE 'plpgsql';
-
-  drop trigger check_parent on element;
 
 drop trigger parent_must_be_directory on element;
 create trigger parent_must_be_directory before insert or update
