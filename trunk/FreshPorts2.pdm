@@ -61,7 +61,7 @@ sqlany55.def
 Dan Langille
 
 968886895
-1015198424
+1016134207
 0
 0
 0
@@ -988,7 +988,7 @@ ports_check
 0
 0
 0
-
+ports_check
 
 
 
@@ -2592,31 +2592,31 @@ notice_date
 3
 200
 200
-frequency
-frequency
+frequency_id
+frequency_id
 
 
 
 197
+83
+int4
+4
 0
-char(1)
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
 1
-0
-0
-0
-
-
-
-
-
-0
-0
-0
-
-
-
-0
-0
 1
 1
 0
@@ -6021,7 +6021,7 @@ text
 1
 0
 0
-
+category_name
 
 1
 3
@@ -6056,7 +6056,7 @@ text
 1
 0
 0
-
+port_name
 
 2
 3
@@ -6092,7 +6092,7 @@ N	not found
 1
 0
 0
-
+found_in_ports
 
 3
 /END_TABLE AMCCOLN
@@ -6687,6 +6687,27 @@ Ref_6049
 0
 n
 0
+3
+6875
+6875
+Ref_6875
+Ref_6875
+
+
+
+192
+197
+2
+2
+1
+1
+0
+0
+
+
+0
+n
+0
 /END_TABLE AMCREFR
 
 /BEGIN_TABLE AMCCCOL
@@ -6841,6 +6862,11 @@ COLN2   N8
 6052
 9
 6042
+1
+6878
+6878
+193
+200
 /END_TABLE AMCCCOL
 
 /BEGIN_TABLE AMCCREF
@@ -7024,6 +7050,12 @@ NUMR    N8
 6053
 6049
 6052
+1
+3
+6879
+6879
+6875
+6878
 1
 /END_TABLE AMCCREF
 
@@ -7404,23 +7436,6 @@ PK
 21
 
 3
-1267
-1267
-watch_notice_log_FK1
-watch_notice_log_FK1
-197
-
-
-
-0
-1
-0
-0
-
-FK202
-22
-
-3
 1271
 1271
 ports_PK
@@ -7435,7 +7450,7 @@ ports_PK
 0
 
 PK
-23
+22
 
 3
 1273
@@ -7452,7 +7467,7 @@ ports_FK1
 0
 
 FK228
-24
+23
 
 3
 1275
@@ -7469,7 +7484,7 @@ ports_FK2
 0
 
 FK315
-25
+24
 
 3
 1281
@@ -7486,7 +7501,7 @@ categories_PK
 0
 
 PK
-26
+25
 
 3
 1283
@@ -7503,7 +7518,7 @@ categories_FK1
 0
 
 FK310
-27
+26
 
 3
 1287
@@ -7520,7 +7535,7 @@ element_revision_PK
 0
 
 PK
-28
+27
 
 3
 1289
@@ -7537,7 +7552,7 @@ element_revision_FK1
 0
 
 FK495
-29
+28
 
 3
 1298
@@ -7554,7 +7569,7 @@ system_branch_PK
 0
 
 PK
-30
+29
 
 3
 1300
@@ -7571,7 +7586,7 @@ system_branch_FK1
 0
 
 FK821
-31
+30
 
 3
 1302
@@ -7588,7 +7603,7 @@ system_PK
 0
 
 PK
-32
+31
 
 3
 1304
@@ -7605,7 +7620,7 @@ commit_log_port_PK
 0
 
 PK
-33
+32
 
 3
 1307
@@ -7622,7 +7637,7 @@ commit_log_port_FK1
 0
 
 FK1230
-34
+33
 
 3
 1309
@@ -7639,7 +7654,7 @@ commit_log_port_FK2
 0
 
 FK1231
-35
+34
 
 3
 1744
@@ -7656,7 +7671,7 @@ commit_log_port_FK3
 0
 
 
-36
+35
 
 3
 1752
@@ -7670,44 +7685,44 @@ system_branch_element_PK
 1
 0
 1
+0
+
+
+36
+
+3
+1756
+1756
+system_branch_element_FK1
+system_branch_element_FK1
+468
+
+
+
+0
+1
+0
 0
 
 
 37
 
 3
-1756
-1756
-system_branch_element_FK1
-system_branch_element_FK1
-468
+4055
+4055
+commit_log_message_id
+commit_log_message_id
+1
 
 
 
+0
 0
 1
-0
 0
 
 
 38
-
-3
-4055
-4055
-commit_log_message_id
-commit_log_message_id
-1
-
-
-
-0
-0
-1
-0
-
-
-39
 
 3
 4057
@@ -7724,13 +7739,30 @@ needs_refresh
 0
 
 
-40
+39
 
 3
 6551
 6551
 category_name
 category_name
+6547
+
+
+
+0
+0
+0
+0
+
+
+40
+
+3
+6553
+6553
+port_name
+port_name
 6547
 
 
@@ -7742,23 +7774,6 @@ category_name
 
 
 41
-
-3
-6553
-6553
-port_name
-port_name
-6547
-
-
-
-0
-0
-0
-0
-
-
-42
 
 /END_TABLE AMCINDX
 
@@ -7930,13 +7945,6 @@ NUMR    N8
 1266
 1265
 198
-1
-1
-3
-1268
-1268
-1267
-200
 1
 1
 3
@@ -8189,6 +8197,26 @@ UPDT    N1
 GENE    N1
 CHCK    N1
 /BEGIN_DATA AMCVIEW
+3
+6871
+6871
+commits_recent
+commits_recent
+
+
+
+1
+1
+select distinct commit_log.id, commit_log.message_id, commit_log.message_date, \
+commit_log.message_subject, commit_log.date_added, commit_log.commit_date, \
+commit_log.committer, commit_log.description, commit_log.system_id\
+from commit_log \
+where exists\
+(select * from commit_log_ports where commit_log_ports.commit_log_id = commit_log.id)\
+order by commit_log.commit_date desc, commit_log.id limit 100
+1
+1
+0
 /END_TABLE AMCVIEW
 
 /BEGIN_TABLE AMCRULE
@@ -8707,6 +8735,14 @@ DeleteIndx
 39
 ports,ports,ports_needs_refresh,ports_needs_refresh
 
+1
+11
+DeleteIndx
+2
+0
+39
+watch_notice_log,watch_notice_log,watch_notice_log_FK1,FK202
+
 /END_TABLE AMCREDO
 
 /BEGIN_TABLE AMCFONT
@@ -8734,6 +8770,10 @@ Arial
 5
 Comic Sans MS
 14
+1
+6
+Courier New
+10
 1
 /END_TABLE AMCFONT
 
@@ -9780,13 +9820,13 @@ no
 0
 WarehouseArchitect
 DBOCreaView
-no
+yes
 162
 2
 0
 WarehouseArchitect
 DBODropView
-no
+yes
 163
 2
 0
@@ -9852,7 +9892,7 @@ yes
 0
 WarehouseArchitect
 DBOConsPkey
-yes
+no
 174
 2
 0
@@ -10422,10 +10462,10 @@ OLE     BIN
 0
 0
 0
--45990
--111261
--33091
--104962
+-48698
+-111569
+-35799
+-105270
 2
 1
 0
@@ -10455,10 +10495,10 @@ OLE     BIN
 0
 0
 0
--42694
--158706
--10220
--152085
+-42695
+-158246
+-10221
+-152547
 1
 1
 0
@@ -10474,7 +10514,7 @@ OLE     BIN
 0
 FreshPorts 2 -physical database model\
 Copyright © 2001-2002 DVL Software Limited\
-Wellington, New Zealand  - 23 February 2002
+Wellington, New Zealand  - 14 March 2002
 
 
 2
@@ -10964,10 +11004,10 @@ in the same database
 0
 0
 0
--15247
--126864
--2498
--123640
+-12697
+-134439
+52
+-131215
 1
 1
 0
@@ -11353,10 +11393,43 @@ than once by the same tag.
 6547
 
 3
+6470
+291
+0
+33
+0
+0
+0
+0
+0
+4545
+-166160
+21519
+-154336
+2
+6
+0
+0
+0
+0
+0
+0
+0
+0
+0
+
+0
+
+
+
+2
+6871
+
+3
 9
 290
 0
-33
+34
 0
 2
 3
@@ -11389,7 +11462,7 @@ than once by the same tag.
 49
 290
 0
-34
+35
 0
 4
 7
@@ -11422,7 +11495,7 @@ d43a000046f2fdffd43a00006823feff
 52
 290
 0
-35
+36
 0
 6
 7
@@ -11455,7 +11528,7 @@ ea420000883ffeffea4200008428feff
 843
 290
 0
-36
+37
 0
 837
 836
@@ -11488,7 +11561,7 @@ cab1ffffbff5fdffcab1ffff1008fefff6beffff1008feff
 888
 290
 0
-37
+38
 0
 4
 835
@@ -11521,7 +11594,7 @@ cab1ffffbff5fdffcab1ffff1008fefff6beffff1008feff
 2809
 290
 0
-38
+39
 0
 4
 622
@@ -11554,7 +11627,7 @@ e8480000a7e2fdffe848000035b3fdff
 2812
 290
 0
-39
+40
 0
 4
 327
@@ -11587,7 +11660,7 @@ e8480000a7e2fdffe848000035b3fdff
 2815
 290
 0
-40
+41
 0
 622
 327
@@ -11620,7 +11693,7 @@ e8480000a7e2fdffe848000035b3fdff
 2986
 290
 0
-41
+42
 0
 4
 4
@@ -11653,7 +11726,7 @@ e8480000a7e2fdffe848000035b3fdff
 3087
 290
 0
-42
+43
 0
 925
 837
@@ -11686,7 +11759,7 @@ ff9affff56d2fdff4db7ffff56d2fdff4db7ffff18e8fdff
 3205
 290
 0
-43
+44
 0
 5
 6
@@ -11719,7 +11792,7 @@ ff9affff56d2fdff4db7ffff56d2fdff4db7ffff18e8fdff
 3482
 290
 0
-44
+45
 0
 320
 5
@@ -11752,7 +11825,7 @@ ff9affff56d2fdff4db7ffff56d2fdff4db7ffff18e8fdff
 4006
 290
 0
-45
+46
 0
 2
 3904
@@ -11785,7 +11858,7 @@ ff9affff56d2fdff4db7ffff56d2fdff4db7ffff18e8fdff
 4008
 290
 0
-46
+47
 0
 327
 3904
@@ -11818,7 +11891,7 @@ d8efffff0cb3fdff064cffff0cb3fdff064cfffffd26feff
 4427
 290
 0
-47
+48
 0
 835
 3
@@ -11851,7 +11924,7 @@ d8efffff0cb3fdff064cffff0cb3fdff064cfffffd26feff
 4435
 290
 0
-48
+49
 0
 835
 836
@@ -11884,7 +11957,7 @@ d41100009a18feffd41100006202feff1deeffff6202feff
 4522
 290
 0
-49
+50
 0
 3
 3904
@@ -11917,7 +11990,7 @@ d41100009a18feffd41100006202feff1deeffff6202feff
 4540
 290
 0
-50
+51
 0
 925
 2
@@ -11950,7 +12023,7 @@ d41100009a18feffd41100006202feff1deeffff6202feff
 4580
 290
 0
-51
+52
 0
 5
 4579
@@ -11983,7 +12056,7 @@ d41100009a18feffd41100006202feff1deeffff6202feff
 4702
 290
 0
-52
+53
 0
 2
 4701
@@ -12016,7 +12089,7 @@ d41100009a18feffd41100006202feff1deeffff6202feff
 4704
 290
 0
-53
+54
 0
 327
 4701
@@ -12049,7 +12122,7 @@ cbdbffff1ebcfdff4578ffff1ebcfdff
 4839
 290
 0
-54
+55
 0
 4837
 4838
@@ -12082,7 +12155,7 @@ c0a50000c626feffc0a50000ad06feff
 4867
 290
 0
-55
+56
 0
 4
 4838
@@ -12115,7 +12188,7 @@ ed4e0000acf4fdffed4e0000e306fefff7920000e306feff
 5216
 290
 0
-56
+57
 0
 5
 5215
@@ -12148,7 +12221,7 @@ ed4e0000acf4fdffed4e0000e306fefff7920000e306feff
 5219
 290
 0
-57
+58
 0
 4837
 5215
@@ -12181,7 +12254,7 @@ ed4e0000acf4fdffed4e0000e306fefff7920000e306feff
 6047
 290
 0
-58
+59
 0
 6
 5524
@@ -12214,7 +12287,7 @@ ed4e0000acf4fdffed4e0000e306fefff7920000e306feff
 6099
 290
 0
-59
+60
 0
 4
 5524
@@ -12242,6 +12315,39 @@ ed4e0000acf4fdffed4e0000e306fefff7920000e306feff
 
 2
 6049
+
+3
+6476
+290
+0
+61
+0
+320
+321
+0
+0
+0
+0
+0
+0
+2
+3
+0
+0
+0
+0
+0
+1
+0
+0
+2
+d39afffffc57feff936efffffc57feff
+2
+
+
+
+2
+6875
 
 /END_TABLE AMCSYMB
 
