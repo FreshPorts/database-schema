@@ -79,7 +79,7 @@ begin
       --    message ''check_parent 3'';
       if (ElementCount = 0) then
          -- message ''no such parent '' || NOW(*);
-         RAISE EXCEPTION ''modifications to element % with name=% cannot completed as the parent % does not exist.'', new.id, new.name, new.parent_id;
+         RAISE EXCEPTION ''modifications to element % with name=% cannot be completed as the parent % does not exist.'', new.id, new.name, new.parent_id;
       end if;
    end if;
    --    message ''check_parent 4''
@@ -112,7 +112,7 @@ begin
 
       if (ParentType = ''F'') then
          -- message ''parent cannot be a file '' || NOW(*);
-         RAISE EXCEPTION ''modifications to element % with name=% cannot completed as the parent % is not a directory.'', new.id, new.name, new.parent_id;
+         RAISE EXCEPTION ''modifications to element % with name=% cannot be completed as the parent % is not a directory.'', new.id, new.name, new.parent_id;
      end if;
    end if;
 
@@ -136,7 +136,7 @@ begin
    --  message ''check_siblings 4'';
    if (new.id <> old.id) then
       -- message ''change of id not allowed '' || NOW(*);
-      RAISE EXCEPTION ''modifications to element % with name=% cannot completed as you are not allowed to change id (new value was %).'', old.id, old.name, new.id;
+      RAISE EXCEPTION ''modifications to element % with name=% cannot be completed as you are not allowed to change id (new value was %).'', old.id, old.name, new.id;
    end if;
 
    RETURN NEW;
@@ -148,3 +148,39 @@ end;
 create trigger id_change before update
 on element for each row
 execute procedure id_change();
+
+
+/*
+  DROP function version_revision_uniqueness();
+create function version_revision_uniqueness() returns OPAQUE as '
+   declare 
+      ElementID int4;
+begin
+
+   select element_id 
+     into ElementID
+     from element_revision
+    where id = new.element_revision_id;
+
+   IF FOUND THEN
+      delete from system_version_element 
+       where element_revision_id in 
+            (select id 
+               from element_revision 
+              where element_id        = ElementID)
+                and system_version_id = new.system_version_id;
+   END IF;
+
+   RETURN NEW;
+
+end;
+' LANGUAGE 'plpgsql';
+
+
+
+  drop trigger version_revision_uniqueness on system_version_element;
+create trigger version_revision_uniqueness before insert or update 
+on system_version_element
+for each row
+execute procedure version_revision_uniqueness();
+*/
