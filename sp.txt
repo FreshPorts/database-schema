@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.96 2004-01-09 19:22:33 dan Exp $
+-- $Id: sp.txt,v 1.97 2004-01-12 21:03:21 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -1780,8 +1780,8 @@ CREATE OR REPLACE FUNCTION PageLoadSummaryUpdate(date) returns int AS '
        l_RowCount   int;
 
    BEGIN
-   INSERT INTO page_load_summary (date, page_name, users, non_users, rendering_time_min, rendering_time_max, rendering_time_avg)
-      SELECT timestamp::date,
+   INSERT INTO page_load_summary (date, page_name, total, users, rendering_time_min, rendering_time_max, rendering_time_avg)
+      SELECT date,
              CASE WHEN page_name = \'/missing.php\' THEN
                 CASE WHEN position(\'?\' in full_url) != 0 THEN
                    substring(full_url from 0 for position(\'?\' in full_url))
@@ -1794,8 +1794,8 @@ CREATE OR REPLACE FUNCTION PageLoadSummaryUpdate(date) returns int AS '
                 END
                 ELSE page_name
              END,
+             count(*)            AS total,
              count(user_id)      AS users,
-             count(*)            AS non_users,
              min(rendering_time) AS min,
              max(rendering_time) AS max,
              avg(rendering_time) AS avg
