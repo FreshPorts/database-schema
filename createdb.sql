@@ -1,5 +1,5 @@
 #
-# $Id: createdb.sql,v 1.25 2002-04-02 04:55:44 dan Exp $
+# $Id: createdb.sql,v 1.26 2002-04-12 06:26:30 dan Exp $
 #
 # Things which must be done to make this script work with PostgreSQL
 # 
@@ -41,6 +41,7 @@ create table commits_latest
 (
     commit_date_raw        timestamp                     ,
     commit_log_id          int4                          ,
+    encoding_losses        boolean                       ,
     message_id             text                          ,
     committer              text                          ,
     commit_description     text                          ,
@@ -184,7 +185,6 @@ create table security_notice
     primary key (id)
 );
 
-
 create table element_revision
 (
     element_id             int4                  not null,
@@ -322,6 +322,8 @@ create table commit_log
     committer              text                  not null,
     description            text                  not null,
     system_id              int4                  not null,
+    encoding_losses        boolean               not null
+        default 'default 'f'::bool',
     primary key (id)
 );
 
@@ -349,7 +351,6 @@ create table commit_log_elements
 
 create sequence commit_log_elements_id_seq;
 alter table commit_log_elements alter column id set default nextval('commit_log_elements_id_seq'::text);
-
 
 create table watch_list_element
 (
@@ -449,13 +450,13 @@ create sequence watch_list_staging_id_seq;
 alter table watch_list_staging  alter column id set default nextval('watch_list_staging_id_seq'::text);
 
 create view commits_recent as
-select distinct commit_log.id, commit_log.message_id, commit_log.message_date, 
-commit_log.message_subject, commit_log.date_added, commit_log.commit_date, 
-commit_log.committer, commit_log.description, commit_log.system_id
-from commit_log 
+select distinct commit_log.id, commit_log.message_id, commit_log.message_date,
+commit_log.message_subject, commit_log.date_added, commit_log.commit_date,
+commit_log.committer, commit_log.description, commit_log.system_id, commit_log.encoding_losses
+from commit_log
 where exists
 (select * from commit_log_ports where commit_log_ports.commit_log_id = commit_log.id)
-order by commit_log.commit_date desc, commit_log.id limit 100;
+order by commit_log.commit_date desc, commit_log.id limit 100;;
 
 create view ports_active as
 select ports.*, element.name as name, categories.name as category
@@ -581,3 +582,4 @@ alter table watch_list_staging
 alter table watch_list_staging
     add foreign key (element_id)
        references element (id) on update cascade on delete set null;
+

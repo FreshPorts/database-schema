@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.50 2002-04-02 04:55:44 dan Exp $
+-- $Id: sp.txt,v 1.51 2002-04-12 06:26:31 dan Exp $
 --
 
 CREATE OR REPLACE FUNCTION IsDescendantOf (int4 ,int4) returns boolean As '
@@ -975,6 +975,7 @@ CREATE OR REPLACE FUNCTION RecordLastestPortCommits() RETURNS INT4 AS '
 		SELECT DISTINCT
 			commits_recent.commit_date															AS commit_date_raw,
 			commits_recent.id																	AS commit_log_id,
+			commits_recent.encoding_losses														AS encoding_losses,
 			commits_recent.message_id															AS message_id,
 			commits_recent.committer															AS committer,
 			commits_recent.description															AS commit_description,
