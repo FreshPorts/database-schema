@@ -1,3 +1,7 @@
+#
+# $Id: README,v 1.2 2001-11-20 12:20:08 dan Exp $
+#
+
 Notes on the database schema.
 
 To alter sequences, see Dictionary->Model Properties->Script.
@@ -30,3 +34,13 @@ alter table commit_log_port
        references commit_log (id) on delete cascade;
 
 
+You might also want to create indexes:
+   under Create Index, you might want to tick Primary Key and
+   Foreign Key.  If you do, you'll need to modify the SQL
+   thusly:
+
+     create index ports_FK2 on ports (category_id asc);
+
+   becomes:
+
+     create index ports_FK2 on ports (category_id);
