@@ -1,5 +1,7 @@
 --
--- $Id: ri.txt,v 1.26 2003-05-12 02:23:28 dan Exp $
+-- $Id: ri.txt,v 1.27 2003-05-16 01:10:54 dan Exp $
+--
+-- Copyright (c) 1998-2003 DVL Software Limited
 --
 
 CREATE OR REPLACE FUNCTION check_siblings() RETURNS OPAQUE as '

@@ -1,5 +1,7 @@
 --
--- $Id: sp.txt,v 1.75 2003-05-07 10:44:10 dan Exp $
+-- $Id: sp.txt,v 1.76 2003-05-16 01:10:54 dan Exp $
+--
+-- Copyright (c) 1998-2003 DVL Software Limited
 --
 
 CREATE OR REPLACE FUNCTION IsDescendantOf (int4 ,int4) returns boolean As '
