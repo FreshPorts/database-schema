@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.18 2001-11-20 12:23:06 dan Exp $
+-- $Id: sp.txt,v 1.19 2001-11-20 16:34:23 dan Exp $
 --
 
   drop function IsDescendantOf (int4 ,int4);
@@ -439,7 +439,7 @@ CREATE FUNCTION RevisionAdd(int4, text) RETURNS boolean AS '
   DROP FUNCTION RevisionForTagGet(int4, int4 );
 CREATE FUNCTION RevisionForTagGet(int4, int4 ) RETURNS text AS '
    DECLARE
-      SystemVersionID  ALIAS for $1;
+      SystemBranchID   ALIAS for $1;
       ElementID        ALIAS for $2;
       TempRevisionName text;
 
@@ -449,9 +449,9 @@ CREATE FUNCTION RevisionForTagGet(int4, int4 ) RETURNS text AS '
    BEGIN
       select revision_name
         into TempRevisionName
-        from system_version_element
-       where system_version_id = SystemVersionID
-         and element_id        = ElementID;
+        from system_branch_element_revision
+       where system_branch_id = SystemBranchID
+         and element_id       = ElementID;
 
       return TempRevisionName;
    END;
@@ -459,21 +459,21 @@ CREATE FUNCTION RevisionForTagGet(int4, int4 ) RETURNS text AS '
 
 
 
-  DROP FUNCTION SystemVersionIDGet(int4, text);
-CREATE FUNCTION SystemVersionIDGet(int4, text) RETURNS int4 AS '
+  DROP FUNCTION SystemBranchIDGet(int4, text);
+CREATE FUNCTION SystemBranchIDGet(int4, text) RETURNS int4 AS '
    DECLARE
       System_ID           ALIAS for $1;
-      System_Version_Name ALIAS for $2;
-      System_Version_ID int4;
+      System_Branch_Name  ALIAS for $2;
+      System_Branch_ID    int4;
 
    BEGIN
       select id
-        into System_Version_ID
-        from system_version
+        into System_Branch_ID
+        from system_branch
        where system_id    = System_ID
-         and version_name = System_Version_Name;
+         and branch_name  = System_Branch_Name;
 
-      return System_Version_ID;
+      return System_Branch_ID;
    END;
 ' LANGUAGE 'plpgsql';
 
@@ -484,10 +484,10 @@ create function ElementTagSet(text, int4, text, text) returns boolean AS '
       System_Name    ALIAS for $1;
       ElementID      ALIAS for $2;
       RevisionName   ALIAS for $3;
-      Version_Tag    ALIAS for $4;
+      Branch_Name    ALIAS for $4;
 
       SystemID              int4;
-      SystemVersionID       int4;
+      SystemBranchID        int4;
       ExistingRevisionFound text;
 
    BEGIN
@@ -498,15 +498,15 @@ create function ElementTagSet(text, int4, text, text) returns boolean AS '
          RAISE EXCEPTION ''cannot find SystemID for SystemName = % '', System_Name;
       END IF;
 
--- get the system_version_id (or tag) for the Version_Tag
-      SystemVersionID := SystemVersionIDGet(SystemID, Version_Tag);
-      IF SystemVersionID IS NULL THEN
-         RAISE EXCEPTION ''cannot find SystemVersionID for Version_Name = % '', Version_Tag;
+-- get the system_branch_id (or tag) for the Branch_Name
+      SystemBranchID := SystemBranchIDGet(SystemID, Branch_Name);
+      IF SystemBranchID IS NULL THEN
+         RAISE EXCEPTION ''cannot find SystemBranchID for Branch_Name = % '', Branch_Name;
       END IF;
 
 /*
 -- has this element already been tagged with this version?
-      ExistingRevisionFound := RevisionForTagGet(SystemVersionID, ElementID);
+      ExistingRevisionFound := RevisionForTagGet(SystemBranchID, ElementID);
 
       IF  THEN
          ExistingRevisionFound := RevisionAdd(ElementID, RevisionName);
@@ -514,8 +514,8 @@ create function ElementTagSet(text, int4, text, text) returns boolean AS '
 
 -- store things away in the sytem version element table
 */
-      insert into system_version_element (system_version_id, element_id, revision_name)
-                              values (SystemVersionID, ElementID, RevisionName);
+      insert into system_branch_element_revision (system_branch_id, element_id, revision_name)
+                              values (SystemBranchID, ElementID, RevisionName);
 
       return 1;
 
@@ -525,14 +525,14 @@ create function ElementTagSet(text, int4, text, text) returns boolean AS '
   drop function ElementTagSet(int4, int4, text);
 create function ElementTagSet(int4, int4, text) returns boolean AS '
    DECLARE
-      SystemVersionID ALIAS for $1;
+      SystemBranchID  ALIAS for $1;
       ElementID       ALIAS for $2;
       RevisionName    ALIAS for $3;
 
    BEGIN  
 
-      insert into system_version_element (system_version_id, element_id, revision_name)
-                              values (SystemVersionID, ElementID, RevisionName);
+      insert into system_branch_element_revision (system_branch_id, element_id, revision_name)
+                              values (SystemBranchID, ElementID, RevisionName);
 
       return 1;
 
