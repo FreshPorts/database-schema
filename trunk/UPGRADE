@@ -13,8 +13,10 @@ alter table ports add column no_latest_link text;
 alter table ports add column no_package     text;
 alter table ports add column package_name   text;
 alter table ports add column portepoch      text;
+update ports set portepoch = '0' where portepoch is null;
 
 alter table commit_log_ports add column port_epoch text;
+update commit_log_ports set port_epoch = '0' where port_epoch is null;
 
 drop view ports_active;
 
