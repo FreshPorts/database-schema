@@ -34,8 +34,11 @@ create sequence watch_notice_log_id_seq;
 
 create table housekeeping
 (
-    last_port_commit       int4                  not null
+    last_port_commit       int4                  not null,
+    refresh_now            smallint              not null
 );
+
+insert into housekeeping values (0,0);
 
 create table commits_latest
 (
@@ -86,6 +89,12 @@ create table watch_notice
     primary key (id)
 );
 
+INSERT INTO "watch_notice" (id, frequency, description) VALUES (1,'Z','Don''t notify me');
+INSERT INTO "watch_notice" (id, frequency, description) VALUES (3,'W','Week (on Tuesdays)');
+INSERT INTO "watch_notice" (id, frequency, description) VALUES (4,'F','Fortnightly  (9th and 23rd)');
+INSERT INTO "watch_notice" (id, frequency, description) VALUES (5,'M','Month (23rd)');
+INSERT INTO "watch_notice" (id, frequency, description) VALUES (2,'D','Day');
+
 create index watch_notice_frequency on watch_notice (frequency);
 
 create table system
@@ -96,6 +105,8 @@ create table system
         default '0 seconds',
     primary key (id)
 );
+
+INSERT INTO "system" VALUES (1,'FreeBSD','-03:00');
 
 create table security_notice
 (
@@ -291,6 +302,7 @@ create table security_notice_log
     change                 text                  not null,
     primary key (id)
 );
+
 alter table element
     add foreign key (parent_id)
        references element (id) on delete cascade;
@@ -421,13 +433,3 @@ alter table system_branch                  alter column id set default nextval('
 alter table users                          alter column id set default nextval('users_id_seq'::text);
 alter table watch_list                     alter column id set default nextval('watch_list_id_seq'::text);
 alter table watch_notice_log               alter column id set default nextval('watch_notice_log_id_seq'::text);
-
-insert into housekeeping values (0);
-
-INSERT INTO "watch_notice" (id, frequency, description) VALUES (1,'Z','Don''t notify me');
-INSERT INTO "watch_notice" (id, frequency, description) VALUES (3,'W','Week (on Tuesdays)');
-INSERT INTO "watch_notice" (id, frequency, description) VALUES (4,'F','Fortnightly  (9th and 23rd)');
-INSERT INTO "watch_notice" (id, frequency, description) VALUES (5,'M','Month (23rd)');
-INSERT INTO "watch_notice" (id, frequency, description) VALUES (2,'D','Day');
-
-INSERT INTO "system" VALUES (1,'FreeBSD','-03:00');
