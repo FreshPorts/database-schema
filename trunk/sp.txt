@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.89 2003-10-02 12:17:05 dan Exp $
+-- $Id: sp.txt,v 1.90 2003-10-04 21:13:34 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -1493,34 +1493,31 @@ DECLARE
 
 BEGIN
     FOR r IN
-SELECT TMP.commit_log_id,
-       TMP.commit_date_raw,
-       TMP.message_subject,
-       TMP.message_id,
-       TMP.committer,
-       TMP.commit_description,
-       TMP.commit_date,
-       TMP.commit_time,
-       TMP.encoding_losses,
-       TMP.port_id,
-       TMP.needs_refresh,
-       TMP.forbidden,
-       TMP.broken,
-       TMP.element_id,
-       TMP.version,
-       TMP.revision,
-       TMP.date_added,
-       TMP.short_description,
-       TMP.category_id,
-       TMP.port,
-       TMP.status,
-       TMP.category,
-       TMP.security_notice_id,
-       TMP.watch,
-       element_pathname(commit_log_elements.element_id, FALSE) as element_pathname
-FROM (
-SELECT SECURITY.*,
-       W.watch
+SELECT SECURITY.commit_log_id,
+       SECURITY.commit_date_raw,
+       SECURITY.message_subject,
+       SECURITY.message_id,
+       SECURITY.committer,
+       SECURITY.commit_description,
+       SECURITY.commit_date,
+       SECURITY.commit_time,
+       SECURITY.encoding_losses,
+       SECURITY.port_id,
+       SECURITY.needs_refresh,
+       SECURITY.forbidden,
+       SECURITY.broken,
+       SECURITY.element_id,
+       SECURITY.version,
+       SECURITY.revision,
+       SECURITY.date_added,
+       SECURITY.short_description,
+       SECURITY.category_id,
+       SECURITY.port,
+       SECURITY.status,
+       SECURITY.category,
+       SECURITY.security_notice_id,
+       W.watch,
+       element_pathname(SECURITY.element_id, FALSE) as element_pathname
 FROM (
 SELECT PEC.*,
        security_notice.id  AS security_notice_id
@@ -1528,6 +1525,42 @@ FROM (
 SELECT PORTELEMENT.*,
        categories.name AS category
 FROM (
+
+SELECT     CL.id     AS commit_log_id, 
+           commit_date       AS commit_date_raw,
+           message_subject,
+           message_id,
+           committer,
+           description       AS commit_description,
+           to_char(CL.commit_date - SystemTimeAdjust(), \'DD Mon YYYY\')  AS commit_date,
+           to_char(CL.commit_date - SystemTimeAdjust(), \'HH24:MI\')      AS commit_time,
+           encoding_losses,
+           NULL::integer as port_id,
+           NULL::text    as clp_version,
+           NULL::text    as clp_revision,
+           NULL::smallint AS needs_refresh,
+           NULL::integer     AS non_port_commit_log_id,
+           NULL::text        AS forbidden,
+           NULL::text        AS broken,
+           CLPE.element_id   AS element_id,
+           NULL::text        AS version,
+           NULL::text        AS revision,
+           NULL::integer     AS date_added,
+           NULL::text        AS short_description,
+           NULL::integer     AS category_id,
+           NULL::text        AS port,
+           \'D\'    AS status
+  FROM commit_log_ports_extra CLPE JOIN
+                  (SELECT latest_commits_ports.commit_log_id
+                   FROM latest_commits_ports
+               ORDER BY latest_commits_ports.commit_date DESC
+                 LIMIT 100) AS LCP
+       ON LCP.commit_log_id = CLPE.commit_log_id, commit_log CL, element E
+  WHERE LCP.commit_log_id = CL.id
+    AND CLPE.element_id   = E.ID
+
+union
+
 SELECT LCPPORTS.*,
        element.name    AS port,
        element.status  AS status
@@ -1563,11 +1596,11 @@ FROM (
                    FROM latest_commits_ports
                ORDER BY latest_commits_ports.commit_date DESC
                  LIMIT MaxCommits) AS LCP
-           ON commit_log.id = LCP.commit_log_id) AS LCPCL LEFT OUTER JOIN commit_log_ports
+           ON commit_log.id = LCP.commit_log_id) AS LCPCL JOIN commit_log_ports
                          ON commit_log_ports.commit_log_id = LCPCL.commit_log_id
-                         AND commit_log_ports.commit_log_id > latest_commits_ports_anchor()) AS LCPCLLCP LEFT OUTER JOIN ports
-on LCPCLLCP.port_id = ports.id) AS LCPPORTS LEFT OUTER JOIN element
-on LCPPORTS.element_id = element.id) AS PORTELEMENT LEFT OUTER JOIN categories
+                         AND commit_log_ports.commit_log_id > latest_commits_ports_anchor()) AS LCPCLLCP JOIN ports
+on LCPCLLCP.port_id = ports.id) AS LCPPORTS JOIN element
+on LCPPORTS.element_id = element.id) AS PORTELEMENT LEFT JOIN categories
 on PORTELEMENT.category_id = categories.id) AS PEC LEFT OUTER JOIN security_notice
 ON PEC.commit_log_id = security_notice.commit_log_id
 ) AS SECURITY LEFT OUTER JOIN
@@ -1577,8 +1610,7 @@ ON PEC.commit_log_id = security_notice.commit_log_id
        AND watch_list.user_id = UserID
        AND watch_list.in_service
 GROUP BY wle_element_id) AS W
-ON        W.wle_element_id = SECURITY.element_id) AS TMP LEFT OUTER JOIN commit_log_elements
-on commit_log_elements.commit_log_id = TMP.non_port_commit_log_id
+ON        W.wle_element_id = SECURITY.element_id
 order by commit_date_raw desc, category, port
 	LOOP
         RETURN NEXT r;
