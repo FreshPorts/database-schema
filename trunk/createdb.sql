@@ -1,36 +1,25 @@
+#
+# Things which must be done to make this script work with PostgreSQL
+# 
+# remove asc from indexes.
+# remove quotes from around current_timestamp
+# remove key names from foreign keys
+#
 
-  drop sequence categories_id_seq;
-create sequence categories_id_seq;
-
-  drop sequence commit_log_id_seq;
-create sequence commit_log_id_seq;
-
-  drop sequence commit_log_elements_id_seq;
-create sequence commit_log_elements_id_seq;
-
-  drop sequence element_id_seq;
-create sequence element_id_seq;
-
-  drop sequence ports_id_seq;
-create sequence ports_id_seq;
-
-  drop sequence system_id_seq;
-create sequence system_id_seq;
-
-  drop sequence system_branch_id_seq;
-create sequence system_branch_id_seq;
-
-  drop sequence users_id_seq;
-create sequence users_id_seq;
-
-  drop sequence watch_list_id_seq;
-create sequence watch_list_id_seq;
-
-  drop sequence watch_notice_id_seq;
-create sequence watch_notice_id_seq;
+create table watch_notice_log
+(
+    id                     int4                  not null,
+    notice_date            timestamp             not null
+        default current_timestamp,
+    frequency              char(1)               not null,
+    msg_count              int4                  not null,
+    commit_count           int4                  not null,
+    primary key (id)
+);
 
   drop sequence watch_notice_log_id_seq;
 create sequence watch_notice_log_id_seq;
+alter table watch_notice_log alter column id set default nextval('watch_notice_log_id_seq'::text);
 
 create table housekeeping
 (
@@ -62,6 +51,47 @@ create table commits_latest
     watch                  text                          
 );
 
+create table watch_list_staging_log
+(
+    id                     int4                  not null,
+    date_added             timestamp             not null,
+    user_id                int4                  not null,
+    action                 char(1)               not null
+        check (
+            action in ('U','W','C','D')),
+    count_total            int4                  not null
+        default '0',
+    count_matches          int4                  not null
+        default '0',
+    count_missing          int4                  not null
+        default '0',
+    count_duplicates       int4                  not null
+        default '0',
+    count_categories       int4                  not null
+        default '0',
+    primary key (id)
+);
+
+  drop sequence watch_list_staging_log_id_seq;
+create sequence watch_list_staging_log_id_seq;
+
+alter table watch_list_staging_log alter column id set default nextval('watch_list_staging_log_id_seq'::text);
+alter table watch_list_staging_log alter column date_added set default current_timestamp;
+
+create table ports_check
+(
+    category_name          text                  not null,
+    port_name              text                  not null,
+    found_in_ports         boolean               not null
+        default 'N'
+        check (
+            found_in_ports in ('Y','N'))
+);
+
+create index category_name on ports_check (category_name);
+
+create index port_name on ports_check (port_name);
+
 create table element
 (
     id                     int4                  not null,
@@ -76,6 +106,11 @@ create table element
     primary key (id)
 );
 
+  drop sequence element_id_seq;
+create sequence element_id_seq;
+
+alter table element alter column id set default nextval('element_id_seq'::text);
+
 create index element_name on element (name);
 
 create table watch_notice
@@ -88,6 +123,11 @@ create table watch_notice
     last_sent              timestamp                     ,
     primary key (id)
 );
+
+  drop sequence watch_notice_id_seq;
+create sequence watch_notice_id_seq;
+
+alter table watch_notice alter column id set default nextval('watch_notice_id_seq'::text);
 
 INSERT INTO "watch_notice" (id, frequency, description) VALUES (1,'Z','Don''t notify me');
 INSERT INTO "watch_notice" (id, frequency, description) VALUES (3,'W','Week (on Tuesdays)');
@@ -106,17 +146,32 @@ create table system
     primary key (id)
 );
 
+  drop sequence system_id_seq;
+create sequence system_id_seq;
+
+alter table system alter column id set default nextval('system_id_seq'::text);
+
 INSERT INTO "system" VALUES (1,'FreeBSD','-03:00');
 
 create table security_notice
 (
     id                     int4                  not null,
     date_added             timestamp             not null
-        default 'current_timestamp',
+        default current_timestamp,
     status                 char                  not null,
     synopsis               text                  not null,
     primary key (id)
 );
+
+create table element_revision
+(
+    element_id             int4                  not null,
+    revision_name          text                          ,
+    primary key (element_id, revision_name)
+);
+
+
+  drop sequence categories_id_seq;
 
 create table categories
 (
@@ -128,12 +183,8 @@ create table categories
     primary key (id)
 );
 
-create table element_revision
-(
-    element_id             int4                  not null,
-    revision_name          text                          ,
-    primary key (element_id, revision_name)
-);
+create sequence categories_id_seq;
+alter table categories alter column id set default nextval('categories_id_seq'::text);
 
 create table ports
 (
@@ -156,10 +207,14 @@ create table ports
     forbidden              text                          ,
     broken                 text                          ,
     date_added             timestamp                     
-        default 'current_timestamp',
+        default current_timestamp,
     categories             text                          ,
     primary key (id)
 );
+
+  drop sequence ports_id_seq;
+create sequence ports_id_seq;
+alter table ports alter column id set default nextval('ports_id_seq'::text);
 
 create table users
 (
@@ -168,18 +223,29 @@ create table users
     password               text                  not null,
     cookie                 text                  not null,
     firstlogin             timestamp                     
-        default 'current_timestamp',
+        default current_timestamp,
     lastlogin              timestamp                     
-        default 'current_timestamp',
+        default current_timestamp,
     email                  text                          ,
     watch_notice_id        int4                  not null,
     emailsitenotices_yn    boolean                       ,
     emailbouncecount       smallint                      ,
     type                   char(1)               not null
+        default 'U'
         check (
             type in ('U','S')),
+    status                 char(1)               not null
+        default 'U'
+        check (
+            status in ('U','A','D')),
+    ip_address             text                  not null,
     primary key (id)
 );
+
+  drop sequence users_id_seq;
+create sequence users_id_seq;
+
+alter table users alter column id set default nextval('users_id_seq'::text);
 
 create index users_cookie on users (cookie);
 
@@ -192,8 +258,17 @@ create table watch_list
     id                     int4                  not null,
     user_id                int4                  not null,
     name                   text                  not null,
+    awaiting_staging       boolean               not null
+        default 'N'
+        check (
+            awaiting_staging in ('Y','N')),
     primary key (id)
 );
+
+  drop sequence watch_list_id_seq;
+create sequence watch_list_id_seq;
+
+alter table watch_list alter column id set default nextval('watch_list_id_seq'::text);
 
 create table system_branch
 (
@@ -202,6 +277,14 @@ create table system_branch
     branch_name            text                          ,
     primary key (id)
 );
+
+  drop sequence system_branch_id_seq;
+create sequence system_branch_id_seq;
+
+alter table system_branch alter column id set default nextval('system_branch_id_seq'::text);
+
+
+  drop sequence commit_log_id_seq;
 
 create table commit_log
 (
@@ -217,9 +300,15 @@ create table commit_log
     primary key (id)
 );
 
+create sequence commit_log_id_seq;
+alter table commit_log alter column id set default nextval('commit_log_id_seq'::text);
+
 create index commit_log_commit_date on commit_log (commit_date);
 
 create unique index commit_log_message_id on commit_log (message_id);
+
+
+  drop sequence commit_log_elements_id_seq;
 
 create table commit_log_elements
 (
@@ -233,21 +322,14 @@ create table commit_log_elements
     primary key (id)
 );
 
+create sequence commit_log_elements_id_seq;
+alter table commit_log_elements alter column id set default nextval('commit_log_elements_id_seq'::text);
+
 create table watch_list_element
 (
     watch_list_id          int4                  not null,
     element_id             int4                  not null,
     primary key (watch_list_id, element_id)
-);
-
-create table watch_notice_log
-(
-    id                     int4                  not null,
-    watch_notice_id        int4                  not null,
-    notice_date            timestamp             not null
-        default 'current_timestamp',
-    watch_notice_count     smallint              not null,
-    primary key (id)
 );
 
 create table system_branch_element_revision
@@ -298,138 +380,138 @@ create table security_notice_log
     security_notice_id     int4                  not null,
     user_id                int4                  not null,
     date_added             timestamp             not null
-        default 'current_timestamp',
+        default current_timestamp,
     change                 text                  not null,
     primary key (id)
 );
 
+create table watch_list_staging
+(
+    id                     int4                  not null,
+    watch_list_id          int4                  not null,
+    category               text                  not null,
+    port                   text                  not null,
+    item_count             int4                  not null,
+    from_pkg_info          boolean               not null
+        check (
+            from_pkg_info in ('Y','N')),
+    from_watch_list        boolean               not null
+        check (
+            from_watch_list in ('Y','N')),
+    element_id             int4                          ,
+    primary key (id)
+);
+
+  drop sequence watch_list_staging_id_seq;
+create sequence watch_list_staging_id_seq;
+
+alter table watch_list_staging  alter column id set default nextval('watch_list_staging_id_seq'::text);
+
 alter table element
     add foreign key (parent_id)
-       references element (id) on delete cascade;
-
-alter table categories
-    add foreign key (element_id)
-       references element (id) on delete cascade;
-
-alter table categories
-    add foreign key (element_id)
-       references element (id) on delete cascade;
+       references element (id) on update restrict on delete cascade;
 
 alter table element_revision
     add foreign key (element_id)
-       references element (id) on delete cascade;
+       references element (id) on update cascade on delete cascade;
+
+alter table categories
+    add foreign key (element_id)
+       references element (id) on update cascade on delete cascade;
 
 alter table ports
     add foreign key (element_id)
-       references element (id) on delete cascade;
+       references element (id) on update cascade on delete cascade;
 
 alter table ports
     add foreign key (category_id)
-       references categories (id) on delete cascade;
-
-alter table ports
-    add foreign key (element_id)
-       references element (id) on delete cascade;
-
-alter table ports
-    add foreign key (category_id)
-       references categories (id) on delete cascade;
+       references categories (id) on update cascade on delete cascade;
 
 alter table users
     add foreign key (watch_notice_id)
-       references watch_notice (id) on delete cascade;
+       references watch_notice (id) on update cascade on delete cascade;
 
 alter table watch_list
     add foreign key (user_id)
-       references users (id) on delete cascade;
+       references users (id) on update cascade on delete cascade;
 
 alter table system_branch
     add foreign key (system_id)
-       references system (id) on delete cascade;
+       references system (id) on update cascade on delete cascade;
 
 alter table commit_log
     add foreign key (system_id)
-       references system (id) on delete cascade;
+       references system (id) on update cascade on delete cascade;
 
 alter table commit_log_elements
     add foreign key (commit_log_id)
-       references commit_log (id) on delete cascade;
+       references commit_log (id) on update cascade on delete cascade;
 
 alter table commit_log_elements
     add foreign key (element_id, revision_name)
-       references element_revision (element_id, revision_name) on delete cascade;
+       references element_revision (element_id, revision_name) on update cascade on delete cascade;
 
 alter table watch_list_element
     add foreign key (element_id)
-       references element (id) on delete cascade;
+       references element (id) on update cascade on delete cascade;
 
 alter table watch_list_element
     add foreign key (watch_list_id)
-       references watch_list (id) on delete cascade;
-
-alter table watch_notice_log
-    add foreign key (watch_notice_id)
-       references watch_notice (id) on delete cascade;
-
-alter table watch_notice_log
-    add foreign key (watch_notice_id)
-       references watch_notice (id) on delete cascade;
+       references watch_list (id) on update cascade on delete cascade;
 
 alter table system_branch_element_revision
     add foreign key (system_branch_id)
-       references system_branch (id) on delete cascade;
+       references system_branch (id) on update cascade on delete cascade;
 
 alter table system_branch_element_revision
     add foreign key (element_id, revision_name)
-       references element_revision (element_id, revision_name) on delete cascade;
+       references element_revision (element_id, revision_name) on update cascade on delete cascade;
 
 alter table commit_log_port_elements
     add foreign key (commit_log_id)
-       references commit_log (id) on delete cascade;
+       references commit_log (id) on update cascade on delete cascade;
 
 alter table commit_log_port_elements
     add foreign key (port_id)
-       references ports (id) on delete cascade;
+       references ports (id) on update cascade on delete cascade;
 
 alter table commit_log_port_elements
     add foreign key (commit_log_element_id)
-       references commit_log_elements (id) on delete cascade;
+       references commit_log_elements (id) on update cascade on delete cascade;
 
 alter table user_confirmations
     add foreign key (user_id)
-       references users (id) on delete cascade;
+       references users (id) on update cascade on delete cascade;
 
 alter table commit_log_ports
     add foreign key (commit_log_id)
-       references commit_log (id) on delete cascade;
+       references commit_log (id) on update cascade on delete cascade;
 
 alter table commit_log_ports
     add foreign key (port_id)
-       references ports (id) on delete cascade;
+       references ports (id) on update cascade on delete cascade;
 
 alter table security_notice_elements
     add foreign key (security_advisory_id)
-       references security_notice (id) on delete cascade;
+       references security_notice (id) on update cascade on delete cascade;
 
 alter table security_notice_elements
     add foreign key (element_id)
-       references element (id) on delete cascade;
+       references element (id) on update cascade on delete cascade;
 
 alter table security_notice_log
     add foreign key (user_id)
-       references users (id) on delete cascade;
+       references users (id) on update cascade on delete cascade;
 
 alter table security_notice_log
     add foreign key (security_notice_id)
-       references security_notice (id) on delete cascade;
+       references security_notice (id) on update cascade on delete cascade;
 
-alter table categories                     alter column id set default nextval('categories_id_seq'::text);
-alter table commit_log                     alter column id set default nextval('commit_log_id_seq'::text);
-alter table commit_log_elements            alter column id set default nextval('commit_log_elements_id_seq'::text);
-alter table element                        alter column id set default nextval('element_id_seq'::text);
-alter table ports                          alter column id set default nextval('ports_id_seq'::text);
-alter table system                         alter column id set default nextval('system_id_seq'::text);
-alter table system_branch                  alter column id set default nextval('system_branch_id_seq'::text);
-alter table users                          alter column id set default nextval('users_id_seq'::text);
-alter table watch_list                     alter column id set default nextval('watch_list_id_seq'::text);
-alter table watch_notice_log               alter column id set default nextval('watch_notice_log_id_seq'::text);
+alter table watch_list_staging
+    add foreign key (watch_list_id)
+       references watch_list (id) on update cascade on delete cascade;
+
+alter table watch_list_staging
+    add foreign key (element_id)
+       references element (id) on update cascade on delete set null;
+

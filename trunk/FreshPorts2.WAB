@@ -61,7 +61,7 @@ sqlany55.def
 Dan Langille
 
 968886895
-1015101882
+1015192528
 0
 0
 0
@@ -962,7 +962,7 @@ watch_list_staging_log
 0
 0
 0
-
+watch_list_staging_log
 
 
 
@@ -975,6 +975,28 @@ create sequence watch_list_staging_log_id_seq;\
 \
 alter table watch_list_staging_log alter column id set default nextval('watch_list_staging_log_id_seq'::text);\
 alter table watch_list_staging_log alter column date_added set default current_timestamp;
+0
+3
+6547
+6547
+2
+ports_check
+ports_check
+
+
+
+0
+0
+0
+
+
+
+
+
+
+
+
+
 0
 /END_TABLE AMCTABL
 
@@ -2669,7 +2691,7 @@ int4
 1
 0
 0
-
+commit_count
 
 5
 3
@@ -5681,7 +5703,7 @@ int4
 1
 0
 0
-
+id
 
 1
 3
@@ -5716,7 +5738,7 @@ timestamp
 1
 0
 0
-
+date_added
 
 2
 3
@@ -5751,7 +5773,7 @@ int4
 1
 0
 0
-
+user_id
 
 3
 3
@@ -5789,7 +5811,7 @@ D	deleting everything from watch list
 1
 0
 0
-
+action
 
 4
 3
@@ -5824,7 +5846,7 @@ int4
 1
 0
 0
-
+count_total
 
 5
 3
@@ -5859,7 +5881,7 @@ int4
 1
 0
 0
-
+count_matches
 
 6
 3
@@ -5894,7 +5916,7 @@ int4
 1
 0
 0
-
+count_missing
 
 7
 3
@@ -5929,7 +5951,7 @@ int4
 1
 0
 0
-
+count_duplicates
 
 8
 3
@@ -5964,9 +5986,115 @@ int4
 1
 0
 0
-
+count_categories
 
 9
+3
+6548
+6548
+category_name
+category_name
+
+
+
+6547
+0
+text
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+0
+1
+1
+0
+0
+
+
+1
+3
+6549
+6549
+port_name
+port_name
+
+
+
+6547
+0
+text
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+0
+1
+1
+0
+0
+
+
+2
+3
+6550
+6550
+found_in_ports
+found_in_ports
+
+
+
+6547
+0
+boolean
+0
+0
+0
+0
+
+
+
+
+N
+0
+0
+0
+Y	found in the ports table\
+N	not found
+
+
+0
+0
+1
+1
+0
+0
+
+
+3
 /END_TABLE AMCCOLN
 
 /BEGIN_TABLE AMCREFR
@@ -7598,6 +7726,40 @@ needs_refresh
 
 40
 
+3
+6551
+6551
+category_name
+category_name
+6547
+
+
+
+0
+0
+0
+0
+
+
+41
+
+3
+6553
+6553
+port_name
+port_name
+6547
+
+
+
+0
+0
+0
+0
+
+
+42
+
 /END_TABLE AMCINDX
 
 /BEGIN_TABLE AMCCIDX
@@ -7943,6 +8105,20 @@ NUMR    N8
 4058
 4057
 3644
+1
+1
+3
+6552
+6552
+6551
+6548
+1
+1
+3
+6554
+6554
+6553
+6549
 1
 1
 /END_TABLE AMCCIDX
@@ -9454,7 +9630,7 @@ no
 0
 WarehouseArchitect
 DBOOthrIndx
-no
+yes
 137
 2
 0
@@ -11113,17 +11289,17 @@ than once by the same tag.
 3
 6156
 289
-2
+0
 31
 0
 0
 0
 0
 0
-22828
--151452
-34602
--141253
+22492
+-149683
+34266
+-139484
 2
 1
 0
@@ -11144,10 +11320,43 @@ than once by the same tag.
 6230
 
 3
+6313
+289
+2
+32
+0
+0
+0
+0
+0
+23702
+-156775
+34051
+-152426
+2
+1
+0
+0
+0
+0
+0
+0
+0
+0
+0
+
+0
+
+
+
+2
+6547
+
+3
 9
 290
 0
-32
+33
 0
 2
 3
@@ -11180,7 +11389,7 @@ than once by the same tag.
 49
 290
 0
-33
+34
 0
 4
 7
@@ -11213,7 +11422,7 @@ d43a000046f2fdffd43a00006823feff
 52
 290
 0
-34
+35
 0
 6
 7
@@ -11246,7 +11455,7 @@ ea420000883ffeffea4200008428feff
 843
 290
 0
-35
+36
 0
 837
 836
@@ -11279,7 +11488,7 @@ cab1ffffbff5fdffcab1ffff1008fefff6beffff1008feff
 888
 290
 0
-36
+37
 0
 4
 835
@@ -11312,7 +11521,7 @@ cab1ffffbff5fdffcab1ffff1008fefff6beffff1008feff
 2809
 290
 0
-37
+38
 0
 4
 622
@@ -11345,7 +11554,7 @@ e8480000a7e2fdffe848000035b3fdff
 2812
 290
 0
-38
+39
 0
 4
 327
@@ -11378,7 +11587,7 @@ e8480000a7e2fdffe848000035b3fdff
 2815
 290
 0
-39
+40
 0
 622
 327
@@ -11411,7 +11620,7 @@ e8480000a7e2fdffe848000035b3fdff
 2986
 290
 0
-40
+41
 0
 4
 4
@@ -11444,7 +11653,7 @@ e8480000a7e2fdffe848000035b3fdff
 3087
 290
 0
-41
+42
 0
 925
 837
@@ -11477,7 +11686,7 @@ ff9affff56d2fdff4db7ffff56d2fdff4db7ffff18e8fdff
 3205
 290
 0
-42
+43
 0
 5
 6
@@ -11510,7 +11719,7 @@ ff9affff56d2fdff4db7ffff56d2fdff4db7ffff18e8fdff
 3482
 290
 0
-43
+44
 0
 320
 5
@@ -11543,7 +11752,7 @@ ff9affff56d2fdff4db7ffff56d2fdff4db7ffff18e8fdff
 4006
 290
 0
-44
+45
 0
 2
 3904
@@ -11576,7 +11785,7 @@ ff9affff56d2fdff4db7ffff56d2fdff4db7ffff18e8fdff
 4008
 290
 0
-45
+46
 0
 327
 3904
@@ -11609,7 +11818,7 @@ d8efffff0cb3fdff064cffff0cb3fdff064cfffffd26feff
 4427
 290
 0
-46
+47
 0
 835
 3
@@ -11642,7 +11851,7 @@ d8efffff0cb3fdff064cffff0cb3fdff064cfffffd26feff
 4435
 290
 0
-47
+48
 0
 835
 836
@@ -11675,7 +11884,7 @@ d41100009a18feffd41100006202feff1deeffff6202feff
 4522
 290
 0
-48
+49
 0
 3
 3904
@@ -11708,7 +11917,7 @@ d41100009a18feffd41100006202feff1deeffff6202feff
 4540
 290
 0
-49
+50
 0
 925
 2
@@ -11741,7 +11950,7 @@ d41100009a18feffd41100006202feff1deeffff6202feff
 4580
 290
 0
-50
+51
 0
 5
 4579
@@ -11774,7 +11983,7 @@ d41100009a18feffd41100006202feff1deeffff6202feff
 4702
 290
 0
-51
+52
 0
 2
 4701
@@ -11807,7 +12016,7 @@ d41100009a18feffd41100006202feff1deeffff6202feff
 4704
 290
 0
-52
+53
 0
 327
 4701
@@ -11840,7 +12049,7 @@ cbdbffff1fbcfdff4678ffff1fbcfdff
 4839
 290
 0
-53
+54
 0
 4837
 4838
@@ -11873,7 +12082,7 @@ c0a50000c626feffc0a50000ad06feff
 4867
 290
 0
-54
+55
 0
 4
 4838
@@ -11906,7 +12115,7 @@ ed4e0000acf4fdffed4e0000e306fefff7920000e306feff
 5216
 290
 0
-55
+56
 0
 5
 5215
@@ -11939,7 +12148,7 @@ ed4e0000acf4fdffed4e0000e306fefff7920000e306feff
 5219
 290
 0
-56
+57
 0
 4837
 5215
@@ -11972,7 +12181,7 @@ ed4e0000acf4fdffed4e0000e306fefff7920000e306feff
 6047
 290
 0
-57
+58
 0
 6
 5524
@@ -12005,7 +12214,7 @@ ed4e0000acf4fdffed4e0000e306fefff7920000e306feff
 6099
 290
 0
-58
+59
 0
 4
 5524
