@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.41 2002-03-14 19:08:17 dan Exp $
+-- $Id: sp.txt,v 1.42 2002-03-14 19:46:39 dan Exp $
 --
 
 CREATE OR REPLACE FUNCTION IsDescendantOf (int4 ,int4) returns boolean As '
@@ -625,9 +625,8 @@ CREATE OR REPLACE FUNCTION GetPortNameFromFileName(text) RETURNS text AS '
 
 
 
-CREATE OR REPLACE FUNCTION RecordLastestPortCommits(timestamp) RETURNS INT4 AS '
+CREATE OR REPLACE FUNCTION RecordLastestPortCommits() RETURNS INT4 AS '
 	DECLARE
-		Start_Date ALIAS FOR $1;
 
 		MaxCommitID	int4;
 		DateNow		timestamp;
@@ -637,11 +636,11 @@ CREATE OR REPLACE FUNCTION RecordLastestPortCommits(timestamp) RETURNS INT4 AS '
 		-- add in the new stuff
 		CREATE TEMP TABLE commits_latest_tmp AS
 		SELECT DISTINCT
-			recent_commits.commit_date															AS commit_date_raw,
-			recent_commits.id																	AS commit_log_id,
-			recent_commits.description															AS commit_description,
-			to_char(recent_commits.commit_date + INTERVAL ''-10800 seconds'', ''DD Mon YYYY'')	AS commit_date,
-			to_char(recent_commits.commit_date + INTERVAL ''-10800 seconds'', ''HH24:MI'')		AS commit_time,
+			commits_recent.commit_date															AS commit_date_raw,
+			commits_recent.id																	AS commit_log_id,
+			commits_recent.description															AS commit_description,
+			to_char(commits_recent.commit_date + INTERVAL ''-10800 seconds'', ''DD Mon YYYY'')	AS commit_date,
+			to_char(commits_recent.commit_date + INTERVAL ''-10800 seconds'', ''HH24:MI'')		AS commit_time,
 			commit_log_ports.port_id															AS port_id,
 			categories.name																		AS category,
 			categories.id																		AS category_id,
@@ -654,16 +653,15 @@ CREATE OR REPLACE FUNCTION RecordLastestPortCommits(timestamp) RETURNS INT4 AS '
 			date_part(''epoch'', ports.date_added)												AS date_added,
 			ports.element_id																	AS element_id,
 			ports.short_description 															AS short_description
-	   FROM commit_log_ports, recent_commits, element, categories, ports
-	  WHERE commit_log_ports.commit_log_id = recent_commits.id
+	   FROM commit_log_ports, commits_recent, element, categories, ports
+	  WHERE commit_log_ports.commit_log_id = commits_recent.id
 	    AND commit_log_ports.port_id       = ports.id
 	    AND categories.id                  = ports.category_id
 	    AND element.id                     = ports.element_id
-   ORDER BY recent_commits.commit_date desc,
+   ORDER BY commits_recent.commit_date desc,
 			commit_log_id,
 			category,
-			port
-	  LIMIT 100;
+			port;
 
 		-- delete what is already there
 		DELETE FROM commits_latest;
