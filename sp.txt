@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.46.2.4 2003-03-06 15:13:19 dan Exp $
+-- $Id: sp.txt,v 1.46.2.5 2003-03-08 13:05:26 dan Exp $
 --
 
 CREATE OR REPLACE FUNCTION IsDescendantOf (int4 ,int4) returns boolean As '
@@ -1085,3 +1085,75 @@ CREATE OR REPLACE FUNCTION CategoryPortCount(text) returns bigint AS '
 	   AND ports.element_id             = element.id
 	   AND element.status               = \'A\';
 ' LANGUAGE SQL STABLE;
+
+
+CREATE FUNCTION anchor_clid () RETURNS integer
+    AS '
+  SELECT min(commit_log_id) AS RESULT
+    FROM latest_commits_ports;
+
+'
+    LANGUAGE sql STABLE;
+
+
+CREATE OR REPLACE FUNCTION SecurityNoticeCreate(integer, inet, text, text) RETURNS bigint
+    AS '
+   DECLARE
+      UserID       ALIAS for $1;
+      IPAddress    ALIAS for $2;
+      NoticeMsg    ALIAS for $3;
+      MessageID    ALIAS for $4;
+
+      CommitLogID       int8;
+      SecurityNoticeID  int8;
+
+   BEGIN
+      SELECT id, commit_log_id
+        INTO SecurityNoticeID, CommitLogID
+        FROM security_notice
+       WHERE commit_log_id =
+                (SELECT id
+                   FROM commit_log
+                  WHERE message_id = MessageID
+                 );
+
+      IF FOUND THEN
+			RAISE NOTICE '' Updating security notice for % MessageID User % from % said % for'', MessageID, UserId, IPAddress, NoticeMsg;
+         UPDATE security_notice
+            SET user_id       = UserID,
+                ip_address    = IPAddress,
+                description   = NoticeMsg
+          WHERE id            = SecurityNoticeID;
+      ELSE
+         SELECT id
+           INTO CommitLogID
+           FROM commit_log
+          WHERE message_id = MessageID;
+
+         IF FOUND THEN
+
+   			RAISE NOTICE '' Creating security notice for % MessageID User % from % said % for'', MessageID, UserId, IPAddress, NoticeMsg;
+
+            -- obtain the next number in the sequence
+            SecurityNoticeID := nextval(\'security_notice_id_seq\');
+            INSERT INTO security_notice
+                   (id,
+                    user_id,
+                    ip_address,
+                    description,
+                    commit_log_id)
+            VALUES (SecurityNoticeID,
+                    UserID,
+                    IPAddress,
+                    NoticeMsg,
+                    CommitLogID);
+         ELSE
+            RAISE NOTICE ''attempt to insert security notice for unknown message % by User % from %'', MessageID, UserID, IPAddress;
+         END IF;
+      END IF;
+
+      return SecurityNoticeID;
+
+   END
+'
+    LANGUAGE plpgsql;
