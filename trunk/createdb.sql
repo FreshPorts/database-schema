@@ -1,5 +1,5 @@
 #
-# $Id: createdb.sql,v 1.31 2002-06-16 20:42:52 dan Exp $
+# $Id: createdb.sql,v 1.32 2002-07-26 15:09:54 dan Exp $
 #
 # Things which must be done to make this script work with PostgreSQL
 # 
@@ -38,7 +38,7 @@ create table housekeeping
 
 insert into housekeeping values (0,0);
 
-create table commits_latest
+create table commits_latest_ports
 (
     commit_date_raw        timestamp                     ,
     commit_log_id          int4                          ,
