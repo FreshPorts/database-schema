@@ -1,5 +1,5 @@
 --
--- $Id: ri.txt,v 1.14.2.4 2003-03-06 21:24:30 dan Exp $
+-- $Id: ri.txt,v 1.14.2.5 2003-03-08 17:33:52 dan Exp $
 --
 
 CREATE OR REPLACE FUNCTION check_siblings() RETURNS TRIGGER AS '
@@ -344,4 +344,36 @@ CREATE TRIGGER user_email_change
     EXECUTE PROCEDURE user_email_change ();
 
 
+
+CREATE OR REPLACE FUNCTION security_notice_audit() RETURNS TRIGGER AS '
+BEGIN
+   INSERT INTO security_notice_audit 
+      (security_notice_id,
+       user_id,
+       date_added,
+       ip_address,
+       description,
+       commit_log_id,
+       status)
+   VALUES (
+       OLD.id,
+       OLD.user_id,
+       OLD.date_added,
+       OLD.ip_address,
+       OLD.description,
+       OLD.commit_log_id,
+       OLD.status);
+
+   NEW.date_added = CURRENT_TIMESTAMP;
+
+	RETURN NEW;
+END;
+
+' LANGUAGE plpgsql;
+
+  DROP TRIGGER security_notice_audit on security_notice;
+CREATE TRIGGER security_notice_audit
+    BEFORE UPDATE ON security_notice
+    FOR EACH ROW
+    EXECUTE PROCEDURE security_notice_audit ();
 
