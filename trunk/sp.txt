@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.115 2004-08-23 15:31:40 dan Exp $
+-- $Id: sp.txt,v 1.116 2004-08-27 14:52:07 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -2036,30 +2036,26 @@ CREATE OR REPLACE FUNCTION GetCategoryPortFromLatestLink(text) RETURNS TEXT AS '
         INTO l_Count
         FROM ports_active
        WHERE latest_link = p_PackageName;
-RAISE NOTICE '' first '';
+
       IF l_Count = 1 THEN
          SELECT category,   name
            INTO l_Category, l_Port
            FROM ports_active
           WHERE latest_link = p_PackageName;
 
-RAISE NOTICE '' second '';
          l_Result := l_Category || \'/\' || l_Port;
-RAISE NOTICE '' third '';
 
       ELSE
          IF l_Count = 0 THEN
             l_Result := \'0\';
          ELSE
             IF l_Count > 1 THEN
-               l_Result := l_Count;
+               l_Result := \'-1\';
             END IF;
         END IF;
       END IF;
 
       return l_Result;
-
-RAISE NOTICE '' fourth '';
 
    END;
 ' LANGUAGE plpgsql STABLE;
