@@ -1,5 +1,5 @@
 --
--- $Id: ri.txt,v 1.22 2003-03-07 20:31:43 dan Exp $
+-- $Id: ri.txt,v 1.23 2003-04-26 14:36:41 dan Exp $
 --
 
 CREATE OR REPLACE FUNCTION check_siblings() RETURNS OPAQUE as '
@@ -452,4 +452,38 @@ CREATE OR REPLACE RULE commit_log_update AS ON UPDATE TO commit_log DO
 UPDATE commits_latest_ports 
    SET commit_date = new.commit_date 
  WHERE (commits_latest_ports.commit_log_id = new.id);
+
+CREATE FUNCTION security_notice_audit () RETURNS "trigger"
+    AS '
+BEGIN
+   INSERT INTO security_notice_audit
+      (security_notice_id,
+       user_id,
+       date_added,
+       ip_address,
+       description,
+       commit_log_id,
+       status)
+   VALUES (
+       OLD.id,
+       OLD.user_id,
+       OLD.date_added,
+       OLD.ip_address,
+       OLD.description,
+       OLD.commit_log_id,
+       OLD.status);
+
+   NEW.date_added = CURRENT_TIMESTAMP;
+
+   RETURN NEW;
+END;
+
+'
+    LANGUAGE plpgsql;
+
+
+CREATE TRIGGER security_notice_audit
+    BEFORE UPDATE ON security_notice
+    FOR EACH ROW
+    EXECUTE PROCEDURE security_notice_audit ();
 
