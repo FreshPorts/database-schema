@@ -632,3 +632,23 @@ create function IsPortsTree(text) returns boolean As '
 '  LANGUAGE 'plpgsql';
 
 
+  drop function CreatePort(int4, int4);
+create function CreatePort(int4, int4) returns int4 AS '
+	DECLARE 	
+		port_element_id		ALIAS for $1;
+		port_category_id	ALIAS for $2;
+
+		port_id				int4;
+
+	BEGIN
+		-- this just creates the bare minimum for a port.
+		-- there are many other fields which need to be populated.
+
+		port_id := nextval(\'ports_id_seq\');
+		INSERT INTO ports (id, element_id, category_id)
+				values     (port_id, port_element_id, port_category_id);
+
+		return port_id;
+
+	END;
+'  LANGUAGE 'plpgsql';
