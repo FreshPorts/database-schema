@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.135 2005-03-18 03:38:10 dan Exp $
+-- $Id: sp.txt,v 1.136 2005-03-20 22:43:41 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -1740,7 +1740,6 @@ ON PEC.commit_log_id = security_notice.commit_log_id) AS SECURITY LEFT OUTER JOI
        AND watch_list.in_service
 GROUP BY wle_element_id) AS W ON W.wle_element_id = SECURITY.element_id
 order by commit_date_raw desc, category, port
-limit 100 * 3
 
 	LOOP
         RETURN NEXT r;
@@ -1879,7 +1878,6 @@ ON PEC.commit_log_id = security_notice.commit_log_id) AS SECURITY LEFT OUTER JOI
        AND watch_list.in_service
 GROUP BY wle_element_id) AS W ON W.wle_element_id = SECURITY.element_id
 order by commit_date_raw desc, category, port
-limit 10 * 3
 
 	LOOP
         RETURN NEXT r;
