@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.54 2002-07-26 15:09:54 dan Exp $
+-- $Id: sp.txt,v 1.55 2002-07-26 15:46:02 dan Exp $
 --
 
 CREATE OR REPLACE FUNCTION IsDescendantOf (int4 ,int4) returns boolean As '
@@ -973,14 +973,14 @@ CREATE OR REPLACE FUNCTION RecordLastestPortCommits() RETURNS INT4 AS '
 		-- add in the new stuff
 		CREATE TEMP TABLE commits_latest_ports_tmp AS
 		SELECT DISTINCT
-			commits_recent.commit_date															AS commit_date_raw,
-			commits_recent.id																	AS commit_log_id,
-			commits_recent.encoding_losses														AS encoding_losses,
-			commits_recent.message_id															AS message_id,
-			commits_recent.committer															AS committer,
-			commits_recent.description															AS commit_description,
-			to_char(commits_recent.commit_date - SystemTimeAdjust(), ''DD Mon YYYY'')			AS commit_date,
-			to_char(commits_recent.commit_date - SystemTimeAdjust(), ''HH24:MI'')				AS commit_time,
+			commits_recent_ports.commit_date													AS commit_date_raw,
+			commits_recent_ports.id																AS commit_log_id,
+			commits_recent_ports.encoding_losses												AS encoding_losses,
+			commits_recent_ports.message_id														AS message_id,
+			commits_recent_ports.committer														AS committer,
+			commits_recent_ports.description													AS commit_description,
+			to_char(commits_recent_ports.commit_date - SystemTimeAdjust(), ''DD Mon YYYY'')		AS commit_date,
+			to_char(commits_recent_ports.commit_date - SystemTimeAdjust(), ''HH24:MI'')			AS commit_time,
 			commit_log_ports.port_id															AS port_id,
 			categories.name																		AS category,
 			categories.id																		AS category_id,
@@ -994,12 +994,12 @@ CREATE OR REPLACE FUNCTION RecordLastestPortCommits() RETURNS INT4 AS '
 			date_part(''epoch'', ports.date_added)												AS date_added,
 			ports.element_id																	AS element_id,
 			ports.short_description 															AS short_description
-	   FROM commit_log_ports, commits_recent, element, categories, ports
-	  WHERE commit_log_ports.commit_log_id = commits_recent.id
+	   FROM commit_log_ports, commits_recent_ports, element, categories, ports
+	  WHERE commit_log_ports.commit_log_id = commits_recent_ports.id
 	    AND commit_log_ports.port_id       = ports.id
 	    AND categories.id                  = ports.category_id
 	    AND element.id                     = ports.element_id
-   ORDER BY commits_recent.commit_date desc,
+   ORDER BY commits_recent_ports.commit_date desc,
 			commit_log_id,
 			category,
 			port;
