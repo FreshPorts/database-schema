@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.23 2002-02-03 15:18:17 dan Exp $
+-- $Id: sp.txt,v 1.24 2002-02-10 18:01:55 dan Exp $
 --
 
   drop function IsDescendantOf (int4 ,int4);
@@ -44,7 +44,7 @@ create function Element_Pathname(int4) returns text AS '
    DECLARE
       element_id   ALIAS FOR $1;
       my_parent_id int4;
-      element_name varchar(255);
+      element_name text;
       pathname     text;
 
 begin
