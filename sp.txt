@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.34 2002-02-28 21:38:03 dan Exp $
+-- $Id: sp.txt,v 1.35 2002-03-02 17:09:04 dan Exp $
 --
 
   drop function IsDescendantOf (int4 ,int4);
@@ -807,51 +807,6 @@ CREATE FUNCTION WatchListStagingAddItem(int4, text, text, int4) RETURNS int4 AS 
 		RETURN OID;
 	END
 ' LANGUAGE 'plpgsql';
-
-  DROP FUNCTION WatchListStagingMergeWatchList(int4);
-CREATE FUNCTION WatchListStagingMergeWatchList(int4) RETURNS int4 AS '
-
-	DECLARE
-		WatchListID	ALIAS for $1;
-		RowCount	int8;
-		TempID		int8;
-
-        stagingport RECORD;
-
-    BEGIN
-        FOR stagingport IN 
-			SELECT element.name, element_id
-			  FROM watch_list_element, element
-			 WHERE watch_list_id = WatchListID
-			   AND element_id    = element.id
-			   AND NOT EXISTS (
-					SELECT element_id 
-					  FROM watch_list_staging, watch_list_staging_results
-					 WHERE watch_list_staging.watch_list_id = watch_list_element.watch_list_id
-					   AND watch_list_staging.id            = watch_list_staging_results.watch_list_staging_id
-					   AND watch_list_element.element_id    = watch_list_staging_results.element_id  )
-		LOOP
-
-			SELECT nextval(\'watch_list_staging_id_seq\'::text)
-			  INTO TempID;
-
-			INSERT INTO watch_list_staging (id, watch_list_id, port_name, from_pkg_info, count_on_pkg_info, from_watch_list)
-				VALUES (TempID, WatchListID, stagingport.name, \'N\', 0, \'Y\');
-
-			INSERT INTO watch_list_staging_results (watch_list_staging_id, watch_list_id, element_id)
-				VALUES (TempID, WatchListID, stagingport.element_id);
-
-		END LOOP;
-
-		GET DIAGNOSTICS RowCount = ROW_COUNT;
-
-		RETURN RowCount;
-	END
-' LANGUAGE 'plpgsql';
-
-
-
-
 
   DROP FUNCTION WatchListStagingProcess(int4);
 CREATE FUNCTION WatchListStagingProcess(int4) RETURNS int4 AS '
