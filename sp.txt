@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.38 2002-03-03 00:37:49 dan Exp $
+-- $Id: sp.txt,v 1.39 2002-03-10 16:02:36 dan Exp $
 --
 
   drop function IsDescendantOf (int4 ,int4);
@@ -1006,7 +1006,8 @@ CREATE FUNCTION PortVerifyBegin()returns int8 AS '
 	BEGIN
 		UPDATE ports SET found_in_index = FALSE;
 
-		CREATE TEMP TABLE PortsCheck (category_name text, port_name text);
+--		CREATE TEMP TABLE PortsCheck (category_name text, port_name text);
+		DELETE FROM Ports_Check;
 
 		GET DIAGNOSTICS RowCount = ROW_COUNT;
 
@@ -1025,7 +1026,7 @@ CREATE FUNCTION PortVerifyAddOne(text, text) returns int8 AS '
 		OID	int8;
 
 	BEGIN
-		INSERT INTO PortsCheck values (CategoryName, PortName);
+		INSERT INTO Ports_Check values (CategoryName, PortName);
 
 		GET DIAGNOSTICS OID = RESULT_OID;
 
@@ -1037,14 +1038,32 @@ CREATE FUNCTION PortVerifyAddOne(text, text) returns int8 AS '
   DROP FUNCTION PortsVerifyProcess();
 CREATE FUNCTION PortsVerifyProcess() returns int8 AS '
 	DECLARE
+		RowCount    int8;
+
+	BEGIN
+--		CREATE INDEX tmpCatPortsCheck  on Ports_Check(category_name);
+--		CREATE INDEX tmpPortPortsCheck on Ports_Check(port_name);
+
 		UPDATE ports SET found_in_index = TRUE
 		WHERE EXISTS
 			(	SELECT *
-				  FROM categories, element, PortsCheck
-				 WHERE element.name      = PortsCheck.port_name
-				   AND categories.name   = PortsCheck.category_name
-				   AND ports.element_id  = element.id
-				   AND ports.category_id = categories.id);
+				  FROM categories, element, Ports_Check
+				 WHERE ports.element_id  = element.id
+				   AND ports.category_id = categories.id
+				   AND categories.name   = Ports_Check.category_name
+				   AND element.name      = Ports_Check.port_name);
 
+		UPDATE Ports_Check SET found_in_ports = TRUE
+		WHERE EXISTS
+			(	SELECT *
+				  FROM categories, element, ports
+				 WHERE ports.element_id  = element.id
+				   AND ports.category_id = categories.id
+				   AND categories.name   = Ports_Check.category_name
+				   AND element.name      = Ports_Check.port_name);
+
+		GET DIAGNOSTICS RowCount = ROW_COUNT;
+
+		RETURN RowCount;
 	END
 ' LANGUAGE 'plpgsql';
