@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.100 2004-02-13 15:10:13 dan Exp $
+-- $Id: sp.txt,v 1.101 2004-02-13 16:43:08 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -1435,11 +1435,11 @@ CREATE OR REPLACE FUNCTION SecurityNoticeCreate(integer, inet, text, text, text)
       IF FOUND THEN
 			RAISE NOTICE '' Updating security notice for % MessageID User % from % said %'', MessageID, UserId, IPAddress, NoticeMsg;
          UPDATE security_notice
-            SET user_id       = UserID,
-                ip_address    = IPAddress,
-                description   = NoticeMsg,
-                status        = p_Status
-          WHERE id            = SecurityNoticeID;
+            SET user_id                   = UserID,
+                ip_address                = IPAddress,
+                description               = NoticeMsg,
+                security_notice_status_id = p_Status
+          WHERE id                        = SecurityNoticeID;
       ELSE
          SELECT id
            INTO CommitLogID
@@ -1458,7 +1458,7 @@ CREATE OR REPLACE FUNCTION SecurityNoticeCreate(integer, inet, text, text, text)
                     ip_address,
                     description,
                     commit_log_id,
-                    status)
+                    security_notice_status_id)
             VALUES (SecurityNoticeID,
                     UserID,
                     IPAddress,
