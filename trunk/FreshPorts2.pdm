@@ -105,7 +105,7 @@ alter table watch_notice_log       alter column id set default nextval('watch_no
 Dan Langille
 
 968886895
-1005351293
+1006256781
 0
 0
 0
@@ -656,6 +656,28 @@ system
 
 
 0
+3
+1056
+1056
+2
+commit_log_port
+commit_log_port
+
+
+
+0
+0
+0
+commit_log_port
+
+
+
+
+
+
+
+
+0
 /END_TABLE AMCTABL
 
 /BEGIN_TABLE AMCCOLN
@@ -1048,8 +1070,8 @@ commit_log_id
 3
 7
 7
-element_revision_id
-element_revision_id
+element_id
+element_id
 element affected by this change
 
 
@@ -1080,6 +1102,41 @@ int4
 element_id
 
 3
+3
+1360
+1360
+revision_name
+revision_name
+
+
+
+4
+84
+text
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+1
+0
+1
+0
+0
+revision_name
+
+4
 3
 180
 180
@@ -1116,7 +1173,7 @@ R	Remove
 0
 change_type
 
-4
+5
 3
 9
 9
@@ -2349,6 +2406,41 @@ last_update
 
 6
 3
+1898
+1898
+revision
+revision
+
+
+
+209
+84
+text
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+0
+0
+1
+0
+0
+revision
+
+7
+3
 216
 216
 maintainer
@@ -2382,43 +2474,43 @@ varchar(40)
 0
 maintainer
 
-7
-3
-217
-217
-homepage
-homepage
-
-
-
-209
-84
-text
-0
-0
-0
-0
-
-
-
-
-
-0
-0
-0
-
-
-
-0
-0
-0
-1
-0
-0
-homepage
-
 8
 3
+217
+217
+homepage
+homepage
+
+
+
+209
+84
+text
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+0
+0
+1
+0
+0
+homepage
+
+9
+3
 218
 218
 master_sites
@@ -2452,7 +2544,7 @@ text
 0
 master_sites
 
-9
+10
 3
 219
 219
@@ -2487,7 +2579,7 @@ varchar(10)
 0
 extract_suffix
 
-10
+11
 3
 220
 220
@@ -2522,43 +2614,43 @@ boolean
 0
 package_exists
 
-11
-3
-221
-221
-depends_build
-depends_build
-
-
-
-209
-84
-text
-0
-0
-0
-0
-
-
-
-
-
-0
-0
-0
-
-
-
-0
-0
-0
-1
-0
-0
-depends_build
-
 12
 3
+221
+221
+depends_build
+depends_build
+
+
+
+209
+84
+text
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+0
+0
+1
+0
+0
+depends_build
+
+13
+3
 222
 222
 depends_run
@@ -2592,7 +2684,7 @@ text
 0
 depends_run
 
-13
+14
 3
 223
 223
@@ -2627,7 +2719,7 @@ int4
 0
 last_commit_id
 
-14
+15
 3
 224
 224
@@ -2662,7 +2754,7 @@ smallint
 0
 needs_refresh
 
-15
+16
 3
 225
 225
@@ -2697,43 +2789,43 @@ boolean
 0
 found_in_index
 
-16
-3
-226
-226
-forbidden
-forbidden
-
-
-
-209
-84
-text
-0
-0
-0
-0
-
-
-
-
-
-0
-0
-0
-
-
-
-0
-0
-0
-1
-0
-0
-forbidden
-
 17
 3
+226
+226
+forbidden
+forbidden
+
+
+
+209
+84
+text
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+0
+0
+1
+0
+0
+forbidden
+
+18
+3
 227
 227
 broken
@@ -2767,7 +2859,7 @@ text
 0
 broken
 
-18
+19
 3
 305
 305
@@ -2944,41 +3036,6 @@ description
 
 5
 3
-470
-470
-id
-id
-
-
-
-467
-83
-int4
-4
-0
-0
-0
-
-
-
-
-
-0
-0
-0
-
-
-
-1
-0
-1
-1
-0
-0
-id
-
-1
-3
 471
 471
 element_id
@@ -3004,7 +3061,7 @@ int4
 
 
 
-0
+1
 1
 1
 1
@@ -3012,7 +3069,7 @@ int4
 0
 element_id
 
-2
+1
 3
 472
 472
@@ -3039,7 +3096,7 @@ text
 
 
 
-0
+1
 0
 0
 1
@@ -3047,7 +3104,7 @@ text
 0
 revision_name
 
-3
+2
 3
 474
 474
@@ -3086,8 +3143,8 @@ system_version_id
 3
 475
 475
-element_revision_id
-element_revision_id
+element_id
+element_id
 
 
 
@@ -3118,6 +3175,41 @@ int4
 element_revision_id
 
 2
+3
+1577
+1577
+revision_name
+revision_name
+
+
+
+468
+83
+int4
+4
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+1
+1
+1
+1
+0
+0
+revision_name
+
+3
 3
 476
 476
@@ -3293,6 +3385,111 @@ text
 name
 
 2
+3
+1057
+1057
+commit_log_id
+commit_log_id
+
+
+
+1056
+83
+int4
+4
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+1
+1
+1
+1
+0
+0
+commit_log_id
+
+1
+3
+1058
+1058
+port_id
+port_id
+
+
+
+1056
+83
+int4
+4
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+1
+1
+1
+1
+0
+0
+port_id
+
+2
+3
+1739
+1739
+commit_log_element_id
+commit_log_element_id
+
+
+
+1056
+83
+int4
+4
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+1
+1
+1
+1
+0
+0
+commit_log_element_id
+
+3
 /END_TABLE AMCCOLN
 
 /BEGIN_TABLE AMCREFR
@@ -3487,27 +3684,6 @@ SYSTEM_VERSION_MODULE_SYSTEM_VERSION
 n
 0
 3
-480
-480
-fk_system_version_element_element_revision
-fk_system_version_element_element_revision
-
-
-
-467
-468
-2
-2
-1
-1
-0
-0
-SYSTEM_VERSION_MODULE_MODULE_REVISION
-fk_system_version_element_elem
-0
-n
-0
-3
 495
 495
 fk_element_revision_element
@@ -3524,27 +3700,6 @@ fk_element_revision_element
 0
 0
 fk_element_revision_element
-
-0
-n
-0
-3
-500
-500
-fk_commit_log_element_element_revision
-fk_commit_log_element_element_revision
-fk_commit_log_element_element_revision
-
-
-467
-4
-2
-2
-1
-1
-0
-0
-fk_commit_log_element_element_revision
 
 0
 n
@@ -3717,6 +3872,111 @@ fk_users_watch_notice
 0
 n
 0
+3
+1230
+1230
+fk_commit_log_port_commit_log
+fk_commit_log_port_commit_log
+
+
+
+1
+1056
+2
+2
+1
+1
+0
+0
+fk_commit_log_port_commit_log
+
+0
+n
+0
+3
+1231
+1231
+fk_commit_log_port_port
+fk_commit_log_port_port
+
+
+
+209
+1056
+2
+2
+1
+1
+0
+0
+fk_commit_log_port_port
+
+0
+n
+0
+3
+1572
+1572
+Ref_1572
+Ref_1572
+
+
+
+467
+4
+1
+1
+0
+1
+0
+0
+Ref_1572
+
+0
+n
+0
+3
+1578
+1578
+Ref_1578
+Ref_1578
+
+
+
+467
+468
+1
+1
+1
+1
+0
+0
+Ref_1578
+
+0
+n
+0
+3
+1740
+1740
+Ref_1740
+Ref_1740
+
+
+
+4
+1056
+2
+2
+1
+1
+0
+0
+Ref_1740
+
+0
+n
+0
 /END_TABLE AMCREFR
 
 /BEGIN_TABLE AMCCCOL
@@ -3767,20 +4027,10 @@ COLN2   N8
 476
 474
 1
-482
-482
-470
-475
-1
 498
 498
 9
 471
-1
-503
-503
-470
-7
 1
 669
 669
@@ -3821,6 +4071,41 @@ COLN2   N8
 967
 193
 186
+1
+1232
+1232
+210
+1058
+1
+1234
+1234
+2
+1057
+1
+1573
+1573
+471
+7
+1
+1575
+1575
+472
+1360
+1
+1579
+1579
+471
+475
+1
+1581
+1581
+472
+1577
+1
+1741
+1741
+5
+1739
 /END_TABLE AMCCCOL
 
 /BEGIN_TABLE AMCCREF
@@ -3880,22 +4165,10 @@ NUMR    N8
 481
 1
 3
-484
-484
-480
-482
-1
-3
 499
 499
 495
 498
-1
-3
-504
-504
-500
-503
 1
 3
 670
@@ -3945,6 +4218,48 @@ NUMR    N8
 964
 967
 1
+3
+1235
+1235
+1230
+1234
+1
+3
+1233
+1233
+1231
+1232
+1
+3
+1574
+1574
+1572
+1573
+1
+3
+1576
+1576
+1572
+1575
+2
+3
+1580
+1580
+1578
+1579
+1
+3
+1582
+1582
+1578
+1581
+2
+3
+1742
+1742
+1740
+1741
+1
 /END_TABLE AMCCREF
 
 /BEGIN_TABLE AMCINDX
@@ -3984,23 +4299,6 @@ element_name
 1
 
 3
-18
-18
-fk_element_parent_id
-element_parent_id
-8
-
-
-
-0
-1
-0
-0
-
-
-2
-
-3
 233
 233
 ports_needs_refresh
@@ -4015,7 +4313,7 @@ ports_needs_refresh
 0
 
 
-3
+2
 
 3
 235
@@ -4032,13 +4330,30 @@ commit_log_commit_date
 0
 
 
-4
+3
 
 3
 237
 237
 users_cookie
 users_cookie
+22
+
+
+
+0
+0
+0
+0
+
+
+4
+
+3
+239
+239
+users_email
+users_email
 22
 
 
@@ -4050,23 +4365,6 @@ users_cookie
 
 
 5
-
-3
-239
-239
-users_email
-users_email
-22
-
-
-
-0
-0
-0
-0
-
-
-6
 
 3
 243
@@ -4083,64 +4381,404 @@ watch_notice_frequency
 0
 
 
+6
+
+3
+900
+900
+users_name
+users_name
+22
+
+
+
+0
+0
+1
+0
+
+
 7
 
 3
-321
-321
-FK_watch_list_element
-FK_watch_list_element
-29
-FK_watch_list_element
+1236
+1236
+commit_log_PK
+commit_log_PK
+1
 
 
+
+1
 0
 1
 0
-0
 
-
+PK
 8
 
 3
-413
-413
-categories_element_id_unique
-categories_element_id_unique
-304
+1238
+1238
+commit_log_elements_PK
+commit_log_elements_PK
+4
 
 
 
-0
-1
 1
 0
+1
+0
 
-
+PK
 9
 
 3
-415
-415
-ports_element_id_unique
-ports_element_id_unique
+1240
+1240
+commit_log_elements_FK1
+commit_log_elements_FK1
+4
+
+
+
+0
+1
+0
+0
+
+FK32
+10
+
+3
+1242
+1242
+commit_log_elements_FK2
+commit_log_elements_FK2
+4
+
+
+
+0
+1
+0
+0
+
+FK500
+11
+
+3
+1244
+1244
+element_PK
+element_PK
+8
+
+
+
+1
+0
+1
+0
+
+PK
+12
+
+3
+1246
+1246
+element_FK1
+element_FK1
+8
+
+
+
+0
+1
+0
+0
+
+FK751
+13
+
+3
+1248
+1248
+users_PK
+users_PK
+22
+
+
+
+1
+0
+1
+0
+
+PK
+14
+
+3
+1250
+1250
+users_FK1
+users_FK1
+22
+
+
+
+0
+1
+0
+0
+
+FK964
+15
+
+3
+1252
+1252
+watch_list_PK
+watch_list_PK
+25
+
+
+
+1
+0
+1
+0
+
+PK
+16
+
+3
+1254
+1254
+watch_list_FK1
+watch_list_FK1
+25
+
+
+
+0
+1
+0
+0
+
+FK893
+17
+
+3
+1256
+1256
+watch_list_element_PK
+watch_list_element_PK
+29
+
+
+
+1
+0
+1
+0
+
+PK
+18
+
+3
+1259
+1259
+watch_list_element_FK1
+watch_list_element_FK1
+29
+
+
+
+0
+1
+0
+0
+
+FK41
+19
+
+3
+1261
+1261
+watch_list_element_FK2
+watch_list_element_FK2
+29
+
+
+
+0
+1
+0
+0
+
+FK44
+20
+
+3
+1263
+1263
+watch_notice_PK
+watch_notice_PK
+192
+
+
+
+1
+0
+1
+0
+
+PK
+21
+
+3
+1265
+1265
+watch_notice_log_PK
+watch_notice_log_PK
+197
+
+
+
+1
+0
+1
+0
+
+PK
+22
+
+3
+1267
+1267
+watch_notice_log_FK1
+watch_notice_log_FK1
+197
+
+
+
+0
+1
+0
+0
+
+FK202
+23
+
+3
+1271
+1271
+ports_PK
+ports_PK
+209
+
+
+
+1
+0
+1
+0
+
+PK
+24
+
+3
+1273
+1273
+ports_FK1
+ports_FK1
 209
 
 
 
 0
 1
+0
+0
+
+FK228
+25
+
+3
+1275
+1275
+ports_FK2
+ports_FK2
+209
+
+
+
+0
+1
+0
+0
+
+FK315
+26
+
+3
+1281
+1281
+categories_PK
+categories_PK
+304
+
+
+
+1
+0
 1
 0
 
-
-10
+PK
+27
 
 3
-485
-485
-element_id
-element_id
+1283
+1283
+categories_FK1
+categories_FK1
+304
+
+
+
+0
+1
+0
+0
+
+FK310
+28
+
+3
+1287
+1287
+element_revision_PK
+element_revision_PK
+467
+
+
+
+1
+0
+1
+0
+
+PK
+29
+
+3
+1289
+1289
+element_revision_FK1
+element_revision_FK1
 467
 
 
@@ -4150,14 +4788,31 @@ element_id
 0
 0
 
-
-11
+FK495
+30
 
 3
-487
-487
-system_id
-system_id
+1298
+1298
+system_version_PK
+system_version_PK
+469
+
+
+
+1
+0
+1
+0
+
+PK
+31
+
+3
+1300
+1300
+system_version_FK1
+system_version_FK1
 469
 
 
@@ -4167,16 +4822,84 @@ system_id
 0
 0
 
-
-12
+FK821
+32
 
 3
-898
-898
-fk_watch_list_users
-fk_watch_list_users
-25
-fk_watch_list_users
+1302
+1302
+system_PK
+system_PK
+505
+
+
+
+1
+0
+1
+0
+
+PK
+33
+
+3
+1304
+1304
+commit_log_port_PK
+commit_log_port_PK
+1056
+
+
+
+1
+0
+1
+0
+
+PK
+34
+
+3
+1307
+1307
+commit_log_port_FK1
+commit_log_port_FK1
+1056
+
+
+
+0
+1
+0
+0
+
+FK1230
+35
+
+3
+1309
+1309
+commit_log_port_FK2
+commit_log_port_FK2
+1056
+
+
+
+0
+1
+0
+0
+
+FK1231
+36
+
+3
+1744
+1744
+commit_log_port_FK3
+commit_log_port_FK3
+1056
+
 
 
 0
@@ -4185,31 +4908,31 @@ fk_watch_list_users
 0
 
 
-13
+37
 
 3
-900
-900
-users_name
-users_name
-22
+1752
+1752
+system_version_element_PK
+system_version_element_PK
+468
 
 
 
-0
+1
 0
 1
 0
 
 
-14
+38
 
 3
-962
-962
-fk_user_watch_notice
-fk_user_watch_notice
-22
+1756
+1756
+system_version_element_FK1
+system_version_element_FK1
+468
 
 
 
@@ -4219,24 +4942,7 @@ fk_user_watch_notice
 0
 
 
-15
-
-3
-1036
-1036
-element_id_revision_name
-element_id_revision_name
-467
-
-
-
-0
-0
-1
-0
-
-
-16
+39
 
 /END_TABLE AMCINDX
 
@@ -4254,13 +4960,6 @@ NUMR    N8
 17
 16
 10
-1
-1
-3
-19
-19
-18
-11
 1
 1
 3
@@ -4299,48 +4998,6 @@ NUMR    N8
 1
 1
 3
-322
-322
-321
-31
-1
-1
-3
-414
-414
-413
-309
-1
-1
-3
-416
-416
-415
-211
-1
-1
-3
-488
-488
-485
-471
-1
-1
-3
-491
-491
-487
-477
-1
-1
-3
-899
-899
-898
-27
-1
-1
-3
 901
 901
 900
@@ -4348,24 +5005,283 @@ NUMR    N8
 1
 1
 3
-963
-963
-962
+1237
+1237
+1236
+2
+1
+1
+3
+1239
+1239
+1238
+5
+1
+1
+3
+1241
+1241
+1240
+6
+1
+1
+3
+1243
+1243
+1242
+7
+1
+1
+3
+1569
+1569
+1242
+1360
+1
+2
+3
+1245
+1245
+1244
+9
+1
+1
+3
+1247
+1247
+1246
+11
+1
+1
+3
+1249
+1249
+1248
+23
+1
+1
+3
+1251
+1251
+1250
 186
 1
 1
 3
-1037
-1037
-1036
+1253
+1253
+1252
+26
+1
+1
+3
+1255
+1255
+1254
+27
+1
+1
+3
+1257
+1257
+1256
+30
+1
+1
+3
+1258
+1258
+1256
+31
+1
+2
+3
+1260
+1260
+1259
+31
+1
+1
+3
+1262
+1262
+1261
+30
+1
+1
+3
+1264
+1264
+1263
+193
+1
+1
+3
+1266
+1266
+1265
+198
+1
+1
+3
+1268
+1268
+1267
+200
+1
+1
+3
+1272
+1272
+1271
+210
+1
+1
+3
+1274
+1274
+1273
+211
+1
+1
+3
+1276
+1276
+1275
+318
+1
+1
+3
+1282
+1282
+1281
+305
+1
+1
+3
+1284
+1284
+1283
+309
+1
+1
+3
+1746
+1746
+1287
 471
 1
 1
 3
-1038
-1038
-1036
+1747
+1747
+1287
 472
+1
+2
+3
+1290
+1290
+1289
+471
+1
+1
+3
+1299
+1299
+1298
+476
+1
+1
+3
+1301
+1301
+1300
+477
+1
+1
+3
+1303
+1303
+1302
+506
+1
+1
+3
+1305
+1305
+1304
+1057
+1
+1
+3
+1306
+1306
+1304
+1058
+1
+2
+3
+1743
+1743
+1304
+1739
+1
+3
+3
+1308
+1308
+1307
+1057
+1
+1
+3
+1310
+1310
+1309
+1058
+1
+1
+3
+1745
+1745
+1744
+1739
+1
+1
+3
+1753
+1753
+1752
+474
+1
+1
+3
+1754
+1754
+1752
+475
+1
+2
+3
+1755
+1755
+1752
+1577
+1
+3
+3
+1757
+1757
+1756
+475
+1
+1
+3
+1758
+1758
+1756
+1577
 1
 2
 /END_TABLE AMCCIDX
@@ -4905,6 +5821,46 @@ DeleteIndx
 0
 39
 ports,ports,fk_ports_element_id,fk_ports_element_id
+
+1
+5
+DeleteIndx
+2
+0
+39
+element_revision,element_revision,element_id_revision_name,element_id_revision_name
+
+1
+6
+DeleteIndx
+2
+0
+39
+system_version_element,system_version_element,Index_1751,Index_1751
+
+1
+7
+DeleteIndx
+2
+0
+39
+system_version_element,system_version_element,system_version_element_PK,PK
+
+1
+8
+DeleteIndx
+2
+0
+39
+system_version_element,system_version_element,system_version_element_FK1,FK479
+
+1
+9
+DeleteIndx
+2
+0
+39
+system_version_element,system_version_element,system_version_element_FK2,FK480
 
 /END_TABLE AMCREDO
 
@@ -6057,7 +7013,7 @@ yes
 0
 WarehouseArchitect
 DBOConsUddt
-yes
+no
 175
 2
 0
@@ -6303,7 +7259,7 @@ no
 0
 WarehouseArchitect
 DBOUseNames
-no
+yes
 216
 2
 0
@@ -6436,6 +7392,12 @@ no
 WarehouseArchitect
 DBODropStor
 no
+238
+2
+0
+WarehouseArchitect
+External Sources
+0,1,-1,-1,-1,-1,481,321,1062,764
 /END_TABLE AMCPROP
 
 /BEGIN_TABLE AMCSYMB
@@ -6483,10 +7445,10 @@ OLE     BIN
 0
 0
 0
-5352
--126890
-18476
--114741
+7299
+-127418
+20423
+-115269
 2
 1
 0
@@ -6503,7 +7465,7 @@ OLE     BIN
 
 
 
-1
+2
 22
 
 3
@@ -6516,10 +7478,10 @@ OLE     BIN
 0
 0
 0
-7782
--109521
-16031
--105172
+9730
+-110048
+17979
+-105699
 2
 1
 0
@@ -6536,7 +7498,7 @@ OLE     BIN
 
 
 
-1
+2
 25
 
 3
@@ -6549,10 +7511,10 @@ OLE     BIN
 0
 0
 0
-7720
--98471
-15819
--94947
+9668
+-98996
+17767
+-95472
 2
 1
 0
@@ -6569,7 +7531,7 @@ OLE     BIN
 
 
 
-1
+2
 29
 
 3
@@ -6582,10 +7544,10 @@ OLE     BIN
 0
 0
 0
-24951
--118968
-34625
--113644
+26899
+-119495
+36573
+-114171
 2
 1
 0
@@ -6602,7 +7564,7 @@ OLE     BIN
 
 
 
-1
+2
 192
 
 3
@@ -6615,10 +7577,10 @@ OLE     BIN
 0
 0
 0
-22658
--110203
-35557
--104879
+24606
+-110730
+37505
+-105406
 2
 1
 0
@@ -6635,7 +7597,7 @@ OLE     BIN
 
 
 
-1
+2
 197
 
 3
@@ -6648,10 +7610,10 @@ OLE     BIN
 0
 0
 0
--37510
--128565
--10061
--115666
+-35638
+-128718
+-8189
+-115819
 1
 1
 0
@@ -6671,10 +7633,10 @@ physical database model\
 copyright 2001 - DVL Software Limited\
 Wellington, New Zealand\
 \
-13 January 2001
+10 November 2001
 
 
-1
+2
 0
 
 3
@@ -6687,10 +7649,10 @@ Wellington, New Zealand\
 0
 0
 0
--12776
--87827
--4527
--83478
+-10835
+-87944
+-2586
+-84420
 2
 1
 0
@@ -6707,7 +7669,7 @@ Wellington, New Zealand\
 
 
 
-1
+2
 467
 
 3
@@ -6720,10 +7682,10 @@ Wellington, New Zealand\
 0
 0
 0
-5540
--87584
-16039
--84060
+7698
+-88537
+17747
+-84188
 2
 1
 0
@@ -6740,11 +7702,11 @@ Wellington, New Zealand\
 
 
 
-1
+2
 468
 
 3
-838
+839
 6
 0
 9
@@ -6753,45 +7715,10 @@ Wellington, New Zealand\
 0
 0
 0
-5150
--91210
-18350
--87986
-1
-1
-0
-1
-529
-0
-0
-0
-0
-0
-0
-
-0
-system_version_element will have a \
-unique key on (system_version_id,\
-element_revision_id)
-
-
-1
-0
-
-3
-839
-6
-0
-10
-0
-0
-0
-0
-0
--13867
--83267
--3669
--81018
+-11920
+-83794
+-1721
+-81545
 1
 1
 0
@@ -6809,23 +7736,23 @@ each element revision is \
 tracked in this table
 
 
-1
+2
 0
 
 3
 327
 289
 2
-11
+10
 0
 0
 0
 0
 0
--7992
--127416
-3932
--108442
+-6053
+-128442
+5871
+-108493
 2
 1
 0
@@ -6842,11 +7769,44 @@ tracked in this table
 
 
 
-1
+2
 209
 
 3
 622
+289
+0
+11
+0
+0
+0
+0
+0
+-16588
+-115258
+-6689
+-108959
+2
+1
+0
+0
+0
+0
+0
+0
+0
+0
+0
+
+0
+
+
+
+2
+304
+
+3
+4
 289
 0
 12
@@ -6855,10 +7815,10 @@ tracked in this table
 0
 0
 0
--18535
--114730
--8636
--108431
+-11588
+-101801
+-788
+-95502
 2
 1
 0
@@ -6875,12 +7835,12 @@ tracked in this table
 
 
 
-1
-304
+2
+8
 
 3
-4
-289
+911
+6
 0
 13
 0
@@ -6888,43 +7848,10 @@ tracked in this table
 0
 0
 0
--13536
--101274
--2736
--94975
-2
-1
-0
-0
-0
-0
-0
-0
-0
-0
-0
-
-0
-
-
-
-1
-8
-
-3
-911
-6
-0
-14
-0
-0
-0
-0
-0
--7183
--95045
-6016
--91821
+-5235
+-95572
+7964
+-92348
 1
 1
 0
@@ -6943,12 +7870,45 @@ the source tree will have exactly \
 one entry in this table.
 
 
-1
+2
 0
 
 3
 2
 289
+0
+14
+0
+0
+0
+0
+0
+-30480
+-102795
+-18406
+-93571
+2
+1
+0
+0
+0
+0
+0
+0
+0
+0
+0
+
+0
+
+
+
+2
+1
+
+3
+915
+6
 0
 15
 0
@@ -6956,43 +7916,10 @@ one entry in this table.
 0
 0
 0
--33177
--102267
--21103
--93043
-2
-1
-0
-0
-0
-0
-0
-0
-0
-0
-0
-
-0
-
-
-
-1
-1
-
-3
-915
-6
-0
-16
-0
-0
-0
-0
-0
--32797
--104901
--24098
--102652
+-34674
+-105203
+-25975
+-102954
 1
 1
 0
@@ -7010,23 +7937,23 @@ Each commit will be \
 stored in this table.
 
 
-1
+2
 0
 
 3
 3
 289
 0
-17
+16
 0
 0
 0
 0
 0
--33605
--88132
--21906
--82808
+-29912
+-89166
+-20238
+-82867
 2
 1
 0
@@ -7043,23 +7970,23 @@ stored in this table.
 
 
 
-1
+2
 4
 
 3
 913
 6
 0
-18
+17
 0
 0
 0
 0
 0
--31675
--82722
--22301
--80473
+-29127
+-82499
+-19753
+-80250
 1
 1
 0
@@ -7077,23 +8004,23 @@ each commit modifies \
 one or more files
 
 
-1
+2
 0
 
 3
 837
 289
 0
-19
+18
 0
 0
 0
 0
 0
-26217
--95561
-34241
--91212
+28165
+-96088
+36189
+-91739
 2
 1
 0
@@ -7110,23 +8037,23 @@ one or more files
 
 
 
-1
+2
 469
 
 3
 917
 6
 0
-20
+19
 0
 0
 0
 0
 0
-23683
--90959
-37557
--88710
+19856
+-91561
+33730
+-89312
 1
 1
 0
@@ -7144,23 +8071,23 @@ Sample entries are 4.2-RELEASE,\
 4.2-STABLE, 5.0-CURRENT
 
 
-1
+2
 0
 
 3
 919
 6
 0
-21
+20
 0
 0
 0
 0
 0
-19362
--101986
-29262
--98762
+20374
+-102513
+32148
+-99289
 1
 1
 0
@@ -7179,23 +8106,23 @@ Operating Systems\
 in the same database
 
 
-1
+2
 0
 
 3
 925
 289
 0
-22
+21
 0
 0
 0
 0
 0
-27862
--103436
-32661
--99912
+29810
+-103961
+34609
+-100437
 2
 1
 0
@@ -7212,23 +8139,23 @@ in the same database
 
 
 
-1
+2
 505
 
 3
 3807
 6
 0
-23
+22
 0
 0
 0
 0
 0
-2024
--83935
-24748
--76811
+7721
+-84051
+30445
+-78203
 1
 1
 0
@@ -7246,13 +8173,45 @@ on insert/update, \
 delete from system_version_element \
 where element_revision_id in \
 (select id from element_revision where element_id = :ID);\
-\
 Make sure you don't have the same element referred to\
 more than once by the same tag.
 
 
+2
+0
+
+3
+3904
+289
+0
+23
+0
+0
+0
+0
+0
+-31142
+-112752
+-18993
+-108403
+2
 1
 0
+0
+0
+0
+0
+0
+0
+0
+0
+
+0
+
+
+
+2
+1056
 
 3
 9
@@ -7279,12 +8238,12 @@ more than once by the same tag.
 0
 0
 2
-ac94ffff8582feffac94ffff21b2feff
+249fffff7980feff249fffff00b0feff
 2
 
 
 
-1
+2
 32
 
 3
@@ -7312,12 +8271,12 @@ ac94ffff8582feffac94ffff21b2feff
 0
 0
 2
-38e0ffff6083fefff92d00006083feff
+d4e7ffff5181feff953500005181feff
 2
 
 
 
-1
+2
 41
 
 3
@@ -7345,52 +8304,19 @@ ac94ffff8582feffac94ffff21b2feff
 0
 0
 2
-0f2e0000ad5cfeff0f2e00003a86feff
+a93500009e5afeffa93500002d84feff
 2
 
 
 
-1
+2
 44
-
-3
-840
-290
-0
-27
-0
-835
-836
-0
-0
-0
-0
-0
-0
-2
-4
-0
-0
-0
-0
-0
-1
-0
-0
-2
-dcecffff62b0feff2216000062b0feff
-2
-
-
-
-1
-480
 
 3
 843
 290
 0
-28
+27
 0
 837
 836
@@ -7411,19 +8337,19 @@ dcecffff62b0feff2216000062b0feff
 0
 0
 3
-037500009c99feff0375000012b0fefff43d000012b0feff
+9f7c00008d97feff9f7c0000cdadfeffa8440000cdadfeff
 2
 
 
 
-1
+2
 479
 
 3
 888
 290
 0
-29
+28
 0
 4
 835
@@ -7444,52 +8370,19 @@ dcecffff62b0feff2216000062b0feff
 0
 0
 2
-ffddffffe589feffffddffff12adfeff
+92e5ffffd687feff92e5ffffd4abfeff
 2
 
 
 
-1
+2
 495
-
-3
-897
-290
-0
-30
-0
-835
-3
-0
-0
-0
-0
-0
-0
-2
-4
-0
-0
-0
-0
-0
-1
-0
-0
-2
-77d3ffff44b1feffa6a7ffff44b1feff
-2
-
-
-
-1
-500
 
 3
 2800
 290
 0
-31
+29
 0
 320
 321
@@ -7510,19 +8403,19 @@ ffddffffe589feffffddffff12adfeff
 0
 0
 2
-b27200005141feffb27200009f59feff
+4c7a0000423ffeff4c7a00009057feff
 2
 
 
 
-1
+2
 666
 
 3
 2809
 290
 0
-32
+30
 0
 4
 622
@@ -7543,19 +8436,19 @@ b27200005141feffb27200009f59feff
 0
 0
 4
-11daffffbd76feff11daffff1d67feffb5c7ffff1d67feffb5c7ffffc14bfeff
+ade1ffffae74feffade1ffff1065feff50cfffff1065feff50cfffffb149feff
 2
 
 
 
-1
+2
 671
 
 3
 2812
 290
 0
-33
+31
 0
 4
 327
@@ -7576,19 +8469,19 @@ b27200005141feffb27200009f59feff
 0
 0
 4
-3ee8ffff4d76feff3ee8ffff6c66feff530400006c66feff53040000580ffeff
+daefffff3e74feffdaefffff5f64feffe60b00005f64feffe60b0000640bfeff
 2
 
 
 
-1
+2
 674
 
 3
 2815
 290
 0
-34
+32
 0
 622
 327
@@ -7609,19 +8502,19 @@ b27200005141feffb27200009f59feff
 0
 0
 3
-3ecaffff494cfeff3ecaffff1733feff8df0ffff1733feff
+d9d1ffff394afeffd9d1fffffa30feff20f8fffffa30feff
 2
 
 
 
-1
+2
 677
 
 3
 2986
 290
 0
-35
+33
 0
 4
 4
@@ -7642,19 +8535,19 @@ b27200005141feffb27200009f59feff
 0
 0
 4
-a4d6ffff1989feffc0c1ffff1989feffc0c1ffff4e78fefff9ccffff4e78feff
+40deffff0a87feff5cc9ffff0a87feff5cc9ffff3f76feff95d4ffff3f76feff
 2
 
 
 
-1
+2
 751
 
 3
 3087
 290
 0
-36
+34
 0
 925
 837
@@ -7675,19 +8568,19 @@ a4d6ffff1989feffc0c1ffff1989feffc0c1ffff4e78fefff9ccffff4e78feff
 0
 0
 2
-ce7400005175feffce740000518dfeff
+687c00004473feff687c0000428bfeff
 2
 
 
 
-1
+2
 821
 
 3
 3205
 290
 0
-37
+35
 0
 5
 6
@@ -7708,19 +8601,19 @@ ce7400005175feffce740000518dfeff
 0
 0
 2
-f32e00005e3dfefff32e0000fd55feff
+8c3600004e3bfeff8c360000ee53feff
 2
 
 
 
-1
+2
 893
 
 3
 3482
 290
 0
-38
+36
 0
 320
 5
@@ -7741,13 +8634,178 @@ f32e00005e3dfefff32e0000fd55feff
 0
 0
 3
-7a740000d032feff7a740000c51afeff3c430000c51afeff
+167c0000c130feff167c0000b518feffd74a0000b518feff
 2
 
 
 
-1
+2
 964
+
+3
+4006
+290
+0
+37
+0
+2
+3904
+0
+0
+0
+0
+0
+0
+2
+4
+0
+0
+0
+0
+0
+1
+0
+0
+2
+809fffff7980feff809fffff0f50feff
+2
+
+
+
+2
+1230
+
+3
+4008
+290
+0
+38
+0
+327
+3904
+0
+0
+0
+0
+0
+0
+2
+4
+0
+0
+0
+0
+0
+1
+0
+0
+3
+f0ffffff272afeff62a4ffff272afeff62a4fffff94efeff
+2
+
+
+
+2
+1231
+
+3
+4427
+290
+0
+39
+0
+835
+3
+0
+0
+0
+0
+0
+0
+2
+4
+0
+0
+0
+0
+0
+1
+0
+0
+2
+c9e5ffffacaffeff0d9effffacaffeff
+2
+
+
+
+2
+1572
+
+3
+4435
+290
+0
+40
+0
+835
+836
+0
+0
+0
+0
+0
+0
+2
+4
+0
+0
+0
+0
+0
+1
+0
+0
+2
+c9e5fffffbaefeffb2310000fbaefeff
+2
+
+
+
+2
+1578
+
+3
+4475
+290
+0
+41
+0
+3
+3904
+0
+0
+0
+0
+0
+0
+2
+4
+0
+0
+0
+0
+0
+1
+0
+0
+4
+7d95fffffeb0fefff379fffffeb0fefff379ffff3c4efeffdd88ffff3c4efeff
+2
+
+
+
+2
+1740
 
 /END_TABLE AMCSYMB
 
