@@ -1,5 +1,5 @@
 --
--- $Id: createdb.sql,v 1.51 2003-04-23 17:21:00 dan Exp $
+-- $Id: createdb.sql,v 1.52 2003-04-28 03:37:47 dan Exp $
 --
 -- The following options should be used to create the database schema
 --
@@ -269,6 +269,8 @@ create table users
         default 5
         check (max_number_watch_lists >= 1),
     last_watch_list_chosen  integer                       ,
+    page_size               smallint              not null
+        default 25,
     primary key (id)
 );
 
