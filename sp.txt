@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.101 2004-02-13 16:43:08 dan Exp $
+-- $Id: sp.txt,v 1.102 2004-02-13 17:15:31 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -1516,7 +1516,7 @@ SELECT SECURITY.commit_log_id,
        SECURITY.short_description,
        SECURITY.category_id,
        SECURITY.port,
-       SECURITY.status,
+       SECURITY.security_notice_status_id as status,
        SECURITY.category,
        SECURITY.security_notice_id,
        W.watch,
