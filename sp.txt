@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.117 2004-09-17 18:48:16 dan Exp $
+-- $Id: sp.txt,v 1.118 2004-09-20 12:14:39 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -2082,3 +2082,21 @@ BEGIN
     RETURN l_PKGNAME;
 END;
 ' LANGUAGE 'plpgsql' IMMUTABLE;
+
+
+CREATE OR REPLACE FUNCTION vuxml_ranges() RETURNS SETOF vuxml_record AS '
+SELECT V.id,
+       V.vid,
+       VN.name      AS package_name,
+       VR.operator1 AS op1,
+       VR.version1  AS v1,
+       VR.operator2 AS op2,
+       VR.version2  AS v2
+  FROM vuxml_ranges VR, vuxml_names VN, vuxml_affected VA, vuxml V
+ WHERE V.id                 = VA.vuxml_id
+   AND VN.vuxml_affected_id = VA.id
+   AND VR.vuxml_affected_id = VA.id
+ ORDER BY VN.name, V.vid;
+' LANGUAGE SQL STABLE;
+
+
