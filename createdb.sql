@@ -1,5 +1,5 @@
 --
--- $Id: createdb.sql,v 1.66 2004-02-13 15:40:05 dan Exp $
+-- $Id: createdb.sql,v 1.67 2004-02-13 15:43:49 dan Exp $
 --
 -- The following options should be used to create the database schema
 --
@@ -224,6 +224,12 @@ create table security_notice_status
     description                text                  not null,
     primary key (id)
 );
+
+insert into security_notice_status (id,name,description) values ('A', 'Active', 'A valid security concern');
+
+insert into security_notice_status (id,name,description) values ('I', 'Ingore', 'Ingore this notice');
+
+insert into security_notice_status (id,name,description) values ('C', 'Candidate', 'A candidate for becoming a security notice');
 
 create table element_revision
 (
