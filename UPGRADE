@@ -1,6 +1,16 @@
 This file contains notes for upgrading from one database version
 to another.
 
+Jan 31 2004
+
+begin;
+alter table page_load_summary add column total_tmp int;
+update page_load_summary set total_tmp = non_users;
+update page_load_summary set non_users = users;
+update page_load_summary set users = total_tmp;
+alter table page_load_summary rename users to total;
+alter table page_load_summary rename non_users to users;
+
 Jan 9 2004
 
 alter table page_load_detail add column date date;
