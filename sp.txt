@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.81 2003-09-06 12:08:53 dan Exp $
+-- $Id: sp.txt,v 1.82 2003-09-10 18:40:26 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -1029,19 +1029,10 @@ CREATE OR REPLACE FUNCTION PortsVerifyProcess() returns int8 AS '
 ' LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION SystemTimeAdjust() returns interval AS '
-	DECLARE
-        TimeAdjust	interval;
-
-	BEGIN
-        SELECT time_adjust
-		  INTO TimeAdjust
-		  FROM system
-		 LIMIT 1;
-
-		RETURN TimeAdjust;
-	END
-' LANGUAGE 'plpgsql'
-WITH (iscachable);
+	SELECT time_adjust
+	  FROM system
+	 LIMIT 1;
+' LANGUAGE 'sql' immutable;
 
 
 CREATE OR REPLACE FUNCTION DailySummaryDateAdd(date) returns int8 AS '
