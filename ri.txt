@@ -1,5 +1,5 @@
 --
--- $Id: ri.txt,v 1.17 2002-04-23 00:02:22 dan Exp $
+-- $Id: ri.txt,v 1.18 2002-11-24 04:57:17 dan Exp $
 --
 
 CREATE OR REPLACE FUNCTION check_siblings() returns OPAQUE as '
@@ -303,4 +303,27 @@ end;
 create trigger user_watch_list_create AFTER insert
 on users for
 each row execute procedure user_watch_list_create();
+
+
+
+
+CREATE OR REPLACE FUNCTION user_email_change() returns OPAQUE as '
+begin
+
+	if old.email <> new.email then
+       RAISE NOTICE ''User % is changing email from % to %'', new.name, old.email, new.email;
+    end if;
+
+   -- return values from triggers fired AFTER are ignored.
+   RETURN NULL;
+end;
+' LANGUAGE 'plpgsql';
+
+
+
+-- the trigger
+  drop trigger user_email_change on users; 
+create trigger user_email_change AFTER update
+on users for
+each row execute procedure user_email_change();
 
