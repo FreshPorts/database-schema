@@ -1,5 +1,5 @@
 #
-# $Id: createdb.sql,v 1.19 2002-03-14 20:16:19 dan Exp $
+# $Id: createdb.sql,v 1.20 2002-03-15 00:54:36 dan Exp $
 #
 # Things which must be done to make this script work with PostgreSQL
 # 
@@ -28,6 +28,7 @@ create table commits_latest
     category_id            int4                          ,
     port                   text                          ,
     version                text                          ,
+    revision               text                          ,
     status                 char(1)                       ,
     needs_refresh          smallint                      ,
     forbidden              text                          ,
