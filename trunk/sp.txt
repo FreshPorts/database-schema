@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.88 2003-09-27 18:42:41 dan Exp $
+-- $Id: sp.txt,v 1.89 2003-10-02 12:17:05 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -1699,4 +1699,28 @@ SELECT P.id as port_id,
 order by 3, port, pathname;
 
 ' LANGUAGE SQL STABLE;
+
+
+
+CREATE OR REPLACE FUNCTION LoginCounts(int) RETURNS SETOF logincounts_record AS '
+DECLARE
+    MaxDays ALIAS for $1;
+
+    r   logincounts_record%rowtype;
+
+BEGIN
+    FOR X IN 1..MaxDays LOOP
+        SELECT current_date -   X      * interval \'1 day\',
+               count(*) as count
+          INTO r
+          FROM users
+         WHERE lastlogin between current_date -   X      * interval \'1 day\'
+                             AND current_date -  (X - 1) * interval \'1 day\';
+
+        RETURN NEXT r;
+    END LOOP;
+    RETURN;
+END
+'
+LANGUAGE plpgsql;
 

@@ -1,7 +1,7 @@
 This file contains notes for upgrading from one database version
 to another.
 
-2003 September 27
+2003 September 29
 
   Add functions: 
 	commit_log_ports_insert
@@ -10,8 +10,10 @@ to another.
 	IsCategory
 	elementGet
     freshports_commit
+	LoginCounts
 
   Add types:
 	element_type
 	commit_record
     freshports_commit_record
+	logincounts_record
