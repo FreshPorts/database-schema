@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.46.2.1 2003-03-04 22:10:56 dan Exp $
+-- $Id: sp.txt,v 1.46.2.2 2003-03-05 18:45:14 dan Exp $
 --
 
 CREATE OR REPLACE FUNCTION IsDescendantOf (int4 ,int4) returns boolean As '
@@ -679,28 +679,45 @@ CREATE OR REPLACE FUNCTION ConfirmUserAccount(text) RETURNS int4 AS '
 
 CREATE OR REPLACE FUNCTION WatchListStagingExists(int4) RETURNS int AS '
 
--- return TRUE or FALSE if the watch list is already being staged.
+-- return TRUE or FALSE if the user is already staging a watch list
 
-	DECLARE
-		WatchListID		ALIAS for $1;
+   DECLARE
+      UserID         ALIAS for $1;
+      StagingCount   int4;
 
-		StagingCount	int4;
+   BEGIN
+      SELECT count(*)
+        INTO StagingCount
+        FROM watch_list_staging
+       WHERE user_id = UserID;
 
-	BEGIN
-		SELECT	count(*)
-		INTO	StagingCount
-		FROM 	watch_list_staging
-		WHERE	watch_list_id = WatchListID;
-
-		IF StagingCount = 0 THEN
-			RETURN 0;
-		ELSE
-			RETURN 1;
-		END IF;
-	END
+      IF StagingCount = 0 THEN
+         RETURN 0;
+      ELSE
+         RETURN 1;
+      END IF;
+   END
 ' LANGUAGE 'plpgsql';
 
+CREATE OR REPLACE FUNCTION WatchListStagingLogDelete(integer,integer) RETURNS bigint AS '
+   DECLARE
+      UserID         ALIAS for $1;
+      ItemCount      ALIAS for $2;
 
+      OID   int8;
+
+   BEGIN
+
+      INSERT INTO watch_list_staging_log (   user_id,
+                                    action,
+                                    count_total)
+               VALUES (UserID, ''D'', ItemCount);
+
+      GET DIAGNOSTICS OID = RESULT_OID;
+
+      RETURN OID;
+   END
+' LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION WatchListStagingAddItem(int4, text, text, int4) RETURNS int8 AS '
 
@@ -781,7 +798,7 @@ CREATE OR REPLACE FUNCTION WatchListStagingProcess(int4) RETURNS int4 AS '
 CREATE OR REPLACE FUNCTION WatchListDeleteAllElements(int4) RETURNS int4 AS '
 	DECLARE
 		WatchListID	ALIAS for $1;
-		RowCount	int8;
+		RowCount	integer;
 
 	BEGIN
 
