@@ -1,5 +1,5 @@
 --
--- $Id: ri.txt,v 1.12 2002-02-23 04:17:53 dan Exp $
+-- $Id: ri.txt,v 1.13 2002-03-11 19:02:20 dan Exp $
 --
 
   DROP function check_siblings();
@@ -100,7 +100,6 @@ execute procedure check_parent();
 
 
   DROP function parent_must_be_directory();
-
 create function parent_must_be_directory() returns OPAQUE as '
    declare
       ParentType char(1);
@@ -115,7 +114,10 @@ begin
 
       if (ParentType = ''F'') then
          -- message ''parent cannot be a file '' || NOW(*);
-         RAISE EXCEPTION ''modifications to element % with name=% cannot be completed as the parent % is not a directory.'', new.id, new.name, new.parent_id;
+         RAISE NOTICE ''modifications to element % with name=% required modifying the the parent % from a file to directory.'', new.id, new.name, new.parent_id;
+		UPDATE element
+		   SET directory_file_flag = ''D''
+		 WHERE element.id          = new.parent_id;
      end if;
    end if;
 
