@@ -1,5 +1,5 @@
 --
--- $Id: createdb.sql,v 1.71 2004-08-27 14:48:36 dan Exp $
+-- $Id: createdb.sql,v 1.72 2004-08-27 16:55:20 dan Exp $
 --
 -- The following options should be used to create the database schema
 --
@@ -663,9 +663,9 @@ create table vuxml_ranges
 (
     id                         serial                not null,
     vuxml_name_id              integer               not null,
+    range_version_start        text                          ,
     range_operator_start       text                          ,
     range_operator_end         text                          ,
-    range_version_start        text                          ,
     range_version_end          text                          ,
     primary key (id)
 );
