@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.85 2003-09-23 17:58:57 dan Exp $
+-- $Id: sp.txt,v 1.86 2003-09-24 13:04:57 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -1493,8 +1493,34 @@ DECLARE
 
 BEGIN
     FOR r IN
+SELECT TMP.commit_log_id,
+       TMP.commit_date_raw,
+       TMP.message_subject,
+       TMP.message_id,
+       TMP.committer,
+       TMP.commit_description,
+       TMP.commit_date,
+       TMP.commit_time,
+       TMP.encoding_losses,
+       TMP.port_id,
+       TMP.needs_refresh,
+       TMP.forbidden,
+       TMP.broken,
+       TMP.element_id,
+       TMP.version,
+       TMP.revision,
+       TMP.date_added,
+       TMP.short_description,
+       TMP.category_id,
+       TMP.port,
+       TMP.status,
+       TMP.category,
+       TMP.security_notice_id,
+       TMP.watch,
+       element_pathname(commit_log_elements.element_id, FALSE) as element_pathname
+FROM (
 SELECT SECURITY.*,
-       W.*
+       W.watch
 FROM (
 SELECT PEC.*,
        security_notice.id  AS security_notice_id
@@ -1506,17 +1532,8 @@ SELECT LCPPORTS.*,
        element.name    AS port,
        element.status  AS status
 FROM (
-SELECT LCPCLLCP.commit_log_id,
-       LCPCLLCP.commit_date_raw,
-       LCPCLLCP.message_subject,
-       LCPCLLCP.message_id,
-       LCPCLLCP.committer,
-       LCPCLLCP.commit_description,
-       LCPCLLCP.commit_date,
-       LCPCLLCP.commit_time,
-       LCPCLLCP.encoding_losses,
-       LCPCLLCP.port_id,
-       LCPCLLCP.needs_refresh,
+SELECT LCPCLLCP.*,
+       CASE WHEN LCPCLLCP.port_id IS NULL THEN LCPCLLCP.commit_log_id ELSE NULL END AS non_port_commit_log_id,
        ports.forbidden,
        ports.broken,
        ports.element_id                     AS element_id,
@@ -1560,7 +1577,8 @@ ON PEC.commit_log_id = security_notice.commit_log_id
        AND watch_list.user_id = UserID
        AND watch_list.in_service
 GROUP BY wle_element_id) AS W
-ON        W.wle_element_id = SECURITY.element_id
+ON        W.wle_element_id = SECURITY.element_id) AS TMP LEFT OUTER JOIN commit_log_elements
+on commit_log_elements.commit_log_id = TMP.non_port_commit_log_id
 order by commit_date_raw desc, category, port
 	LOOP
         RETURN NEXT r;
