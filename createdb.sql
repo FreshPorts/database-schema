@@ -1,5 +1,5 @@
 #
-# $Id: createdb.sql,v 1.36 2002-07-27 20:15:48 dan Exp $
+# $Id: createdb.sql,v 1.37 2002-07-27 23:24:45 dan Exp $
 #
 # Things which must be done to make this script work with PostgreSQL
 # 
@@ -76,6 +76,7 @@ commit_date			text,
 commit_time			text,
 element_id			int4,
 element_name		text,
+revision_name		text,
 status				char(1),
 encoding_losses		boolean,
 element_pathname	text

@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.57 2002-07-26 21:21:39 dan Exp $
+-- $Id: sp.txt,v 1.58 2002-07-27 23:24:45 dan Exp $
 --
 
 CREATE OR REPLACE FUNCTION IsDescendantOf (int4 ,int4) returns boolean As '
@@ -1045,6 +1045,7 @@ CREATE OR REPLACE FUNCTION RecordLastestCommits() RETURNS INT4 AS '
 			to_char(commits_recent.commit_date - SystemTimeAdjust(), ''HH24:MI'')				AS commit_time,
 			element.id																			AS element_id,
 			element.name																		AS element_name,
+			commit_log_elements.revision_name													AS revision_name,
 			element.status																		AS status,
 			commits_recent.encoding_losses														AS encoding_losses,
 			element_pathname(element.id)														AS element_pathname
