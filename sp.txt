@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.125 2005-01-13 22:13:56 dan Exp $
+-- $Id: sp.txt,v 1.126 2005-01-17 00:08:44 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -1544,6 +1544,34 @@ DECLARE
 	r 	commit_record%rowtype;
 
 BEGIN
+	IF MaxCommits = 100 THEN
+		RAISE NOTICE ''selecting large'';
+		FOR r IN
+			SELECT * FROM LatestCommitsLarge(UserID)
+		LOOP
+    	    RETURN NEXT r;
+	    END LOOP;
+	ELSE
+		RAISE NOTICE ''selecting small'';
+		FOR r IN
+			SELECT * FROM LatestCommitsSmall(UserID)
+		LOOP
+    	    RETURN NEXT r;
+	    END LOOP;
+	END IF;
+
+    RETURN;
+END
+'
+LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION LatestCommitsLarge(int) RETURNS SETOF commit_record AS '
+DECLARE
+	UserID		ALIAS for $1;
+
+	r 	commit_record%rowtype;
+
+BEGIN
     FOR r IN
 SELECT SECURITY.commit_log_id,
        SECURITY.commit_date_raw,
@@ -1627,7 +1655,7 @@ SELECT CLPE.*,
                 (SELECT latest_commits_ports.commit_log_id
                    FROM latest_commits_ports
                ORDER BY latest_commits_ports.commit_date DESC
-                  LIMIT MaxCommits) AS 
+                  LIMIT 100) AS 
                   LCP ON commit_log.id = LCP.commit_log_id) AS LCPCL
                       JOIN commit_log_ports_elements CLPE on CLPE.commit_log_id = LCPCL.commit_log_id
                                                          AND CLPE.commit_log_id > latest_commits_ports_anchor()
@@ -1653,7 +1681,7 @@ ON PEC.commit_log_id = security_notice.commit_log_id) AS SECURITY LEFT OUTER JOI
        AND watch_list.in_service
 GROUP BY wle_element_id) AS W ON W.wle_element_id = SECURITY.element_id
 order by commit_date_raw desc, category, port
-limit MaxCommits * 3
+limit 100 * 3
 
 	LOOP
         RETURN NEXT r;
@@ -1664,6 +1692,131 @@ END
 LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION LatestCommitsSmall(int) RETURNS SETOF commit_record AS '
+DECLARE
+	UserID		ALIAS for $1;
+
+	r 	commit_record%rowtype;
+
+BEGIN
+    FOR r IN
+SELECT SECURITY.commit_log_id,
+       SECURITY.commit_date_raw,
+       SECURITY.message_subject,
+       SECURITY.message_id,
+       SECURITY.committer,
+       SECURITY.commit_description,
+       SECURITY.commit_date,
+       SECURITY.commit_time,
+       SECURITY.encoding_losses,
+       SECURITY.port_id,
+       SECURITY.needs_refresh,
+       SECURITY.forbidden,
+       SECURITY.broken,
+       SECURITY.deprecated,
+       SECURITY.ignore,
+       SECURITY.element_id,
+       SECURITY.version,
+       SECURITY.revision,
+       SECURITY.epoch,
+       SECURITY.date_added,
+       SECURITY.short_description,
+       SECURITY.category_id,
+       SECURITY.port,
+       SECURITY.status,
+       SECURITY.category,
+       SECURITY.security_notice_id,
+       W.watch,
+       element_pathname(SECURITY.element_id, FALSE) as element_pathname
+FROM (
+SELECT PEC.*,
+       security_notice.id  AS security_notice_id
+FROM (
+SELECT PORTELEMENT.*,
+       categories.name AS category
+FROM (
+SELECT LCPPORTS.*,
+       element.name    AS port,
+       element.status  AS status,
+        CASE WHEN port_id IS NULL THEN commit_log_id ELSE NULL END AS non_port_commit_log_id,
+        CASE when clp_version  IS NULL then ports_version  else clp_version  END as version,
+        CASE when clp_revision IS NULL then ports_revision else clp_revision END AS revision,
+        CASE when clp_epoch    IS NULL then ports_epoch    else clp_epoch    END AS epoch
+FROM (
+  SELECT VERSIONS.*, 
+        CLP.port_version  AS clp_version,
+        CLP.port_revision AS clp_revision,
+        CLP.port_epoch    AS clp_epoch,
+        CLP.needs_refresh AS needs_refresh
+FROM
+( 
+SELECT CLPE.*,
+         P.id as port_id,
+         P.forbidden,
+         P.broken,
+         P.deprecated,
+         P.ignore,
+         date_part(\'epoch\', P.date_added)::integer AS date_added,
+         P.short_description              AS short_description,
+         P.category_id,
+         P.revision  as ports_revision,
+         P.version   as ports_version,
+         P.portepoch as ports_epoch
+    FROM
+
+
+  (SELECT LCPCL.*,
+          CLPE.element_id,
+          element_pathname(CLPE.element_id)
+   FROM 
+   (SELECT commit_log.id     AS commit_log_id, 
+           commit_date       AS commit_date_raw,
+           message_subject,
+           message_id,
+           committer,
+           description       AS commit_description,
+           to_char(commit_log.commit_date - SystemTimeAdjust(), \'DD Mon YYYY\')  AS commit_date,
+           to_char(commit_log.commit_date - SystemTimeAdjust(), \'HH24:MI\')      AS commit_time,
+           encoding_losses
+     FROM commit_log JOIN
+                (SELECT latest_commits_ports.commit_log_id
+                   FROM latest_commits_ports
+               ORDER BY latest_commits_ports.commit_date DESC
+                  LIMIT 10) AS 
+                  LCP ON commit_log.id = LCP.commit_log_id) AS LCPCL
+                      JOIN commit_log_ports_elements CLPE on CLPE.commit_log_id = LCPCL.commit_log_id
+                                                         AND CLPE.commit_log_id > latest_commits_ports_anchor()
+
+
+) AS CLPE
+           LEFT OUTER JOIN ports P ON CLPE.element_id = P.element_id) AS VERSIONS
+           LEFT OUTER JOIN commit_log_ports CLP ON CLP.commit_log_id = VERSIONS.commit_log_id
+                                     AND VERSIONS.port_id = CLP.port_id
+                                AND CLP.commit_log_id > latest_commits_ports_anchor()
+
+
+) AS LCPPORTS JOIN element
+on LCPPORTS.element_id = element.id) AS PORTELEMENT LEFT JOIN categories
+on PORTELEMENT.category_id = categories.id)
+
+ AS PEC LEFT OUTER JOIN security_notice
+ON PEC.commit_log_id = security_notice.commit_log_id) AS SECURITY LEFT OUTER JOIN
+(SELECT element_id as wle_element_id, COUNT(watch_list_id) as watch
+  FROM watch_list JOIN watch_list_element
+        ON watch_list.id      = watch_list_element.watch_list_id
+       AND watch_list.user_id = UserID
+       AND watch_list.in_service
+GROUP BY wle_element_id) AS W ON W.wle_element_id = SECURITY.element_id
+order by commit_date_raw desc, category, port
+limit 10 * 3
+
+	LOOP
+        RETURN NEXT r;
+    END LOOP;
+    RETURN;
+END
+'
+LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION commit_log_ports_insert(int) RETURNS boolean
 AS '
