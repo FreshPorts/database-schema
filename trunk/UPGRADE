@@ -1,0 +1,9 @@
+This file contains notes for upgrading from one database version
+to another.
+
+2003 September 24
+
+To use non port tree commits:
+
+  Add functions: commit_log_ports_insert LastestCommits
+
