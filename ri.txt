@@ -1,5 +1,5 @@
 --
--- $Id: ri.txt,v 1.14.2.10 2003-04-23 22:14:56 dan Exp $
+-- $Id: ri.txt,v 1.14.2.11 2003-04-23 22:29:51 dan Exp $
 --
 
 CREATE OR REPLACE FUNCTION check_siblings() RETURNS TRIGGER AS '
@@ -426,10 +426,11 @@ EXECUTE PROCEDURE commit_log_ports_insert ();
 CREATE OR REPLACE FUNCTION commit_log_insert () RETURNS "trigger"
 AS '
 BEGIN
-	INSERT INTO latest_commits(new.id,  commit_date);
+	INSERT INTO latest_commits (commit_log_id, commit_date) values (new.id,  new.commit_date);
 	RETURN new;
 END;'
 LANGUAGE plpgsql;
+
 
 
 CREATE TRIGGER commit_log_insert
