@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.132 2005-02-17 00:04:57 dan Exp $
+-- $Id: sp.txt,v 1.133 2005-02-17 01:54:37 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -1599,6 +1599,8 @@ SELECT SECURITY.commit_log_id,
        SECURITY.security_notice_id,
        SECURITY.vulnerable_current,
        SECURITY.vulnerable_past,
+       SECURITY.restricted,
+       SECURITY.no_cdrom,
        W.watch,
        element_pathname(SECURITY.element_id, FALSE) as element_pathname
 FROM (
@@ -1639,7 +1641,9 @@ SELECT CLPE.*,
          P.category_id,
          P.revision  as ports_revision,
          P.version   as ports_version,
-         P.portepoch as ports_epoch
+         P.portepoch as ports_epoch,
+         P.restricted,
+         P.no_cdrom
     FROM
 
 
@@ -1734,6 +1738,8 @@ SELECT SECURITY.commit_log_id,
        SECURITY.security_notice_id,
        SECURITY.vulnerable_current,
        SECURITY.vulnerable_past,
+       SECURITY.restricted,
+       SECURITY.no_cdrom,
        W.watch,
        element_pathname(SECURITY.element_id, FALSE) as element_pathname
 FROM (
@@ -1774,7 +1780,9 @@ SELECT CLPE.*,
          P.category_id,
          P.revision  as ports_revision,
          P.version   as ports_version,
-         P.portepoch as ports_epoch
+         P.portepoch as ports_epoch,
+         P.restricted,
+         P.no_cdrom
     FROM
 
 
