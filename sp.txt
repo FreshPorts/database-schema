@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.51 2002-04-12 06:26:31 dan Exp $
+-- $Id: sp.txt,v 1.52 2002-05-19 22:13:07 dan Exp $
 --
 
 CREATE OR REPLACE FUNCTION IsDescendantOf (int4 ,int4) returns boolean As '
@@ -1085,6 +1085,123 @@ CREATE OR REPLACE FUNCTION DailySummaryDateRemove(date) returns int8 AS '
 ' LANGUAGE 'plpgsql';
 
 
+CREATE OR REPLACE FUNCTION DailyStatsCaculate() returns int8 AS '
+	DECLARE
+		queries		RECORD;
+		curs1		REFCURSOR;
+		TheDate		date;
+		QueryTotal	int4;
 
+	BEGIN
+		select (current_date - interval ''1 day'')::date
+		INTO TheDate;
+
+		FOR queries IN select id, query from daily_stats LOOP
+			OPEN  curs1 FOR execute queries.query;
+			FETCH curs1 INTO QueryTotal;
+			EXECUTE ''INSERT INTO daily_stats_data (daily_stats_id, date, value) values ('' 
+					|| queries.id || '','' || quote_literal(TheDate) || '','' || quote_literal(QueryTotal) || '')'';
+			CLOSE curs1;
+		END LOOP;
+		return 0;
+	END
+' LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION Stats_PortCount() returns int8 AS '
+	DECLARE
+		PortCount	int8;
+
+	BEGIN
+		SELECT count(*)
+		  INTO PortCount
+		  FROM ports, element
+		 WHERE element.status = \'A\'
+		   AND ports.element_id = element.id;
+
+		return PortCount;
+	END
+' LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION Stats_PortCountBroken() returns int8 AS '
+	DECLARE
+		PortCount	int8;
+
+	BEGIN
+		SELECT count(*)
+		  INTO PortCount
+		  FROM ports, element
+		 WHERE element.status = \'A\'
+		   AND ports.element_id = element.id
+		   AND ports.broken <> \'\';
+
+		return PortCount;
+	END
+' LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION Stats_PortCountForbidden() returns int8 AS '
+	DECLARE
+		PortCount	int8;
+
+	BEGIN
+		SELECT count(*)
+		  INTO PortCount
+		  FROM ports, element
+		 WHERE element.status = \'A\'
+		   AND ports.element_id = element.id
+		   AND ports.forbidden <> \'\';
+
+		return PortCount;
+	END
+' LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION Stats_PortCountNewToday() returns int8 AS '
+	DECLARE
+		PortCount	int8;
+
+	BEGIN
+		SELECT count(*)
+		  INTO PortCount
+		  FROM ports, element
+		 WHERE element.status = \'A\'
+		   AND ports.element_id = element.id
+		   AND date_added > now() - interval \'1 day\' - SystemTimeAdjust();
+
+		return PortCount;
+	END
+' LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION Stats_PortCountNewYesterday() returns int8 AS '
+	DECLARE
+		PortCount	int8;
+
+	BEGIN
+		SELECT count(*)
+		  INTO PortCount
+		  FROM ports, element
+		 WHERE element.status = \'A\'
+		   AND ports.element_id = element.id
+		   AND date_added > now() - interval \'2 days\' - SystemTimeAdjust();
+
+		return PortCount;
+	END
+' LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION Stats_PortCountNewThisWeek() returns int8 AS '
+	DECLARE
+		PortCount	int8;
+
+	BEGIN
+		SELECT count(*)
+		  INTO PortCount
+		  FROM ports, element
+		 WHERE element.status = \'A\'
+		   AND ports.element_id = element.id
+		   AND date_added > now() - interval \'7 days\' - SystemTimeAdjust();
+
+		return PortCount;
+	END
+' LANGUAGE 'plpgsql';
 
 
