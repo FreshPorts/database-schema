@@ -1,5 +1,5 @@
 --
--- $Id: createdb.sql,v 1.80 2005-01-26 14:39:20 dan Exp $
+-- $Id: createdb.sql,v 1.81 2005-02-17 04:47:10 dan Exp $
 --
 -- The following options should be used to create the database schema
 --
@@ -310,6 +310,8 @@ create table ports
     no_package                 text                          ,
     package_name               text                          ,
     portepoch                  text                          ,
+    restricted                 text                          ,
+    no_cdrom                   text                          ,
     primary key (id)
 );
 
