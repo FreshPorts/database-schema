@@ -1,6 +1,32 @@
 This file contains notes for upgrading from one database version
 to another.
 
+
+Feb 22 2004
+
+Add deprecated to ports.
+
+begin;
+
+alter table ports add deprecated text;
+
+drop view ports_active cascade;
+
+create view ports_active as
+select ports.*, element.name as name, categories.name as category
+from categories, ports, element
+where element.status = 'A'
+and categories.id = ports.category_id
+and ports.element_id = element.id;
+
+drop type commit_record cascade;
+\i datatype.txt
+\i sp.txt
+
+commit;
+
+
+
 Feb 13 2004
 
 To upgrade the security_notice and security_notice_table:
