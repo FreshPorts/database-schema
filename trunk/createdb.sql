@@ -232,7 +232,7 @@ alter table commit_log_elements
 
 alter table commit_log_elements
     add foreign key (element_id, revision_name)
-       references element_revision (element_id, revision_name) on delete restrict;
+       references element_revision (element_id, revision_name) on delete cascade;
 
 alter table watch_list_element
     add foreign key (element_id)
