@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.95 2004-01-02 18:16:47 dan Exp $
+-- $Id: sp.txt,v 1.96 2004-01-09 19:22:33 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -1773,4 +1773,39 @@ CREATE OR REPLACE FUNCTION PortsMovedAdd (text, text, text, text) returns int AS
 
       RETURN l_PortsMovedID;
    END;
+'  LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION PageLoadSummaryUpdate(date) returns int AS '
+   DECLARE
+       l_RowCount   int;
+
+   BEGIN
+   INSERT INTO page_load_summary (date, page_name, users, non_users, rendering_time_min, rendering_time_max, rendering_time_avg)
+      SELECT timestamp::date,
+             CASE WHEN page_name = \'/missing.php\' THEN
+                CASE WHEN position(\'?\' in full_url) != 0 THEN
+                   substring(full_url from 0 for position(\'?\' in full_url))
+                ELSE
+                    CASE WHEN position(\'cgi-bin/ads/\' in full_url) = 0 THEN
+                        full_url
+                     ELSE
+                        substring(full_url from 0 for position(\'%20\' in full_url))
+                     END
+                END
+                ELSE page_name
+             END,
+             count(user_id)      AS users,
+             count(*)            AS non_users,
+             min(rendering_time) AS min,
+             max(rendering_time) AS max,
+             avg(rendering_time) AS avg
+        FROM page_load_detail
+       WHERE date = $1
+    GROUP BY 1, 2;
+    
+    GET DIAGNOSTICS l_RowCount = ROW_COUNT;
+
+    return l_RowCount;
+
+    END;
 '  LANGUAGE 'plpgsql';
