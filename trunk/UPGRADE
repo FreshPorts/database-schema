@@ -5,5 +5,13 @@ to another.
 
 To use non port tree commits:
 
-  Add functions: commit_log_ports_insert LastestCommits
+  Add functions: 
+	commit_log_ports_insert
+	LastestCommits
+	IsPort
+	IsCategory
+	elementGet
 
+  Add types:
+	element_type
+	commit_record
