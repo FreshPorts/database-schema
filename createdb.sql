@@ -1,5 +1,5 @@
 --
--- $Id: createdb.sql,v 1.49 2003-03-08 17:38:46 dan Exp $
+-- $Id: createdb.sql,v 1.50 2003-03-08 18:00:04 dan Exp $
 --
 -- The following options should be used to create the database schema
 --
@@ -487,7 +487,7 @@ create table commit_log_ports_ignore
     primary key (commit_log_id, port_id)
 );
 
-create table commits_latest_ports
+create table latest_commits_ports
 (
     commit_log_id           integer               not null,
     commit_date             timestamp             not null,
@@ -726,7 +726,7 @@ alter table commit_log_ports_ignore
     add foreign key  (commit_log_id)
        references commit_log (id) on update cascade on delete cascade;
 
-alter table commits_latest_ports
+alter table latest_commits_ports
     add foreign key  (commit_log_id)
        references commit_log (id) on update cascade on delete cascade;
 
