@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.109 2004-04-07 15:04:37 dan Exp $
+-- $Id: sp.txt,v 1.110 2004-06-09 13:13:17 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -617,6 +617,23 @@ CREATE OR REPLACE FUNCTION GetPort(text) RETURNS int4 AS '
       return port_id;
    END;
 ' LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION GetPort(text, text) RETURNS int4 AS '
+   DECLARE
+      p_Category ALIAS for $1;  
+      p_Port     ALIAS for $2;
+
+      l_port_id          int4;
+   BEGIN
+      SELECT id
+        INTO l_port_id
+        FROM ports_active
+       WHERE name     = p_Port
+         AND category = p_Category;
+
+      RETURN l_port_id;
+   END;
+' LANGUAGE 'plpgsql' STABLE;
 
 CREATE OR REPLACE FUNCTION IsPortsTree(text) returns boolean As '
 
@@ -1865,4 +1882,74 @@ CREATE OR REPLACE FUNCTION AnnouncementsGet() RETURNS SETOF text AS '
 	 WHERE start_date <= current_date
 	   AND end_date   >= current_date;
 ' LANGUAGE SQL STABLE;
+
+CREATE OR REPLACE FUNCTION ClearSlavePort(int) returns int AS '
+	DECLARE
+		p_SlavePortID ALIAS FOR $1;
+		p_MasterPort  ALIAS FOR $2;
+
+		l_MasterPortID  int;
+
+	BEGIN
+		DELETE FROM master_slave
+		WHERE  slave_port_id = p_SlavePortID;
+
+		UPDATE ports
+		   SET is_slave_port = FALSE
+		 WHERE id            = p_SlavePortID;
+
+		return 0;
+	END
+' LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION SetSlavePort(text, text) returns int4 AS '
+	DECLARE
+		p_SlaveCategoryPort		ALIAS FOR $1;
+		p_MasterCategoryPort	ALIAS FOR $2;
+
+		l_MasterPortID			int4;
+		l_SlavePortID			int4;
+
+		l_MasterPortCategory	text;
+		l_MasterPortName		text;
+
+		l_SlavePortCategory		text;
+		l_SlavePortName			text;
+
+		position				int;
+
+	BEGIN
+		position := strpos(p_SlaveCategoryPort, \'/\');
+		l_SlavePortCategory := substr(p_SlaveCategoryPort, 1, position - 1);
+		l_SlavePortName     := substr(p_SlaveCategoryPort, position + 1);
+
+		l_SlavePortID := GetPort(l_SlavePortCategory, l_SlavePortName);
+		IF (l_SlavePortID IS NULL) THEN
+			RAISE EXCEPTION ''cannot find port id for category = % port = % (%)'', l_SlavePortCategory, l_SlavePortName, p_SlaveCategoryPort;
+		END IF;
+
+		position := strpos(p_MasterCategoryPort, \'/\');
+		l_MasterPortCategory := substr(p_MasterCategoryPort, 1, position - 1);
+		l_MasterPortName     := substr(p_MasterCategoryPort, position + 1);
+
+		l_MasterPortID := GetPort(l_MasterPortCategory, l_MasterPortName);
+
+		IF (l_MasterPortID IS NULL) THEN
+			RAISE EXCEPTION ''cannot find port id for category = % port = % (%)'', l_MasterPortCategory, l_MasterPortName, p_MasterCategoryPort;
+		END IF;
+
+		DELETE FROM master_slave_ports
+		WHERE  slave_port_id = l_SlavePortID;
+
+		UPDATE ports
+		   SET is_slave_port = TRUE
+		 WHERE id            = l_SlavePortID;
+
+		INSERT INTO master_slave_ports (master_port_id, slave_port_id)
+			VALUES (l_MasterPortID, l_SlavePortID);
+
+		RETURN l_MasterPortID;
+	END
+' LANGUAGE plpgsql;
+
 
