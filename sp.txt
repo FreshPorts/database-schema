@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.19 2001-11-20 16:34:23 dan Exp $
+-- $Id: sp.txt,v 1.20 2001-11-20 18:23:00 dan Exp $
 --
 
   drop function IsDescendantOf (int4 ,int4);
@@ -226,11 +226,11 @@ create function Element_Add(text, char(1)) returns int4 AS '
              
              --DebugText := DebugText || element_directory_file_flag || \',\' || element_name;
             if char_length(element_pathname) = 0 then
-               insert into element(id, parent_id, directory_file_flag, name) 
-                            values(element_id, element_parent_id, element_directory_file_flag, element_name);
+               insert into element(id, parent_id, directory_file_flag, name, status) 
+                            values(element_id, element_parent_id, element_directory_file_flag, element_name, \'A\');
             else
-               insert into element(id, parent_id, directory_file_flag, name)
-                            values(element_id, element_parent_id, \'D\', element_name);
+               insert into element(id, parent_id, directory_file_flag, name, status)
+                            values(element_id, element_parent_id, \'D\', element_name, \'A\');
              end if;
          else
             --DebugText := DebugText || \'found\\n\';
