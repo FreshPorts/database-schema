@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.29 2002-02-21 23:17:59 dan Exp $
+-- $Id: sp.txt,v 1.30 2002-02-23 23:25:52 dan Exp $
 --
 
   drop function IsDescendantOf (int4 ,int4);
@@ -711,3 +711,52 @@ CREATE FUNCTION RecordLastestPortCommits(timestamp) RETURNS INT4 AS '
 	END;
 ' LANGUAGE 'plpgsql';
 
+  DROP FUNCTION ConfirmUserAccount(text);
+CREATE FUNCTION ConfirmUserAccount(text) RETURNS int4 AS '
+
+-- return values:
+--  0 : no such token found
+-- -1 : some error occurred
+--  1 : confirmed and enabled
+--  2 : more than one user found with that token
+--      very unlikely to occur.
+
+	DECLARE
+ 		TheToken		ALIAS for $1;
+
+		RowsModified	int4;
+		Result			int4;
+
+
+    BEGIN
+
+		UPDATE users
+		   SET status  = \'A\'
+		 WHERE status != \'D\'
+	AND EXISTS (
+			SELECT user_id 
+		      FROM user_confirmations
+		     WHERE token   = TheToken
+		       AND user_id = users.id
+			);
+
+		GET DIAGNOSTICS RowsModified = ROW_COUNT;
+
+		IF RowsModified = 1 THEN
+			Result = 1;
+		ELSE
+			IF RowsModified = 0 THEN
+				Result = 0;
+			ELSE
+				IF RowsModified > 1 THEN
+					Result = 2;
+				ELSE
+					Result = -1;
+				END IF;
+			END IF;
+		END IF;
+
+		RETURN Result;				
+		
+    END;
+' LANGUAGE 'plpgsql';
