@@ -6,8 +6,10 @@ December 30 2003
 create table ports_moved
 (
     id            serial                not null,
-    from_port_id  integer                       ,
+    from_port_id  integer               not null,
     to_port_id    integer                       ,
+    date          date                  not null,
+    reason        text                  not null,
     primary key (id)
 );
 
