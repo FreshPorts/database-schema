@@ -48,7 +48,7 @@ FreshPorts2
 PostgreSQL 7.x
 PostgreSQL.def
 --\
--- $Id: FreshPorts2.pdm,v 1.93 2004-09-13 13:01:16 dan Exp $\
+-- $Id: FreshPorts2.pdm,v 1.94 2004-09-14 14:27:30 dan Exp $\
 --\
 -- The following options should be used to create the database schema\
 --\
@@ -80,7 +80,7 @@ PostgreSQL.def
 Dan Langille
 
 968886895
-1095080394
+1095171962
 0
 0
 0
@@ -5404,8 +5404,8 @@ no_package
 3
 25782
 25782
-pkgname
-pkgname
+package_name
+package_name
 
 
 
@@ -21180,10 +21180,10 @@ OLE     BIN
 0
 0
 0
-49853
--241512
-71977
--237388
+49852
+-241513
+71976
+-237389
 1
 1
 0
@@ -21199,7 +21199,7 @@ OLE     BIN
 0
 FreshPorts 2 - physical database model\
 Copyright © 2001-2004 DVL Software Limited\
-Wellington, New Zealand  - 13 September 2004
+Wellington, New Zealand  - 14 September 2004
 
 
 3
@@ -21753,9 +21753,9 @@ than once by the same tag.
 0
 0
 10503
--238882
-21153
--231606
+-238883
+21152
+-231607
 2
 1
 0
@@ -21950,10 +21950,10 @@ than once by the same tag.
 0
 0
 0
-28505
--115909
-40529
--107985
+28504
+-115910
+40528
+-107986
 2
 7
 0
@@ -21983,10 +21983,10 @@ than once by the same tag.
 0
 0
 0
-28065
--126397
+28064
+-126398
 43313
--117498
+-117499
 2
 7
 0
@@ -22414,10 +22414,10 @@ one entry in this table.
 0
 0
 0
-30395
--246835
-48620
--217134
+30392
+-246839
+48616
+-217138
 2
 1
 0
@@ -22646,9 +22646,9 @@ one entry in this table.
 0
 0
 7020
--244524
-24645
--239198
+-244525
+24644
+-239199
 2
 1
 0
@@ -22711,9 +22711,9 @@ one entry in this table.
 0
 0
 0
-54041
+54040
 -245362
-63040
+63039
 -241838
 2
 1
@@ -22909,10 +22909,10 @@ one entry in this table.
 0
 0
 0
-13327
--228436
-22775
--222135
+13325
+-228438
+22774
+-222137
 2
 1
 0
@@ -23041,9 +23041,9 @@ one entry in this table.
 0
 0
 0
-37736
+37735
 -255673
-49210
+49209
 -252149
 2
 1
@@ -23107,10 +23107,10 @@ one entry in this table.
 0
 0
 0
-30124
--265990
-40473
--260664
+30123
+-265991
+40472
+-260665
 2
 1
 0
@@ -23716,7 +23716,7 @@ bf7900007bf1fcffbf79000047e4fcff5898000047e4fcff
 0
 0
 2
-09070000b369fcffd0420000b369fcff
+09070000b269fcffcf420000b269fcff
 2
 
 
@@ -23749,7 +23749,7 @@ bf7900007bf1fcffbf79000047e4fcff5898000047e4fcff
 0
 0
 2
-df8500002f61fcff543e00002f61fcff
+db8500002a61fcff533e00002a61fcff
 2
 
 
@@ -24244,7 +24244,7 @@ a6cb00008c87fdffa6cb00001765fdffb0ea00001765fdff
 0
 0
 3
-66da0000fe9efcff66da00009a8cfcff6dbb00009a8cfcff
+66da0000fe9efcff66da0000968cfcff69bb0000968cfcff
 2
 
 
@@ -24277,7 +24277,7 @@ a6cb00008c87fdffa6cb00001765fdffb0ea00001765fdff
 0
 0
 2
-270401006e70fcff70b900006e70fcff
+270401006a70fcff6cb900006a70fcff
 2
 
 
@@ -24409,7 +24409,7 @@ de7a0000e57bfdffde7a0000c362fdff
 0
 0
 2
-7f800000e04dfcff195d0000e04dfcff
+7b800000db4dfcff185d0000db4dfcff
 2
 
 
@@ -24442,7 +24442,7 @@ de7a0000e57bfdffde7a0000c362fdff
 0
 0
 3
-be090000886afcffbe0900004857fcffed1b00004857fcff
+be090000886afcffbe0900004757fcffec1b00004757fcff
 2
 
 
@@ -24508,7 +24508,7 @@ add0ffff2877fcffadd0fffffc55fcff
 0
 0
 2
-6bb800009542fcff09d600009542fcff
+67b800009142fcff08d600009142fcff
 2
 
 
@@ -24541,7 +24541,7 @@ add0ffff2877fcffadd0fffffc55fcff
 0
 0
 3
-c41001005868fcffc41001009047fcffa1f300009047fcff
+c41001005868fcffc41001009047fcffa0f300009047fcff
 2
 
 
@@ -24706,7 +24706,7 @@ daffffffd56afcffdaffffff9a3efcfffa3300009a3efcff
 0
 0
 2
-517a00000e94fcff285800000e94fcff
+4d7a00000894fcff265800000894fcff
 2
 
 
@@ -24739,7 +24739,7 @@ daffffffd56afcffdaffffff9a3efcfffa3300009a3efcff
 0
 0
 2
-9a8100008e88fcff464800008e88fcff
+968100008888fcff444800008888fcff
 2
 
 
@@ -24871,7 +24871,7 @@ eb6d0000d835fdff2c500000d835fdff2c5000008d55fdff
 0
 0
 2
-d5aa00005646fcffd5aa00008120fcff
+d0aa00005246fcffd0aa00008120fcff
 2
 
 
@@ -24904,7 +24904,7 @@ d5aa00005646fcffd5aa00008120fcff
 0
 0
 2
-7ae60000b51dfcff4fbd0000b51dfcff
+7ae60000b51dfcff4ebd0000b51dfcff
 2
 
 
@@ -24937,7 +24937,7 @@ d5aa00005646fcffd5aa00008120fcff
 0
 0
 3
-16c000007fe5fbffe18700007fe5fbffe187000029fdfbff
+16c000007fe5fbffe08700007fe5fbffe087000028fdfbff
 2
 
 
@@ -25102,7 +25102,7 @@ a4b5000048ebfbffcdfe000048ebfbff
 0
 0
 2
-3a8800007542fcff3a8800000903fcff
+358800007142fcff358800000803fcff
 2
 
 
@@ -25135,7 +25135,7 @@ a4b5000048ebfbffcdfe000048ebfbff
 0
 0
 3
-fef7fffff568fcfffef7ffff3cfcfbff0a7a00003cfcfbff
+fef7fffff568fcfffef7ffff3bfcfbff097a00003bfcfbff
 2
 
 
