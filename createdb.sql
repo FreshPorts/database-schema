@@ -46,7 +46,7 @@ create table element
     primary key (id)
 );
 
-create index element_name on element (name asc);
+create index element_name on element (name);
 
 create table watch_notice
 (
@@ -59,7 +59,7 @@ create table watch_notice
     primary key (id)
 );
 
-create index watch_notice_frequency on watch_notice (frequency asc);
+create index watch_notice_frequency on watch_notice (frequency);
 
 create table system
 (
@@ -142,11 +142,11 @@ create table users
     primary key (id)
 );
 
-create index users_cookie on users (cookie asc);
+create index users_cookie on users (cookie);
 
-create index users_email on users (email asc);
+create index users_email on users (email);
 
-create unique index users_name on users (name asc);
+create unique index users_name on users (name);
 
 create table watch_list
 (
@@ -178,9 +178,9 @@ create table commit_log
     primary key (id)
 );
 
-create index commit_log_commit_date on commit_log (commit_date asc);
+create index commit_log_commit_date on commit_log (commit_date);
 
-create unique index commit_log_message_id on commit_log (message_id asc);
+create unique index commit_log_message_id on commit_log (message_id);
 
 create table commit_log_elements
 (
@@ -242,6 +242,8 @@ create table commit_log_ports
     port_version           text                          ,
     primary key (commit_log_id, port_id)
 );
+
+create index needs_refresh on commit_log_ports (needs_refresh);
 
 create table security_notice_elements
 (
