@@ -1,5 +1,5 @@
 --
--- $Id: ri.txt,v 1.14.2.3 2003-03-05 19:46:39 dan Exp $
+-- $Id: ri.txt,v 1.14.2.4 2003-03-06 21:24:30 dan Exp $
 --
 
 CREATE OR REPLACE FUNCTION check_siblings() RETURNS TRIGGER AS '
@@ -307,15 +307,14 @@ CREATE OR REPLACE FUNCTION categories_insert_update () RETURNS TRIGGER
     AS '
    BEGIN
    IF new.element_id IS NULL AND new.is_primary THEN
-         RAISE EXCEPTION ''if is_primary is set, then element_id must be non-null for a category (name=% description=%'', new.name,
- new.description;
+         RAISE EXCEPTION ''if is_primary is set, then element_id must be non-null for a category (name=% description=%'', new.name, new.description;
       END IF;
 
    IF new.element_id IS NOT NULL AND NOT new.is_primary THEN
          RAISE EXCEPTION ''Non primary categories must not have a element_id (name=% description=%'', new.name, new.description;
-      END IF;
+   END IF;
 
-      RETURN new;
+   RETURN new;
    END;'
 LANGUAGE plpgsql;
 
@@ -343,5 +342,6 @@ CREATE TRIGGER user_email_change
     AFTER UPDATE ON users
     FOR EACH ROW
     EXECUTE PROCEDURE user_email_change ();
+
 
 
