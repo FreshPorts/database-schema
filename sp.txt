@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.86 2003-09-24 13:04:57 dan Exp $
+-- $Id: sp.txt,v 1.87 2003-09-24 18:12:04 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -1611,4 +1611,30 @@ BEGIN
 END;'
 
 LANGUAGE plpgsql;
+
+
+
+
+CREATE OR REPLACE function IsPort(int) returns int as '
+   SELECT id
+     FROM ports
+    WHERE element_id = $1;
+' LANGUAGE SQL STABLE;
+
+CREATE OR REPLACE function IsCategory(int) returns int as '
+   SELECT id
+     FROM categories
+    WHERE element_id = $1;
+' LANGUAGE SQL STABLE;
+
+CREATE OR REPLACE FUNCTION elementGet (text) RETURNS SETOF element_type AS '
+   SELECT id,
+          name::text,
+          directory_file_flag::text,
+          status::text,
+          case when IsCategory(Pathname_ID($1)) IS NULL THEN FALSE ELSE TRUE END,
+          case when IsPort(    Pathname_ID($1)) IS NULL THEN FALSE ELSE TRUE END
+     FROM element
+    WHERE id = PathName_ID($1);
+' LANGUAGE SQL STABLE;
 
