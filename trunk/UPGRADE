@@ -17,3 +17,56 @@ to another.
 	commit_record
     freshports_commit_record
 	logincounts_record
+
+  Populate commit_log_ports_elements:
+
+begin;
+delete from commit_log_ports_elements;
+
+ insert into commit_log_ports_elements
+ SELECT commit_log_ports.commit_log_id, 
+        ports.element_id
+   FROM commit_log_ports, ports
+  WHERE commit_log_ports.port_id = ports.id;
+
+commit;
+
+ SELECT commit_log_ports.commit_log_id, 
+        ports.element_id,
+        element_pathname(ports.element_id)
+   INTO MASTER
+   FROM commit_log_ports, ports
+  WHERE commit_log_ports.port_id = ports.id;
+
+
+ SELECT commit_log_elements.commit_log_id, 
+        commit_log_elements.element_id,
+        element_pathname(commit_log_elements.element_id)
+   INTO MATCHES
+   FROM commit_log_elements
+
+
+create index master_commit_log_id  on master (commit_log_id);
+create index matches_commit_log_id on matches(commit_log_id);
+
+create index master_element_pathname  on master (element_pathname);
+create index matches_element_pathname on matches(element_pathname);
+
+
+vacuum analyse master;
+vacuum analyse matches;
+
+begin;
+
+insert into commit_log_ports_elements
+SELECT commit_log_id,
+       element_id
+  FROM matches
+ WHERE NOT EXISTS (
+   SELECT *
+     FROM master
+     WHERE matches.element_pathname LIKE (master.element_pathname || '/%')
+       AND matches.commit_log_id = master.commit_log_id)
+   AND matches.element_pathname LIKE '/ports/%';
+
+commit;
