@@ -48,7 +48,7 @@ FreshPorts2
 PostgreSQL 7.x
 PostgreSQL.def
 --\
--- $Id: FreshPorts2.pdm,v 1.95 2004-09-20 12:13:11 dan Exp $\
+-- $Id: FreshPorts2.pdm,v 1.96 2004-09-20 13:12:05 dan Exp $\
 --\
 -- The following options should be used to create the database schema\
 --\
@@ -80,7 +80,7 @@ PostgreSQL.def
 Dan Langille
 
 968886895
-1095680753
+1095683159
 0
 0
 0
@@ -12607,7 +12607,7 @@ serial
 
 
 1
-1
+0
 1
 1
 0
@@ -12625,7 +12625,7 @@ id
 24708
 24708
 vuxml_affected_id
-vuxml_name_id
+vuxml_affected_id
 
 
 
@@ -12648,7 +12648,7 @@ integer
 
 
 0
-0
+1
 1
 1
 0
@@ -12656,47 +12656,6 @@ integer
 vuxml_port_xref_id
 
 2
-0
--100
-0
-0
-0
-0
-3
-24713
-24713
-version1
-version1
-
-
-
-24706
-84
-text
-0
-0
-0
-0
-
-
-
-
-
-0
-0
-0
-
-
-
-0
-0
-1
-1
-0
-0
-range_version_start
-
-3
 0
 -100
 0
@@ -12737,7 +12696,7 @@ text
 0
 range_operator_start
 
-4
+3
 0
 -100
 0
@@ -12745,10 +12704,10 @@ range_operator_start
 0
 0
 3
-24710
-24710
-version2
-version2
+24713
+24713
+version1
+version1
 
 
 
@@ -12772,13 +12731,13 @@ text
 
 0
 0
-0
+1
 1
 0
 0
-range_version_end
+range_version_start
 
-5
+4
 0
 -100
 0
@@ -12818,6 +12777,47 @@ text
 0
 0
 range_operator_end
+
+5
+0
+-100
+0
+0
+0
+0
+3
+24710
+24710
+version2
+version2
+
+
+
+24706
+84
+text
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+0
+0
+1
+0
+0
+range_version_end
 
 6
 0
@@ -14889,8 +14889,8 @@ Ref_26865
 25789
 24706
 25789
-1
-1
+2
+2
 1
 1
 0
@@ -15227,10 +15227,10 @@ COLN2   N10
 2
 25822
 1
-26866
-26866
+26872
+26872
 25790
-24711
+24708
 /END_TABLE AMCCCOL
 
 /BEGIN_TABLE AMCCREF
@@ -15620,10 +15620,10 @@ NUMR    N8
 25848
 1
 3
-26867
-26867
+26873
+26873
 26865
-26866
+26872
 1
 /END_TABLE AMCCREF
 
@@ -23140,10 +23140,10 @@ one entry in this table.
 0
 0
 0
-58441
--283229
-69165
--275953
+57982
+-283238
+69606
+-275962
 2
 1
 0
@@ -25135,7 +25135,7 @@ fef7fffff568fcfffef7ffff40f7fbff097a000040f7fbff
 0
 0
 2
-d1f900009fe2fbffd1f9000043bbfbff
+cff900009fe2fbffcff900003abbfbff
 2
 
 
