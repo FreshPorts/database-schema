@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.46.2.9 2003-04-16 02:02:48 dan Exp $
+-- $Id: sp.txt,v 1.46.2.10 2003-04-23 16:28:31 dan Exp $
 --
 
 CREATE OR REPLACE FUNCTION IsDescendantOf (int4 ,int4) returns boolean As '
@@ -1035,14 +1035,24 @@ CREATE OR REPLACE FUNCTION CategoryPortCount(text) returns bigint AS '
 ' LANGUAGE SQL STABLE;
 
 
-CREATE FUNCTION anchor_clid () RETURNS integer
+CREATE OR REPLACE FUNCTION latest_commits_ports_anchor () RETURNS integer
     AS '
-  SELECT min(commit_log_id) AS RESULT
-    FROM latest_commits_ports;
-
+  SELECT commit_log_id AS RESULT
+    FROM latest_commits_ports
+ORDER BY commit_log_id
+   LIMIT 1;
 '
     LANGUAGE sql STABLE;
 
+
+CREATE OR REPLACE FUNCTION latest_commits_anchor () RETURNS integer
+    AS '
+  SELECT commit_log_id AS RESULT
+    FROM latest_commits
+ORDER BY commit_log_id
+   LIMIT 1;
+'
+    LANGUAGE sql STABLE;
 
 
 CREATE OR REPLACE FUNCTION SecurityNoticeCreate(integer, inet, text, text) RETURNS bigint
