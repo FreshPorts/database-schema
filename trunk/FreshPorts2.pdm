@@ -48,7 +48,7 @@ FreshPorts2
 PostgreSQL 7.x
 PostgreSQL.def
 --\
--- $Id: FreshPorts2.pdm,v 1.99 2005-01-26 14:39:31 dan Exp $\
+-- $Id: FreshPorts2.pdm,v 1.100 2005-01-27 19:19:09 dan Exp $\
 --\
 -- The following options should be used to create the database schema\
 --\
@@ -80,7 +80,7 @@ PostgreSQL.def
 Dan Langille
 
 968886895
-1106750105
+1106853467
 0
 0
 0
@@ -2033,12 +2033,43 @@ ports_vulnerable
 ports_vulnerable
 
 This table created for performance reasons.  It represents a summary of the data\
-from the vuxml tables.
+from the vuxml tables.\
+\
+To initialise this table:\
+\
+begin;\
+delete from ports_vulnerable;\
+\
+insert into ports_vulnerable\
+SELECT port_id, 0, count(distinct vuxml_id)\
+  FROM commit_log_ports_vuxml\
+ GROUP BY port_id;\
+\
+UPDATE ports_vulnerable\
+   SET current = temp.current_vuln_count,\
+       past    = past - temp.current_vuln_count\
+FROM\
+\
+(select CLPV.port_id, count(distinct vuxml_id) as current_vuln_count\
+  from commit_log_ports_vuxml CLPV, commit_log_ports CLP, ports P, ports_vulnerable PV\
+ where CLP.commit_log_id = CLPV.commit_log_id\
+   and CLPV.port_id      = CLP.port_id\
+   and P.id              = CLP.port_id\
+   and P.version         = CLP.port_version\
+   and P.revision        = CLP.port_revision\
+   and CLP.port_epoch    = P.portepoch\
+   AND PV.port_id        = P.id\
+group by 1\
+order by 1, 2) as temp\
+\
+where ports_vulnerable.port_id = temp.port_id;\
+\
+commit;
 
 0
 0
 0
-
+ports_vulnerable
 
 
 
@@ -13419,7 +13450,7 @@ integer
 1
 0
 0
-
+port_id
 
 1
 0
@@ -13460,7 +13491,7 @@ integer
 1
 0
 0
-
+current
 
 2
 0
@@ -13501,7 +13532,7 @@ integer
 1
 0
 0
-
+past
 
 3
 0
@@ -15046,7 +15077,7 @@ Ref_28155
 0
 0
 0
-
+Ref_28155
 
 0
 n
@@ -15070,7 +15101,7 @@ Ref_28159
 1
 0
 0
-
+Ref_28159
 
 0
 n
@@ -21447,10 +21478,10 @@ OLE     BIN
 0
 0
 0
-49994
--241521
-71818
--237397
+49993
+-241522
+71817
+-237398
 1
 1
 0
@@ -21466,7 +21497,7 @@ OLE     BIN
 0
 FreshPorts 2 - physical database model\
 Copyright © 2001-2004 DVL Software Limited\
-Wellington, New Zealand  - 25 January 2005
+Wellington, New Zealand  - 27 January 2005
 
 
 2
@@ -23436,10 +23467,10 @@ than once by the same tag.
 0
 0
 0
-27379
--258550
-34578
--254199
+27377
+-258552
+34576
+-254201
 2
 1
 0
@@ -25299,7 +25330,7 @@ e4f8fffff468fcffe4f8ffff17f9fbffd897000017f9fbff
 0
 0
 2
-0c7c0000683ffcff0c7c00000814fcff
+0a7c0000683ffcff0a7c00000614fcff
 2
 
 
