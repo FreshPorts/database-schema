@@ -1,9 +1,8 @@
 --
--- $Id: ri.txt,v 1.13 2002-03-11 19:02:20 dan Exp $
+-- $Id: ri.txt,v 1.14 2002-03-12 19:25:39 dan Exp $
 --
 
-  DROP function check_siblings();
-create function check_siblings() returns OPAQUE as '
+CREATE OR REPLACE FUNCTION check_siblings() returns OPAQUE as '
    declare 
       ElementCount integer;
 begin
@@ -47,8 +46,7 @@ execute procedure check_siblings();
 
 
 
-  DROP function on_delete_remove_children();
-create function on_delete_remove_children() returns OPAQUE as '
+CREATE OR REPLACE FUNCTION on_delete_remove_children() returns OPAQUE as '
 begin
 
   delete from element 
@@ -65,8 +63,7 @@ execute procedure on_delete_remove_children();
 
 
 
-  DROP function check_parent();
-create function check_parent() returns OPAQUE as '
+CREATE OR REPLACE FUNCTION check_parent() returns OPAQUE as '
    declare
       ElementCount int4;
 begin
@@ -99,8 +96,7 @@ execute procedure check_parent();
 
 
 
-  DROP function parent_must_be_directory();
-create function parent_must_be_directory() returns OPAQUE as '
+CREATE OR REPLACE FUNCTION parent_must_be_directory() returns OPAQUE as '
    declare
       ParentType char(1);
 begin
@@ -134,8 +130,7 @@ execute procedure parent_must_be_directory();
 
 
 -- the procedure
-  DROP function id_change();
-create function id_change() returns OPAQUE as '
+CREATE OR REPLACE FUNCTION id_change() returns OPAQUE as '
 begin
    --  message ''check_siblings 4'';
    if (new.id <> old.id) then
@@ -154,8 +149,7 @@ on element for each row
 execute procedure id_change();
 
 
-  DROP function version_revision_uniqueness();
-create function version_revision_uniqueness() returns OPAQUE as '
+CREATE OR REPLACE FUNCTION version_revision_uniqueness() returns OPAQUE as '
    declare 
       ElementID            int4;
       ExistingRevisionName text;
@@ -188,8 +182,7 @@ execute procedure version_revision_uniqueness();
 
 
 -- the procedure
-  DROP function element_delete_check();
-create function element_delete_check() returns OPAQUE as '
+CREATE OR REPLACE FUNCTION element_delete_check() returns OPAQUE as '
 begin
 
    -- if we are removing an element, make sure we set the
@@ -227,8 +220,7 @@ execute procedure element_delete_check();
 
 
 
-  DROP function commit_log_delete_check();
-create function commit_log_delete_check() returns OPAQUE as '
+CREATE OR REPLACE FUNCTION commit_log_delete_check() returns OPAQUE as '
 begin
 
 	-- if we are removing a commit_log, make sure we remove
@@ -257,8 +249,7 @@ execute procedure commit_log_delete_check();
 
 
 
-  DROP function user_watch_list_create();
-create function user_watch_list_create() returns OPAQUE as '
+CREATE OR REPLACE FUNCTION user_watch_list_create() returns OPAQUE as '
 begin
 
 	insert into watch_list (user_id, name) 

@@ -1,9 +1,8 @@
 --
--- $Id: sp.txt,v 1.39 2002-03-10 16:02:36 dan Exp $
+-- $Id: sp.txt,v 1.40 2002-03-12 19:25:40 dan Exp $
 --
 
-  drop function IsDescendantOf (int4 ,int4);
-create function IsDescendantOf (int4 ,int4) returns boolean As '
+CREATE OR REPLACE FUNCTION IsDescendantOf (int4 ,int4) returns boolean As '
    DECLARE
       element_id ALIAS FOR $1;
       target_id  ALIAS FOR $2;
@@ -39,8 +38,7 @@ create function IsDescendantOf (int4 ,int4) returns boolean As '
 '  LANGUAGE 'plpgsql';
 
 
-drop   function Element_Pathname(int4);
-create function Element_Pathname(int4) returns text AS '
+CREATE OR REPLACE FUNCTION Element_Pathname(int4) returns text AS '
    DECLARE
       element_id   ALIAS FOR $1;
       my_parent_id int4;
@@ -73,8 +71,7 @@ END;
 
 
 
-  drop function Pathname_ID(text);
-create function Pathname_ID(text) returns int4 AS '
+CREATE OR REPLACE FUNCTION Pathname_ID(text) returns int4 AS '
 
    DECLARE
       in_element_pathname ALIAS FOR $1;
@@ -140,8 +137,7 @@ END;
 
 
 
-  drop function Element_Add(text, char(1));
-create function Element_Add(text, char(1)) returns int4 AS '
+CREATE OR REPLACE FUNCTION Element_Add(text, char(1)) returns int4 AS '
    DECLARE 
       in_element_pathname         ALIAS for $1;
       element_directory_file_flag ALIAS for $2;
@@ -251,8 +247,7 @@ end;
 
 
 
-  drop function Element_SetStatus(int4, char(1));
-create function Element_SetStatus(int4, char(1)) returns int4 AS '
+CREATE OR REPLACE FUNCTION Element_SetStatus(int4, char(1)) returns int4 AS '
    DECLARE 
       element_id     ALIAS for $1;
       element_status ALIAS for $2;
@@ -267,8 +262,7 @@ create function Element_SetStatus(int4, char(1)) returns int4 AS '
 '  LANGUAGE 'plpgsql';
 
 
-  drop function CreateCategory(text, text, bool);
-create function CreateCategory(text, text, bool) returns int4 AS '
+CREATE OR REPLACE FUNCTION CreateCategory(text, text, bool) returns int4 AS '
    DECLARE 
       category_name        ALIAS for $1;
       category_description ALIAS for $2;
@@ -298,8 +292,7 @@ create function CreateCategory(text, text, bool) returns int4 AS '
 
 
 
-  drop function ElementRevisionID(int4, text);
-create function ElementRevisionID(int4, text) returns int4 AS '
+CREATE OR REPLACE FUNCTION ElementRevisionID(int4, text) returns int4 AS '
    DECLARE 
       in_element_id ALIAS for $1;
       tag           ALIAS for $2;
@@ -325,8 +318,7 @@ create function ElementRevisionID(int4, text) returns int4 AS '
 --           53
 -- (1 row)
 
-  DROP FUNCTION GetCategory (text );
-CREATE FUNCTION GetCategory (text ) RETURNS int4 AS '
+CREATE OR REPLACE FUNCTION GetCategory (text ) RETURNS int4 AS '
    DECLARE
       category_name ALIAS for $1;     
       pathname             text;   
@@ -346,8 +338,7 @@ CREATE FUNCTION GetCategory (text ) RETURNS int4 AS '
 ' LANGUAGE 'plpgsql';
 
 
-  DROP FUNCTION GetCategory (int4);
-CREATE FUNCTION GetCategory (int4) RETURNS text AS '
+CREATE OR REPLACE FUNCTION GetCategory (int4) RETURNS text AS '
 	DECLARE
 		category_id			ALIAS for $1;
 
@@ -366,8 +357,7 @@ CREATE FUNCTION GetCategory (int4) RETURNS text AS '
 
 
 
-  DROP FUNCTION RevisionExists (int4, text );
-CREATE FUNCTION RevisionExists (int4, text) RETURNS boolean AS '
+CREATE OR REPLACE FUNCTION RevisionExists (int4, text) RETURNS boolean AS '
    DECLARE
       ElementID     ALIAS for $1;
       RevisionName  ALIAS for $2;
@@ -393,8 +383,7 @@ CREATE FUNCTION RevisionExists (int4, text) RETURNS boolean AS '
 
 
 
-  DROP FUNCTION RevisionAdd(int4, text );
-CREATE FUNCTION RevisionAdd(int4, text) RETURNS boolean AS '
+CREATE OR REPLACE FUNCTION RevisionAdd(int4, text) RETURNS boolean AS '
    DECLARE
       ElementID     ALIAS for $1;
       RevisionName  ALIAS for $2;
@@ -409,8 +398,7 @@ CREATE FUNCTION RevisionAdd(int4, text) RETURNS boolean AS '
 ' LANGUAGE 'plpgsql';
 
 
-  DROP FUNCTION RevisionForTagGet(int4, int4 );
-CREATE FUNCTION RevisionForTagGet(int4, int4 ) RETURNS text AS '
+CREATE OR REPLACE FUNCTION RevisionForTagGet(int4, int4 ) RETURNS text AS '
    DECLARE
       SystemBranchID   ALIAS for $1;
       ElementID        ALIAS for $2;
@@ -432,8 +420,7 @@ CREATE FUNCTION RevisionForTagGet(int4, int4 ) RETURNS text AS '
 
 
 
-  DROP FUNCTION SystemBranchIDGet(int4, text);
-CREATE FUNCTION SystemBranchIDGet(int4, text) RETURNS int4 AS '
+CREATE OR REPLACE FUNCTION SystemBranchIDGet(int4, text) RETURNS int4 AS '
    DECLARE
       System_ID           ALIAS for $1;
       System_Branch_Name  ALIAS for $2;
@@ -451,11 +438,7 @@ CREATE FUNCTION SystemBranchIDGet(int4, text) RETURNS int4 AS '
 ' LANGUAGE 'plpgsql';
 
 
--- we no longer use this function
-  drop function ElementTagSet(text, int4, text, text);
-
-  drop function ElementTagSet(int4, int4, text);
-create function ElementTagSet(int4, int4, text) returns boolean AS '
+CREATE OR REPLACE FUNCTION ElementTagSet(int4, int4, text) returns boolean AS '
    DECLARE
       SystemBranchID  ALIAS for $1;
       ElementID       ALIAS for $2;
@@ -480,8 +463,7 @@ create function ElementTagSet(int4, int4, text) returns boolean AS '
 '  LANGUAGE 'plpgsql';
 
 
-  DROP FUNCTION SystemIDGet(text);
-CREATE FUNCTION SystemIDGet(text) RETURNS int4 AS '
+CREATE OR REPLACE FUNCTION SystemIDGet(text) RETURNS int4 AS '
    DECLARE
       SystemName ALIAS for $1;
       SystemID   int4;
@@ -497,8 +479,7 @@ CREATE FUNCTION SystemIDGet(text) RETURNS int4 AS '
 ' LANGUAGE 'plpgsql';
 
 
-  DROP FUNCTION WatchListAdd (int4, text );
-CREATE FUNCTION WatchListAdd (int4, text) RETURNS boolean AS '
+CREATE OR REPLACE FUNCTION WatchListAdd (int4, text) RETURNS boolean AS '
    DECLARE
       WatchListID  ALIAS for $1;
       ElementName  ALIAS for $2;
@@ -523,8 +504,7 @@ CREATE FUNCTION WatchListAdd (int4, text) RETURNS boolean AS '
 ' LANGUAGE 'plpgsql';
 
 
-  DROP FUNCTION IsLoginValid (text, text );
-CREATE FUNCTION IsLoginValid (text, text ) RETURNS int4 AS '
+CREATE OR REPLACE FUNCTION IsLoginValid (text, text ) RETURNS int4 AS '
    DECLARE
       UserName     ALIAS for $1;
       UserPassWord ALIAS for $2;
@@ -553,8 +533,7 @@ CREATE FUNCTION IsLoginValid (text, text ) RETURNS int4 AS '
 --     4403
 -- (1 row)
 
-  DROP FUNCTION GetPort(text);
-CREATE FUNCTION GetPort(text) RETURNS int4 AS '
+CREATE OR REPLACE FUNCTION GetPort(text) RETURNS int4 AS '
    DECLARE
       category_port ALIAS for $1;  
       pathname         text;
@@ -573,8 +552,7 @@ CREATE FUNCTION GetPort(text) RETURNS int4 AS '
    END;
 ' LANGUAGE 'plpgsql';
 
-  drop function IsPortsTree(text) ;
-create function IsPortsTree(text) returns boolean As '
+CREATE OR REPLACE FUNCTION IsPortsTree(text) returns boolean As '
 
 --
 -- return TRUE if the element exists under the ports tree
@@ -597,8 +575,7 @@ create function IsPortsTree(text) returns boolean As '
 '  LANGUAGE 'plpgsql';
 
 
-  drop function CreatePort(int4, int4);
-create function CreatePort(int4, int4) returns int4 AS '
+CREATE OR REPLACE FUNCTION CreatePort(int4, int4) returns int4 AS '
 	DECLARE 	
 		port_element_id		ALIAS for $1;
 		port_category_id	ALIAS for $2;
@@ -619,8 +596,7 @@ create function CreatePort(int4, int4) returns int4 AS '
 '  LANGUAGE 'plpgsql';
 
 
-  DROP FUNCTION GetPortNameFromFileName(text);
-CREATE FUNCTION GetPortNameFromFileName(text) RETURNS text AS '
+CREATE OR REPLACE FUNCTION GetPortNameFromFileName(text) RETURNS text AS '
 	DECLARE
  		file_name	ALIAS for $1;
 
@@ -649,8 +625,7 @@ CREATE FUNCTION GetPortNameFromFileName(text) RETURNS text AS '
 
 
 
-  DROP FUNCTION RecordLastestPortCommits(timestamp);
-CREATE FUNCTION RecordLastestPortCommits(timestamp) RETURNS INT4 AS '
+CREATE OR REPLACE FUNCTION RecordLastestPortCommits(timestamp) RETURNS INT4 AS '
 	DECLARE
 		Start_Date ALIAS FOR $1;
 
@@ -711,8 +686,7 @@ CREATE FUNCTION RecordLastestPortCommits(timestamp) RETURNS INT4 AS '
 	END;
 ' LANGUAGE 'plpgsql';
 
-  DROP FUNCTION ConfirmUserAccount(text);
-CREATE FUNCTION ConfirmUserAccount(text) RETURNS int4 AS '
+CREATE OR REPLACE FUNCTION ConfirmUserAccount(text) RETURNS int4 AS '
 
 -- return values:
 --  0 : no such token found
@@ -761,8 +735,7 @@ CREATE FUNCTION ConfirmUserAccount(text) RETURNS int4 AS '
     END;
 ' LANGUAGE 'plpgsql';
 
-  DROP FUNCTION WatchListStagingExists(int4);
-CREATE FUNCTION WatchListStagingExists(int4) RETURNS int AS '
+CREATE OR REPLACE FUNCTION WatchListStagingExists(int4) RETURNS int AS '
 
 -- return TRUE or FALSE if the watch list is already being staged.
 
@@ -787,8 +760,7 @@ CREATE FUNCTION WatchListStagingExists(int4) RETURNS int AS '
 
 
 
-  DROP FUNCTION WatchListStagingAddItem(int4, text, text, int4);
-CREATE FUNCTION WatchListStagingAddItem(int4, text, text, int4) RETURNS int8 AS '
+CREATE OR REPLACE FUNCTION WatchListStagingAddItem(int4, text, text, int4) RETURNS int8 AS '
 
 	DECLARE
 		WatchListID		ALIAS for $1;
@@ -808,8 +780,7 @@ CREATE FUNCTION WatchListStagingAddItem(int4, text, text, int4) RETURNS int8 AS 
 	END
 ' LANGUAGE 'plpgsql';
 
-  DROP FUNCTION WatchListStagingProcess(int4);
-CREATE FUNCTION WatchListStagingProcess(int4) RETURNS int4 AS '
+CREATE OR REPLACE FUNCTION WatchListStagingProcess(int4) RETURNS int4 AS '
 	DECLARE
 		WatchListID	ALIAS for $1;
 
@@ -865,8 +836,7 @@ CREATE FUNCTION WatchListStagingProcess(int4) RETURNS int4 AS '
 	END
 ' LANGUAGE 'plpgsql';
 
-  DROP FUNCTION WatchListDeleteAllElements(int4);
-CREATE FUNCTION WatchListDeleteAllElements(int4) RETURNS int4 AS '
+CREATE OR REPLACE FUNCTION WatchListDeleteAllElements(int4) RETURNS int4 AS '
 	DECLARE
 		WatchListID	ALIAS for $1;
 		RowCount	int8;
@@ -884,8 +854,7 @@ CREATE FUNCTION WatchListDeleteAllElements(int4) RETURNS int4 AS '
 	END
 ' LANGUAGE 'plpgsql';
 
-  DROP FUNCTION WatchListStagingClear(int4);
-CREATE FUNCTION WatchListStagingClear(int4) RETURNS int4 AS '
+CREATE OR REPLACE FUNCTION WatchListStagingClear(int4) RETURNS int4 AS '
 	DECLARE
 		WatchListID	ALIAS for $1;
 		RowCount	int8;
@@ -904,8 +873,7 @@ CREATE FUNCTION WatchListStagingClear(int4) RETURNS int4 AS '
 ' LANGUAGE 'plpgsql';
 
 
-  DROP FUNCTION WatchListStagingLogGeneral(int4, int4, int4, int4, int4, int4);
-CREATE FUNCTION WatchListStagingLogGeneral(int4, int4, int4, int4, int4, int4) returns int8 AS '
+CREATE OR REPLACE FUNCTION WatchListStagingLogGeneral(int4, int4, int4, int4, int4, int4) returns int8 AS '
 	DECLARE
 		UserID			ALIAS for $1;
 		CountTotal		ALIAS for $2;
@@ -934,8 +902,7 @@ CREATE FUNCTION WatchListStagingLogGeneral(int4, int4, int4, int4, int4, int4) r
 	END
 ' LANGUAGE 'plpgsql';
 
-  DROP FUNCTION WatchListStagingLogClearing(int4, int4);
-CREATE FUNCTION WatchListStagingLogClearing(int4, int4) returns int8 AS '
+CREATE OR REPLACE FUNCTION WatchListStagingLogClearing(int4, int4) returns int8 AS '
 	DECLARE
 		UserID			ALIAS for $1;
 		ItemCount		ALIAS for $2;
@@ -955,8 +922,7 @@ CREATE FUNCTION WatchListStagingLogClearing(int4, int4) returns int8 AS '
 	END
 ' LANGUAGE 'plpgsql';
 
-  DROP FUNCTION WatchListStagingLogDelete(int4, int4);
-CREATE FUNCTION WatchListStagingLogDelete(int4, int4) returns int8 AS '
+CREATE OR REPLACE FUNCTION WatchListStagingLogDelete(int4, int4) returns int8 AS '
 	DECLARE
 		UserID			ALIAS for $1;
 		ItemCount		ALIAS for $2;
@@ -976,8 +942,7 @@ CREATE FUNCTION WatchListStagingLogDelete(int4, int4) returns int8 AS '
 	END
 ' LANGUAGE 'plpgsql';
 
-  DROP FUNCTION WatchListStagingLogWatch(int4, int4);
-CREATE FUNCTION WatchListStagingLogWatch(int4, int4) returns int8 AS '
+CREATE OR REPLACE FUNCTION WatchListStagingLogWatch(int4, int4) returns int8 AS '
 	DECLARE
 		UserID			ALIAS for $1;
 		CountTotal		ALIAS for $2;
@@ -998,8 +963,7 @@ CREATE FUNCTION WatchListStagingLogWatch(int4, int4) returns int8 AS '
 ' LANGUAGE 'plpgsql';
 
 
-  DROP FUNCTION PortVerifyBegin();
-CREATE FUNCTION PortVerifyBegin()returns int8 AS '
+CREATE OR REPLACE FUNCTION PortVerifyBegin()returns int8 AS '
 	DECLARE
 		RowCount	int8;
 
@@ -1018,8 +982,7 @@ CREATE FUNCTION PortVerifyBegin()returns int8 AS '
 
 
 
-  DROP FUNCTION PortVerifyAddOne(text, text);
-CREATE FUNCTION PortVerifyAddOne(text, text) returns int8 AS '
+CREATE OR REPLACE FUNCTION PortVerifyAddOne(text, text) returns int8 AS '
 	DECLARE
 		CategoryName	ALIAS for $1;
 		PortName		ALIAS for $2;
@@ -1035,8 +998,7 @@ CREATE FUNCTION PortVerifyAddOne(text, text) returns int8 AS '
 ' LANGUAGE 'plpgsql';
 
 
-  DROP FUNCTION PortsVerifyProcess();
-CREATE FUNCTION PortsVerifyProcess() returns int8 AS '
+CREATE OR REPLACE FUNCTION PortsVerifyProcess() returns int8 AS '
 	DECLARE
 		RowCount    int8;
 
