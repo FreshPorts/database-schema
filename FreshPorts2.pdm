@@ -48,7 +48,7 @@ FreshPorts2
 PostgreSQL 7.x
 PostgreSQL.def
 --\
--- $Id: FreshPorts2.pdm,v 1.77 2003-12-30 13:53:36 dan Exp $\
+-- $Id: FreshPorts2.pdm,v 1.78 2003-12-30 14:08:11 dan Exp $\
 --\
 -- The following options should be used to create the database schema\
 --\
@@ -80,7 +80,7 @@ PostgreSQL.def
 Dan Langille
 
 968886895
-1072792157
+1072793196
 0
 0
 0
@@ -1686,7 +1686,7 @@ ports_moved
 0
 0
 0
-
+ports_moved
 
 
 
@@ -10650,7 +10650,7 @@ serial
 1
 0
 0
-
+id
 
 1
 0
@@ -10687,11 +10687,11 @@ integer
 
 0
 1
-1
+0
 1
 0
 0
-
+from_port_id
 
 2
 0
@@ -10728,11 +10728,11 @@ integer
 
 0
 1
-1
+0
 1
 0
 0
-
+to_port_id
 
 3
 0
@@ -11985,11 +11985,11 @@ Ref_21527
 209
 2
 2
-1
+0
 1
 0
 0
-
+Ref_21527
 
 0
 n
@@ -12009,11 +12009,11 @@ Ref_21530
 209
 2
 2
-1
+0
 1
 0
 0
-
+Ref_21530
 
 0
 n
@@ -15821,17 +15821,17 @@ Arial
 MS Sans Serif
 8
 0
+4
+Arial
+8
+8
+5
+Arial
+6
+0
 6
 Comic Sans MS
 10
-0
-7
-Arial
-8
-8
-8
-Arial
-6
 0
 /END_TABLE AMCFONT
 
@@ -18032,7 +18032,7 @@ OLE     BIN
 
 
 
-18131
+2
 22
 
 3
@@ -18065,7 +18065,7 @@ OLE     BIN
 
 
 
-18131
+2
 25
 
 3
@@ -18098,7 +18098,7 @@ OLE     BIN
 
 
 
-18131
+2
 29
 
 3
@@ -18131,7 +18131,7 @@ OLE     BIN
 
 
 
-18131
+2
 192
 
 3
@@ -18164,13 +18164,13 @@ OLE     BIN
 
 
 
-18131
+2
 197
 
 3
 749
 6
-2
+0
 6
 0
 0
@@ -18199,7 +18199,7 @@ Copyright © 2001-2003 DVL Software Limited\
 Wellington, New Zealand  - 30 December 2003
 
 
-18131
+2
 0
 
 3
@@ -18232,7 +18232,7 @@ Wellington, New Zealand  - 30 December 2003
 
 
 
-18131
+2
 467
 
 3
@@ -18265,7 +18265,7 @@ Wellington, New Zealand  - 30 December 2003
 
 
 
-18131
+2
 1
 
 3
@@ -18298,7 +18298,7 @@ Wellington, New Zealand  - 30 December 2003
 
 
 
-18131
+2
 0
 
 3
@@ -18332,7 +18332,7 @@ Each commit will be \
 stored in this table.
 
 
-18131
+2
 0
 
 3
@@ -18365,7 +18365,7 @@ stored in this table.
 
 
 
-18131
+2
 4
 
 3
@@ -18399,7 +18399,7 @@ each commit modifies \
 one or more files
 
 
-18131
+2
 0
 
 3
@@ -18432,7 +18432,7 @@ one or more files
 
 
 
-18131
+2
 0
 
 3
@@ -18465,7 +18465,7 @@ one or more files
 
 
 
-18131
+2
 469
 
 3
@@ -18501,7 +18501,7 @@ Sample entries are \
 5.0-CURRENT
 
 
-18131
+2
 0
 
 3
@@ -18534,7 +18534,7 @@ Sample entries are \
 
 
 
-18131
+2
 0
 
 3
@@ -18569,7 +18569,7 @@ Operating Systems\
 in the same database
 
 
-18131
+2
 0
 
 3
@@ -18602,7 +18602,7 @@ in the same database
 
 
 
-18131
+2
 505
 
 3
@@ -18635,7 +18635,7 @@ in the same database
 
 
 
-18131
+2
 0
 
 3
@@ -18668,7 +18668,7 @@ in the same database
 
 
 
-18131
+2
 468
 
 3
@@ -18703,7 +18703,7 @@ same element referred to more \
 than once by the same tag.
 
 
-18131
+2
 0
 
 3
@@ -18736,7 +18736,7 @@ than once by the same tag.
 
 
 
-18131
+2
 2324
 
 3
@@ -18769,7 +18769,7 @@ than once by the same tag.
 
 
 
-18131
+2
 2836
 
 3
@@ -18802,7 +18802,7 @@ than once by the same tag.
 
 
 
-18131
+2
 3363
 
 3
@@ -18835,7 +18835,7 @@ than once by the same tag.
 
 
 
-18131
+2
 5703
 
 3
@@ -18868,7 +18868,7 @@ than once by the same tag.
 
 
 
-18131
+2
 6230
 
 3
@@ -18901,7 +18901,7 @@ than once by the same tag.
 
 
 
-18131
+2
 6547
 
 3
@@ -18934,7 +18934,7 @@ than once by the same tag.
 
 
 
-18131
+2
 8543
 
 3
@@ -18967,7 +18967,7 @@ than once by the same tag.
 
 
 
-18131
+2
 7239
 
 3
@@ -19000,7 +19000,7 @@ than once by the same tag.
 
 
 
-18131
+2
 7906
 
 3
@@ -19033,7 +19033,7 @@ than once by the same tag.
 
 
 
-18131
+2
 6871
 
 3
@@ -19066,7 +19066,7 @@ than once by the same tag.
 
 
 
-18131
+2
 0
 
 3
@@ -19099,7 +19099,7 @@ than once by the same tag.
 
 
 
-18131
+2
 9430
 
 3
@@ -19132,7 +19132,7 @@ than once by the same tag.
 
 
 
-18131
+2
 10451
 
 3
@@ -19165,7 +19165,7 @@ than once by the same tag.
 
 
 
-18131
+2
 10456
 
 3
@@ -19198,7 +19198,7 @@ than once by the same tag.
 
 
 
-18131
+2
 10812
 
 3
@@ -19231,7 +19231,7 @@ than once by the same tag.
 
 
 
-18131
+2
 10814
 
 3
@@ -19264,7 +19264,7 @@ than once by the same tag.
 
 
 
-18131
+2
 10829
 
 3
@@ -19297,7 +19297,7 @@ than once by the same tag.
 
 
 
-18131
+2
 10838
 
 3
@@ -19330,7 +19330,7 @@ than once by the same tag.
 
 
 
-18131
+2
 10864
 
 3
@@ -19363,7 +19363,7 @@ than once by the same tag.
 
 
 
-18131
+2
 11332
 
 3
@@ -19398,7 +19398,7 @@ the source tree will have exactly\
 one entry in this table.
 
 
-18131
+2
 0
 
 3
@@ -19431,7 +19431,7 @@ one entry in this table.
 
 
 
-18131
+2
 209
 
 3
@@ -19464,7 +19464,7 @@ one entry in this table.
 
 
 
-18131
+2
 304
 
 3
@@ -19497,7 +19497,7 @@ one entry in this table.
 
 
 
-18131
+2
 8
 
 3
@@ -19530,7 +19530,7 @@ one entry in this table.
 
 
 
-18131
+2
 11727
 
 3
@@ -19563,7 +19563,7 @@ one entry in this table.
 
 
 
-18131
+2
 14576
 
 3
@@ -19596,7 +19596,7 @@ one entry in this table.
 
 
 
-18131
+2
 14577
 
 3
@@ -19629,7 +19629,7 @@ one entry in this table.
 
 
 
-18131
+2
 15520
 
 3
@@ -19662,7 +19662,7 @@ one entry in this table.
 
 
 
-18131
+2
 15995
 
 3
@@ -19695,7 +19695,7 @@ one entry in this table.
 
 
 
-18131
+2
 17130
 
 3
@@ -19728,7 +19728,7 @@ one entry in this table.
 
 
 
-18131
+2
 17588
 
 3
@@ -19761,7 +19761,7 @@ one entry in this table.
 
 
 
-18131
+2
 18036
 
 3
@@ -19794,7 +19794,7 @@ one entry in this table.
 
 
 
-18131
+2
 18531
 
 3
@@ -19827,7 +19827,7 @@ one entry in this table.
 
 
 
-18131
+2
 19455
 
 3
@@ -19860,7 +19860,7 @@ one entry in this table.
 
 
 
-18131
+2
 20390
 
 3
@@ -19893,7 +19893,7 @@ one entry in this table.
 
 
 
-18131
+2
 20903
 
 3
@@ -19926,7 +19926,7 @@ one entry in this table.
 
 
 
-18131
+2
 20912
 
 3
@@ -19939,10 +19939,10 @@ one entry in this table.
 0
 0
 0
-13353
--227434
-22802
--223083
+13349
+-227438
+22798
+-223087
 2
 1
 0
@@ -19959,7 +19959,7 @@ one entry in this table.
 
 
 
-18131
+2
 21523
 
 3
@@ -19992,7 +19992,7 @@ one entry in this table.
 
 
 
-18131
+2
 1572
 
 3
@@ -20025,7 +20025,7 @@ one entry in this table.
 
 
 
-18131
+2
 32
 
 3
@@ -20058,7 +20058,7 @@ one entry in this table.
 
 
 
-18131
+2
 41
 
 3
@@ -20091,7 +20091,7 @@ one entry in this table.
 
 
 
-18131
+2
 44
 
 3
@@ -20124,7 +20124,7 @@ one entry in this table.
 
 
 
-18131
+2
 479
 
 3
@@ -20157,7 +20157,7 @@ one entry in this table.
 
 
 
-18131
+2
 495
 
 3
@@ -20190,7 +20190,7 @@ one entry in this table.
 
 
 
-18131
+2
 821
 
 3
@@ -20223,7 +20223,7 @@ a7b500003a26fdff5df800003a26fdff
 
 
 
-18131
+2
 893
 
 3
@@ -20256,7 +20256,7 @@ e7370000723dfdffe7370000061cfdff88a70000061cfdff
 
 
 
-18131
+2
 964
 
 3
@@ -20289,7 +20289,7 @@ e7370000723dfdffe7370000061cfdff88a70000061cfdff
 
 
 
-18131
+2
 1578
 
 3
@@ -20322,7 +20322,7 @@ d1edffff07b0fcffd1edffff577efcff
 
 
 
-18131
+2
 2092
 
 3
@@ -20355,7 +20355,7 @@ c07900007cf1fcffc079000047e4fcff5998000047e4fcff
 
 
 
-18131
+2
 2328
 
 3
@@ -20388,7 +20388,7 @@ c07900007cf1fcffc079000047e4fcff5998000047e4fcff
 
 
 
-18131
+2
 2840
 
 3
@@ -20421,7 +20421,7 @@ c07900007cf1fcffc079000047e4fcff5998000047e4fcff
 
 
 
-18131
+2
 2841
 
 3
@@ -20454,7 +20454,7 @@ c87100007014fdff85d7ffff7014fdff
 
 
 
-18131
+2
 3368
 
 3
@@ -20487,7 +20487,7 @@ ade30000aeaffcffade30000bfe3fcff
 
 
 
-18131
+2
 6049
 
 3
@@ -20520,7 +20520,7 @@ ade30000aeaffcffade30000bfe3fcff
 
 
 
-18131
+2
 6875
 
 3
@@ -20553,7 +20553,7 @@ ade30000aeaffcffade30000bfe3fcff
 
 
 
-18131
+2
 10833
 
 3
@@ -20586,7 +20586,7 @@ a4bc00000e33fdff251101000e33fdff
 
 
 
-18131
+2
 11336
 
 3
@@ -20619,7 +20619,7 @@ b3bb0000b712fdff9ee20000b712fdff9ee20000ee01fdff
 
 
 
-18131
+2
 12188
 
 3
@@ -20652,7 +20652,7 @@ acfe0000fd1efdffd1be0000fd1efdff
 
 
 
-18131
+2
 13301
 
 3
@@ -20685,7 +20685,7 @@ b0c6ffff0f74fcff72b1ffff0f74fcff72b1ffff840cfdff2ad2ffff840cfdff
 
 
 
-18131
+2
 14563
 
 3
@@ -20718,7 +20718,7 @@ b0c6ffff0f74fcff72b1ffff0f74fcff72b1ffff840cfdff2ad2ffff840cfdff
 
 
 
-18131
+2
 14585
 
 3
@@ -20751,7 +20751,7 @@ b0c6ffff0f74fcff72b1ffff0f74fcff72b1ffff840cfdff2ad2ffff840cfdff
 
 
 
-18131
+2
 14986
 
 3
@@ -20784,7 +20784,7 @@ b0c6ffff0f74fcff72b1ffff0f74fcff72b1ffff840cfdff2ad2ffff840cfdff
 
 
 
-18131
+2
 14989
 
 3
@@ -20817,7 +20817,7 @@ a7cb00008d87fdffa7cb00001865fdffb1ea00001865fdff
 
 
 
-18131
+2
 14998
 
 3
@@ -20850,7 +20850,7 @@ a7cb00008d87fdffa7cb00001865fdffb1ea00001865fdff
 
 
 
-18131
+2
 14999
 
 3
@@ -20883,7 +20883,7 @@ a7cb00008d87fdffa7cb00001865fdffb1ea00001865fdff
 
 
 
-18131
+2
 671
 
 3
@@ -20916,7 +20916,7 @@ a7cb00008d87fdffa7cb00001865fdffb1ea00001865fdff
 
 
 
-18131
+2
 674
 
 3
@@ -20949,7 +20949,7 @@ a7cb00008d87fdffa7cb00001865fdffb1ea00001865fdff
 
 
 
-18131
+2
 677
 
 3
@@ -20982,7 +20982,7 @@ a7cb00008d87fdffa7cb00001865fdffb1ea00001865fdff
 
 
 
-18131
+2
 751
 
 3
@@ -21015,7 +21015,7 @@ daef000043a4fcffdaef00003786fcff321001003786fcff
 
 
 
-18131
+2
 11730
 
 3
@@ -21048,7 +21048,7 @@ e07a0000e67bfdffe07a0000c362fdff
 
 
 
-18131
+2
 15187
 
 3
@@ -21081,7 +21081,7 @@ c57d00003651fcff235d00003651fcff
 
 
 
-18131
+2
 16003
 
 3
@@ -21114,7 +21114,7 @@ bf090000896afcffbf0900005257fcfff71b00005257fcff
 
 
 
-18131
+2
 16442
 
 3
@@ -21147,7 +21147,7 @@ afd0ffff2977fcffafd0fffffc55fcff
 
 
 
-18131
+2
 17133
 
 3
@@ -21180,7 +21180,7 @@ afd0ffff2977fcffafd0fffffc55fcff
 
 
 
-18131
+2
 17591
 
 3
@@ -21213,7 +21213,7 @@ f80a01000268fcfff80a0100b64dfcfffdf20000b64dfcff
 
 
 
-18131
+2
 17592
 
 3
@@ -21246,7 +21246,7 @@ f80a01000268fcfff80a0100b64dfcfffdf20000b64dfcff
 
 
 
-18131
+2
 18047
 
 3
@@ -21279,7 +21279,7 @@ f6ebffff3669fcfff6ebffff6c45fcff
 
 
 
-18131
+2
 18534
 
 3
@@ -21312,7 +21312,7 @@ f6ebffff3669fcfff6ebffff6c45fcff
 
 
 
-18131
+2
 20397
 
 3
@@ -21345,7 +21345,7 @@ f6ebffff3669fcfff6ebffff6c45fcff
 
 
 
-18131
+2
 20398
 
 3
@@ -21378,7 +21378,7 @@ e5840000052ffdff334f0000052ffdff334f00003163fdff
 
 
 
-18131
+2
 20926
 
 3
@@ -21406,12 +21406,12 @@ e5840000052ffdff334f0000052ffdff334f00003163fdff
 0
 0
 2
-807800002d8cfcff685900002d8cfcff
+80780000298cfcff64590000298cfcff
 2
 
 
 
-18131
+2
 21527
 
 3
@@ -21439,12 +21439,12 @@ e5840000052ffdff334f0000052ffdff334f00003163fdff
 0
 0
 3
-b2800000037dfcff05490000037dfcff05490000f689fcff
+b2800000037dfcff01490000037dfcff01490000f289fcff
 2
 
 
 
-18131
+2
 21530
 
 /END_TABLE AMCSYMB
