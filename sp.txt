@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.46 2002-03-23 03:06:30 dan Exp $
+-- $Id: sp.txt,v 1.46.2.1 2003-03-04 22:10:56 dan Exp $
 --
 
 CREATE OR REPLACE FUNCTION IsDescendantOf (int4 ,int4) returns boolean As '
@@ -273,24 +273,27 @@ CREATE OR REPLACE FUNCTION CreateCategory(text, text, bool) returns int4 AS '
       category_id          int4;
 
    BEGIN
-      pathname            := \'ports/\' || category_name;
-      category_element_id := Pathname_ID(pathname);
-
-      IF category_element_id is NULL THEN
-         category_element_id := Element_Add(pathname, \'D\');
-      END IF;
-
       category_id := nextval(\'categories_id_seq\');
-      INSERT INTO categories (id,          is_primary,          element_id,          name,              description)
-                  values     (category_id, category_is_primary, category_element_id, category_name, category_description);
+
+   	IF category_is_primary THEN
+	      pathname            := \'ports/\' || category_name;
+   	   category_element_id := Pathname_ID(pathname);
+
+      	IF category_element_id is NULL THEN
+         	category_element_id := Element_Add(pathname, \'D\');
+      	END IF;
+
+   	   INSERT INTO categories (id,          is_primary,          element_id,          name,          description)
+      	            values     (category_id, category_is_primary, category_element_id, category_name, category_description);
+		ELSE
+   	   INSERT INTO categories (id,          is_primary,          name,          description)
+      	            values     (category_id, category_is_primary, category_name, category_description);
+		END IF;
 
       return category_id;
---       return category_element_id;
 
    END;
 '  LANGUAGE 'plpgsql';
-
-
 
 CREATE OR REPLACE FUNCTION ElementRevisionID(int4, text) returns int4 AS '
    DECLARE 
@@ -924,7 +927,7 @@ CREATE OR REPLACE FUNCTION PortVerifyBegin() returns int8 AS '
 CREATE OR REPLACE FUNCTION PortVerifyAddOne(text, text) returns int8 AS '
 	DECLARE
 		CategoryName	ALIAS for $1;
-		PortName		ALIAS for $2;
+		PortName			ALIAS for $2;
 		OID	int8;
 
 	BEGIN
@@ -960,4 +963,73 @@ CREATE OR REPLACE FUNCTION PortsVerifyProcess() returns int8 AS '
 
 		RETURN RowCount;
 	END
+' LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION GetPortID(text, text) returns int8 AS '
+	DECLARE
+		CategoryName ALIAS for $1;
+		PortName     ALIAS for $2;
+		PortID       int8;
+
+	BEGIN
+
+		SELECT ports_all.id
+		  INTO PortID
+		  FROM ports_categories, ports_all, categories, element
+		 WHERE ports_categories.port_id     = ports_all.id
+		   AND ports_categories.category_id = categories.id
+		   AND ports_all.element_id         = element.id
+		   AND ports_all.name               = PortName
+		   AND categories.name              = CategoryName;
+
+		return PortID;
+
+	END
+' LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION ports_categories_set(int8, text) returns int8 AS '
+   DECLARE
+      PortID         ALIAS for $1;
+      CategoryNames  ALIAS for $2;
+
+      CategoryCount  integer;
+      Category       text;
+		CategoryID		int8;
+
+   BEGIN
+      RAISE NOTICE '' into ports_categories_set for port = % with categories = %'', PortID, CategoryNames;
+
+		DELETE 
+		  FROM ports_categories
+		 WHERE port_id = PortID;
+
+      CategoryCount := 0;
+      LOOP
+         CategoryCount := CategoryCount + 1;
+         Category := split_part(CategoryNames, \' \', CategoryCount);
+
+			-- let us not get carried away....
+         IF Category = \'\' OR CategoryCount > 100 THEN
+            EXIT;
+         END IF;
+
+			SELECT id
+			  INTO CategoryID
+			  FROM categories
+			 WHERE name = Category;
+
+			IF NOT FOUND THEN
+				RAISE NOTICE '' we need to create category % '', Category;
+				CategoryID := CreateCategory(Category, ''no description supplied'', FALSE);
+			END IF;
+
+			INSERT INTO ports_categories (port_id, category_id) values (PortID, CategoryID);
+
+			RAISE NOTICE '' category % is % with id %'', CategoryCount, Category, CategoryID;
+      END LOOP;
+
+      RETURN 0;
+   END
 ' LANGUAGE 'plpgsql';
