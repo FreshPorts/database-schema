@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.112 2004-06-09 13:28:22 dan Exp $
+-- $Id: sp.txt,v 1.113 2004-08-02 01:14:38 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -1838,6 +1838,32 @@ CREATE OR REPLACE FUNCTION PortsMovedAdd (text, text, text, text) returns int AS
       end if;
 
       RETURN l_PortsMovedID;
+   END;
+'  LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION PortsUpdatingAdd (date, text, text, text) returns int AS '
+   DECLARE
+      p_Date    ALIAS FOR $1;
+      p_Affects ALIAS FOR $2;
+      p_Author  ALIAS FOR $3;
+      p_Reason  ALIAS FOR $4;
+
+      l_PortsUpdatingID   int;
+      OID                 int8;
+
+   BEGIN
+      -- obtain the next number in the sequence
+      l_PortsUpdatingID := nextval(''ports_updating_id_seq'');
+
+      INSERT INTO ports_updating (id, date, affects, author, reason)
+             VALUES (l_PortsUpdatingID, p_Date::date, p_Affects, p_Author, p_Reason);
+
+      GET DIAGNOSTICS OID = RESULT_OID;
+      IF OID IS NULL THEN
+         l_PortsUpdatingID := NULL;
+      END IF;
+
+      RETURN l_PortsUpdatingID;
    END;
 '  LANGUAGE 'plpgsql';
 

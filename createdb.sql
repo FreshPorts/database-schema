@@ -1,5 +1,5 @@
 --
--- $Id: createdb.sql,v 1.69 2004-06-22 14:59:09 dan Exp $
+-- $Id: createdb.sql,v 1.70 2004-08-02 01:14:37 dan Exp $
 --
 -- The following options should be used to create the database schema
 --
@@ -230,6 +230,16 @@ insert into security_notice_status (id,name,description) values ('A', 'Active', 
 insert into security_notice_status (id,name,description) values ('I', 'Ingore', 'Ingore this notice');
 
 insert into security_notice_status (id,name,description) values ('C', 'Candidate', 'A candidate for becoming a security notice');
+
+create table ports_updating
+(
+    id                         serial                not null,
+    date                       date                  not null,
+    affects                    text                  not null,
+    author                     text                          ,
+    reason                     text                  not null,
+    primary key (id)
+);
 
 create table element_revision
 (
@@ -593,6 +603,12 @@ create index page_load_detail_date on page_load_detail (date);
 
 create index page_load_ip_address on page_load_detail (ip_address);
 
+create table ports_updating_ports_xref
+(
+    ports_updating_id          integer               not null,
+    port_id                    integer               not null
+);
+
 create view commits_recent as
 select distinct commit_log.id, commit_log.message_id, commit_log.message_date,
 commit_log.message_subject, commit_log.date_added, commit_log.commit_date,
@@ -833,4 +849,12 @@ alter table ports_moved
 alter table page_load_detail
     add foreign key  (user_id)
        references users (id) on update cascade on delete cascade;
+
+alter table ports_updating_ports_xref
+    add foreign key  (port_id)
+       references ports (id) on update cascade on delete cascade;
+
+alter table ports_updating_ports_xref
+    add foreign key  (ports_updating_id)
+       references ports_updating (id) on update cascade on delete cascade;
 
