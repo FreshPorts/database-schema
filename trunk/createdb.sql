@@ -1,5 +1,5 @@
 --
--- $Id: createdb.sql,v 1.41 2003-02-20 21:00:13 dan Exp $
+-- $Id: createdb.sql,v 1.42 2003-02-20 22:28:29 dan Exp $
 --
 -- The following options should be used to create the database schema
 --
@@ -37,7 +37,7 @@ insert into housekeeping values (1,0,0);
 
 create table commits_latest_ports
 (
-    commit_date_raw         timestamp                     ,
+    commit_date_raw         timestamp with time zone         ,
     commit_log_id           int4                          ,
     encoding_losses         boolean                       ,
     message_id              text                          ,
@@ -64,7 +64,7 @@ create table commits_latest_ports
 create table watch_list_staging_log
 (
     id                      int4                  not null,
-    date_added              timestamp             not null,
+    date_added              timestamp with time zone not null,
     user_id                 int4                  not null,
     action                  char(1)               not null
         check (action in ('U','W','C','D')),
@@ -129,7 +129,7 @@ alter table graphs alter column id set default nextval('graphs_id_seq'::text);
 create table commits_latest
 (
     commit_log_id           int4                          ,
-    commit_date_raw         timestamp                     ,
+    commit_date_raw         timestamp with time zone         ,
     message_subject         text                          ,
     message_id              text                          ,
     committer               text                          ,
@@ -166,7 +166,7 @@ create table watch_notice
     frequency               char(1)               not null
         check (frequency in ('Z','D','W','F','M')),
     description             text                  not null,
-    last_sent               timestamp                     ,
+    last_sent               timestamp with time zone         ,
     primary key (id)
 );
 
@@ -300,7 +300,7 @@ create table ports
     found_in_index          boolean                       ,
     forbidden               text                          ,
     broken                  text                          ,
-    date_added              timestamp                     
+    date_added              timestamp with time zone         
         default current_timestamp,
     categories              text                          ,
     primary key (id)
@@ -316,9 +316,9 @@ create table users
     name                    text                  not null,
     password                text                  not null,
     cookie                  text                  not null,
-    firstlogin              timestamp                     
+    firstlogin              timestamp with time zone         
         default current_timestamp,
-    lastlogin               timestamp                     
+    lastlogin               timestamp with time zone         
         default current_timestamp,
     email                   text                          ,
     watch_notice_id         int4                  not null,
@@ -394,10 +394,10 @@ create table commit_log
 (
     id                      int4                  not null,
     message_id              text                  not null,
-    message_date            timestamp             not null,
+    message_date            timestamp with time zone not null,
     message_subject         text                          ,
-    date_added              timestamp             not null,
-    commit_date             timestamp             not null,
+    date_added              timestamp with time zone not null,
+    commit_date             timestamp with time zone not null,
     committer               text                  not null,
     description             text                  not null,
     system_id               int4                  not null,
@@ -440,7 +440,7 @@ create table watch_list_element
 create table watch_notice_log
 (
     id                      int4                  not null,
-    notice_date             timestamp             not null
+    notice_date             timestamp with time zone not null
         default current_timestamp,
     frequency_id            int4                  not null,
     watch_notice_count      int4                  not null,
@@ -491,7 +491,7 @@ create table security_notice
 (
     id                      serial                not null,
     user_id                 int4                  not null,
-    date_added              timestamp             not null
+    date_added              timestamp with time zone not null
         default current_timestamp,
     ip_address              inet                  not null,
     description             text                  not null,
@@ -542,7 +542,7 @@ create table report_log
     id                      int4                  not null,
     report_id               int4                  not null,
     frequency_id            int4                          ,
-    report_date             timestamp             not null
+    report_date             timestamp with time zone not null
         default current_timestamp,
     email_count             int4                  not null,
     commit_count            int4                  not null,
@@ -599,7 +599,7 @@ create table ports_refesh_ignore
 (
     commit_log_id           int4                  not null,
     port_id                 int4                  not null,
-    date_ignored            timestamp             not null
+    date_ignored            timestamp with time zone not null
         default current_timestamp,
     reason                  text                  not null,
     primary key (commit_log_id, port_id)
