@@ -1,5 +1,5 @@
 --
--- $Id: createdb.sql,v 1.64 2004-01-12 21:02:40 dan Exp $
+-- $Id: createdb.sql,v 1.65 2004-01-31 13:40:13 dan Exp $
 --
 -- The following options should be used to create the database schema
 --
@@ -98,8 +98,8 @@ create table announcements
 (
     id                      serial                not null,
     text                    text                  not null,
-    start_date              timestamp with time zone         ,
-    end_date                timestamp with time zone         ,
+    start_date              date                          ,
+    end_date                date                          ,
     primary key (id)
 );
 
@@ -108,10 +108,12 @@ create table page_load_summary
     id                      serial                not null,
     date                    date                  not null,
     page_name               text                  not null,
-    total                   integer               not null,
-    users                   integer               not null,
-    rendering_time_min      interval              not null,
-    rendering_time_max      interval              not null,
+    total                   integer               not null
+        default 0,
+    users                   integer               not null
+        default 0,
+    rendering_time_min      interval                      ,
+    rendering_time_max      interval                      ,
     rendering_time_avg      interval              not null,
     primary key (id)
 );
@@ -547,23 +549,6 @@ create table commit_log_ports_elements
 
 create index commit_log_ports_elements_clid on commit_log_ports_elements (commit_log_id);
 
-create table page_load_detail
-(
-    id                      serial                not null,
-    timestamp               timestamp without time zone not null
-        default current_timestamp,
-    page_name               text                  not null,
-    user_id                 integer                       ,
-    ip_address              inet                  not null,
-    full_url                text                  not null,
-    rendering_time          interval              not null,
-    primary key (id)
-);
-
-create index page_load_detail_timestamp on page_load_detail (timestamp);
-
-create index page_load_ip_address on page_load_detail (ip_address);
-
 create table ports_moved
 (
     id                      serial                not null,
@@ -573,6 +558,25 @@ create table ports_moved
     reason                  text                  not null,
     primary key (id)
 );
+
+create table page_load_detail
+(
+    id                      serial                not null,
+    date                    date                  not null
+        default CURRENT_DATE,
+    time                    time                  not null
+        default LOCALTIME,
+    page_name               text                  not null,
+    user_id                 integer               not null,
+    ip_address              inet                  not null,
+    full_url                text                  not null,
+    rendering_time          interval              not null,
+    primary key (id)
+);
+
+create index page_load_detail_date on page_load_detail (date);
+
+create index page_load_ip_address on page_load_detail (ip_address);
 
 create view commits_recent as
 select distinct commit_log.id, commit_log.message_id, commit_log.message_date,
@@ -795,10 +799,6 @@ alter table commit_log_ports_elements
     add foreign key  (element_id)
        references element (id) on update cascade on delete cascade;
 
-alter table page_load_detail
-    add foreign key  (user_id)
-       references users (id) on update cascade on delete cascade;
-
 alter table ports_moved
     add foreign key  (from_port_id)
        references ports (id) on update cascade on delete cascade;
@@ -806,4 +806,8 @@ alter table ports_moved
 alter table ports_moved
     add foreign key  (to_port_id)
        references ports (id) on update cascade on delete cascade;
+
+alter table page_load_detail
+    add foreign key  (user_id)
+       references users (id) on update cascade on delete cascade;
 
