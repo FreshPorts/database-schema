@@ -1,11 +1,12 @@
 #
-# $Id: createdb.sql,v 1.23 2002-03-28 03:52:00 dan Exp $
+# $Id: createdb.sql,v 1.24 2002-04-01 20:53:43 dan Exp $
 #
 # Things which must be done to make this script work with PostgreSQL
 # 
 # remove asc from indexes. ' asc);' => ');'
 # remove quotes from around 'current_timestamp'
 # remove key names from foreign keys
+# in ports_active, put quotes around status.
 #
 # The following options should be used to create the database schema
 #
@@ -105,6 +106,12 @@ alter table ports_check alter column id set default nextval('ports_check_id_seq'
 
 create index ports_check_category_id on ports_check (category_id);
 
+create table daily_refreshes
+(
+    refresh_date           date                  not null,
+    primary key (refresh_date)
+);
+
 create table element
 (
     id                     int4                  not null,
@@ -175,6 +182,7 @@ create table security_notice
     synopsis               text                  not null,
     primary key (id)
 );
+
 
 create table element_revision
 (
@@ -451,7 +459,7 @@ order by commit_log.commit_date desc, commit_log.id limit 100;
 create view ports_active as
 select ports.*, element.name as name, categories.name as category
 from categories, ports, element
-where element.status = A
+where element.status = 'A'
 and categories.id = ports.category_id
 and ports.element_id = element.id;
 
