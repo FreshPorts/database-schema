@@ -130,7 +130,16 @@ alter table vuxml_names
     add foreign key  (vuxml_affected_id)
        references vuxml_affected (id) on update cascade on delete cascade;
 
+drop one of the types.... can't remember what one
 
+< data_types.txt
+< sp.txt
+
+Then run scripts/Verify/set-no_latest_link.no_package.pkgname.portepoch.pl
+
+< MOVED
+< UPDATED
+< vuln.xml
 
 Feb 22 2004
 
