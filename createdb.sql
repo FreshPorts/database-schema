@@ -240,6 +240,7 @@ create table commit_log_ports
     port_id                int4                  not null,
     needs_refresh          smallint              not null,
     port_version           text                          ,
+    port_revision          text                          ,
     primary key (commit_log_id, port_id)
 );
 
