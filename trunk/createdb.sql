@@ -1,9 +1,10 @@
 #
-# $Id: createdb.sql,v 1.28 2002-04-24 19:35:52 dan Exp $
+# $Id: createdb.sql,v 1.29 2002-05-19 22:22:38 dan Exp $
 #
 # Things which must be done to make this script work with PostgreSQL
 # 
 # remove asc from indexes. ' asc);' => ');'
+#                          ' asc,' => ','
 # remove quotes from around 'current_timestamp'
 # remove key names from foreign keys
 # in ports_active, put quotes around status.
@@ -199,10 +200,22 @@ create table security_notice
     id                     int4                  not null,
     date_added             timestamp             not null
         default current_timestamp,
-    status                 char                  not null,
+    status                 char(1)               not null,
     synopsis               text                  not null,
     primary key (id)
 );
+
+create table daily_stats
+(
+    id                     int4                  not null,
+    title                  text                          ,
+    query                  text                          ,
+    primary key (id)
+);
+
+  drop sequence daily_stats_seq;
+create sequence daily_stats_seq;
+alter table daily_stats alter column id set default nextval('daily_stats_seq'::text);
 
 create table element_revision
 (
@@ -210,9 +223,6 @@ create table element_revision
     revision_name          text                          ,
     primary key (element_id, revision_name)
 );
-
-
-  drop sequence categories_id_seq;
 
 create table categories
 (
@@ -224,6 +234,7 @@ create table categories
     primary key (id)
 );
 
+  drop sequence categories_id_seq;
 create sequence categories_id_seq;
 alter table categories alter column id set default nextval('categories_id_seq'::text);
 
@@ -281,6 +292,10 @@ create table users
         check (
             status in ('U','A','D')),
     ip_address             text                  not null,
+    number_of_commits      smallint                      
+        default 100,
+    number_of_days         smallint                      
+        default 9,
     primary key (id)
 );
 
@@ -466,6 +481,21 @@ create sequence watch_list_staging_id_seq;
 
 alter table watch_list_staging  alter column id set default nextval('watch_list_staging_id_seq'::text);
 
+create table daily_stats_data
+(
+    id                     int4                  not null,
+    daily_stats_id         int4                  not null,
+    date                   date                  not null,
+    value                  integer               not null,
+    primary key (id)
+);
+
+  drop sequence daily_stats_data_seq;
+create sequence daily_stats_data_seq;
+alter table daily_stats_data alter column id set default nextval('daily_stats_data_seq'::text);
+
+create unique index daily_stats_data_unique on daily_stats_data (daily_stats_id, date);
+
 create view commits_recent as
 select distinct commit_log.id, commit_log.message_id, commit_log.message_date,
 commit_log.message_subject, commit_log.date_added, commit_log.commit_date,
@@ -599,4 +629,8 @@ alter table watch_list_staging
 alter table watch_list_staging
     add foreign key (element_id)
        references element (id) on update cascade on delete set null;
+
+alter table daily_stats_data
+    add foreign key (daily_stats_id)
+       references daily_stats (id) on delete cascade;
 

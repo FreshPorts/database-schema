@@ -48,11 +48,12 @@ FreshPorts2
 Sybase SQL Anywhere 5.5
 sqlany55.def
 #\
-# $Id: FreshPorts2.WAB,v 1.38 2002-04-24 19:35:52 dan Exp $\
+# $Id: FreshPorts2.WAB,v 1.39 2002-05-19 22:22:37 dan Exp $\
 #\
 # Things which must be done to make this script work with PostgreSQL\
 # \
 # remove asc from indexes. ' asc);' => ');'\
+#                          ' asc,' => ','\
 # remove quotes from around 'current_timestamp'\
 # remove key names from foreign keys\
 # in ports_active, put quotes around status.\
@@ -84,7 +85,7 @@ sqlany55.def
 Dan Langille
 
 968886895
-1018645370
+1021846619
 0
 0
 0
@@ -509,6 +510,240 @@ boolean
 
 
 0
+1
+9959
+9959
+FLAG_YN3
+FLAG_YN3
+
+
+flag for showing true or false, yes or no
+boolean
+0
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+1
+9960
+9960
+TEXT4
+TEXT4
+
+
+long varchar type fields
+text
+0
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+1
+9961
+9961
+DFLOAT3
+DFLOAT3
+
+
+
+double precision
+0
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+1
+9985
+9985
+FLAG_YN4
+FLAG_YN4
+
+
+flag for showing true or false, yes or no
+boolean
+0
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+1
+9986
+9986
+TEXT5
+TEXT5
+
+
+long varchar type fields
+text
+0
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+1
+9987
+9987
+DFLOAT4
+DFLOAT4
+
+
+
+double precision
+0
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+1
+10011
+10011
+FLAG_YN5
+FLAG_YN5
+
+
+flag for showing true or false, yes or no
+boolean
+0
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+1
+10012
+10012
+TEXT6
+TEXT6
+
+
+long varchar type fields
+text
+0
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+1
+10013
+10013
+DFLOAT5
+DFLOAT5
+
+
+
+double precision
+0
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
 /END_TABLE AMCDOMN
 
 /BEGIN_TABLE AMCTABL
@@ -776,7 +1011,8 @@ categories
 
 
 
-  drop sequence categories_id_seq;
+
+  drop sequence categories_id_seq;\
 create sequence categories_id_seq;\
 alter table categories alter column id set default nextval('categories_id_seq'::text);
 0
@@ -1163,7 +1399,7 @@ graphs
 0
 0
 0
-
+graphs
 
 
 
@@ -1174,6 +1410,54 @@ graphs
   drop sequence graphs_id_seq;\
 create sequence graphs_id_seq;\
 alter table graphs alter column id set default nextval('graphs_id_seq'::text);
+0
+3
+10451
+10451
+2
+daily_stats_data
+daily_stats_data
+
+
+
+0
+0
+0
+
+
+
+
+
+
+
+
+  drop sequence daily_stats_data_seq;\
+create sequence daily_stats_data_seq;\
+alter table daily_stats_data alter column id set default nextval('daily_stats_data_seq'::text);
+0
+3
+10456
+10456
+2
+daily_stats
+daily_stats
+
+
+
+0
+0
+0
+
+
+
+
+
+
+
+
+  drop sequence daily_stats_seq;\
+create sequence daily_stats_seq;\
+alter table daily_stats alter column id set default nextval('daily_stats_seq'::text);
 0
 /END_TABLE AMCTABL
 
@@ -2314,8 +2598,8 @@ status
 
 22
 0
-char(1)
-1
+text
+0
 0
 0
 0
@@ -2376,6 +2660,76 @@ text
 ip_address
 
 13
+3
+9957
+9957
+number_of_commits
+number_of_commits
+
+
+
+22
+0
+smallint
+0
+0
+0
+0
+
+
+
+
+100
+0
+0
+0
+
+
+
+0
+0
+0
+1
+0
+0
+number_of_commits
+
+14
+3
+9958
+9958
+number_of_days
+number_of_days
+
+
+
+22
+0
+smallint
+0
+0
+0
+0
+
+
+
+
+9
+0
+0
+0
+
+
+
+0
+0
+0
+1
+0
+0
+number_of_days
+
+15
 3
 26
 26
@@ -6618,7 +6972,7 @@ int4
 1
 0
 0
-
+id
 
 1
 3
@@ -6653,7 +7007,7 @@ text
 1
 0
 0
-
+title
 
 2
 3
@@ -6685,6 +7039,321 @@ text
 0
 0
 1
+1
+0
+0
+query
+
+3
+3
+9774
+9774
+label
+label
+
+
+
+9430
+84
+text
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+0
+0
+1
+0
+0
+label
+
+4
+3
+9775
+9775
+is_clickable
+is_clickable
+
+
+
+9430
+0
+boolean
+0
+0
+0
+0
+
+
+
+
+f
+0
+0
+0
+
+
+
+0
+0
+0
+1
+0
+0
+is_clickable
+
+5
+3
+10452
+10452
+id
+id
+
+
+
+10451
+83
+int4
+4
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+1
+0
+1
+1
+0
+0
+
+
+1
+3
+10453
+10453
+daily_stats_id
+daily_stats_id
+
+
+
+10451
+83
+int4
+4
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+1
+1
+1
+0
+0
+
+
+2
+3
+10454
+10454
+date
+date
+
+
+
+10451
+0
+date
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+0
+1
+1
+0
+0
+
+
+3
+3
+10455
+10455
+value
+value
+
+
+
+10451
+0
+integer
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+0
+1
+1
+0
+0
+
+
+4
+3
+10457
+10457
+id
+id
+
+
+
+10456
+0
+int4
+4
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+1
+0
+1
+1
+0
+0
+
+
+1
+3
+10461
+10461
+title
+title
+
+
+
+10456
+0
+text
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+0
+0
+1
+0
+0
+
+
+2
+3
+10460
+10460
+query
+query
+
+
+
+10456
+0
+text
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+0
+0
 1
 0
 0
@@ -7304,6 +7973,27 @@ Ref_6875
 0
 n
 0
+3
+10462
+10462
+Ref_10462
+Ref_10462
+
+
+
+10456
+10451
+0
+2
+1
+0
+0
+0
+
+
+0
+n
+0
 /END_TABLE AMCREFR
 
 /BEGIN_TABLE AMCCCOL
@@ -7463,6 +8153,11 @@ COLN2   N8
 6878
 193
 200
+1
+10465
+10465
+10457
+10453
 /END_TABLE AMCCCOL
 
 /BEGIN_TABLE AMCCREF
@@ -7652,6 +8347,12 @@ NUMR    N8
 6879
 6875
 6878
+1
+3
+10466
+10466
+10462
+10465
 1
 /END_TABLE AMCCREF
 
@@ -8354,6 +9055,23 @@ ports_check_category_id
 
 40
 
+3
+10467
+10467
+daily_stats_data_unique
+daily_stats_data_unique
+10451
+
+
+
+0
+0
+1
+0
+
+
+41
+
 /END_TABLE AMCINDX
 
 /BEGIN_TABLE AMCCIDX
@@ -8701,6 +9419,20 @@ NUMR    N8
 7425
 1
 1
+3
+10468
+10468
+10467
+10453
+1
+1
+3
+10469
+10469
+10467
+10454
+1
+2
 /END_TABLE AMCCIDX
 
 /BEGIN_TABLE AMCAKEY
@@ -9411,10 +10143,6 @@ Arial
 5
 Comic Sans MS
 14
-1
-6
-Courier New
-10
 1
 /END_TABLE AMCFONT
 
@@ -10971,10 +11699,10 @@ OLE     BIN
 0
 0
 0
--6547
--119000
-6277
--104901
+-6675
+-119571
+6375
+-103522
 2
 1
 0
@@ -10991,7 +11719,7 @@ OLE     BIN
 
 
 
-2
+1
 22
 
 3
@@ -11004,10 +11732,10 @@ OLE     BIN
 0
 0
 0
-15988
--114119
-26937
--108795
+15981
+-114126
+26930
+-108802
 2
 1
 0
@@ -11024,7 +11752,7 @@ OLE     BIN
 
 
 
-2
+1
 25
 
 3
@@ -11037,9 +11765,9 @@ OLE     BIN
 0
 0
 0
-8312
+8309
 -122576
-16411
+16408
 -119052
 2
 1
@@ -11057,7 +11785,7 @@ OLE     BIN
 
 
 
-2
+1
 29
 
 3
@@ -11070,10 +11798,10 @@ OLE     BIN
 0
 0
 0
--29752
--110868
--20378
--105544
+-29755
+-110871
+-20381
+-105547
 2
 1
 0
@@ -11090,7 +11818,7 @@ OLE     BIN
 
 
 
-2
+1
 192
 
 3
@@ -11103,10 +11831,10 @@ OLE     BIN
 0
 0
 0
--48699
--111570
--35800
--105271
+-48702
+-111573
+-35803
+-105274
 2
 1
 0
@@ -11123,7 +11851,7 @@ OLE     BIN
 
 
 
-2
+1
 197
 
 3
@@ -11136,10 +11864,10 @@ OLE     BIN
 0
 0
 0
--42614
--165191
--10140
--158400
+-42619
+-165828
+-10145
+-159371
 1
 1
 0
@@ -11155,10 +11883,10 @@ OLE     BIN
 0
 FreshPorts 2 -physical database model\
 Copyright © 2001-2002 DVL Software Limited\
-Wellington, New Zealand  - 1 April 2002
+Wellington, New Zealand  - 19 May 2002
 
 
-2
+1
 0
 
 3
@@ -11171,10 +11899,10 @@ Wellington, New Zealand  - 1 April 2002
 0
 0
 0
--3022
--126673
-5227
--123149
+-3277
+-127177
+4972
+-123653
 2
 1
 0
@@ -11191,7 +11919,7 @@ Wellington, New Zealand  - 1 April 2002
 
 
 
-2
+1
 467
 
 3
@@ -11204,10 +11932,10 @@ Wellington, New Zealand  - 1 April 2002
 0
 0
 0
--22190
--131979
--8766
--127630
+-24292
+-131898
+-10868
+-127549
 2
 1
 0
@@ -11224,7 +11952,7 @@ Wellington, New Zealand  - 1 April 2002
 
 
 
-2
+1
 468
 
 3
@@ -11237,10 +11965,10 @@ Wellington, New Zealand  - 1 April 2002
 0
 0
 0
--10005
--165440
-1619
--144516
+-10008
+-165443
+1616
+-144519
 2
 1
 0
@@ -11257,7 +11985,7 @@ Wellington, New Zealand  - 1 April 2002
 
 
 
-2
+1
 209
 
 3
@@ -11270,10 +11998,10 @@ Wellington, New Zealand  - 1 April 2002
 0
 0
 0
-5582
--163156
-14356
--156857
+5578
+-163160
+14352
+-156861
 2
 1
 0
@@ -11290,7 +12018,7 @@ Wellington, New Zealand  - 1 April 2002
 
 
 
-2
+1
 304
 
 3
@@ -11303,10 +12031,10 @@ Wellington, New Zealand  - 1 April 2002
 0
 0
 0
-6343
--146519
-17142
--140220
+6340
+-146522
+17139
+-140223
 2
 1
 0
@@ -11323,7 +12051,7 @@ Wellington, New Zealand  - 1 April 2002
 
 
 
-2
+1
 8
 
 3
@@ -11336,10 +12064,10 @@ Wellington, New Zealand  - 1 April 2002
 0
 0
 0
-1295
--141307
-8569
--135158
+3820
+-140384
+11094
+-134235
 1
 1
 0
@@ -11361,7 +12089,7 @@ one entry in this \
 table.
 
 
-2
+1
 0
 
 3
@@ -11374,10 +12102,10 @@ table.
 0
 0
 0
--38320
--138811
--26546
--127637
+-38323
+-138814
+-26549
+-127640
 2
 1
 0
@@ -11394,7 +12122,7 @@ table.
 
 
 
-2
+1
 1
 
 3
@@ -11407,10 +12135,10 @@ table.
 0
 0
 0
--37720
--127999
--29021
--125750
+-37723
+-128002
+-29024
+-125753
 1
 1
 0
@@ -11428,7 +12156,7 @@ Each commit will be \
 stored in this table.
 
 
-2
+1
 0
 
 3
@@ -11441,10 +12169,10 @@ stored in this table.
 0
 0
 0
--31992
--121569
--22318
--115270
+-31743
+-122915
+-22069
+-116616
 2
 1
 0
@@ -11461,7 +12189,7 @@ stored in this table.
 
 
 
-2
+1
 4
 
 3
@@ -11474,10 +12202,10 @@ stored in this table.
 0
 0
 0
--31061
--114256
--21687
--112007
+-31064
+-114259
+-21690
+-112010
 1
 1
 0
@@ -11495,7 +12223,7 @@ each commit modifies \
 one or more files
 
 
-2
+1
 0
 
 3
@@ -11508,10 +12236,10 @@ one or more files
 0
 0
 0
--21024
--141057
--13075
--136708
+-21027
+-141060
+-13078
+-136711
 2
 1
 0
@@ -11528,7 +12256,7 @@ one or more files
 
 
 
-2
+1
 469
 
 3
@@ -11541,10 +12269,10 @@ one or more files
 0
 0
 0
--17693
--145809
--9519
--141610
+-17696
+-145812
+-9522
+-141613
 1
 1
 0
@@ -11564,7 +12292,7 @@ Sample entries are \
 5.0-CURRENT
 
 
-2
+1
 0
 
 3
@@ -11577,10 +12305,10 @@ Sample entries are \
 0
 0
 0
--27078
--152571
--15304
--149347
+-27081
+-152574
+-15307
+-149350
 1
 1
 0
@@ -11599,7 +12327,7 @@ Operating Systems\
 in the same database
 
 
-2
+1
 0
 
 3
@@ -11612,10 +12340,10 @@ in the same database
 0
 0
 0
--31252
--149406
--22703
--145057
+-31255
+-149409
+-22706
+-145060
 2
 1
 0
@@ -11632,7 +12360,7 @@ in the same database
 
 
 
-2
+1
 505
 
 3
@@ -11645,10 +12373,10 @@ in the same database
 0
 0
 0
--12462
--135076
-287
--131852
+-12465
+-135079
+284
+-131855
 1
 1
 0
@@ -11667,7 +12395,7 @@ same element referred to more \
 than once by the same tag.
 
 
-2
+1
 0
 
 3
@@ -11680,10 +12408,10 @@ than once by the same tag.
 0
 0
 0
--49988
--125808
--37839
--121459
+-49991
+-125811
+-37842
+-121462
 2
 1
 0
@@ -11700,7 +12428,7 @@ than once by the same tag.
 
 
 
-2
+1
 1056
 
 3
@@ -11713,9 +12441,9 @@ than once by the same tag.
 0
 0
 0
--17953
+-17960
 -118218
--10154
+-10161
 -114694
 2
 1
@@ -11733,7 +12461,7 @@ than once by the same tag.
 
 
 
-2
+1
 2324
 
 3
@@ -11746,10 +12474,10 @@ than once by the same tag.
 0
 0
 0
--42171
--155261
--32122
--148962
+-42174
+-155264
+-32125
+-148965
 2
 1
 0
@@ -11766,7 +12494,7 @@ than once by the same tag.
 
 
 
-2
+1
 2836
 
 3
@@ -11779,10 +12507,10 @@ than once by the same tag.
 0
 0
 0
-38060
--121906
-47884
--116582
+38057
+-121909
+47881
+-116585
 2
 1
 0
@@ -11799,7 +12527,7 @@ than once by the same tag.
 
 
 
-2
+1
 3093
 
 3
@@ -11812,9 +12540,9 @@ than once by the same tag.
 0
 0
 0
-36507
+36504
 -131356
-46856
+46853
 -127832
 2
 1
@@ -11832,7 +12560,7 @@ than once by the same tag.
 
 
 
-2
+1
 3094
 
 3
@@ -11845,10 +12573,10 @@ than once by the same tag.
 0
 0
 0
-37743
--112469
-49892
--106170
+37736
+-112476
+49885
+-106177
 2
 1
 0
@@ -11865,7 +12593,7 @@ than once by the same tag.
 
 
 
-2
+1
 3363
 
 3
@@ -11878,10 +12606,10 @@ than once by the same tag.
 0
 0
 0
-23975
--136720
-34849
--133196
+20686
+-155424
+31560
+-151900
 2
 1
 0
@@ -11898,11 +12626,11 @@ than once by the same tag.
 
 
 
-2
+1
 4526
 
 3
-5368
+5524
 289
 0
 29
@@ -11911,10 +12639,10 @@ than once by the same tag.
 0
 0
 0
-35173
--167110
-50322
--144236
+17534
+-128114
+27883
+-118890
 2
 1
 0
@@ -11931,11 +12659,11 @@ than once by the same tag.
 
 
 
-2
-4528
+1
+5703
 
 3
-5524
+6156
 289
 0
 30
@@ -11944,10 +12672,10 @@ than once by the same tag.
 0
 0
 0
-17537
--126510
-27886
--117286
+37315
+-143453
+49089
+-133254
 2
 1
 0
@@ -11964,11 +12692,11 @@ than once by the same tag.
 
 
 
-2
-5703
+1
+6230
 
 3
-6156
+6313
 289
 0
 31
@@ -11977,10 +12705,10 @@ than once by the same tag.
 0
 0
 0
-37318
--143450
-49092
--133251
+21423
+-139884
+33272
+-132610
 2
 1
 0
@@ -11997,11 +12725,11 @@ than once by the same tag.
 
 
 
-2
-6230
+1
+6547
 
 3
-6313
+6957
 289
 0
 32
@@ -12010,10 +12738,10 @@ than once by the same tag.
 0
 0
 0
-23954
--144515
-35803
--137241
+20992
+-151070
+28641
+-147546
 2
 1
 0
@@ -12030,12 +12758,12 @@ than once by the same tag.
 
 
 
-2
-6547
+1
+8543
 
 3
-6470
-291
+7119
+289
 0
 33
 0
@@ -12043,12 +12771,12 @@ than once by the same tag.
 0
 0
 0
-16494
--165324
-33468
--152525
+92113
+-112548
+100887
+-106249
 2
-6
+1
 0
 0
 0
@@ -12063,11 +12791,11 @@ than once by the same tag.
 
 
 
-2
-6871
+1
+9430
 
 3
-6795
+6632
 291
 0
 34
@@ -12076,10 +12804,10 @@ than once by the same tag.
 0
 0
 0
-19237
--155961
-34486
--147062
+52364
+-114052
+64388
+-106128
 2
 6
 0
@@ -12096,11 +12824,11 @@ than once by the same tag.
 
 
 
-2
-7906
+1
+7239
 
 3
-6957
+5368
 289
 0
 35
@@ -12109,10 +12837,10 @@ than once by the same tag.
 0
 0
 0
-25208
--132745
-32857
--129809
+33317
+-167538
+48466
+-144664
 2
 1
 0
@@ -12129,12 +12857,12 @@ than once by the same tag.
 
 
 
-2
-8543
+1
+4528
 
 3
-7119
-289
+6795
+291
 0
 36
 0
@@ -12142,31 +12870,31 @@ than once by the same tag.
 0
 0
 0
-29368
--112916
-34902
--108567
+51924
+-124538
+67173
+-115639
 2
+6
+0
+0
+0
+0
+0
+0
+0
+0
+0
+
+0
+
+
+
 1
-0
-0
-0
-0
-0
-0
-0
-0
-0
-
-0
-
-
-
-2
-9430
+7906
 
 3
-6632
+6470
 291
 0
 37
@@ -12175,10 +12903,10 @@ than once by the same tag.
 0
 0
 0
-21952
--153394
-33976
--145470
+52046
+-138705
+69020
+-125906
 2
 6
 0
@@ -12195,14 +12923,80 @@ than once by the same tag.
 
 
 
+1
+6871
+
+3
+7483
+289
+0
+38
+0
+0
+0
+0
+0
+79120
+-111819
+88269
+-106495
 2
-7239
+1
+0
+0
+0
+0
+0
+0
+0
+0
+0
+
+0
+
+
+
+1
+10451
+
+3
+7484
+289
+0
+39
+0
+0
+0
+0
+0
+80347
+-120592
+85881
+-116243
+2
+1
+0
+0
+0
+0
+0
+0
+0
+0
+0
+
+0
+
+
+
+1
+10456
 
 3
 9
 290
 0
-38
+40
 0
 2
 3
@@ -12223,19 +13017,19 @@ than once by the same tag.
 0
 0
 2
-a68effff43fefdffa68effffc83cfeff
+1e8fffff40fefdff1e8fffff8637feff
 2
 
 
 
-2
+1
 32
 
 3
 49
 290
 0
-39
+41
 0
 4
 7
@@ -12256,19 +13050,19 @@ a68effff43fefdffa68effffc83cfeff
 0
 0
 2
-a029000017d7fdffa02900001323feff
+9a29000014d7fdff9a2900001323feff
 2
 
 
 
-2
+1
 41
 
 3
 52
 290
 0
-40
+42
 0
 6
 7
@@ -12289,19 +13083,19 @@ a029000017d7fdffa02900001323feff
 0
 0
 4
-cb3e0000394bfeffb42d0000394bfeffb42d00009838feffb42d0000d728feff
+c43e0000324bfeffb12d0000324bfeffb12d00009538feffb12d0000d728feff
 2
 
 
 
-2
+1
 44
 
 3
 843
 290
 0
-41
+43
 0
 837
 836
@@ -12322,19 +13116,19 @@ cb3e0000394bfeffb42d0000394bfeffb42d00009838feffb42d0000d728feff
 0
 0
 2
-52bbffff9ae7fdff52bbffffc205feff
+4cbbffff97e7fdff4cbbffff0e07feff
 2
 
 
 
-2
+1
 479
 
 3
 888
 290
 0
-42
+44
 0
 4
 835
@@ -12355,19 +13149,19 @@ cb3e0000394bfeffb42d0000394bfeffb42d00009838feffb42d0000d728feff
 0
 0
 4
-181c0000e0d7fdff181c00006ff6fdff640300006ff6fdff64030000a714feff
+151c0000ddd7fdff65020000ddd7fdff6502000021f4fdff65020000af12feff
 2
 
 
 
-2
+1
 495
 
 3
 2809
 290
 0
-43
+45
 0
 4
 622
@@ -12388,19 +13182,19 @@ cb3e0000394bfeffb42d0000394bfeffb42d00009838feffb42d0000d728feff
 0
 0
 2
-032d00001acafdff032d00006c8cfdff
+fc2c000017cafdfffc2c0000688cfdff
 2
 
 
 
-2
+1
 671
 
 3
 2812
 290
 0
-44
+46
 0
 4
 327
@@ -12421,19 +13215,19 @@ cb3e0000394bfeffb42d0000394bfeffb42d00009838feffb42d0000d728feff
 0
 0
 3
-e6200000b0d4fdffe62000003ab8fdff1af6ffff3ab8fdff
+e3200000add4fdffe320000037b8fdff17f6ffff37b8fdff
 2
 
 
 
-2
+1
 674
 
 3
 2815
 290
 0
-45
+47
 0
 622
 327
@@ -12454,19 +13248,19 @@ e6200000b0d4fdffe62000003ab8fdff1af6ffff3ab8fdff
 0
 0
 3
-d11c0000878bfdffd11c000027a6fdff64ddffff27a6fdff
+cd1c0000838bfdffcd1c000024a6fdff61ddffff24a6fdff
 2
 
 
 
-2
+1
 677
 
 3
 2986
 290
 0
-46
+48
 0
 4
 4
@@ -12487,19 +13281,19 @@ d11c0000878bfdffd11c000027a6fdff64ddffff27a6fdff
 0
 0
 4
-0e3f00005cd8fdff564c00005cd8fdff564c000091c7fdffaf1c000091c7fdff
+0b3f000059d8fdff534c000059d8fdff534c00008ec7fdffac1c00008ec7fdff
 2
 
 
 
-2
+1
 751
 
 3
 3087
 290
 0
-47
+49
 0
 925
 837
@@ -12520,19 +13314,19 @@ d11c0000878bfdffd11c000027a6fdff64ddffff27a6fdff
 0
 0
 3
-5899ffff93c0fdffe9baffff93c0fdffe9baffff9fd9fdff
+5599ffff90c0fdffe6baffff90c0fdffe6baffff9cd9fdff
 2
 
 
 
-2
+1
 821
 
 3
 3205
 290
 0
-48
+50
 0
 5
 6
@@ -12553,19 +13347,19 @@ d11c0000878bfdffd11c000027a6fdff64ddffff27a6fdff
 0
 0
 2
-181400004a54fefffb3e00004a54feff
+66140000af55fefff43e0000af55feff
 2
 
 
 
-2
+1
 893
 
 3
 3482
 290
 0
-49
+51
 0
 320
 5
@@ -12586,19 +13380,19 @@ d11c0000878bfdffd11c000027a6fdff64ddffff27a6fdff
 0
 0
 2
-639effff7459feffa30c00007459feff
+609effff395bfeffcf0c0000395bfeff
 2
 
 
 
-2
+1
 964
 
 3
 4006
 290
 0
-50
+52
 0
 2
 3904
@@ -12619,19 +13413,19 @@ d11c0000878bfdffd11c000027a6fdff64ddffff27a6fdff
 0
 0
 3
-2972ffff80f1fdff5d5affff80f1fdff5d5affffc51afeff
+2672ffff7df1fdff5a5affff7df1fdff5a5affffc21afeff
 2
 
 
 
-2
+1
 1230
 
 3
 4008
 290
 0
-51
+53
 0
 327
 3904
@@ -12652,19 +13446,19 @@ d11c0000878bfdffd11c000027a6fdff64ddffff27a6fdff
 0
 0
 3
-87edfffffc9efdffff4cfffffc9efdffff4cffff701dfeff
+84edfffff99efdfffc4cfffff99efdfffc4cffff6d1dfeff
 2
 
 
 
-2
+1
 1231
 
 3
 4427
 290
 0
-52
+54
 0
 835
 3
@@ -12685,19 +13479,19 @@ d11c0000878bfdffd11c000027a6fdff64ddffff27a6fdff
 0
 0
 3
-9efffffff91cfeff9effffffba28feff7ea1ffffba28feff
+9affffff0a19feff9affffff1f24feffa198ffff1f24feff
 2
 
 
 
-2
+1
 1572
 
 3
 4435
 290
 0
-53
+55
 0
 835
 836
@@ -12717,20 +13511,20 @@ d11c0000878bfdffd11c000027a6fdff64ddffff27a6fdff
 1
 0
 0
-3
-0b020000f317feff24bbfffff317feff24bbffff73fdfdff
+4
+0c010000fb15feff7ce8fffffb15feffd1bbfffffb15feffd1bbfffff109feff
 2
 
 
 
-2
+1
 1578
 
 3
 4522
 290
 0
-54
+56
 0
 3
 3904
@@ -12751,19 +13545,19 @@ d11c0000878bfdffd11c000027a6fdff64ddffff27a6fdff
 0
 0
 3
-348dffffb831feffee4effffb831feffee4efffff517feff
+2d8effff762cfeffeb4effff762cfeffeb4efffff217feff
 2
 
 
 
-2
+1
 2088
 
 3
 4540
 290
 0
-55
+57
 0
 925
 2
@@ -12784,19 +13578,19 @@ d11c0000878bfdffd11c000027a6fdff64ddffff27a6fdff
 0
 0
 2
-358dfffffcc0fdff358dffffe1fbfdff
+2f8dfffff9c0fdff2f8dffffdefbfdff
 2
 
 
 
-2
+1
 2092
 
 3
 4580
 290
 0
-56
+58
 0
 5
 4579
@@ -12817,19 +13611,19 @@ d11c0000878bfdffd11c000027a6fdff64ddffff27a6fdff
 0
 0
 3
-76f9ffff964afeffadcbffff964afeffadcbffff253cfeff
+4cf9ffff264cfeffa6cbffff264cfeffa6cbffff253cfeff
 2
 
 
 
-2
+1
 2328
 
 3
 4702
 290
 0
-57
+59
 0
 2
 4701
@@ -12850,19 +13644,19 @@ d11c0000878bfdffd11c000027a6fdff64ddffff27a6fdff
 0
 0
 2
-fc72ffff96e4fdfffc72ffff48b4fdff
+f672ffff93e4fdfff672ffff45b4fdff
 2
 
 
 
-2
+1
 2840
 
 3
 4704
 290
 0
-58
+60
 0
 327
 4701
@@ -12883,19 +13677,19 @@ fc72ffff96e4fdfffc72ffff48b4fdff
 0
 0
 2
-cbdaffff0fa8fdff5f6fffff0fa8fdff
+c8daffff09a8fdff5c6fffff09a8fdff
 2
 
 
 
-2
+1
 2841
 
 3
 4839
 290
 0
-59
+61
 0
 4837
 4838
@@ -12916,19 +13710,19 @@ cbdaffff0fa8fdff5f6fffff0fa8fdff
 0
 0
 2
-bea50000c526feffbea50000ad06feff
+b8a50000c226feffb8a50000ad06feff
 2
 
 
 
-2
+1
 3101
 
 3
 4867
 290
 0
-60
+62
 0
 4
 4838
@@ -12949,19 +13743,19 @@ bea50000c526feffbea50000ad06feff
 0
 0
 3
-ef3f00007dd9fdffef3f0000e306fefff6920000e306feff
+ec3f00007ad9fdffec3f0000e306fefff3920000e306feff
 2
 
 
 
-2
+1
 3108
 
 3
 5216
 290
 0
-61
+63
 0
 5
 5215
@@ -12982,19 +13776,19 @@ ef3f00007dd9fdffef3f0000e306fefff6920000e306feff
 0
 0
 2
-de1600000e5dfeff6f9500000e5dfeff
+381700000e5ffeff689500000e5ffeff
 2
 
 
 
-2
+1
 3368
 
 3
 5219
 290
 0
-62
+64
 0
 4837
 5215
@@ -13015,19 +13809,19 @@ de1600000e5dfeff6f9500000e5dfeff
 0
 0
 2
-14a90000ec31feff14a90000ab4cfeff
+0aa90000e931feff0aa90000a44cfeff
 2
 
 
 
-2
+1
 3371
 
 3
 6047
 290
 0
-63
+65
 0
 6
 5524
@@ -13048,19 +13842,19 @@ de1600000e5dfeff6f9500000e5dfeff
 0
 0
 2
-70560000df45feff705600005235feff
+66560000d845feff665600000e2ffeff
 2
 
 
 
-2
+1
 6034
 
 3
 6099
 290
 0
-64
+66
 0
 4
 5524
@@ -13081,19 +13875,19 @@ de1600000e5dfeff6f9500000e5dfeff
 0
 0
 3
-5737000098dafdff573700001218feff975400001218feff
+5437000095dafdff54370000ce11feff94540000ce11feff
 2
 
 
 
-2
+1
 6049
 
 3
 6476
 290
 0
-65
+67
 0
 320
 321
@@ -13114,13 +13908,46 @@ de1600000e5dfeff6f9500000e5dfeff
 0
 0
 2
-d29afffffa57feff926efffffa57feff
+cf9afffff457feff8f6efffff457feff
 2
 
 
 
-2
+1
 6875
+
+3
+7485
+290
+0
+68
+0
+7484
+7483
+0
+0
+0
+0
+0
+0
+2
+3
+0
+0
+0
+0
+0
+1
+0
+0
+2
+dc420100f22ffeffdc4201000c5cfeff
+2
+
+
+
+1
+10462
 
 /END_TABLE AMCSYMB
 
