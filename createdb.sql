@@ -1,5 +1,5 @@
 --
--- $Id: createdb.sql,v 1.59 2003-11-20 14:21:00 dan Exp $
+-- $Id: createdb.sql,v 1.60 2003-12-30 13:53:37 dan Exp $
 --
 -- The following options should be used to create the database schema
 --
@@ -560,7 +560,17 @@ create table page_load_detail
     primary key (id)
 );
 
-create unique index page_loads_date_date2 on page_load_detail (timestamp, page_name);
+create index page_load_detail_timestamp on page_load_detail (timestamp);
+
+create index page_load_ip_address on page_load_detail (ip_address);
+
+create table ports_moved
+(
+    id                      serial                not null,
+    from_port_id            integer               not null,
+    to_port_id              integer               not null,
+    primary key (id)
+);
 
 create view commits_recent as
 select distinct commit_log.id, commit_log.message_id, commit_log.message_date,
@@ -786,4 +796,12 @@ alter table commit_log_ports_elements
 alter table page_load_detail
     add foreign key  (user_id)
        references users (id) on update cascade on delete cascade;
+
+alter table ports_moved
+    add foreign key  (from_port_id)
+       references ports (id) on update cascade on delete cascade;
+
+alter table ports_moved
+    add foreign key  (to_port_id)
+       references ports (id) on update cascade on delete cascade;
 
