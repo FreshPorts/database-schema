@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.53 2002-05-28 15:53:47 dan Exp $
+-- $Id: sp.txt,v 1.54 2002-07-26 15:09:54 dan Exp $
 --
 
 CREATE OR REPLACE FUNCTION IsDescendantOf (int4 ,int4) returns boolean As '
@@ -971,7 +971,7 @@ CREATE OR REPLACE FUNCTION RecordLastestPortCommits() RETURNS INT4 AS '
 	BEGIN
 
 		-- add in the new stuff
-		CREATE TEMP TABLE commits_latest_tmp AS
+		CREATE TEMP TABLE commits_latest_ports_tmp AS
 		SELECT DISTINCT
 			commits_recent.commit_date															AS commit_date_raw,
 			commits_recent.id																	AS commit_log_id,
@@ -1005,13 +1005,13 @@ CREATE OR REPLACE FUNCTION RecordLastestPortCommits() RETURNS INT4 AS '
 			port;
 
 		-- delete what is already there
-		DELETE FROM commits_latest;
+		DELETE FROM commits_latest_ports;
 
-		INSERT INTO commits_latest SELECT * FROM commits_latest_tmp;
+		INSERT INTO commits_latest_ports SELECT * FROM commits_latest_ports_tmp;
 
 		SELECT MAX(commit_log_id)
 		  INTO MaxCommitID
-		  FROM commits_latest;
+		  FROM commits_latest_ports;
 
 		--
 		-- record that last commit just in case we need it next time...
