@@ -1,5 +1,5 @@
 --
--- $Id: ri.txt,v 1.10 2001-11-20 16:41:16 dan Exp $
+-- $Id: ri.txt,v 1.11 2002-02-20 22:04:32 dan Exp $
 --
 
   DROP function check_siblings();
@@ -216,6 +216,15 @@ create trigger element_delete_check before insert or update
 on commit_log_elements for each row
 execute procedure element_delete_check();
 
+
+
+
+
+
+
+
+
+
   DROP function commit_log_delete_check();
 create function commit_log_delete_check() returns OPAQUE as '
 begin
@@ -237,3 +246,31 @@ end;
 create trigger commit_log_delete_check before delete
 on commit_log for each row
 execute procedure commit_log_delete_check();
+
+
+
+
+
+
+
+
+
+  DROP function user_watch_list_create();
+create function user_watch_list_create() returns OPAQUE as '
+begin
+
+	insert into watch_list (user_id, name) 
+                    values (new.id, \'main\');
+
+   RETURN OLD;
+end;
+' LANGUAGE 'plpgsql';
+
+
+
+-- the trigger
+  drop trigger user_watch_list_create on users; 
+create trigger user_watch_list_create AFTER insert
+on users for
+each row execute procedure user_watch_list_create();
+
