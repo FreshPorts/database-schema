@@ -1,5 +1,5 @@
 --
--- $Id: ri.txt,v 1.27 2003-05-16 01:10:54 dan Exp $
+-- $Id: ri.txt,v 1.28 2003-08-19 13:32:57 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -319,103 +319,6 @@ EXECUTE PROCEDURE user_email_change();
 
 
 
-CREATE OR REPLACE FUNCTION element_update_set_children(int4, text) RETURNS int as 
-'DECLARE
-
-   node ALIAS for $1;
-   path ALIAS for $2;
-   children record;
-
-   BEGIN
---      RAISE NOTICE ''PROCESSING all children of % ...'', path;
-      FOR children IN SELECT ep.id, ep.pathname, e.name, e.directory_file_flag
-                        FROM element_pathnames ep, element e
-                       WHERE ep.id       = e.id
-                         AND e.parent_id = node LOOP
---         RAISE NOTICE ''   updating %'', children.name ;
-         UPDATE element_pathnames set pathname = path ||  ''/'' || children.name where id = children.id;
-
-         -- no sense doing recursive calls on files, just directories
-         IF children.directory_file_flag = ''D'' THEN
-            -- recursive call
-            perform element_update_set_children(children.id, path ||  ''/'' || children.name);
-         END IF;
-      END LOOP;
-
-      return 0;
-   END;'
-
-language 'plpgsql';
-
-CREATE OR REPLACE FUNCTION element_update() RETURNS opaque as '
-DECLARE
-   parent_pathname   text;
-   my_pathname       text;
-   RowsModified      int4;
-BEGIN
---   RAISE NOTICE ''TRIGGER: in element_update % %'', old.name, new.name;
-   IF old.name <> new.name THEN
-      select pathname
-        into parent_pathname
-        from element_pathnames
-       where id = new.parent_id;
-      IF found THEN
-         my_pathname =  parent_pathname || \'/\' ||new.name;
-      ELSE
-         my_pathname = \'/\' || new.name;
-      END IF;
-      
-      UPDATE element_pathnames SET pathname = my_pathname WHERE id = new.id;
-      GET DIAGNOSTICS RowsModified = ROW_COUNT;
-      IF RowsModified <> 1 THEN
-         RAISE EXCEPTION ''Row in element_pathnames not found for %'', new.id;
-      END IF;
-
-      perform element_update_set_children(new.id, my_pathname);
-   END IF;
-
-   RETURN new;
-END;'
-language 'plpgsql';
-
-
-  DROP TRIGGER element_update ON element;
-CREATE TRIGGER element_update BEFORE UPDATE ON element FOR EACH ROW
-EXECUTE PROCEDURE element_update();
-
-
-
-
-CREATE OR REPLACE FUNCTION element_insert() RETURNS opaque as '
-   DECLARE
-      parent_pathname   text;
-      my_pathname       text;
-   BEGIN
-      select pathname
-        into parent_pathname
-        from element_pathnames
-       where id = new.parent_id;
-
-
-      if found then
-         my_pathname =  parent_pathname || \'/\' ||new.name;
-      else
-         my_pathname = \'/\' || new.name;
-      end if;
-
-      INSERT into element_pathnames (id, pathname) values (new.id, my_pathname);
-
-      RETURN new;
-   END;'
-
-language 'plpgsql';
-
-
-  DROP TRIGGER element_insert ON element;
-CREATE TRIGGER element_insert AFTER INSERT ON element FOR EACH ROW
-EXECUTE PROCEDURE element_insert();
-
-
 CREATE OR REPLACE FUNCTION categories_insert_update() RETURNS TRIGGER AS '
    BEGIN
    	IF new.element_id IS NULL AND new.is_primary THEN
@@ -545,13 +448,11 @@ CREATE OR REPLACE FUNCTION ports_categories_set() RETURNS TRIGGER AS '
 		CategoryID		int8;
 		UpdateNeeded	boolean;
    BEGIN
---		RAISE NOTICE ''into ports_categories_set for port = % with categories = %, action = %'', new.id, new.categories, TG_OP;
 
 		UpdateNeeded := TRUE;
 
 		IF TG_OP = ''UPDATE'' THEN
 			IF old.categories = new.categories THEN
---				RAISE NOTICE ''nothing to do because we''''re updating and categories are not changing.'';
 				UpdateNeeded := FALSE;
 			END IF;
 		END IF;
