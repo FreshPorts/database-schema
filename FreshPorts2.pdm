@@ -48,7 +48,7 @@ FreshPorts2
 Sybase SQL Anywhere 5.5
 sqlany55.def
 #\
-# $Id: FreshPorts2.pdm,v 1.39 2002-04-12 06:26:30 dan Exp $\
+# $Id: FreshPorts2.pdm,v 1.40 2002-04-12 15:08:18 dan Exp $\
 #\
 # Things which must be done to make this script work with PostgreSQL\
 # \
@@ -84,7 +84,7 @@ sqlany55.def
 Dan Langille
 
 968886895
-1018586246
+1018620749
 0
 0
 0
@@ -1535,7 +1535,7 @@ default 'f'::bool
 1
 0
 0
-
+encoding_losses
 
 10
 3
@@ -5047,7 +5047,7 @@ boolean
 1
 0
 0
-
+encoding_losses
 
 3
 3
@@ -8720,7 +8720,7 @@ ports_all
 8\
 671\
 674
-select ports.*, element.name as name, categories.name as category\
+select ports.*, element.name as name, categories.name as category, element.status\
 from categories, ports, element\
 where categories.id = ports.category_id\
 and ports.element_id = element.id
@@ -11921,17 +11921,17 @@ than once by the same tag.
 3
 6470
 291
-2
+0
 33
 0
 0
 0
 0
 0
-16495
--165323
-33469
--152524
+16494
+-165324
+33468
+-152525
 2
 6
 0
@@ -11987,17 +11987,17 @@ than once by the same tag.
 3
 6795
 291
-0
+2
 35
 0
 0
 0
 0
 0
-21530
--155465
-33554
--147541
+19913
+-155960
+35162
+-147061
 2
 6
 0

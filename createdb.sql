@@ -1,5 +1,5 @@
 #
-# $Id: createdb.sql,v 1.26 2002-04-12 06:26:30 dan Exp $
+# $Id: createdb.sql,v 1.27 2002-04-12 15:08:18 dan Exp $
 #
 # Things which must be done to make this script work with PostgreSQL
 # 
@@ -466,7 +466,7 @@ and categories.id = ports.category_id
 and ports.element_id = element.id;
 
 create view ports_all as
-select ports.*, element.name as name, categories.name as category
+select ports.*, element.name as name, categories.name as category, element.status
 from categories, ports, element
 where categories.id = ports.category_id
 and ports.element_id = element.id;
