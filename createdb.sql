@@ -183,8 +183,8 @@ create table ports
     last_commit_id       int4                          ,
     needs_refresh        smallint                      ,
     found_in_index       boolean                       ,
-    forbidden            boolean                       ,
-    broken               boolean                       ,
+    forbidden            text                          ,
+    broken               text                          ,
     primary key (id)
 );
 
