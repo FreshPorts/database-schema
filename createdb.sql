@@ -1,4 +1,3 @@
-
   drop sequence categories_id_seq;
 create sequence categories_id_seq;
 
@@ -11,9 +10,6 @@ create sequence commit_log_elements_id_seq;
   drop sequence element_id_seq;
 create sequence element_id_seq;
 
-  drop sequence element_revision_id_seq;
-create sequence element_revision_id_seq;
-
   drop sequence ports_id_seq;
 create sequence ports_id_seq;
 
@@ -22,9 +18,6 @@ create sequence system_id_seq;
 
   drop sequence system_version_id_seq;
 create sequence system_version_id_seq;
-
-  drop sequence system_version_element_id_seq;
-create sequence system_version_element_id_seq;
 
   drop sequence users_id_seq;
 create sequence users_id_seq;
@@ -51,7 +44,7 @@ create table commit_log
     primary key (id)
 );
 
-create index commit_log_commit_date on commit_log (commit_date asc);
+create index commit_log_commit_date on commit_log (commit_date);
 
 create table watch_notice
 (
@@ -64,7 +57,7 @@ create table watch_notice
     primary key (id)
 );
 
-create index watch_notice_frequency on watch_notice (frequency asc);
+create index watch_notice_frequency on watch_notice (frequency);
 
 create table system
 (
@@ -85,7 +78,7 @@ create table element
     primary key (id)
 );
 
-create index element_name on element (name asc);
+create index element_name on element (name);
 
 create table users
 (
@@ -105,11 +98,11 @@ create table users
     primary key (id)
 );
 
-create index users_cookie on users (cookie asc);
+create index users_cookie on users (cookie);
 
-create index users_email on users (email asc);
+create index users_email on users (email);
 
-create unique index users_name on users (name asc);
+create unique index users_name on users (name);
 
 create table watch_list
 (
@@ -195,7 +188,7 @@ create table ports
     primary key (id)
 );
 
-create index ports_needs_refresh on ports (needs_refresh asc);
+create index ports_needs_refresh on ports (needs_refresh);
 
 create table system_version_element
 (
@@ -206,31 +199,31 @@ create table system_version_element
 );
 
 alter table element
-    add foreign key fk_parent_id_element (parent_id)
+    add foreign key (parent_id)
        references element (id) on delete cascade;
 
 alter table users
-    add foreign key fk_users_watch_notice (watch_notice_id)
+    add foreign key (watch_notice_id)
        references watch_notice (id) on delete cascade;
 
 alter table watch_list
-    add foreign key FK_WATCH_LI_FK_WATCH__USERS (user_id)
+    add foreign key (user_id)
        references users (id) on delete cascade;
 
 alter table system_version
-    add foreign key fk_system_version_system (system_id)
+    add foreign key (system_id)
        references system (id) on delete cascade;
 
 alter table categories
-    add foreign key FK_CATEGORI_FK_CATEGO_ELEMENT (element_id)
+    add foreign key (element_id)
        references element (id) on delete cascade;
 
 alter table categories
-    add foreign key fk_categories_element (element_id)
+    add foreign key (element_id)
        references element (id) on delete cascade;
 
 alter table element_revision
-    add foreign key FK_ELEMENT__FK_ELEMEN_ELEMENT (element_id)
+    add foreign key (element_id)
        references element (id) on delete cascade;
 
 alter table commit_log_elements
@@ -238,60 +231,57 @@ alter table commit_log_elements
        references commit_log (id) on delete cascade;
 
 alter table commit_log_elements
-    add foreign key FK_COMMIT_L_REF_1100_ELEMENT_ (element_id, revision_name)
+    add foreign key (element_id, revision_name)
        references element_revision (element_id, revision_name) on delete restrict;
 
 alter table watch_list_element
-    add foreign key watch_list_element_element (element_id)
+    add foreign key (element_id)
        references element (id) on delete cascade;
 
 alter table watch_list_element
-    add foreign key watch_list_element_watch_list (watch_list_id)
+    add foreign key (watch_list_id)
        references watch_list (id) on delete cascade;
 
 alter table watch_notice_log
-    add foreign key watch_list_fk (watch_notice_id)
+    add foreign key (watch_notice_id)
        references watch_notice (id) on delete cascade;
 
 alter table watch_notice_log
-    add foreign key FK_WATCH_NO_FK_WATCH__WATCH_NO (watch_notice_id)
+    add foreign key (watch_notice_id)
        references watch_notice (id) on delete cascade;
 
 alter table ports
-    add foreign key ports_element_fk (element_id)
+    add foreign key (element_id)
        references element (id) on delete cascade;
 
 alter table ports
-    add foreign key FK_PORTS_FK_PORTS__CATEGORI (category_id)
+    add foreign key (category_id)
        references categories (id) on delete cascade;
 
 alter table ports
-    add foreign key fk_ports_element (element_id)
+    add foreign key (element_id)
        references element (id) on delete cascade;
 
 alter table ports
-    add foreign key fk_ports_categories (category_id)
+    add foreign key (category_id)
        references categories (id) on delete cascade;
 
 alter table system_version_element
-    add foreign key FK_SYSTEM_V_FK_SYSTEM_SYSTEM_V (system_version_id)
+    add foreign key (system_version_id)
        references system_version (id) on delete cascade;
 
 alter table system_version_element
-    add foreign key FK_SYSTEM_V_FK_SYSTEM_ELEMENT_ (element_id, revision_name)
+    add foreign key (element_id, revision_name)
        references element_revision (element_id, revision_name) on delete cascade;
 
 alter table categories             alter column id set default nextval('categories_id_seq'::text);
 alter table commit_log             alter column id set default nextval('commit_log_id_seq'::text);
 alter table commit_log_elements    alter column id set default nextval('commit_log_elements_id_seq'::text);
 alter table element                alter column id set default nextval('element_id_seq'::text);
-alter table element_revision       alter column id set default nextval('element_revision_id_seq'::text);
 alter table ports                  alter column id set default nextval('ports_id_seq'::text);
 alter table system                 alter column id set default nextval('system_id_seq'::text);
 alter table system_version         alter column id set default nextval('system_version_id_seq'::text);
-alter table system_version_element alter column id set default nextval('system_version_element_id_seq'::text);
 alter table users                  alter column id set default nextval('users_id_seq'::text);
 alter table watch_list             alter column id set default nextval('watch_list_id_seq'::text);
-alter table watch_list_element     alter column id set default nextval('watch_notice_id_seq'::text);
 alter table watch_notice_log       alter column id set default nextval('watch_notice_log_id_seq'::text);
 
