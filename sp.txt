@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.127 2005-01-17 00:23:29 dan Exp $
+-- $Id: sp.txt,v 1.128 2005-01-26 14:21:09 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -2315,3 +2315,75 @@ CREATE OR REPLACE function WatchListCountDefault(int) returns bigint as '
 	   AND user_id = $1;
 ' LANGUAGE SQL STABLE;
 
+
+CREATE OR REPLACE function PortsVulnerabilityCountAdjust(int) returns bigint as '
+DECLARE
+	p_PortID		ALIAS for $1;
+
+	l_VulnCurrent	int;
+	l_VulnCount		int;
+	l_VulnPast		int;
+
+	l_RowsModified	int;
+
+BEGIN
+
+  SELECT count(distinct vuxml_id)
+    INTO l_VulnCount
+    FROM commit_log_ports_vuxml
+   WHERE port_id = p_PortID;
+
+	RAISE NOTICE ''Port % has % vulnerabilities registered'', p_PortID, l_VulnCount;
+
+	IF l_VulnCount > 0 THEN
+
+
+		SELECT count(distinct vuxml_id)
+		  INTO l_VulnCurrent
+		  FROM commit_log_ports_vuxml CLPV, commit_log_ports CLP, ports P, ports_vulnerable PV
+		 WHERE CLP.commit_log_id = CLPV.commit_log_id
+		   AND CLPV.port_id      = CLP.port_id
+		   AND P.id              = CLP.port_id
+		   AND P.version         = CLP.port_version
+		   AND P.revision        = CLP.port_revision
+		   AND CLP.port_epoch    = P.portepoch
+		   AND PV.port_id        = P.id
+		   AND P.id              = p_PortID
+		 GROUP BY P.id;
+
+		IF l_VulnCurrent IS NULL THEN
+			l_VulnCurrent := 0;
+		END IF;
+
+		RAISE NOTICE ''Port % has % current vulnerabilities'', p_PortID, l_VulnCurrent;
+		
+		l_VulnPast := l_VulnCount - l_VulnCurrent;
+
+		RAISE NOTICE ''Port % has % past vulnerabilities'', p_PortID, l_VulnPast;
+
+		-- try an update first
+
+		UPDATE ports_vulnerable
+		   SET current = l_VulnCurrent,
+		       past    = l_VulnPast
+		 WHERE ports_vulnerable.port_id = p_PortID;
+
+		GET DIAGNOSTICS l_RowsModified = ROW_COUNT;
+
+		-- if that fails, do an insert
+
+		IF l_RowsModified = 0 THEN
+			INSERT INTO ports_vulnerable (port_id, current, past)
+			VALUES (p_PortID, l_VulnCurrent, l_VulnPast);
+		END IF;
+
+	ELSE
+		-- there are no vulnerabilities for this port
+		DELETE FROM ports_vulnerable where port_id = p_PortID;
+	END IF;
+
+	return l_VulnCount;
+
+END
+
+' LANGUAGE 'plpgsql' IMMUTABLE;
