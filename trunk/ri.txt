@@ -1,5 +1,5 @@
 --
--- $Id: ri.txt,v 1.24 2003-04-29 15:59:25 dan Exp $
+-- $Id: ri.txt,v 1.25 2003-04-29 16:03:12 dan Exp $
 --
 
 CREATE OR REPLACE FUNCTION check_siblings() RETURNS OPAQUE as '
@@ -543,13 +543,13 @@ CREATE OR REPLACE FUNCTION ports_categories_set() RETURNS TRIGGER AS '
 		CategoryID		int8;
 		UpdateNeeded	boolean;
    BEGIN
-      RAISE NOTICE ''into ports_categories_set for port = % with categories = %, action = %'', new.id, new.categories, TG_OP;
+--		RAISE NOTICE ''into ports_categories_set for port = % with categories = %, action = %'', new.id, new.categories, TG_OP;
 
 		UpdateNeeded := TRUE;
 
 		IF TG_OP = ''UPDATE'' THEN
 			IF old.categories = new.categories THEN
-				RAISE NOTICE ''nothing to do because we''''re updating and categories are not changing.'';
+--				RAISE NOTICE ''nothing to do because we''''re updating and categories are not changing.'';
 				UpdateNeeded := FALSE;
 			END IF;
 		END IF;
