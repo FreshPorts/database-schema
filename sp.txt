@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.21 2001-11-21 04:06:37 dan Exp $
+-- $Id: sp.txt,v 1.22 2002-01-06 22:17:17 dan Exp $
 --
 
   drop function IsDescendantOf (int4 ,int4);
@@ -533,25 +533,13 @@ CREATE FUNCTION SystemIDGet(text) RETURNS int4 AS '
   DROP FUNCTION WatchListAdd (int4, text );
 CREATE FUNCTION WatchListAdd (int4, text) RETURNS boolean AS '
    DECLARE
-      UserID       ALIAS for $1;
+      WatchListID  ALIAS for $1;
       ElementName  ALIAS for $2;
-      WatchListID  int4;
+
       EntryExists  boolean = 0;
       ElementID    int4;
 
    BEGIN
-      select id
-        into WatchListID
-        from Watch_List
-       where user_id = UserId
-         and name    = \'main\';
-
-      IF NOT FOUND THEN
-         WatchListID = nextval(\'watch_list_id_seq\'::text);
-         insert into watch_list (id, user_id, name)
-                         values (WatchListId, UserId, \'main\');
-      END IF;      
-
       select Pathname_ID(ElementName)
         into ElementID;
 
