@@ -46,7 +46,7 @@ create table element
     primary key (id)
 );
 
-create index element_name on element (name);
+create index element_name on element (name asc);
 
 create table watch_notice
 (
@@ -54,17 +54,28 @@ create table watch_notice
     frequency              char(1)               not null
         check (
             frequency in ('Z','D','W','F','M')),
-    description            varchar(30)           not null,
+    description            text                  not null,
     last_sent              timestamp                     ,
     primary key (id)
 );
 
-create index watch_notice_frequency on watch_notice (frequency);
+create index watch_notice_frequency on watch_notice (frequency asc);
 
 create table system
 (
     id                     int4                  not null,
-    name                   text                          ,
+    name                   text                  not null,
+    time_adjust            interval              not null
+        default '0 seconds',
+    primary key (id)
+);
+
+create table security_notice
+(
+    id                     int4                  not null,
+    date_added             timestamp             not null,
+    status                 char                  not null,
+    synopsis               text                  not null,
     primary key (id)
 );
 
@@ -73,8 +84,8 @@ create table categories
     id                     int4                  not null,
     is_primary             boolean               not null,
     element_id             int4                  not null,
-    name                   varchar(30)           not null,
-    description            varchar(80)                   ,
+    name                   text                  not null,
+    description            text                          ,
     primary key (id)
 );
 
@@ -94,10 +105,10 @@ create table ports
     long_description       text                          ,
     version                text                          ,
     revision               text                          ,
-    maintainer             varchar(40)                   ,
+    maintainer             text                          ,
     homepage               text                          ,
     master_sites           text                          ,
-    extract_suffix         varchar(10)                   ,
+    extract_suffix         text                          ,
     package_exists         boolean                       ,
     depends_build          text                          ,
     depends_run            text                          ,
@@ -109,29 +120,17 @@ create table ports
     primary key (id)
 );
 
-create index ports_needs_refresh on ports (needs_refresh);
-
-create table commit_log_elements
-(
-    id                     int4                  not null,
-    commit_log_id          int4                  not null,
-    element_id             int4                  not null,
-    revision_name          text                          ,
-    change_type            char(1)               not null
-        check (
-            change_type in ('A','M','R')),
-    primary key (id)
-);
+create index ports_needs_refresh on ports (needs_refresh asc);
 
 create table users
 (
     id                     int4                  not null,
-    name                   varchar(20)           not null,
-    password               varchar(80)           not null,
-    cookie                 varchar(80)           not null,
+    name                   text                  not null,
+    password               text                  not null,
+    cookie                 text                  not null,
     firstlogin             timestamp                     ,
     lastlogin              timestamp                     ,
-    email                  varchar(40)                   ,
+    email                  text                          ,
     watch_notice_id        int4                  not null,
     emailsitenotices_yn    boolean                       ,
     emailbouncecount       smallint                      ,
@@ -141,17 +140,17 @@ create table users
     primary key (id)
 );
 
-create index users_cookie on users (cookie);
+create index users_cookie on users (cookie asc);
 
-create index users_email on users (email);
+create index users_email on users (email asc);
 
-create unique index users_name on users (name);
+create unique index users_name on users (name asc);
 
 create table watch_list
 (
     id                     int4                  not null,
     user_id                int4                  not null,
-    name                   varchar(60)           not null,
+    name                   text                  not null,
     primary key (id)
 );
 
@@ -171,13 +170,25 @@ create table commit_log
     message_subject        text                          ,
     date_added             timestamp             not null,
     commit_date            timestamp             not null,
-    committer              varchar(40)           not null,
+    committer              text                  not null,
     description            text                  not null,
     system_id              int4                  not null,
     primary key (id)
 );
 
-create index commit_log_commit_date on commit_log (commit_date);
+create index commit_log_commit_date on commit_log (commit_date asc);
+
+create table commit_log_elements
+(
+    id                     int4                  not null,
+    commit_log_id          int4                  not null,
+    element_id             int4                  not null,
+    revision_name          text                          ,
+    change_type            char(1)               not null
+        check (
+            change_type in ('A','M','R')),
+    primary key (id)
+);
 
 create table watch_list_element
 (
@@ -203,7 +214,7 @@ create table system_branch_element_revision
     primary key (system_branch_id, element_id, revision_name)
 );
 
-create table commit_log_port
+create table commit_log_port_elements
 (
     commit_log_id          int4                  not null,
     port_id                int4                  not null,
@@ -211,8 +222,39 @@ create table commit_log_port
     primary key (commit_log_id, port_id, commit_log_element_id)
 );
 
+create table user_confirmations
+(
+    user_id                int4                  not null,
+    token                  text                  not null,
+    primary key (user_id, token)
+);
+
+create table commit_log_ports
+(
+    commit_log_id          int4                  not null,
+    port_id                int4                  not null,
+    primary key (commit_log_id, port_id)
+);
+
+create table security_notice_elements
+(
+    security_advisory_id   int4                  not null,
+    element_id             int4                  not null,
+    primary key (security_advisory_id, element_id)
+);
+
+create table security_notice_log
+(
+    id                     int4                  not null,
+    security_notice_id     int4                  not null,
+    user_id                int4                  not null,
+    date_added             timestamp             not null,
+    change                 text                  not null,
+    primary key (id)
+);
+
 alter table element
-    add foreign key (parent_id)
+    add foreign key fk_parent_id_element (parent_id)
        references element (id) on delete cascade;
 
 alter table categories
@@ -243,14 +285,6 @@ alter table ports
     add foreign key (category_id)
        references categories (id) on delete cascade;
 
-alter table commit_log_elements
-    add foreign key (commit_log_id)
-       references commit_log (id) on delete cascade;
-
-alter table commit_log_elements
-    add foreign key (element_id, revision_name)
-       references element_revision (element_id, revision_name) on delete cascade;
-
 alter table users
     add foreign key (watch_notice_id)
        references watch_notice (id) on delete cascade;
@@ -266,6 +300,14 @@ alter table system_branch
 alter table commit_log
     add foreign key (system_id)
        references system (id) on delete cascade;
+
+alter table commit_log_elements
+    add foreign key (commit_log_id)
+       references commit_log (id) on delete cascade;
+
+alter table commit_log_elements
+    add foreign key (element_id, revision_name)
+       references element_revision (element_id, revision_name) on delete cascade;
 
 alter table watch_list_element
     add foreign key (element_id)
@@ -291,17 +333,45 @@ alter table system_branch_element_revision
     add foreign key (element_id, revision_name)
        references element_revision (element_id, revision_name) on delete cascade;
 
-alter table commit_log_port
+alter table commit_log_port_elements
     add foreign key (commit_log_id)
        references commit_log (id) on delete cascade;
 
-alter table commit_log_port
+alter table commit_log_port_elements
     add foreign key (port_id)
        references ports (id) on delete cascade;
 
-alter table commit_log_port
+alter table commit_log_port_elements
     add foreign key (commit_log_element_id)
        references commit_log_elements (id) on delete cascade;
+
+alter table user_confirmations
+    add foreign key (user_id)
+       references users (id) on delete cascade;
+
+alter table commit_log_ports
+    add foreign key (commit_log_id)
+       references commit_log (id) on delete cascade;
+
+alter table commit_log_ports
+    add foreign key (port_id)
+       references ports (id) on delete cascade;
+
+alter table security_notice_elements
+    add foreign key (security_advisory_id)
+       references security_notice (id) on delete cascade;
+
+alter table security_notice_elements
+    add foreign key (element_id)
+       references element (id) on delete cascade;
+
+alter table security_notice_log
+    add foreign key (user_id)
+       references users (id) on delete cascade;
+
+alter table security_notice_log
+    add foreign key (security_notice_id)
+       references security_notice (id) on delete cascade;
 
 alter table categories                     alter column id set default nextval('categories_id_seq'::text);
 alter table commit_log                     alter column id set default nextval('commit_log_id_seq'::text);
