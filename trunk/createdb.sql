@@ -1,5 +1,5 @@
 --
--- $Id: createdb.sql,v 1.57 2003-10-06 17:32:13 dan Exp $
+-- $Id: createdb.sql,v 1.58 2003-11-14 04:46:11 dan Exp $
 --
 -- The following options should be used to create the database schema
 --
@@ -102,6 +102,21 @@ create table announcements
     end_date                timestamp with time zone         ,
     primary key (id)
 );
+
+create table page_load_summary
+(
+    id                      serial                not null,
+    date                    date                  not null,
+    name                    text                  not null,
+    users                   integer               not null
+        default 0,
+    non_users               integer               not null
+        default 0,
+    rendering_time_avg      interval              not null,
+    primary key (id)
+);
+
+create unique index page_loads_date_date on page_load_summary (date, name);
 
 create table element
 (
@@ -299,6 +314,21 @@ create table watch_list
     primary key (id)
 );
 
+create table security_notice
+(
+    id                      serial                not null,
+    user_id                 integer               not null,
+    date_added              timestamp with time zone not null
+        default current_timestamp,
+    ip_address              inet                  not null,
+    description             text                  not null,
+    commit_log_id           integer               not null,
+    status                  char(1)               not null
+        default 'A'
+        check (status in ('A','I')),
+    primary key (id)
+);
+
 create table system_branch
 (
     id                      serial                not null,
@@ -335,21 +365,6 @@ create table commit_log_elements
     revision_name           text                  not null,
     change_type             char(1)               not null
         check (change_type in ('A','M','R')),
-    primary key (id)
-);
-
-create table security_notice
-(
-    id                      serial                not null,
-    user_id                 integer               not null,
-    date_added              timestamp with time zone not null
-        default current_timestamp,
-    ip_address              inet                  not null,
-    description             text                  not null,
-    commit_log_id           integer               not null,
-    status                  char(1)               not null
-        default 'A'
-        check (status in ('A','I')),
     primary key (id)
 );
 
@@ -538,6 +553,21 @@ create table commit_log_ports_elements
     primary key (commit_log_id, element_id)
 );
 
+create table page_load_detail
+(
+    id                      serial                not null,
+    timestamp               timestamp without time zone not null
+        default current_timestamp,
+    page_name               text                  not null,
+    user_id                 integer                       ,
+    ip_address              inet                  not null,
+    full_url                text                  not null,
+    rendering_time          interval              not null,
+    primary key (id)
+);
+
+create unique index page_loads_date_date2 on page_load_detail (timestamp, page_name);
+
 create view commits_recent as
 select distinct commit_log.id, commit_log.message_id, commit_log.message_date,
 commit_log.message_subject, commit_log.date_added, commit_log.commit_date,
@@ -599,6 +629,14 @@ alter table watch_list
     add foreign key  (user_id)
        references users (id) on update cascade on delete cascade;
 
+alter table security_notice
+    add foreign key  (user_id)
+       references users (id) on update cascade on delete cascade;
+
+alter table security_notice
+    add foreign key  (commit_log_id)
+       references commit_log (id) on update cascade on delete cascade;
+
 alter table system_branch
     add foreign key  (system_id)
        references system (id) on update cascade on delete cascade;
@@ -614,14 +652,6 @@ alter table commit_log_elements
 alter table commit_log_elements
     add foreign key  (element_id, revision_name)
        references element_revision (element_id, revision_name) on update cascade on delete cascade;
-
-alter table security_notice
-    add foreign key  (user_id)
-       references users (id) on update cascade on delete cascade;
-
-alter table security_notice
-    add foreign key  (commit_log_id)
-       references commit_log (id) on update cascade on delete cascade;
 
 alter table watch_list_element
     add foreign key  (element_id)
@@ -770,4 +800,8 @@ alter table commit_log_ports_elements
 alter table commit_log_ports_elements
     add foreign key  (element_id)
        references element (id) on update cascade on delete cascade;
+
+alter table page_load_detail
+    add foreign key  (user_id)
+       references users (id) on update cascade on delete cascade;
 
