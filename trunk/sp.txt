@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.61 2002-11-25 20:46:58 dan Exp $
+-- $Id: sp.txt,v 1.62 2002-12-03 15:36:22 dan Exp $
 --
 
 CREATE OR REPLACE FUNCTION IsDescendantOf (int4 ,int4) returns boolean As '
@@ -1168,6 +1168,21 @@ CREATE OR REPLACE FUNCTION Stats_PortCount() returns int8 AS '
 	END
 ' LANGUAGE 'plpgsql';
 
+CREATE OR REPLACE FUNCTION Stats_PortCountDeleted() returns int8 AS '
+	DECLARE
+		PortCount	int8;
+
+	BEGIN
+		SELECT count(*)
+		  INTO PortCount
+		  FROM ports, element
+		 WHERE element.status = \'D\'
+		   AND ports.element_id = element.id;
+
+		return PortCount;
+	END
+' LANGUAGE 'plpgsql';
+
 
 CREATE OR REPLACE FUNCTION Stats_PortCountBroken() returns int8 AS '
 	DECLARE
@@ -1254,4 +1269,116 @@ CREATE OR REPLACE FUNCTION Stats_PortCountNewThisWeek() returns int8 AS '
 		return PortCount;
 	END
 ' LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION Stats_CategoryCount() returns int8 AS '
+	DECLARE
+		CategoryCount	int8;
+
+	BEGIN
+		SELECT count(*)
+		  INTO CategoryCount
+		  FROM categories;
+
+		return CategoryCount;
+	END
+' LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION Stats_CommitCountPorts() returns int8 AS '
+	DECLARE
+		RowCount	int8;
+
+	BEGIN
+		select count(*) 
+		  INTO RowCount
+		  from commit_log;
+
+		return RowCount;
+	END
+' LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION Stats_CommitCountPorts() returns int8 AS '
+	DECLARE
+		RowCount	int8;
+
+	BEGIN
+		select count(distinct commit_log_id) 
+		  INTO RowCount
+		  from commit_log_ports;
+
+		return RowCount;
+	END
+' LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION Stats_CommitCountDaysPorts() returns int8 AS '
+	DECLARE
+		RowCount	int8;
+
+	BEGIN
+		select count(distinct date_trunc(\'day\', commit_date))
+		  INTO RowCount
+		  from commit_log, commit_log_ports
+		 where commit_log_ports.commit_log_id = commit_log.id;
+
+		return RowCount;
+	END
+' LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION Stats_CommitCountDays() returns int8 AS '
+	DECLARE
+		RowCount	int8;
+
+	BEGIN
+		select count(distinct date_trunc(\'day\', commit_date))
+		  INTO RowCount
+		  from commit_log;
+
+		return RowCount;
+	END
+' LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION Stats_UserCount() returns int8 AS '
+	DECLARE
+		RowCount	int8;
+
+	BEGIN
+		select count(*)
+		  INTO RowCount
+		  from users;
+
+		return RowCount;
+	END
+' LANGUAGE 'plpgsql';
+
+
+
+CREATE OR REPLACE FUNCTION Stats_WatchListCount() returns int8 AS ' DECLARE
+		RowCount	int8;
+
+	BEGIN
+		select count(*)
+		  INTO RowCount
+		  from watch_list;
+
+		return RowCount;
+	END
+' LANGUAGE 'plpgsql';
+
+
+
+CREATE OR REPLACE FUNCTION Stats_WatchListElementCount() returns int8 AS ' DECLARE
+		RowCount	int8;
+
+	BEGIN
+		select count(*)
+		  INTO RowCount
+		  from watch_list_element;
+
+		return RowCount;
+	END
+' LANGUAGE 'plpgsql';
+
+
 
