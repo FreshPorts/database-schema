@@ -48,7 +48,7 @@ FreshPorts2
 Sybase SQL Anywhere 5.5
 sqlany55.def
 #\
-# $Id: FreshPorts2.pdm,v 1.47 2002-11-24 05:32:57 dan Exp $\
+# $Id: FreshPorts2.pdm,v 1.48 2002-11-25 20:47:14 dan Exp $\
 #\
 # Things which must be done to make this script work with PostgreSQL\
 # \
@@ -85,7 +85,7 @@ sqlany55.def
 Dan Langille
 
 968886895
-1038115905
+1038256984
 0
 0
 0
@@ -1880,7 +1880,12 @@ element_pathnames
 
 
 
-
+#\
+#\
+# This may be useful in populating this table:\
+#    insert into element_pathnames select id, element_pathname(id) from element;\
+#\
+#
 0
 0
 0
@@ -13023,18 +13028,18 @@ Arial
 MS Sans Serif
 8
 0
+4
+Arial
+8
+8
+5
+Arial
+6
+0
 6
 Comic Sans MS
 14
 1
-10
-Arial
-8
-8
-11
-Arial
-6
-0
 /END_TABLE AMCFONT
 
 /BEGIN_TABLE AMCPENS
@@ -14830,7 +14835,7 @@ yes
 0
 DataArchitect
 DBOConsUddt
-yes
+no
 287
 2
 0
@@ -15234,7 +15239,7 @@ OLE     BIN
 
 
 
-8839
+2
 22
 
 3
@@ -15267,7 +15272,7 @@ OLE     BIN
 
 
 
-8839
+2
 25
 
 3
@@ -15300,7 +15305,7 @@ OLE     BIN
 
 
 
-8839
+2
 29
 
 3
@@ -15333,7 +15338,7 @@ OLE     BIN
 
 
 
-8839
+2
 192
 
 3
@@ -15366,7 +15371,7 @@ OLE     BIN
 
 
 
-8839
+2
 197
 
 3
@@ -15401,7 +15406,7 @@ Copyright © 2001-2002 DVL Software Limited\
 Wellington, New Zealand  - 24 November 2002
 
 
-8839
+2
 0
 
 3
@@ -15434,7 +15439,7 @@ Wellington, New Zealand  - 24 November 2002
 
 
 
-8839
+2
 467
 
 3
@@ -15467,7 +15472,7 @@ Wellington, New Zealand  - 24 November 2002
 
 
 
-8839
+2
 468
 
 3
@@ -15500,7 +15505,7 @@ Wellington, New Zealand  - 24 November 2002
 
 
 
-8839
+2
 209
 
 3
@@ -15533,7 +15538,7 @@ Wellington, New Zealand  - 24 November 2002
 
 
 
-8839
+2
 304
 
 3
@@ -15566,7 +15571,7 @@ Wellington, New Zealand  - 24 November 2002
 
 
 
-8839
+2
 8
 
 3
@@ -15604,7 +15609,7 @@ one entry in this \
 table.
 
 
-8839
+2
 0
 
 3
@@ -15637,7 +15642,7 @@ table.
 
 
 
-8839
+2
 1
 
 3
@@ -15671,7 +15676,7 @@ Each commit will be \
 stored in this table.
 
 
-8839
+2
 0
 
 3
@@ -15704,7 +15709,7 @@ stored in this table.
 
 
 
-8839
+2
 4
 
 3
@@ -15738,7 +15743,7 @@ each commit modifies \
 one or more files
 
 
-8839
+2
 0
 
 3
@@ -15771,7 +15776,7 @@ one or more files
 
 
 
-8839
+2
 469
 
 3
@@ -15807,7 +15812,7 @@ Sample entries are \
 5.0-CURRENT
 
 
-8839
+2
 0
 
 3
@@ -15842,7 +15847,7 @@ Operating Systems\
 in the same database
 
 
-8839
+2
 0
 
 3
@@ -15875,7 +15880,7 @@ in the same database
 
 
 
-8839
+2
 505
 
 3
@@ -15910,7 +15915,7 @@ same element referred to more \
 than once by the same tag.
 
 
-8839
+2
 0
 
 3
@@ -15943,7 +15948,7 @@ than once by the same tag.
 
 
 
-8839
+2
 1056
 
 3
@@ -15976,7 +15981,7 @@ than once by the same tag.
 
 
 
-8839
+2
 2324
 
 3
@@ -16009,7 +16014,7 @@ than once by the same tag.
 
 
 
-8839
+2
 2836
 
 3
@@ -16042,7 +16047,7 @@ than once by the same tag.
 
 
 
-8839
+2
 3093
 
 3
@@ -16075,7 +16080,7 @@ than once by the same tag.
 
 
 
-8839
+2
 3094
 
 3
@@ -16108,7 +16113,7 @@ than once by the same tag.
 
 
 
-8839
+2
 3363
 
 3
@@ -16141,7 +16146,7 @@ than once by the same tag.
 
 
 
-8839
+2
 4526
 
 3
@@ -16174,7 +16179,7 @@ than once by the same tag.
 
 
 
-8839
+2
 5703
 
 3
@@ -16207,7 +16212,7 @@ than once by the same tag.
 
 
 
-8839
+2
 6230
 
 3
@@ -16240,7 +16245,7 @@ than once by the same tag.
 
 
 
-8839
+2
 6547
 
 3
@@ -16273,7 +16278,7 @@ than once by the same tag.
 
 
 
-8839
+2
 8543
 
 3
@@ -16306,7 +16311,7 @@ than once by the same tag.
 
 
 
-8839
+2
 9430
 
 3
@@ -16339,7 +16344,7 @@ than once by the same tag.
 
 
 
-8839
+2
 7239
 
 3
@@ -16372,7 +16377,7 @@ than once by the same tag.
 
 
 
-8839
+2
 4528
 
 3
@@ -16405,7 +16410,7 @@ than once by the same tag.
 
 
 
-8839
+2
 7906
 
 3
@@ -16438,7 +16443,7 @@ than once by the same tag.
 
 
 
-8839
+2
 6871
 
 3
@@ -16471,7 +16476,7 @@ than once by the same tag.
 
 
 
-8839
+2
 10451
 
 3
@@ -16504,7 +16509,7 @@ than once by the same tag.
 
 
 
-8839
+2
 10456
 
 3
@@ -16537,7 +16542,7 @@ than once by the same tag.
 
 
 
-8839
+2
 10812
 
 3
@@ -16570,7 +16575,7 @@ than once by the same tag.
 
 
 
-8839
+2
 10814
 
 3
@@ -16603,7 +16608,7 @@ than once by the same tag.
 
 
 
-8839
+2
 10829
 
 3
@@ -16636,7 +16641,7 @@ than once by the same tag.
 
 
 
-8839
+2
 10838
 
 3
@@ -16669,7 +16674,7 @@ than once by the same tag.
 
 
 
-8839
+2
 10864
 
 3
@@ -16702,7 +16707,7 @@ than once by the same tag.
 
 
 
-8839
+2
 11332
 
 3
@@ -16715,9 +16720,9 @@ than once by the same tag.
 0
 0
 0
--8515
+-8516
 -140401
-34
+33
 -136880
 2
 1
@@ -16735,7 +16740,7 @@ than once by the same tag.
 
 
 
-8839
+2
 11727
 
 3
@@ -16768,7 +16773,7 @@ ce0200008e17feffce0200001b25feffeca7ffff1b25feff
 
 
 
-8839
+2
 1572
 
 3
@@ -16801,7 +16806,7 @@ ce0200008e17feffce0200001b25feffeca7ffff1b25feff
 
 
 
-8839
+2
 32
 
 3
@@ -16834,7 +16839,7 @@ ce0200008e17feffce0200001b25feffeca7ffff1b25feff
 
 
 
-8839
+2
 41
 
 3
@@ -16867,7 +16872,7 @@ c23e0000304bfeffb02d0000304bfeffb02d00009338feffb02d0000d728feff
 
 
 
-8839
+2
 44
 
 3
@@ -16900,7 +16905,7 @@ c23e0000304bfeffb02d0000304bfeffb02d00009338feffb02d0000d728feff
 
 
 
-8839
+2
 479
 
 3
@@ -16933,7 +16938,7 @@ c23e0000304bfeffb02d0000304bfeffb02d00009338feffb02d0000d728feff
 
 
 
-8839
+2
 495
 
 3
@@ -16966,7 +16971,7 @@ f92c000015cafdfff92c0000678cfdff
 
 
 
-8839
+2
 671
 
 3
@@ -16999,7 +17004,7 @@ e1200000abd4fdffe120000036b8fdff16f6ffff36b8fdff
 
 
 
-8839
+2
 674
 
 3
@@ -17032,7 +17037,7 @@ cc1c0000828bfdffcc1c000023a6fdff60ddffff23a6fdff
 
 
 
-8839
+2
 677
 
 3
@@ -17065,7 +17070,7 @@ cc1c0000828bfdffcc1c000023a6fdff60ddffff23a6fdff
 
 
 
-8839
+2
 751
 
 3
@@ -17098,7 +17103,7 @@ cc1c0000828bfdffcc1c000023a6fdff60ddffff23a6fdff
 
 
 
-8839
+2
 821
 
 3
@@ -17131,7 +17136,7 @@ cc1c0000828bfdffcc1c000023a6fdff60ddffff23a6fdff
 
 
 
-8839
+2
 893
 
 3
@@ -17164,7 +17169,7 @@ cc1c0000828bfdffcc1c000023a6fdff60ddffff23a6fdff
 
 
 
-8839
+2
 964
 
 3
@@ -17197,7 +17202,7 @@ cc1c0000828bfdffcc1c000023a6fdff60ddffff23a6fdff
 
 
 
-8839
+2
 1230
 
 3
@@ -17230,7 +17235,7 @@ cc1c0000828bfdffcc1c000023a6fdff60ddffff23a6fdff
 
 
 
-8839
+2
 1231
 
 3
@@ -17263,7 +17268,7 @@ cc1c0000828bfdffcc1c000023a6fdff60ddffff23a6fdff
 
 
 
-8839
+2
 1578
 
 3
@@ -17296,7 +17301,7 @@ cc1c0000828bfdffcc1c000023a6fdff60ddffff23a6fdff
 
 
 
-8839
+2
 2088
 
 3
@@ -17329,7 +17334,7 @@ cc1c0000828bfdffcc1c000023a6fdff60ddffff23a6fdff
 
 
 
-8839
+2
 2092
 
 3
@@ -17362,7 +17367,7 @@ cc1c0000828bfdffcc1c000023a6fdff60ddffff23a6fdff
 
 
 
-8839
+2
 2328
 
 3
@@ -17395,7 +17400,7 @@ f472ffff92e4fdfff472ffff44b4fdff
 
 
 
-8839
+2
 2840
 
 3
@@ -17428,7 +17433,7 @@ c7daffff07a8fdff5b6fffff07a8fdff
 
 
 
-8839
+2
 2841
 
 3
@@ -17461,7 +17466,7 @@ b3a50000bf26feffb3a50000ad06feff
 
 
 
-8839
+2
 3101
 
 3
@@ -17494,7 +17499,7 @@ ea3f000078d9fdffea3f0000e306fefff1920000e306feff
 
 
 
-8839
+2
 3108
 
 3
@@ -17527,7 +17532,7 @@ ea3f000078d9fdffea3f0000e306fefff1920000e306feff
 
 
 
-8839
+2
 3368
 
 3
@@ -17560,7 +17565,7 @@ ea3f000078d9fdffea3f0000e306fefff1920000e306feff
 
 
 
-8839
+2
 3371
 
 3
@@ -17593,7 +17598,7 @@ ea3f000078d9fdffea3f0000e306fefff1920000e306feff
 
 
 
-8839
+2
 6034
 
 3
@@ -17626,7 +17631,7 @@ ea3f000078d9fdffea3f0000e306fefff1920000e306feff
 
 
 
-8839
+2
 6049
 
 3
@@ -17659,7 +17664,7 @@ cd9afffff157feff8e6efffff157feff
 
 
 
-8839
+2
 6875
 
 3
@@ -17692,7 +17697,7 @@ da420100f12ffeffda4201000b5cfeff
 
 
 
-8839
+2
 10462
 
 3
@@ -17725,7 +17730,7 @@ d9beffffe589fefff589ffffe589feff
 
 
 
-8839
+2
 10824
 
 3
@@ -17758,7 +17763,7 @@ d9beffffe589fefff589ffffe589feff
 
 
 
-8839
+2
 10832
 
 3
@@ -17791,7 +17796,7 @@ d4fdffff2c67feffd4fdffff6986feff
 
 
 
-8839
+2
 10833
 
 3
@@ -17824,7 +17829,7 @@ d4fdffff2c67feffd4fdffff6986feff
 
 
 
-8839
+2
 10843
 
 3
@@ -17857,7 +17862,7 @@ d4fdffff2c67feffd4fdffff6986feff
 
 
 
-8839
+2
 10848
 
 3
@@ -17890,7 +17895,7 @@ bbf2ffff4d6afeffbbf2ffffab73feff92d7ffffab73feff
 
 
 
-8839
+2
 11336
 
 3
@@ -17918,12 +17923,12 @@ bbf2ffff4d6afeffbbf2ffffab73feff92d7ffffab73feff
 0
 0
 3
-d5210000e7d1fdff6df1ffffe7d1fdff6df1ffff7edefdff
+d5210000e7d1fdff6cf1ffffe7d1fdff6cf1ffff7edefdff
 2
 
 
 
-8839
+2
 11730
 
 /END_TABLE AMCSYMB
