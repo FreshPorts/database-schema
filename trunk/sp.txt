@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.80 2003-09-05 20:26:39 dan Exp $
+-- $Id: sp.txt,v 1.81 2003-09-06 12:08:53 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -502,7 +502,7 @@ CREATE OR REPLACE FUNCTION SystemBranchIDGet(int4, text) RETURNS int4 AS '
 ' LANGUAGE 'plpgsql';
 
 
-CREATE OR REPLACE FUNCTION ElementTagSet(int4, int4, text) returns boolean AS '
+CREATE OR REPLACE FUNCTION ElementTagSet(int4, int4, text) RETURNS boolean AS '
    DECLARE
       SystemBranchID  ALIAS for $1;
       ElementID       ALIAS for $2;
@@ -512,13 +512,21 @@ CREATE OR REPLACE FUNCTION ElementTagSet(int4, int4, text) returns boolean AS '
 
    BEGIN  
 
-      insert into system_branch_element_revision
-				 (system_branch_id, element_id, revision_name)
-				values (SystemBranchID, ElementID, RevisionName);
+-- has this element already been tagged with this version?
+      ExistingRevisionFound := RevisionForTagGet(SystemBranchID, ElementID);
+
+      IF ExistingRevisionFound IS NULL THEN
+         insert into system_branch_element_revision
+							 (system_branch_id, element_id, revision_name)
+							values (SystemBranchID, ElementID, RevisionName);
+      END IF;
+
       return 1;
 
    END;
-'  LANGUAGE 'plpgsql';
+'
+    LANGUAGE plpgsql;
+
 
 
 CREATE OR REPLACE FUNCTION SystemIDGet(text) RETURNS int4 AS '
