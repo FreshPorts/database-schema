@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.106 2004-04-01 18:25:35 dan Exp $
+-- $Id: sp.txt,v 1.107 2004-04-03 01:15:58 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -1711,11 +1711,11 @@ SELECT FOURTH1.port_id,
        to_char(FOURTH1.commit_date - SystemTimeAdjust(), \'DD Mon YYYY\')  AS commit_date,
        to_char(FOURTH1.commit_date - SystemTimeAdjust(), \'HH24:MI:SS\')   AS commit_time,
        FOURTH1.encoding_losses,
-       FOURTH1.status       AS status,
+       FOURTH1.status     AS status,
        FOURTH1.port_version,
        FOURTH1.port_revision,
-       NULL::text AS revision_name,
-       NULL::text    AS change_type,
+       NULL::text         AS revision_name,
+       NULL::text         AS change_type,
        FOURTH1.pathname   AS pathname,
        CASE WHEN FOURTH1.port_id IS NULL THEN FALSE ELSE TRUE END AS is_port,
        FOURTH1.element_id
