@@ -1,4 +1,3 @@
-drop function IsDescendantOf (int4 ,int4) ;
 create function IsDescendantOf (int4 ,int4) returns boolean As '
    DECLARE
       element_id ALIAS FOR $1;
@@ -342,8 +341,8 @@ create function ElementRevisionID(int4, text) returns int4 AS '
 
 
 
-  DROP FUNCTION "getcategory" (text );
-CREATE FUNCTION "getcategory" (text ) RETURNS int4 AS '
+  DROP FUNCTION GetCategory (text);
+CREATE FUNCTION GetCategory (text) RETURNS int4 AS '
    DECLARE
       category_name ALIAS for $1;     
       pathname             text;   
@@ -361,6 +360,25 @@ CREATE FUNCTION "getcategory" (text ) RETURNS int4 AS '
       return category_id;    
    END;
 ' LANGUAGE 'plpgsql';
+
+
+  DROP FUNCTION GetCategory (int4);
+CREATE FUNCTION GetCategory (int4) RETURNS text AS '
+	DECLARE
+		category_id			ALIAS for $1;
+
+		category_name		text;
+
+	BEGIN
+		select name
+		  into category_name
+		  from categories
+		 where id = category_id;
+
+		return category_name;
+	END;
+' LANGUAGE 'plpgsql';
+
 
 
 
