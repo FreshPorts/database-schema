@@ -1,6 +1,72 @@
 This file contains notes for upgrading from one database version
 to another.
 
+14 November 2003
+
+- To add page_load_detail ability:
+
+cd DOCMENT_ROOT/..
+mkdir caching
+mkdir caching/cache
+mkdir caching/tmp
+
+Add this to www/include/common.php
+
+	require_once($_SERVER['DOCUMENT_ROOT'] . '/../classes/page_load_detail.php');
+
+$Statistics = new PageLoadDetail();
+
+
+Add this to configuration/database.php
+
+	$Statistics->DBSet($db);
+
+
+create table page_load_summary
+(
+    id                      serial                not null,
+    date                    date                  not null,
+    name                    text                  not null,
+    users                   integer               not null
+        default 0,
+    non_users               integer               not null
+        default 0,
+    rendering_time_avg      interval              not null,
+    primary key (id)
+);
+
+create unique index page_loads_date_date on page_load_summary (date, name);
+
+create table page_load_detail
+(
+    id                      serial                not null,
+    timestamp               timestamp without time zone not null
+        default current_timestamp,
+    page_name               text                  not null,
+    user_id                 integer                       ,
+    ip_address              inet                  not null,
+    full_url                text                  not null,
+    rendering_time          interval              not null,
+    primary key (id)
+);
+
+create unique index page_loads_date_date2 on page_load_detail (timestamp, page_name);
+
+
+alter table page_load_detail
+    add foreign key  (user_id)
+       references users (id) on update cascade on delete cascade;
+
+Add these permissions:
+
+grant insert                         on page_load_detail               to group www;
+grant update                         on page_load_detail_id_seq        to group www;
+
+
+
+*************************************************
+
+
 2003 September 29
 
   Add functions: 
