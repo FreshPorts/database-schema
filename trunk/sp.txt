@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.68 2003-03-04 22:25:52 dan Exp $
+-- $Id: sp.txt,v 1.69 2003-04-07 17:02:17 dan Exp $
 --
 
 CREATE OR REPLACE FUNCTION IsDescendantOf (int4 ,int4) returns boolean As '
@@ -1158,12 +1158,12 @@ CREATE OR REPLACE FUNCTION DailySummaryDateRemove(date) returns int8 AS '
 CREATE OR REPLACE FUNCTION DailyStatsCaculate() returns int8 AS '
 	DECLARE
 		queries		RECORD;
-		curs1		REFCURSOR;
+		curs1			REFCURSOR;
 		TheDate		date;
 		QueryTotal	int4;
 
 	BEGIN
-		select (current_date - interval ''1 day'')::date
+		select (current_date - 1)::date
 		INTO TheDate;
 
 		FOR queries IN select id, query from daily_stats LOOP
