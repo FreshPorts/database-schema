@@ -608,3 +608,27 @@ CREATE FUNCTION "getport" (text ) RETURNS int4 AS '
 ' LANGUAGE 'plpgsql';
 
 
+  drop function IsPortsTree(text) ;
+create function IsPortsTree(text) returns boolean As '
+
+--
+-- return TRUE if the element exists under the ports tree
+---
+   DECLARE
+      element_pathname ALIAS for $1;
+
+      IsPortsTree   boolean;
+   BEGIN
+      IsPortsTree := 0;
+      if (substring(element_pathname from 1 for 6) = \'/ports\') OR
+         (substring(element_pathname from 1 for 5) =  \'ports\')  THEN
+          if Pathname_ID(element_pathname) then
+             IsPortsTree := 1;
+          END IF;
+      END IF;
+
+      RETURN IsPortsTree;
+   END;
+'  LANGUAGE 'plpgsql';
+
+
