@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.33 2002-02-27 21:10:25 dan Exp $
+-- $Id: sp.txt,v 1.34 2002-02-28 21:38:03 dan Exp $
 --
 
   drop function IsDescendantOf (int4 ,int4);
@@ -880,3 +880,42 @@ CREATE FUNCTION WatchListStagingProcess(int4) RETURNS int4 AS '
 		RETURN RowCount;
 	END
 ' LANGUAGE 'plpgsql';
+
+  DROP FUNCTION WatchListDeleteAllElements(int4);
+CREATE FUNCTION WatchListDeleteAllElements(int4) RETURNS int4 AS '
+	DECLARE
+		WatchListID	ALIAS for $1;
+		RowCount	int8;
+
+	BEGIN
+
+		DELETE FROM watch_list_element
+		      WHERE watch_list_id  = WatchListID;
+
+		GET DIAGNOSTICS RowCount = ROW_COUNT;
+
+		RETURN RowCount;
+	END
+' LANGUAGE 'plpgsql';
+
+  DROP FUNCTION WatchListStagingClear(int4);
+CREATE FUNCTION WatchListStagingClear(int4) RETURNS int4 AS '
+	DECLARE
+		WatchListID	ALIAS for $1;
+		RowCount	int8;
+
+	BEGIN
+
+		DELETE FROM watch_list_staging
+		      WHERE watch_list_id  = WatchListID;
+
+		GET DIAGNOSTICS RowCount = ROW_COUNT;
+
+		RETURN RowCount;
+	END
+' LANGUAGE 'plpgsql';
+
+
+
+
+
