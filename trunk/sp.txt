@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.45 2002-03-19 13:27:55 dan Exp $
+-- $Id: sp.txt,v 1.46 2002-03-23 03:06:30 dan Exp $
 --
 
 CREATE OR REPLACE FUNCTION IsDescendantOf (int4 ,int4) returns boolean As '
@@ -624,65 +624,6 @@ CREATE OR REPLACE FUNCTION GetPortNameFromFileName(text) RETURNS text AS '
 ' LANGUAGE 'plpgsql';
 
 
-
-CREATE OR REPLACE FUNCTION RecordLastestPortCommits() RETURNS INT4 AS '
-	DECLARE
-
-		MaxCommitID	int4;
-		DateNow		timestamp;
-
-	BEGIN
-
-		-- add in the new stuff
-		CREATE TEMP TABLE commits_latest_tmp AS
-		SELECT DISTINCT
-			commits_recent.commit_date															AS commit_date_raw,
-			commits_recent.id																	AS commit_log_id,
-			commits_recent.description															AS commit_description,
-			to_char(commits_recent.commit_date + INTERVAL ''-10800 seconds'', ''DD Mon YYYY'')	AS commit_date,
-			to_char(commits_recent.commit_date + INTERVAL ''-10800 seconds'', ''HH24:MI'')		AS commit_time,
-			commit_log_ports.port_id															AS port_id,
-			categories.name																		AS category,
-			categories.id																		AS category_id,
-			element.name																		AS port,
-			COALESCE(commit_log_ports.port_version,  ports.version)								AS version,
-			COALESCE(commit_log_ports.port_revision, ports.revision)							AS revision,
-			element.status																		AS status,
-			commit_log_ports.needs_refresh														AS needs_refresh,
-			ports.forbidden																		AS forbidden,
-			ports.broken																		AS broken,
-			date_part(''epoch'', ports.date_added)												AS date_added,
-			ports.element_id																	AS element_id,
-			ports.short_description 															AS short_description
-	   FROM commit_log_ports, commits_recent, element, categories, ports
-	  WHERE commit_log_ports.commit_log_id = commits_recent.id
-	    AND commit_log_ports.port_id       = ports.id
-	    AND categories.id                  = ports.category_id
-	    AND element.id                     = ports.element_id
-   ORDER BY commits_recent.commit_date desc,
-			commit_log_id,
-			category,
-			port;
-
-		-- delete what is already there
-		DELETE FROM commits_latest;
-
-		INSERT INTO commits_latest SELECT * FROM commits_latest_tmp;
-
-		SELECT MAX(commit_log_id)
-		  INTO MaxCommitID
-		  FROM commits_latest;
-
-		--
-		-- record that last commit just in case we need it next time...
-		--
-		UPDATE housekeeping
-		   SET last_port_commit = MaxCommitID;
-
-	return MaxCommitID;
-
-	END;
-' LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION ConfirmUserAccount(text) RETURNS int4 AS '
 
