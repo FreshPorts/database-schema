@@ -1,5 +1,5 @@
 --
--- $Id: datatype.txt,v 1.4 2003-09-27 18:42:23 dan Exp $
+-- $Id: datatype.txt,v 1.5 2003-10-02 12:17:05 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -61,4 +61,9 @@ CREATE TYPE freshports_commit_record AS (
 	change_type        text,
 	pathname           text,
     is_port            boolean
+);
+
+CREATE TYPE logincounts_record AS (
+	date            date,
+	count           integer
 );
