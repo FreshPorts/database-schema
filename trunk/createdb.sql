@@ -1,5 +1,5 @@
 #
-# $Id: createdb.sql,v 1.20 2002-03-15 00:54:36 dan Exp $
+# $Id: createdb.sql,v 1.21 2002-03-17 17:45:35 dan Exp $
 #
 # Things which must be done to make this script work with PostgreSQL
 # 
@@ -7,6 +7,26 @@
 # remove quotes from around current_timestamp
 # remove key names from foreign keys
 #
+# The following options should be used to create the database schema
+#
+# Under tables:
+#  For Create Table
+#   uncheck the following
+#    - Alternate Key
+#    - Physical Options
+#    - Comment
+#    - Drop table
+#  For Create Index
+#   uncheck the following
+#    - Primary Key
+#    - Foreign Key
+#    - Drop Index
+#
+# Under Views:
+#  Check the following:
+#    - Create view
+#    - Default value
+#    - Check
 
 create table housekeeping
 (
@@ -45,8 +65,7 @@ create table watch_list_staging_log
     date_added             timestamp             not null,
     user_id                int4                  not null,
     action                 char(1)               not null
-        check (
-            action in ('U','W','C','D')),
+        check (action in ('U','W','C','D')),
     count_total            int4                  not null
         default '0',
     count_matches          int4                  not null
@@ -68,17 +87,17 @@ alter table watch_list_staging_log alter column date_added set default current_t
 
 create table ports_check
 (
+    id                     int4                  not null,
     category_name          text                  not null,
     port_name              text                  not null,
-    found_in_ports         boolean               not null
-        default 'N'
-        check (
-            found_in_ports in ('Y','N'))
+    category_id            int4                          ,
+    port_id                int4                          ,
+    primary key (id)
 );
 
-create index category_name on ports_check (category_name);
-
-create index port_name on ports_check (port_name);
+  drop sequence ports_check_id_seq;
+create sequence ports_check_id_seq;
+alter table ports_check alter column id set default nextval('ports_check_id_seq'::text);
 
 create table element
 (
@@ -86,8 +105,7 @@ create table element
     name                   text                  not null,
     parent_id              int4                          ,
     directory_file_flag    char(1)               not null
-        check (
-            directory_file_flag in ('F','D')),
+        check (directory_file_flag in ('F','D')),
     status                 char(1)               not null
         check (
             status in ('A','D')),
@@ -203,6 +221,8 @@ create table ports
   drop sequence ports_id_seq;
 create sequence ports_id_seq;
 alter table ports alter column id set default nextval('ports_id_seq'::text);
+
+create index ports_element_id on ports (element_id);
 
 create table users
 (
@@ -396,8 +416,7 @@ create table watch_list_staging
     port                   text                  not null,
     item_count             int4                  not null,
     from_pkg_info          boolean               not null
-        check (
-            from_pkg_info in ('Y','N')),
+        check (from_pkg_info in ('Y','N')),
     from_watch_list        boolean               not null
         check (
             from_watch_list in ('Y','N')),
@@ -418,6 +437,12 @@ from commit_log
 where exists
 (select * from commit_log_ports where commit_log_ports.commit_log_id = commit_log.id)
 order by commit_log.commit_date desc, commit_log.id limit 100;
+
+create view ports_active as
+select ports.*, element.name
+from element, ports
+where ports.element_id = element.id
+and e lement.status;
 
 alter table element
     add foreign key (parent_id)
