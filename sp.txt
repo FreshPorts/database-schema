@@ -299,3 +299,22 @@ create function CreateCategory(text, text, bool) returns int4 AS '
 
 
 
+  drop function ElementRevisionID(int4, text);
+create function ElementRevisionID(int4, text) returns int4 AS '
+   DECLARE 
+      in_element_id ALIAS for $1;
+      tag           ALIAS for $2;
+
+      element_revision_id     int4;
+
+   BEGIN
+      select id
+        into element_revision_id
+        from element_revision
+       where element_id    = in_element_id
+         and revision_name = tag;
+
+     return element_revision_id;
+   END;
+'  LANGUAGE 'plpgsql';
+

@@ -105,7 +105,7 @@ alter table watch_notice_log       alter column id set default nextval('watch_no
 Dan Langille
 
 968886895
-978647622
+978760327
 0
 0
 0
@@ -1331,7 +1331,7 @@ id
 3
 24
 24
-username
+name
 name
 
 
@@ -1541,31 +1541,31 @@ email
 3
 186
 186
-watchnotifyfrequency
-watchnotifyfrequency
+watch_notify_id
+watch_notify_id
 
 
 
 22
-85
-char(1)
+83
+int4
+4
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
 1
-0
-0
-0
-
-
-
-
-
-0
-0
-0
-
-
-
-0
-0
 1
 1
 0
@@ -3049,10 +3049,10 @@ revision_name
 
 3
 3
-473
-473
-id
-id
+474
+474
+system_version_id
+system_version_id
 
 
 
@@ -3075,19 +3075,19 @@ int4
 
 
 1
-0
 1
 1
+1
 0
 0
-id
+system_version_id
 
 1
 3
-474
-474
-system_version_id
-system_version_id
+475
+475
+element_revision_id
+element_revision_id
 
 
 
@@ -3109,50 +3109,15 @@ int4
 
 
 
-0
 1
 1
 1
+1
 0
 0
-system_version_id
+element_revision_id
 
 2
-3
-475
-475
-element_revision_id
-element_revision_id
-
-
-
-468
-83
-int4
-4
-0
-0
-0
-
-
-
-
-
-0
-0
-0
-
-
-
-0
-1
-1
-1
-0
-0
-element_revision_id
-
-3
 3
 476
 476
@@ -3374,27 +3339,6 @@ commit_log
 0
 n
 0
-3
-38
-38
-fk_watch_list_user_id
-fk_watch_list_user_id
-fk_watch_list_user_id
-
-
-22
-25
-2
-2
-1
-1
-0
-0
-watch_list_user
-watch_list_user
-0
-n
-1
 3
 41
 41
@@ -3747,8 +3691,50 @@ fk_system_version_system
 1
 0
 0
-
 fk_system_version_system
+fk_system_version_system
+0
+n
+0
+3
+893
+893
+fk_watch_list_users
+fk_watch_list_users
+
+
+
+22
+25
+2
+2
+1
+1
+0
+0
+fk_watch_list_users
+
+0
+n
+0
+3
+964
+964
+fk_users_watch_notice
+fk_users_watch_notice
+
+
+
+192
+22
+2
+2
+1
+1
+0
+0
+
+fk_users_watch_notice
 0
 n
 0
@@ -3766,11 +3752,6 @@ COLN2   N8
 33
 2
 6
-1
-39
-39
-23
-27
 1
 42
 42
@@ -3856,6 +3837,16 @@ COLN2   N8
 824
 506
 477
+1
+896
+896
+23
+27
+1
+967
+967
+193
+186
 /END_TABLE AMCCCOL
 
 /BEGIN_TABLE AMCCREF
@@ -3871,12 +3862,6 @@ NUMR    N8
 34
 32
 33
-1
-3
-40
-40
-38
-39
 1
 3
 43
@@ -3980,6 +3965,18 @@ NUMR    N8
 821
 824
 1
+3
+897
+897
+893
+896
+1
+3
+968
+968
+964
+967
+1
 /END_TABLE AMCCREF
 
 /BEGIN_TABLE AMCINDX
@@ -4021,7 +4018,7 @@ element_name
 3
 18
 18
-element_parent_id
+fk_element_parent_id
 element_parent_id
 8
 
@@ -4104,23 +4101,6 @@ users_email
 6
 
 3
-241
-241
-watch_list_user_id
-watch_list_user_id
-25
-
-
-
-0
-1
-0
-0
-
-
-7
-
-3
 243
 243
 watch_notice_frequency
@@ -4135,7 +4115,7 @@ watch_notice_frequency
 0
 
 
-8
+7
 
 3
 321
@@ -4152,7 +4132,7 @@ FK_watch_list_element
 0
 
 
-9
+8
 
 3
 413
@@ -4169,7 +4149,7 @@ categories_element_id_unique
 0
 
 
-10
+9
 
 3
 415
@@ -4186,14 +4166,31 @@ ports_element_id_unique
 0
 
 
-11
+10
 
 3
 485
 485
 module_id
-MODULE_ID
+module_id
 467
+
+
+
+0
+0
+0
+0
+
+
+11
+
+3
+487
+487
+system_id
+system_id
+469
 
 
 
@@ -4206,11 +4203,28 @@ MODULE_ID
 12
 
 3
-486
-486
-version_revision
-version_revision
-468
+898
+898
+fk_watch_list_users
+fk_watch_list_users
+25
+fk_watch_list_users
+
+
+0
+1
+0
+0
+
+
+13
+
+3
+900
+900
+users_name
+users_name
+22
 
 
 
@@ -4220,24 +4234,24 @@ version_revision
 0
 
 
-13
+14
 
 3
-487
-487
-system_id
-SYSTEM_ID
-469
+962
+962
+fk_user_watch_notice
+fk_user_watch_notice
+22
 
 
 
 0
-0
+1
 0
 0
 
 
-14
+15
 
 /END_TABLE AMCINDX
 
@@ -4293,13 +4307,6 @@ NUMR    N8
 1
 1
 3
-242
-242
-241
-27
-1
-1
-3
 244
 244
 243
@@ -4335,24 +4342,31 @@ NUMR    N8
 1
 1
 3
-489
-489
-486
-474
-1
-1
-3
-490
-490
-486
-475
-1
-2
-3
 491
 491
 487
 477
+1
+1
+3
+899
+899
+898
+27
+1
+1
+3
+901
+901
+900
+24
+1
+1
+3
+963
+963
+962
+186
 1
 1
 /END_TABLE AMCCIDX
@@ -4859,6 +4873,34 @@ GENE    N8
 /BEGIN_DATA PBVALD
 /END_TABLE PBVALD
 
+/BEGIN_TABLE AMCREDO
+@       N5
+REDO    N8
+OPER    A20
+MODL    N8
+SUBM    N8
+OBJT    N5
+PRM1    A512
+PRM2    A512
+/BEGIN_DATA AMCREDO
+1
+2
+DeleteIndx
+2
+0
+39
+system_version_element,system_version_element,version_revision,version_revision
+
+1
+3
+DeleteIndx
+2
+0
+39
+watch_list,watch_list,watch_list_user_id,watch_list_user_id
+
+/END_TABLE AMCREDO
+
 /BEGIN_TABLE AMCFONT
 FONT    N5
 FNAM    A32
@@ -4873,19 +4915,15 @@ Arial
 MS Sans Serif
 8
 0
-6
+5
 Comic Sans MS
 14
 1
 7
 Arial
-14
-1
-8
-Arial
 8
 8
-9
+8
 Arial
 6
 0
@@ -4927,23 +4965,23 @@ BHAT    N5
 0
 2
 0
-32896
+8421504
 0
 3
 0
-255
+32896
 0
 4
 0
-65535
+255
 0
 5
 0
-0
+65535
 0
 6
 0
-8421504
+0
 0
 7
 0
@@ -5952,7 +5990,7 @@ no
 0
 WarehouseArchitect
 DBOTablComm
-yes
+no
 165
 2
 0
@@ -6438,10 +6476,10 @@ OLE     BIN
 0
 0
 0
-12188
--127629
-25762
--115480
+5355
+-126887
+18479
+-114738
 2
 1
 0
@@ -6458,7 +6496,7 @@ OLE     BIN
 
 
 
-2994
+3384
 22
 
 3
@@ -6471,10 +6509,10 @@ OLE     BIN
 0
 0
 0
-14846
--110257
-23095
--105908
+7783
+-109520
+16032
+-105171
 2
 1
 0
@@ -6491,7 +6529,7 @@ OLE     BIN
 
 
 
-2994
+3384
 25
 
 3
@@ -6504,10 +6542,10 @@ OLE     BIN
 0
 0
 0
-14920
--95996
-23019
--92472
+7870
+-95246
+15969
+-91722
 2
 1
 0
@@ -6524,7 +6562,7 @@ OLE     BIN
 
 
 
-2994
+3384
 29
 
 3
@@ -6537,10 +6575,10 @@ OLE     BIN
 0
 0
 0
--29949
--119268
--20275
--113944
+24951
+-118968
+34625
+-113644
 2
 1
 0
@@ -6557,7 +6595,7 @@ OLE     BIN
 
 
 
-2994
+3384
 192
 
 3
@@ -6570,10 +6608,10 @@ OLE     BIN
 0
 0
 0
--30292
--107503
--17393
--102179
+22658
+-110203
+35557
+-104879
 2
 1
 0
@@ -6590,7 +6628,7 @@ OLE     BIN
 
 
 
-2994
+3384
 197
 
 3
@@ -6603,14 +6641,14 @@ OLE     BIN
 0
 0
 0
--36944
--127963
--8820
--120464
+-36384
+-127363
+-8935
+-114465
 1
 1
 0
-6
+5
 529
 0
 0
@@ -6620,13 +6658,16 @@ OLE     BIN
 0
 
 0
-FreshPorts 2 - physical dataabase model\
+FreshPorts 2\
+physical database model\
 \
 copyright 2001 - DVL Software Limited\
-Wellington, New Zealand
+Wellington, New Zealand\
+\
+6 January 2001
 
 
-2994
+3384
 0
 
 3
@@ -6639,10 +6680,10 @@ Wellington, New Zealand
 0
 0
 0
--5723
--86099
-2526
--81750
+-12774
+-85350
+-4525
+-81001
 2
 1
 0
@@ -6659,7 +6700,7 @@ Wellington, New Zealand
 
 
 
-2994
+3384
 467
 
 3
@@ -6672,10 +6713,10 @@ Wellington, New Zealand
 0
 0
 0
-12594
--86271
-23093
--81922
+5540
+-85109
+16039
+-81585
 2
 1
 0
@@ -6692,7 +6733,7 @@ Wellington, New Zealand
 
 
 
-2994
+3384
 468
 
 3
@@ -6705,10 +6746,10 @@ Wellington, New Zealand
 0
 0
 0
-11976
--81760
-26750
--78536
+10776
+-81460
+25550
+-78236
 1
 1
 0
@@ -6727,7 +6768,7 @@ unique key on (system_version_id,\
 element_revision_id)
 
 
-2994
+3384
 0
 
 3
@@ -6740,10 +6781,10 @@ element_revision_id)
 0
 0
 0
--6817
--81542
-3381
--79293
+-13867
+-80792
+-3669
+-78543
 1
 1
 0
@@ -6761,7 +6802,7 @@ each element revision is \
 tracked in this table
 
 
-2994
+3384
 0
 
 3
@@ -6774,10 +6815,10 @@ tracked in this table
 0
 0
 0
--1303
--124608
-10621
--105634
+-8353
+-123858
+3571
+-104884
 2
 1
 0
@@ -6794,7 +6835,7 @@ tracked in this table
 
 
 
-2994
+3384
 209
 
 3
@@ -6807,10 +6848,10 @@ tracked in this table
 0
 0
 0
--11934
--117354
--2035
--111055
+-19359
+-113754
+-9460
+-107455
 2
 1
 0
@@ -6827,7 +6868,7 @@ tracked in this table
 
 
 
-2994
+3384
 304
 
 3
@@ -6840,10 +6881,10 @@ tracked in this table
 0
 0
 0
--6403
--98791
-4397
--92492
+-13454
+-98042
+-2654
+-91743
 2
 1
 0
@@ -6860,7 +6901,7 @@ tracked in this table
 
 
 
-2994
+3384
 8
 
 3
@@ -6873,10 +6914,10 @@ tracked in this table
 0
 0
 0
-17
--92570
-13216
--89346
+-7033
+-91820
+6166
+-88596
 1
 1
 0
@@ -6895,12 +6936,12 @@ the source tree will have exactly \
 one entry in this table.
 
 
-2994
+3384
 0
 
 3
-923
-16
+2
+289
 0
 15
 0
@@ -6908,43 +6949,10 @@ one entry in this table.
 0
 0
 0
-0
-0
-0
-0
--1
--1
-0
-0
-0
-0
-0
-0
-0
-0
-0
-
-0
-
-
-
-2994
-0
-
-3
-2
-289
-0
-1
-923
-0
-0
-0
-0
--26352
--100617
--14278
--91393
+-33027
+-99042
+-20953
+-89818
 2
 1
 0
@@ -6961,23 +6969,23 @@ one entry in this table.
 
 
 
-2994
+3384
 1
 
 3
 915
 6
 0
-2
-923
+16
 0
 0
 0
 0
--35647
--96651
--26948
--94402
+0
+-32347
+-102201
+-23648
+-99952
 1
 1
 0
@@ -6995,23 +7003,23 @@ Each commit will be \
 stored in this table.
 
 
-2994
+3384
 0
 
 3
 3
 289
 0
-16
+17
 0
 0
 0
 0
 0
--26555
--86407
--14856
--81083
+-33605
+-85657
+-21906
+-80333
 2
 1
 0
@@ -7028,23 +7036,23 @@ stored in this table.
 
 
 
-2994
+3384
 4
 
 3
 913
 6
 0
-17
+18
 0
 0
 0
 0
 0
--36250
--84597
--26876
--82348
+-31675
+-80247
+-22301
+-77998
 1
 1
 0
@@ -7062,23 +7070,23 @@ each commit modifies \
 one or more files
 
 
-2994
+3384
 0
 
 3
 837
 289
 0
-18
+19
 0
 0
 0
 0
 0
-27194
--95709
-35218
--91360
+26068
+-92785
+34092
+-88436
 2
 1
 0
@@ -7095,23 +7103,23 @@ one or more files
 
 
 
-2994
+3384
 469
 
 3
 917
 6
 0
-19
+20
 0
 0
 0
 0
 0
-24508
--90659
-38382
--88410
+23533
+-88184
+37407
+-85935
 1
 1
 0
@@ -7129,23 +7137,23 @@ Sample entries are 4.2-RELEASE,\
 4.2-STABLE, 5.0-CURRENT
 
 
-2994
+3384
 0
 
 3
 919
 6
 0
-20
+21
 0
 0
 0
 0
 0
-26862
--110836
-36762
--107612
+19212
+-99211
+29112
+-95987
 1
 1
 0
@@ -7164,23 +7172,23 @@ Operating Systems\
 in the same database
 
 
-2994
+3384
 0
 
 3
 925
 289
 0
-21
+22
 0
 0
 0
 0
 0
-29362
--107486
-34161
--103962
+27712
+-100661
+32511
+-97137
 2
 1
 0
@@ -7197,50 +7205,17 @@ in the same database
 
 
 
-2994
+3384
 505
 
 3
 9
 290
 0
-22
-0
-2
-3
-0
-0
-0
-0
-0
-0
-2
-3
-0
-0
-0
-0
-0
-1
-0
-0
-2
-c6affffff788feffc6afffffdeb8feff
-2
-
-
-
-2994
-32
-
-3
-46
-290
-0
 23
 0
-5
-6
+2
+3
 0
 0
 0
@@ -7248,7 +7223,7 @@ c6affffff788feffc6afffffdeb8feff
 0
 0
 2
-3
+4
 0
 0
 0
@@ -7258,13 +7233,13 @@ c6affffff788feffc6afffffdeb8feff
 0
 0
 2
-f34900002a25fefff3490000cd59feff
+f794ffff1e8ffefff794ffffccbbfeff
 2
 
 
 
-2994
-38
+3384
+32
 
 3
 49
@@ -7281,7 +7256,7 @@ f34900002a25fefff3490000cd59feff
 0
 0
 2
-3
+4
 0
 0
 0
@@ -7291,12 +7266,12 @@ f34900002a25fefff3490000cd59feff
 0
 0
 2
-15fcffff138dfeff194a0000138dfeff
+8ae0ffff0090feff8f2e00000090feff
 2
 
 
 
-2994
+3384
 41
 
 3
@@ -7314,7 +7289,7 @@ f34900002a25fefff3490000cd59feff
 0
 0
 2
-3
+4
 0
 0
 0
@@ -7324,12 +7299,12 @@ f34900002a25fefff3490000cd59feff
 0
 0
 2
-f2490000cd59fefff2490000e58ffeff
+5b2e0000ae5cfeff5b2e0000d392feff
 2
 
 
 
-2994
+3384
 44
 
 3
@@ -7347,7 +7322,7 @@ f2490000cd59fefff2490000e58ffeff
 0
 0
 2
-3
+4
 0
 0
 0
@@ -7357,12 +7332,12 @@ f2490000cd59fefff2490000e58ffeff
 0
 0
 2
-6908000018b7feffb031000018b7feff
+deecffff0fbafeff221600000fbafeff
 2
 
 
 
-2994
+3384
 480
 
 3
@@ -7380,7 +7355,7 @@ f2490000cd59fefff2490000e58ffeff
 0
 0
 2
-3
+4
 0
 0
 0
@@ -7390,12 +7365,12 @@ f2490000cd59fefff2490000e58ffeff
 0
 0
 3
-d47800000899feffd4780000a6b6feff82590000a6b6feff
+6e74000074a4feff6e740000bdb9fefff43d0000bdb9feff
 2
 
 
 
-2994
+3384
 479
 
 3
@@ -7413,7 +7388,7 @@ d47800000899feffd4780000a6b6feff82590000a6b6feff
 0
 0
 2
-3
+4
 0
 0
 0
@@ -7423,12 +7398,12 @@ d47800000899feffd4780000a6b6feff82590000a6b6feff
 0
 0
 2
-baf9ffff9893feffbaf9ffffd2b3feff
+2edeffff8596feff2edeffffbfb6feff
 2
 
 
 
-2994
+3384
 495
 
 3
@@ -7446,7 +7421,7 @@ baf9ffff9893feffbaf9ffffd2b3feff
 0
 0
 2
-3
+4
 0
 0
 0
@@ -7456,12 +7431,12 @@ baf9ffff9893feffbaf9ffffd2b3feff
 0
 0
 2
-04efffff04b8feff30c3ffff04b8feff
+79d3fffff1bafeffa6a7fffff1bafeff
 2
 
 
 
-2994
+3384
 500
 
 3
@@ -7479,7 +7454,7 @@ baf9ffff9893feffbaf9ffffd2b3feff
 0
 0
 2
-3
+4
 0
 0
 0
@@ -7489,12 +7464,12 @@ baf9ffff9893feffbaf9ffffd2b3feff
 0
 0
 2
-d19bffff563cfeffd19bffffe063feff
+b27200005141feffb27200009f59feff
 2
 
 
 
-2994
+3384
 666
 
 3
@@ -7512,7 +7487,7 @@ d19bffff563cfeffd19bffffe063feff
 0
 0
 2
-3
+4
 0
 0
 0
@@ -7522,12 +7497,12 @@ d19bffff563cfeffd19bffffe063feff
 0
 0
 4
-eef5ffff7080feffeef5ffff9468feff7ee1ffff9468feff7ee1ffff8141feff
+63daffff5d83feff63daffff826bfeff7dc4ffff826bfeff7dc4ffff914ffeff
 2
 
 
 
-2994
+3384
 671
 
 3
@@ -7545,7 +7520,7 @@ eef5ffff7080feffeef5ffff9468feff7ee1ffff9468feff7ee1ffff8141feff
 0
 0
 2
-3
+4
 0
 0
 0
@@ -7555,12 +7530,12 @@ eef5ffff7080feffeef5ffff9468feff7ee1ffff9468feff7ee1ffff8141feff
 0
 0
 4
-92ffffff9e87feff92ffffffcf72fefff1200000cf72fefff1200000fd5dfeff
+07e4ffff8b8afeff07e4ffffbd75feff67050000bd75feff67050000eb60feff
 2
 
 
 
-2994
+3384
 674
 
 3
@@ -7578,7 +7553,7 @@ eef5ffff7080feffeef5ffff9468feff7ee1ffff9468feff7ee1ffff8141feff
 0
 0
 2
-3
+4
 0
 0
 0
@@ -7588,12 +7563,12 @@ eef5ffff7080feffeef5ffff9468feff7ee1ffff9468feff7ee1ffff8141feff
 0
 0
 3
-07e4ffff0942feff07e4ffff2825feffae0a00002825feff
+06c7ffff1950feff06c7ffffc938feff05f0ffffc938feff
 2
 
 
 
-2994
+3384
 677
 
 3
@@ -7611,7 +7586,7 @@ eef5ffff7080feffeef5ffff9468feff7ee1ffff9468feff7ee1ffff8141feff
 0
 0
 2
-3
+4
 0
 0
 0
@@ -7621,18 +7596,18 @@ eef5ffff7080feffeef5ffff9468feff7ee1ffff9468feff7ee1ffff8141feff
 0
 0
 5
-3bedffff5388feff9dddffff5388feff9dddffffb974feff67eeffffb974feff67eeffff2b83feff
+b0d1ffff408bfeff12c2ffff408bfeff12c2ffffa677feffdcd2ffffa677feffdcd2ffff1886feff
 2
 
 
 
-2994
+3384
 751
 
 3
 3087
 290
-2
+0
 35
 0
 925
@@ -7644,7 +7619,7 @@ eef5ffff7080feffeef5ffff9468feff7ee1ffff9468feff7ee1ffff8141feff
 0
 0
 2
-3
+4
 0
 0
 0
@@ -7654,13 +7629,79 @@ eef5ffff7080feffeef5ffff9468feff7ee1ffff9468feff7ee1ffff8141feff
 0
 0
 2
-a67900007f65feffa6790000bd8cfeff
+397400002880feff397400002998feff
 2
 
 
 
-2994
+3384
 821
+
+3
+3205
+290
+0
+36
+0
+5
+6
+0
+0
+0
+0
+0
+0
+2
+4
+0
+0
+0
+0
+0
+1
+0
+0
+2
+f72e0000613dfefff72e0000fe55feff
+2
+
+
+
+3384
+893
+
+3
+3482
+290
+0
+37
+0
+320
+5
+0
+0
+0
+0
+0
+0
+2
+4
+0
+0
+0
+0
+0
+1
+0
+0
+3
+7a740000d032feff7a740000c81afeff3f430000c81afeff
+2
+
+
+
+3384
+964
 
 /END_TABLE AMCSYMB
 
