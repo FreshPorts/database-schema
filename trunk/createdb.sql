@@ -119,6 +119,7 @@ create table ports
     broken                 text                          ,
     date_added             timestamp                     
         default 'current_timestamp',
+    categories             text                          ,
     primary key (id)
 );
 
