@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.64 2002-12-04 17:16:58 dan Exp $
+-- $Id: sp.txt,v 1.65 2002-12-08 04:03:58 dan Exp $
 --
 
 CREATE OR REPLACE FUNCTION IsDescendantOf (int4 ,int4) returns boolean As '
@@ -671,18 +671,17 @@ CREATE OR REPLACE FUNCTION ConfirmUserAccount(text) RETURNS int4 AS '
 
 CREATE OR REPLACE FUNCTION WatchListStagingExists(int4) RETURNS int AS '
 
--- return TRUE or FALSE if the watch list is already being staged.
+-- return TRUE or FALSE if the user is already staging a watch list
 
 	DECLARE
-		WatchListID		ALIAS for $1;
-
+		UserID			ALIAS for $1;
 		StagingCount	int4;
 
 	BEGIN
-		SELECT	count(*)
-		INTO	StagingCount
-		FROM 	watch_list_staging
-		WHERE	watch_list_id = WatchListID;
+		SELECT count(*)
+		  INTO StagingCount
+		  FROM watch_list_staging
+		 WHERE user_id = UserID;
 
 		IF StagingCount = 0 THEN
 			RETURN 0;
@@ -697,16 +696,16 @@ CREATE OR REPLACE FUNCTION WatchListStagingExists(int4) RETURNS int AS '
 CREATE OR REPLACE FUNCTION WatchListStagingAddItem(int4, text, text, int4) RETURNS int8 AS '
 
 	DECLARE
-		WatchListID		ALIAS for $1;
+		UserID			ALIAS for $1;
 		CategoryName	ALIAS for $2;
-		PortName		ALIAS for $3;
-		Count			ALIAS for $4;
+		PortName			ALIAS for $3;
+		Count				ALIAS for $4;
 
 		OID			int8;
 
 	BEGIN
-		INSERT INTO watch_list_staging (watch_list_id, category, port, item_count, from_pkg_info, from_watch_list)
-		VALUES (WatchListID, CategoryName, PortName, Count, \'Y\', \'N\');
+		INSERT INTO watch_list_staging (user_id, category, port, item_count, from_pkg_info, from_watch_list)
+		VALUES (UserID, CategoryName, PortName, Count, \'Y\', \'N\');
 
 		GET DIAGNOSTICS OID = RESULT_OID;
 
@@ -714,18 +713,35 @@ CREATE OR REPLACE FUNCTION WatchListStagingAddItem(int4, text, text, int4) RETUR
 	END
 ' LANGUAGE 'plpgsql';
 
+CREATE OR REPLACE FUNCTION WatchListUserID(int4)
+ RETURNS int4 AS '
+	DECLARE
+		UserID ALIAS for $1;
+
+		WatchListID int4;
+	BEGIN
+		SELECT user_id
+		  INTO WatchListID
+		  FROM watch_list
+		 WHERE id = UserID;
+
+		RETURN WatchListID;
+	END
+' LANGUAGE 'plpgsql';
+
+
 CREATE OR REPLACE FUNCTION WatchListStagingProcess(int4) RETURNS int4 AS '
 	DECLARE
-		WatchListID	ALIAS for $1;
+		UserID	ALIAS for $1;
 
-		CountTotal		int4;
-		CountMatches	int4;
-		CountMissing	int4;
+		CountTotal			int4;
+		CountMatches		int4;
+		CountMissing		int4;
 		CountDuplicates	int4;
 		CountCategories	int4;
 
 	BEGIN
-
+	
 -- for each item in watch_list_staging
 -- find matching ports and put them 
 -- into the table
@@ -737,38 +753,39 @@ CREATE OR REPLACE FUNCTION WatchListStagingProcess(int4) RETURNS int4 AS '
 				   AND categories.name   = watch_list_staging.category
 				   AND ports.element_id  = element.id
 				   AND ports.category_id = categories.id)
-		 WHERE watch_list_id = WatchListID;
+		 WHERE user_id = UserID;
 
 		SELECT count(*)
 		  INTO CountTotal
 		  FROM watch_list_staging
-		 WHERE watch_list_id = WatchListID;
+		 WHERE user_id = UserID;
 
 		SELECT count(DISTINCT category)
 		  INTO CountCategories
 		  FROM watch_list_staging
-		 WHERE watch_list_id = WatchListID
+		 WHERE user_id = UserID
 		   AND element_id IS NOT NULL;
 	
 		SELECT count(*)
 		  INTO CountMissing
 		  FROM watch_list_staging
-		 WHERE watch_list_id = WatchListID
+		 WHERE user_id = UserID
 		   AND element_id IS NULL;
 
 		SELECT count(*)
 		  INTO CountDuplicates
 		  FROM watch_list_staging
-		 WHERE watch_list_id = WatchListID;
+		 WHERE user_id = UserID;
 
 		CountMatches := CountTotal - CountMissing;
 
-		PERFORM WatchListStagingLogGeneral(WatchListID, CountTotal, CountMatches, CountMissing, 
+		PERFORM WatchListStagingLogGeneral(UserID, CountTotal, CountMatches, CountMissing, 
 											CountDuplicates, CountCategories);
 
 		RETURN CountTotal;
 	END
 ' LANGUAGE 'plpgsql';
+
 
 CREATE OR REPLACE FUNCTION WatchListDeleteAllElements(int4) RETURNS int4 AS '
 	DECLARE
@@ -790,17 +807,17 @@ CREATE OR REPLACE FUNCTION WatchListDeleteAllElements(int4) RETURNS int4 AS '
 
 CREATE OR REPLACE FUNCTION WatchListStagingClear(int4) RETURNS int4 AS '
 	DECLARE
-		WatchListID	ALIAS for $1;
+		UserID	ALIAS for $1;
 		RowCount	int8;
 
 	BEGIN
 
 		DELETE FROM watch_list_staging
-		      WHERE watch_list_id  = WatchListID;
+		      WHERE user_id  = UserID;
 
 		GET DIAGNOSTICS RowCount = ROW_COUNT;
 
-		PERFORM WatchListStagingLogClearing(WatchListID, RowCount);
+		PERFORM WatchListStagingLogClearing(UserID, RowCount);
 
 		RETURN RowCount;
 	END
