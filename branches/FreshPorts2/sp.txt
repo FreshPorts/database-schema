@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.46.2.7 2003-04-14 00:41:19 dan Exp $
+-- $Id: sp.txt,v 1.46.2.8 2003-04-16 00:35:28 dan Exp $
 --
 
 CREATE OR REPLACE FUNCTION IsDescendantOf (int4 ,int4) returns boolean As '
@@ -831,19 +831,19 @@ CREATE OR REPLACE FUNCTION WatchListDeleteAllElements(int4) RETURNS int4 AS '
 	END
 ' LANGUAGE 'plpgsql';
 
-CREATE OR REPLACE FUNCTION WatchListStagingClear(int4) RETURNS int4 AS '
+CREATE OR REPLACE FUNCTION WatchListStagingClear(int8) RETURNS int8 AS '
 	DECLARE
-		WatchListID	ALIAS for $1;
+		UserID	ALIAS for $1;
 		RowCount	int8;
 
 	BEGIN
 
 		DELETE FROM watch_list_staging
-		      WHERE watch_list_id  = WatchListID;
+		      WHERE user_id  = UserID;
 
 		GET DIAGNOSTICS RowCount = ROW_COUNT;
 
-		PERFORM WatchListStagingLogClearing(WatchListID, RowCount);
+		PERFORM WatchListStagingLogClearing(UserID, RowCount);
 
 		RETURN RowCount;
 	END
@@ -879,7 +879,7 @@ CREATE OR REPLACE FUNCTION WatchListStagingLogGeneral(int4, int4, int4, int4, in
 	END
 ' LANGUAGE 'plpgsql';
 
-CREATE OR REPLACE FUNCTION WatchListStagingLogClearing(int4, int4) returns int8 AS '
+CREATE OR REPLACE FUNCTION WatchListStagingLogClearing(int8, int8) returns int8 AS '
 	DECLARE
 		UserID			ALIAS for $1;
 		ItemCount		ALIAS for $2;
@@ -1024,52 +1024,6 @@ CREATE OR REPLACE FUNCTION GetPortID(text, text) returns int8 AS '
 ' LANGUAGE 'plpgsql';
 
 
-CREATE OR REPLACE FUNCTION ports_categories_set(int8, text) returns int8 AS '
-   DECLARE
-      PortID         ALIAS for $1;
-      CategoryNames  ALIAS for $2;
-
-      CategoryCount  integer;
-      Category       text;
-		CategoryID		int8;
-
-   BEGIN
-      RAISE NOTICE '' into ports_categories_set for port = % with categories = %'', PortID, CategoryNames;
-
-		DELETE 
-		  FROM ports_categories
-		 WHERE port_id = PortID;
-
-      CategoryCount := 0;
-      LOOP
-         CategoryCount := CategoryCount + 1;
-         Category := split_part(CategoryNames, \' \', CategoryCount);
-
-			-- let us not get carried away....
-         IF Category = \'\' OR CategoryCount > 100 THEN
-            EXIT;
-         END IF;
-
-			SELECT id
-			  INTO CategoryID
-			  FROM categories
-			 WHERE name = Category;
-
-			IF NOT FOUND THEN
-				RAISE NOTICE '' we need to create category % '', Category;
-				CategoryID := CreateCategory(Category, ''no description supplied'', FALSE);
-			END IF;
-
-			INSERT INTO ports_categories (port_id, category_id) values (PortID, CategoryID);
-
-			RAISE NOTICE '' category % is % with id %'', CategoryCount, Category, CategoryID;
-      END LOOP;
-
-      RETURN 0;
-   END
-' LANGUAGE 'plpgsql';
-
-
 CREATE OR REPLACE FUNCTION GetPortID(text, text) RETURNS bigint
     AS '
    DECLARE
@@ -1176,3 +1130,5 @@ CREATE OR REPLACE FUNCTION SecurityNoticeCreate(integer, inet, text, text) RETUR
    END
 '
     LANGUAGE plpgsql;
+
+
