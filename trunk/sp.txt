@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.113 2004-08-02 01:14:38 dan Exp $
+-- $Id: sp.txt,v 1.114 2004-08-11 14:48:07 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -1864,6 +1864,34 @@ CREATE OR REPLACE FUNCTION PortsUpdatingAdd (date, text, text, text) returns int
       END IF;
 
       RETURN l_PortsUpdatingID;
+   END;
+'  LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION PortsUpdatingPortsXrefAdd (integer, text) returns int AS '
+   DECLARE
+      p_PortsUpdatingID ALIAS FOR $1;
+      p_Port            ALIAS FOR $2;
+
+      l_PortID     int;
+      OID          int8;
+
+   BEGIN
+      OID := NULL;
+      select GetPort(p_Port)
+        INTO l_PortID;
+
+      RAISE NOTICE '' PortsUpdatingPortsXrefAdd p_PortsUpdatingID=% p_Port=% l_PortID=%'', p_PortsUpdatingID, p_Port, l_PortID;
+      IF l_PortID IS NOT NULL THEN
+
+         INSERT INTO ports_updating_ports_xref(ports_updating_id, port_id)
+             VALUES (p_PortsUpdatingID, l_PortID);
+
+         GET DIAGNOSTICS OID = RESULT_OID;
+      ELSE
+         OID := NULL;
+      END IF;
+
+      RETURN OID;
    END;
 '  LANGUAGE 'plpgsql';
 
