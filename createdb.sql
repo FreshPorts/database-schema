@@ -1,5 +1,5 @@
 #
-# $Id: createdb.sql,v 1.33 2002-07-26 15:46:02 dan Exp $
+# $Id: createdb.sql,v 1.34 2002-07-26 21:20:57 dan Exp $
 #
 # Things which must be done to make this script work with PostgreSQL
 # 
@@ -63,6 +63,25 @@ create table commits_latest_ports
     short_description      text                          ,
     watch                  text                          
 );
+
+create table commits_latest
+(
+commit_log_id		int4,
+commit_date_raw		timestamp,
+message_subject		text,
+message_id			text,
+committer			text,
+commit_description	text,
+commit_date			text,
+commit_time			text,
+element_id			int4,
+element_name		text,
+status				char(1),
+encoding_losses		boolean,
+element_pathname	text
+);
+
+
 
 create table watch_list_staging_log
 (
@@ -556,6 +575,16 @@ create table report_subscriptions
     report_frequency_id    int4                  not null,
     primary key (report_id, user_id)
 );
+
+create view commits_recent as
+select distinct commit_log.id, commit_log.message_id, commit_log.message_date,
+commit_log.message_subject, commit_log.date_added, commit_log.commit_date,
+commit_log.committer, commit_log.description, commit_log.system_id, commit_log.encoding_losses
+from commit_log
+where exists
+(select * from commit_log_elements where commit_log_elements.commit_log_id = commit_log.id)
+order by commit_log.commit_date desc, commit_log.id limit 100;;
+
 
 create view commits_recent_ports as
 select distinct commit_log.id, commit_log.message_id, commit_log.message_date,

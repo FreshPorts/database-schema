@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.55 2002-07-26 15:46:02 dan Exp $
+-- $Id: sp.txt,v 1.56 2002-07-26 21:20:57 dan Exp $
 --
 
 CREATE OR REPLACE FUNCTION IsDescendantOf (int4 ,int4) returns boolean As '
@@ -1012,6 +1012,56 @@ CREATE OR REPLACE FUNCTION RecordLastestPortCommits() RETURNS INT4 AS '
 		SELECT MAX(commit_log_id)
 		  INTO MaxCommitID
 		  FROM commits_latest_ports;
+
+		--
+		-- record that last commit just in case we need it next time...
+		--
+		UPDATE housekeeping
+		   SET last_port_commit = MaxCommitID;
+
+	return MaxCommitID;
+
+	END;
+' LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION RecordLastestCommits() RETURNS INT4 AS '
+	DECLARE
+
+		MaxCommitID	int4;
+		DateNow		timestamp;
+
+	BEGIN
+
+		-- add in the new stuff
+		CREATE TEMP TABLE commits_latest_tmp AS
+		SELECT DISTINCT
+			commits_recent.id																	AS commit_log_id,
+			commits_recent.commit_date															AS commit_date_raw,
+			commits_recent.message_subject														AS message_subject,
+			commits_recent.message_id															AS message_id,
+			commits_recent.committer															AS committer,
+			commits_recent.description															AS commit_description,
+			to_char(commits_recent.commit_date - SystemTimeAdjust(), ''DD Mon YYYY'')			AS commit_date,
+			to_char(commits_recent.commit_date - SystemTimeAdjust(), ''HH24:MI'')				AS commit_time,
+			element.id																			AS element_id,
+			element.name																		AS element_name,
+			element.status																		AS status,
+			commits_recent.encoding_losses														AS encoding_losses,
+			element_pathname(element.id)														AS element_pathname
+	   FROM commits_recent, element, commit_log_elements
+	  WHERE commit_log_elements.commit_log_id = commits_recent.id
+	    AND commit_log_elements.element_id    = element.id
+   ORDER BY commits_recent.commit_date desc,
+			commit_log_id;
+
+		-- delete what is already there
+		DELETE FROM commits_latest;
+
+		INSERT INTO commits_latest SELECT * FROM commits_latest_tmp;
+
+		SELECT MAX(commit_log_id)
+		  INTO MaxCommitID
+		  FROM commits_latest;
 
 		--
 		-- record that last commit just in case we need it next time...
