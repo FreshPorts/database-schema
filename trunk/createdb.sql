@@ -1,5 +1,5 @@
 --
--- $Id: createdb.sql,v 1.52 2003-04-28 03:37:47 dan Exp $
+-- $Id: createdb.sql,v 1.53 2003-05-02 18:38:00 dan Exp $
 --
 -- The following options should be used to create the database schema
 --
@@ -161,9 +161,15 @@ create table reports
     primary key (id)
 );
 
-insert into reports(id, name, description) values (1, 'Watch List Notification', 'Details of any changes to any items on your watch list');
+insert into reports(id, name, description, needs_frequency) values (1, 'Watch List Notification', 'Details of any changes to any items on your watch list', TRUE);
 
-insert into reports(id, name, description) values (2, 'New Ports', 'Lists the new ports which have been added to the ports tree');
+insert into reports(id, name, description, needs_frequency) values (2, 'New Ports', 'Lists the new ports which have been added to the ports tree', TRUE);
+
+insert into reports(id, name, description, needs_frequency) values (3, 'Maintainer notification', 'Port maintainers are notified when their port fails to build (for maintainers only).', FALSE);
+
+insert into reports(id, name, description, needs_frequency) values (4, 'Announcements', 'Very low frequency notices about important changes to the website (highly recommended)', FALSE);
+
+insert into reports(id, name, description, needs_frequency) values (5, 'Security Notices', 'Notification of any security commits related to ports on your watch list.', FALSE);
 
 create table report_frequency
 (
