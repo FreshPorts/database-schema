@@ -1,8 +1,8 @@
 --
--- $Id: ri.txt,v 1.20 2003-03-04 22:28:47 dan Exp $
+-- $Id: ri.txt,v 1.21 2003-03-04 22:51:13 dan Exp $
 --
 
-CREATE OR REPLACE FUNCTION check_siblings() returns OPAQUE as '
+CREATE OR REPLACE FUNCTION check_siblings() RETURNS OPAQUE as '
    declare 
       ElementCount integer;
 		PortCount		integer;
@@ -66,11 +66,9 @@ end;
 ' LANGUAGE 'plpgsql';
 
 
-  drop trigger check_siblings on element;
-create trigger check_siblings after insert or update 
-on element
-for each row
-execute procedure check_siblings();
+  DROP TRIGGER check_siblings ON element;
+CREATE TRIGGER check_siblings AFTER INSERT OR UPDATE ON element FOR EACH ROW
+EXECUTE PROCEDURE check_siblings();
 
 
 
@@ -80,7 +78,7 @@ execute procedure check_siblings();
 
 
 
-CREATE OR REPLACE FUNCTION on_delete_remove_children() returns OPAQUE as '
+CREATE OR REPLACE FUNCTION on_delete_remove_children() RETURNS OPAQUE as '
 begin
 
   delete from element 
@@ -90,14 +88,13 @@ begin
 end;
 ' LANGUAGE 'plpgsql';
 
-  drop trigger on_delete_remove_children on element;
-create trigger on_delete_remove_children before delete 
-on element for each row
-execute procedure on_delete_remove_children();
+  DROP TRIGGER on_delete_remove_children ON element;
+CREATE TRIGGER on_delete_remove_children BEFORE DELETE ON element FOR EACH ROW
+EXECUTE PROCEDURE on_delete_remove_children();
 
 
 
-CREATE OR REPLACE FUNCTION check_parent() returns OPAQUE as '
+CREATE OR REPLACE FUNCTION check_parent() RETURNS OPAQUE as '
    declare
       ElementCount int4;
 begin
@@ -123,14 +120,13 @@ begin
 end;
 ' LANGUAGE 'plpgsql';
 
-  drop trigger check_parent on element;
-create trigger check_parent before insert or update
-on element for each row
-execute procedure check_parent();
+  DROP TRIGGER check_parent ON element;
+CREATE TRIGGER check_parent BEFORE INSERT OR UPDATE ON element FOR EACH ROW
+EXECUTE PROCEDURE check_parent();
 
 
 
-CREATE OR REPLACE FUNCTION parent_must_be_directory() returns OPAQUE as '
+CREATE OR REPLACE FUNCTION parent_must_be_directory() RETURNS OPAQUE as '
    declare
       ParentType char(1);
 begin
@@ -155,16 +151,15 @@ begin
 end;
 ' LANGUAGE 'plpgsql';
 
-drop trigger parent_must_be_directory on element;
-create trigger parent_must_be_directory before insert or update
-on element for each row
-execute procedure parent_must_be_directory();
+  DROP TRIGGER parent_must_be_directory ON element;
+CREATE TRIGGER parent_must_be_directory BEFORE INSERT OR UPDATE ON element FOR EACH ROW
+EXECUTE PROCEDURE parent_must_be_directory();
 
 
 
 
 -- the procedure
-CREATE OR REPLACE FUNCTION id_change() returns OPAQUE as '
+CREATE OR REPLACE FUNCTION id_change() RETURNS OPAQUE as '
 begin
    --  message ''check_siblings 4'';
    if (new.id <> old.id) then
@@ -177,13 +172,12 @@ end;
 ' LANGUAGE 'plpgsql';
 
 -- the trigger
-  drop trigger id_change on element;
-create trigger id_change before update
-on element for each row
-execute procedure id_change();
+  DROP TRIGGER id_change ON element;
+CREATE TRIGGER id_change BEFORE UPDATE ON element FOR EACH ROW
+EXECUTE PROCEDURE id_change();
 
 
-CREATE OR REPLACE FUNCTION version_revision_uniqueness() returns OPAQUE as '
+CREATE OR REPLACE FUNCTION version_revision_uniqueness() RETURNS OPAQUE as '
    declare 
       ElementID            int4;
       ExistingRevisionName text;
@@ -208,15 +202,13 @@ end;
 
 
 
-  drop trigger version_revision_uniqueness on system_branch_element_revision;
-create trigger version_revision_uniqueness before insert or update 
-on system_branch_element_revision
-for each row
-execute procedure version_revision_uniqueness();
+  DROP TRIGGER version_revision_uniqueness ON system_branch_element_revision;
+CREATE TRIGGER version_revision_uniqueness BEFORE INSERT OR UPDATE ON system_branch_element_revision FOR EACH ROW
+EXECUTE PROCEDURE version_revision_uniqueness();
 
 
 -- the procedure
-CREATE OR REPLACE FUNCTION element_delete_check() returns OPAQUE as '
+CREATE OR REPLACE FUNCTION element_delete_check() RETURNS OPAQUE as '
 begin
 
    -- if we are removing an element, make sure we set the
@@ -240,10 +232,9 @@ end;
 
 
 -- the trigger
-  drop trigger element_delete_check on commit_log_elements;
-create trigger element_delete_check before insert or update
-on commit_log_elements for each row
-execute procedure element_delete_check();
+  DROP TRIGGER element_delete_check ON commit_log_elements;
+CREATE TRIGGER element_delete_check BEFORE INSERT OR UPDATE ON commit_log_elements FOR EACH ROW
+EXECUTE PROCEDURE element_delete_check();
 
 
 
@@ -254,7 +245,7 @@ execute procedure element_delete_check();
 
 
 
-CREATE OR REPLACE FUNCTION commit_log_delete_check() returns OPAQUE as '
+CREATE OR REPLACE FUNCTION commit_log_delete_check() RETURNS OPAQUE as '
 begin
 
 	-- if we are removing a commit_log, make sure we remove
@@ -270,10 +261,9 @@ end;
 
 
 
-  drop trigger commit_log_delete_check on commit_log;
-create trigger commit_log_delete_check before delete
-on commit_log for each row
-execute procedure commit_log_delete_check();
+  DROP TRIGGER commit_log_delete_check ON commit_log;
+CREATE TRIGGER commit_log_delete_check BEFORE DELETE ON commit_log FOR EACH ROW
+EXECUTE PROCEDURE commit_log_delete_check();
 
 
 
@@ -283,7 +273,7 @@ execute procedure commit_log_delete_check();
 
 
 
-CREATE OR REPLACE FUNCTION user_watch_list_create() returns OPAQUE as '
+CREATE OR REPLACE FUNCTION user_watch_list_create() RETURNS OPAQUE as '
 begin
 
 	insert into watch_list (user_id, name) 
@@ -299,15 +289,14 @@ end;
 
 
 -- the trigger
-  drop trigger user_watch_list_create on users; 
-create trigger user_watch_list_create AFTER insert
-on users for
-each row execute procedure user_watch_list_create();
+  DROP TRIGGER user_watch_list_create ON users; 
+CREATE TRIGGER user_watch_list_create AFTER INSERT ON users FOR EACH ROW
+EXECUTE PROCEDURE user_watch_list_create();
 
 
 
 
-CREATE OR REPLACE FUNCTION user_email_change() returns OPAQUE as '
+CREATE OR REPLACE FUNCTION user_email_change() RETURNS OPAQUE as '
 begin
 
 	if old.email <> new.email then
@@ -322,14 +311,13 @@ end;
 
 
 -- the trigger
-  drop trigger user_email_change on users; 
-create trigger user_email_change AFTER update
-on users for
-each row execute procedure user_email_change();
+  DROP TRIGGER user_email_change ON users; 
+CREATE TRIGGER user_email_change AFTER update ON users FOR EACH ROW
+EXECUTE PROCEDURE user_email_change();
 
 
 
-create or replace function element_update_set_children(int4, text) returns int as 
+CREATE OR REPLACE FUNCTION element_update_set_children(int4, text) RETURNS int as 
 'DECLARE
 
    node ALIAS for $1;
@@ -357,7 +345,7 @@ create or replace function element_update_set_children(int4, text) returns int a
 
 language 'plpgsql';
 
-create or replace function element_update() returns opaque as '
+CREATE OR REPLACE FUNCTION element_update() RETURNS opaque as '
 DECLARE
    parent_pathname   text;
    my_pathname       text;
@@ -389,14 +377,14 @@ END;'
 language 'plpgsql';
 
 
-  drop trigger element_update on element;
-create trigger element_update before update on element for each row
-execute procedure element_update();
+  DROP TRIGGER element_update ON element;
+CREATE TRIGGER element_update BEFORE UPDATE ON element FOR EACH ROW
+EXECUTE PROCEDURE element_update();
 
 
 
 
-create or replace function element_insert() returns opaque as '
+CREATE OR REPLACE FUNCTION element_insert() RETURNS opaque as '
    DECLARE
       parent_pathname   text;
       my_pathname       text;
@@ -421,13 +409,12 @@ create or replace function element_insert() returns opaque as '
 language 'plpgsql';
 
 
-  drop trigger element_insert on element;
-create trigger element_insert after insert on element for each row
-execute procedure element_insert();
+  DROP TRIGGER element_insert ON element;
+CREATE TRIGGER element_insert AFTER INSERT ON element FOR EACH ROW
+EXECUTE PROCEDURE element_insert();
 
 
-
-create or replace function categories_insert_update() returns trigger as '
+CREATE OR REPLACE FUNCTION categories_insert_update() RETURNS TRIGGER AS '
    BEGIN
    	IF new.element_id IS NULL AND new.is_primary THEN
          RAISE EXCEPTION ''if is_primary is set, then element_id must be non-null for a category (name=% description=%'', new.name, new.description;
@@ -443,6 +430,6 @@ create or replace function categories_insert_update() returns trigger as '
 language 'plpgsql';
 
 
-  drop trigger categories_insert on categories;
-create trigger categories_insert after INSERT OR UPDATE on categories for each row
-execute procedure categories_insert_update();
+  DROP TRIGGER categories_insert ON categories;
+CREATE TRIGGER categories_insert AFTER INSERT OR UPDATE ON categories FOR EACH ROW
+EXECUTE PROCEDURE categories_insert_update();
