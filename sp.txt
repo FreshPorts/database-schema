@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.131 2005-02-01 13:57:40 dan Exp $
+-- $Id: sp.txt,v 1.132 2005-02-17 00:04:57 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -1914,7 +1914,9 @@ SELECT FOURTH1.port_id,
        FOURTH1.broken,
        FOURTH1.security_notice_id,
        FOURTH1.vulnerable_current,
-       FOURTH1.vulnerable_past
+       FOURTH1.vulnerable_past,
+       FOURTH1.restricted,
+       FOURTH1.no_cdrom
 FROM
 (SELECT THIRD1b.*,
         ports_vulnerable.current AS vulnerable_current,
@@ -1938,7 +1940,9 @@ FROM
         P.forbidden,
         P.deprecated,
         P.ignore,
-        P.broken
+        P.broken,
+        P.restricted,
+        P.no_cdrom
 FROM         
 (SELECT CL.message_id   AS message_id,
         CL.committer    AS committer,
