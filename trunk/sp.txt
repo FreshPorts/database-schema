@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.103 2004-02-13 18:02:20 dan Exp $
+-- $Id: sp.txt,v 1.104 2004-02-22 15:58:29 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -1143,6 +1143,22 @@ CREATE OR REPLACE FUNCTION Stats_PortCountBroken() returns int8 AS '
 	END
 ' LANGUAGE 'plpgsql';
 
+CREATE OR REPLACE FUNCTION Stats_PortCountDeprecated() returns int8 AS '
+	DECLARE
+		PortCount	int8;
+
+	BEGIN
+		SELECT count(*)
+		  INTO PortCount
+		  FROM ports, element
+		 WHERE element.status = \'A\'
+		   AND ports.element_id = element.id
+		   AND ports.deprecated <> \'\';
+
+		return PortCount;
+	END
+' LANGUAGE 'plpgsql';
+
 CREATE OR REPLACE FUNCTION Stats_PortCountForbidden() returns int8 AS '
 	DECLARE
 		PortCount	int8;
@@ -1509,6 +1525,7 @@ SELECT SECURITY.commit_log_id,
        SECURITY.needs_refresh,
        SECURITY.forbidden,
        SECURITY.broken,
+       SECURITY.deprecated,
        SECURITY.element_id,
        SECURITY.version,
        SECURITY.revision,
@@ -1545,6 +1562,7 @@ SELECT CLPE.*,
          P.id as port_id,
          P.forbidden,
          P.broken,
+         P.deprecated,
          date_part(\'epoch\', P.date_added)::integer AS date_added,
          P.short_description              AS short_description,
          P.category_id,
