@@ -251,12 +251,12 @@ create function GetOrCreateCategory(text) returns int4 AS '
       category_element_id := Pathname_ID(pathname);
 
       IF NOT FOUND THEN
-         category_element_id := Element_Add(pathname, 'D');
+         category_element_id := Element_Add(pathname, \'D\');
       END IF;
 
       category_id := nextval(\'category_id_seq\');
       INSERT INTO category (id,          is_primary, element_id, name)
-                 values    (category_id, 'Y', category_element_id, category_name, 
+                 values    (category_id, \'Y\', category_element_id, category_name, 
 
       return category_id;
    END;
@@ -401,7 +401,7 @@ CREATE FUNCTION RevisionForTagGet(int4, int4 ) RETURNS text AS '
 
       return TempRevisionName;
    END;
-' LANGUAGE 'plpgsql'
+' LANGUAGE 'plpgsql';
 
 
 
