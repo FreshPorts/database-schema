@@ -1,5 +1,5 @@
 --
--- $Id: ri.txt,v 1.34 2003-12-01 18:32:33 dan Exp $
+-- $Id: ri.txt,v 1.35 2004-02-13 16:43:08 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -351,7 +351,7 @@ BEGIN
        ip_address,
        description,
        commit_log_id,
-       status)
+       security_notice_status_id)
    VALUES (
        OLD.id,
        OLD.user_id,
@@ -359,7 +359,7 @@ BEGIN
        OLD.ip_address,
        OLD.description,
        OLD.commit_log_id,
-       OLD.status);
+       OLD.security_notice_status_id);
 
    NEW.date_added = CURRENT_TIMESTAMP;
 
