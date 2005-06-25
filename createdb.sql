@@ -1,5 +1,5 @@
 --
--- $Id: createdb.sql,v 1.81 2005-02-17 04:47:10 dan Exp $
+-- $Id: createdb.sql,v 1.82 2005-06-25 17:57:58 dan Exp $
 --
 -- The following options should be used to create the database schema
 --
@@ -312,11 +312,14 @@ create table ports
     portepoch                  text                          ,
     restricted                 text                          ,
     no_cdrom                   text                          ,
+    expiration_date            date                          ,
     primary key (id)
 );
 
 create index ports_ignore on ports(ignore) where ignore <> '';
 create index ports_broken on ports(broken) where broken <> '';
+
+create index ports_expiration_date on ports(expiration_date) where expiration_date is not null;
 
 create table users
 (
