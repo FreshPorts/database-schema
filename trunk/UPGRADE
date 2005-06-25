@@ -9,6 +9,9 @@ run scripts/Verify/set-expiration-date.pl
 
 create index ports_ports_expiration_date on ports(expiration_date) where expiration_date is not null;
 
+drop type freshports_commit_record cascade;
+drop type commit_record cascade;
+
 run database-schema/sp.txt
 insert into daily_stats (title, query) values ('Expired Ports', 'select Stats_Expired()');
 insert into daily_stats (title, query) values ('Expiration Ports', 'select Stats_Expiration()');
