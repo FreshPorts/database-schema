@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.137 2005-06-25 17:58:21 dan Exp $
+-- $Id: sp.txt,v 1.138 2005-06-25 18:40:31 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -1682,6 +1682,7 @@ SELECT SECURITY.commit_log_id,
        SECURITY.vulnerable_past,
        SECURITY.restricted,
        SECURITY.no_cdrom,
+       SECURITY.expiration_date,
        W.watch,
        element_pathname(SECURITY.element_id, FALSE) as element_pathname
 FROM (
@@ -1724,6 +1725,7 @@ SELECT CLPE.*,
          P.version   as ports_version,
          P.portepoch as ports_epoch,
          P.restricted,
+         P.expiration_date,
          P.no_cdrom
     FROM
 
@@ -1820,6 +1822,7 @@ SELECT SECURITY.commit_log_id,
        SECURITY.vulnerable_past,
        SECURITY.restricted,
        SECURITY.no_cdrom,
+       SECURITY.expiration_date,
        W.watch,
        element_pathname(SECURITY.element_id, FALSE) as element_pathname
 FROM (
@@ -1862,6 +1865,7 @@ SELECT CLPE.*,
          P.version   as ports_version,
          P.portepoch as ports_epoch,
          P.restricted,
+         P.expiration_date,
          P.no_cdrom
     FROM
 
@@ -2003,6 +2007,7 @@ SELECT FOURTH1.port_id,
        FOURTH1.vulnerable_current,
        FOURTH1.vulnerable_past,
        FOURTH1.restricted,
+       FOURTH1.expiration_date,
        FOURTH1.no_cdrom
 FROM
 (SELECT THIRD1b.*,
@@ -2029,6 +2034,7 @@ FROM
         P.ignore,
         P.broken,
         P.restricted,
+        P.expiration_date,
         P.no_cdrom
 FROM         
 (SELECT CL.message_id   AS message_id,
