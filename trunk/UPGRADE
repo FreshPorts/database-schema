@@ -1,6 +1,17 @@
 This file contains notes for upgrading from one database version
 to another.
 
+25 June 2005
+
+alter table ports add column expiration_date date default null;
+create index ports_ports_expiration_date on ports(expiration_date) where expiration_date is not null;
+
+run scripts/Verify/set-expiration-date.pl
+
+run database-schema/sp.txt
+insert into daily_stats (title, query) values ('Expired Ports', 'select Stats_Expired()');
+insert into daily_stats (title, query) values ('Expiration Ports', 'select Stats_Expiration()');
+
 
 15 February 2005
 
