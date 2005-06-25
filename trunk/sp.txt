@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.136 2005-03-20 22:43:41 dan Exp $
+-- $Id: sp.txt,v 1.137 2005-06-25 17:58:21 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -1436,6 +1436,38 @@ CREATE OR REPLACE FUNCTION Stats_WatchListElementCount() returns int8 AS '
 		return RowCount;
 	END
 ' LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION Stats_Expiration() returns int8 AS '
+	DECLARE
+		ExpirationCount	int8;
+
+	BEGIN
+		SELECT count(*)
+		  INTO ExpirationCount
+		  FROM ports
+		 WHERE ports.expiration_date is not null;
+
+		return ExpirationCount;
+	END
+' LANGUAGE 'plpgsql';
+
+
+
+CREATE OR REPLACE FUNCTION Stats_Expired() returns int8 AS '
+	DECLARE
+		ExpirationCount	int8;
+
+	BEGIN
+		SELECT count(*)
+		  INTO ExpirationCount
+		  FROM ports
+		 WHERE ports.expiration_date >= CURRENT_DATE;
+
+		return ExpirationCount;
+	END
+' LANGUAGE 'plpgsql';
+
+
 
 
 CREATE OR REPLACE FUNCTION latest_commits_anchor () RETURNS integer
