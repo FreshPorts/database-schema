@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.138 2005-06-25 18:40:31 dan Exp $
+-- $Id: sp.txt,v 1.139 2005-07-14 02:28:16 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -1444,8 +1444,8 @@ CREATE OR REPLACE FUNCTION Stats_Expiration() returns int8 AS '
 	BEGIN
 		SELECT count(*)
 		  INTO ExpirationCount
-		  FROM ports
-		 WHERE ports.expiration_date is not null;
+		  FROM ports_active
+		 WHERE ports_active.expiration_date is not null;
 
 		return ExpirationCount;
 	END
@@ -1460,8 +1460,8 @@ CREATE OR REPLACE FUNCTION Stats_Expired() returns int8 AS '
 	BEGIN
 		SELECT count(*)
 		  INTO ExpirationCount
-		  FROM ports
-		 WHERE ports.expiration_date >= CURRENT_DATE;
+		  FROM ports_active
+		 WHERE ports_active.expiration_date <= CURRENT_DATE;
 
 		return ExpirationCount;
 	END
@@ -2484,3 +2484,4 @@ BEGIN
 END
 
 ' LANGUAGE 'plpgsql' IMMUTABLE;
+
