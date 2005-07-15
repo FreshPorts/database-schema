@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.139 2005-07-14 02:28:16 dan Exp $
+-- $Id: sp.txt,v 1.140 2005-07-15 03:19:57 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -2485,3 +2485,6 @@ END
 
 ' LANGUAGE 'plpgsql' IMMUTABLE;
 
+CREATE OR REPLACE FUNCTION GMT_Format(timestamp with time zone) returns text AS '
+	SELECT to_char($1 AT TIME ZONE \'UTC\', \'Dy, DD Mon YYYY HH24:MI:SS\') || \' GMT\' as GMT;
+' LANGUAGE 'sql' immutable;
