@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.142 2005-10-11 00:27:26 dan Exp $
+-- $Id: sp.txt,v 1.143 2005-11-01 22:48:54 dan Exp $
 --
 -- Copyright (c) 1998-2003 DVL Software Limited
 --
@@ -1468,6 +1468,21 @@ CREATE OR REPLACE FUNCTION Stats_Expired() returns int8 AS '
 ' LANGUAGE 'plpgsql';
 
 
+CREATE OR REPLACE FUNCTION Stats_Interactive() returns int8 AS '
+	DECLARE
+		InteractiveCount	int8;
+
+	BEGIN
+		SELECT count(*)
+		  INTO InteractiveCount
+		  FROM ports_active
+		 WHERE ports_active.is_interactive != \'\';
+
+		return InteractiveCount;
+	END
+' LANGUAGE 'plpgsql';
+
+
 
 
 CREATE OR REPLACE FUNCTION latest_commits_anchor () RETURNS integer
@@ -1683,6 +1698,9 @@ SELECT SECURITY.commit_log_id,
        SECURITY.restricted,
        SECURITY.no_cdrom,
        SECURITY.expiration_date,
+       SECURITY.is_interactive,
+       SECURITY.only_for_archs,
+       SECURITY.not_for_archs,
        W.watch,
        element_pathname(SECURITY.element_id, FALSE) as element_pathname
 FROM (
@@ -1726,7 +1744,10 @@ SELECT CLPE.*,
          P.portepoch as ports_epoch,
          P.restricted,
          P.expiration_date,
-         P.no_cdrom
+         P.no_cdrom,
+         P.is_interactive,
+         P.only_for_archs,
+         P.not_for_archs
     FROM
 
 
@@ -1823,6 +1844,9 @@ SELECT SECURITY.commit_log_id,
        SECURITY.restricted,
        SECURITY.no_cdrom,
        SECURITY.expiration_date,
+       SECURITY.is_interactive,
+       SECURITY.only_for_archs,
+       SECURITY.not_for_archs,
        W.watch,
        element_pathname(SECURITY.element_id, FALSE) as element_pathname
 FROM (
@@ -1866,7 +1890,10 @@ SELECT CLPE.*,
          P.portepoch as ports_epoch,
          P.restricted,
          P.expiration_date,
-         P.no_cdrom
+         P.no_cdrom,
+         P.is_interactive,
+         P.only_for_archs,
+         P.not_for_archs
     FROM
 
 
@@ -2008,7 +2035,10 @@ SELECT FOURTH1.port_id,
        FOURTH1.vulnerable_past,
        FOURTH1.restricted,
        FOURTH1.expiration_date,
-       FOURTH1.no_cdrom
+       FOURTH1.no_cdrom,
+       FOURTH1.is_interactive,
+       FOURTH1.only_for_archs,
+       FOURTH1.not_for_archs
 FROM
 (SELECT THIRD1b.*,
         ports_vulnerable.current AS vulnerable_current,
@@ -2035,7 +2065,10 @@ FROM
         P.broken,
         P.restricted,
         P.expiration_date,
-        P.no_cdrom
+        P.no_cdrom,
+        P.is_interactive,
+        P.only_for_archs,
+        P.not_for_archs
 FROM         
 (SELECT CL.message_id   AS message_id,
         CL.committer    AS committer,

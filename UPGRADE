@@ -1,3 +1,19 @@
+For adding personal watch lists:
+
+CREATE OR REPLACE FUNCTION Generate_Watch_List_Token() returns text as '
+    SELECT md5((random())::text) || md5((random())::text) as token;
+' LANGUAGE 'sql' VOLATILE;
+
+ALTER TABLE watch_list ADD COLUMN token text;
+ALTER TABLE watch_list ALTER COLUMN token SET DEFAULT generate_watch_list_token();
+update watch_list set token = generate_watch_list_token();
+
+For adding new fields to ports table:
+
+ALTER TABLE ports ADD COLUMN is_interactive text;
+ALTER TABLE ports ADD COLUMN only_for_archs text;
+ALTER TABLE ports ADD COLUMN not_for_archs text;
+
 This file contains notes for upgrading from one database version
 to another.
 
