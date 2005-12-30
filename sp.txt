@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.144 2005-12-30 13:41:33 dan Exp $
+-- $Id: sp.txt,v 1.145 2005-12-30 13:42:02 dan Exp $
 --
 -- Copyright (c) 1998-2005 DVL Software Limited
 --
@@ -2562,32 +2562,3 @@ BEGIN
 END;
 '  LANGUAGE plpgsql STABLE;
 
-CREATE OR REPLACE FUNCTION AnyActiveFiles(int4) returns int4 AS '
-	DECLARE
-		p_element_id   		ALIAS FOR $1;
-
-		queries				RECORD;
-		l_result			int;
-
-BEGIN
-	FOR queries IN 
-		SELECT id, status, directory_file_flag
-	      FROM element
-    	 WHERE parent_id = p_element_id
-	LOOP
-		IF queries.directory_file_flag = \'F\' THEN
-			IF queries.status = \'A\' THEN
-				return 1;
-			END IF;
-		ELSE
-			l_result := AnyActiveFiles(queries.id);
-			IF l_result = 1 THEN
-				return 1;
-			END IF;
-		END IF;
-
-	END LOOP;
-
-	return 0;
-END;
-'  LANGUAGE plpgsql STABLE;
