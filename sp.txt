@@ -1,7 +1,7 @@
 --
--- $Id: sp.txt,v 1.143 2005-11-01 22:48:54 dan Exp $
+-- $Id: sp.txt,v 1.144 2005-12-30 13:41:33 dan Exp $
 --
--- Copyright (c) 1998-2003 DVL Software Limited
+-- Copyright (c) 1998-2005 DVL Software Limited
 --
 
 CREATE OR REPLACE FUNCTION IsDescendantOf (int4 ,int4) returns boolean As '
@@ -2525,3 +2525,69 @@ CREATE OR REPLACE FUNCTION GMT_Format(timestamp with time zone) returns text AS 
 CREATE OR REPLACE FUNCTION Generate_Watch_List_Token() returns text as '
     SELECT md5((random())::text) || md5((random())::text) as token;
 ' LANGUAGE 'sql' VOLATILE;
+
+--
+-- takes an element_id and checks to see if all files below it have
+-- been deleted.
+--
+-- returns 1 if all files have been deleted
+-- returns 0 if at least one file below it has not been deleted
+CREATE OR REPLACE FUNCTION AllFilesDeleted(int4) returns int4 AS '
+	DECLARE
+		p_element_id   		ALIAS FOR $1;
+
+		queries				RECORD;
+		l_result			int;
+
+BEGIN
+	FOR queries IN 
+		SELECT id, status, directory_file_flag
+	      FROM element
+    	 WHERE parent_id = p_element_id
+	LOOP
+		IF queries.directory_file_flag = \'F\' THEN
+			IF queries.status = \'A\' THEN
+				return 0;
+			END IF;
+		ELSE
+			l_result := AllFilesDeleted(queries.id);
+			IF l_result = 0 THEN
+				return 0;
+			END IF;
+		END IF;
+
+	END LOOP;
+
+	return 1;
+END;
+'  LANGUAGE plpgsql STABLE;
+
+CREATE OR REPLACE FUNCTION AnyActiveFiles(int4) returns int4 AS '
+	DECLARE
+		p_element_id   		ALIAS FOR $1;
+
+		queries				RECORD;
+		l_result			int;
+
+BEGIN
+	FOR queries IN 
+		SELECT id, status, directory_file_flag
+	      FROM element
+    	 WHERE parent_id = p_element_id
+	LOOP
+		IF queries.directory_file_flag = \'F\' THEN
+			IF queries.status = \'A\' THEN
+				return 1;
+			END IF;
+		ELSE
+			l_result := AnyActiveFiles(queries.id);
+			IF l_result = 1 THEN
+				return 1;
+			END IF;
+		END IF;
+
+	END LOOP;
+
+	return 0;
+END;
+'  LANGUAGE plpgsql STABLE;
