@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.145 2005-12-30 13:42:02 dan Exp $
+-- $Id: sp.txt,v 1.146 2006-01-07 22:25:32 dan Exp $
 --
 -- Copyright (c) 1998-2005 DVL Software Limited
 --
@@ -2261,6 +2261,9 @@ CREATE OR REPLACE FUNCTION SetSlavePort(text, text) returns int4 AS '
 
 		l_MasterPortCategory	text;
 		l_MasterPortName		text;
+
+		l_SlavePortCategory     text;
+		l_SlavePortName         text;
 
 		position				int;
 
