@@ -1,7 +1,7 @@
 --
--- $Id: sp.txt,v 1.147 2006-01-08 02:49:57 dan Exp $
+-- $Id: sp.txt,v 1.148 2006-02-13 15:16:16 dan Exp $
 --
--- Copyright (c) 1998-2005 DVL Software Limited
+-- Copyright (c) 1998-2006 DVL Software Limited
 --
 
 CREATE OR REPLACE FUNCTION IsDescendantOf (int4 ,int4) returns boolean As '
@@ -2565,3 +2565,49 @@ BEGIN
 END;
 '  LANGUAGE plpgsql STABLE;
 
+CREATE OR REPLACE FUNCTION WatchListDeletedPorts(bigint) returns SETOF old_new_ports_record AS'
+DECLARE
+	p_WatchListID ALIAS for $1;
+
+	r	 	old_new_ports_record%rowtype;
+
+BEGIN
+FOR r IN
+SELECT E1.name AS name_old,
+       C1.name AS category_old,
+       E2.name AS name_new,
+       C2.name AS category_new
+  FROM watch_list_element WLE,
+       ports_moved        PM,
+       element            E1,
+       ports              P1,
+       element            E2,
+       ports              P2,
+       categories         C1,
+       categories         C2
+ WHERE WLE.watch_list_id = p_WatchListID
+   AND WLE.element_id    = E1.id
+   AND E1.id             = P1.element_id
+   AND P1.id             = PM.from_port_id
+   AND P1.category_id    = C1.id
+   AND PM.to_port_id     = P2.id
+   AND P2.element_id     = E2.id
+   AND P2.category_id    = C2.id
+LOOP
+	RETURN NEXT r;
+END LOOP;
+RETURN;
+END
+'
+LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION Port_ID(text, text) returns integer AS '
+	SELECT P.id
+	  FROM element EP, ports P, categories C, ports_categories PC
+	WHERE EP.name        = $2
+	  AND EP.id          = P.element_id
+	  AND C.name         = $1
+	  AND PC.port_id     = P.id
+	  AND PC.category_id = C.id;
+' LANGUAGE SQL STABLE;
