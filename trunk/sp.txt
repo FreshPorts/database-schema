@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.149 2006-02-21 20:59:30 dan Exp $
+-- $Id: sp.txt,v 1.150 2006-06-06 22:48:39 dan Exp $
 --
 -- Copyright (c) 1998-2006 DVL Software Limited
 --
@@ -2612,3 +2612,22 @@ CREATE OR REPLACE FUNCTION Port_ID(text, text) returns integer AS '
 	  AND PC.category_id = C.id
 	  AND P.category_id  = C.id;
 ' LANGUAGE SQL STABLE;
+
+
+-- This function returns the latest commit date
+CREATE OR REPLACE FUNCTION LatestCommitDate() returns timestamp with time zone AS '
+   SELECT CL.date_added
+     FROM commit_log CL
+ ORDER BY CL.id desc limit 1;
+' LANGUAGE SQL STABLE;
+
+-- This function returns the latest commit date for the ports tree
+CREATE OR REPLACE FUNCTION LatestCommitDatePorts() returns timestamp with time zone AS '
+SELECT CL.date_added
+  FROM commit_log CL
+ WHERE CL.id = ( SELECT LCP.commit_log_id
+                   FROM latest_commits_ports LCP
+               ORDER BY LCP.commit_log_id DESC
+                  LIMIT 1)
+' LANGUAGE SQL STABLE;
+
