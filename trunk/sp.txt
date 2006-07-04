@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.150 2006-06-06 22:48:39 dan Exp $
+-- $Id: sp.txt,v 1.151 2006-07-04 19:49:05 dan Exp $
 --
 -- Copyright (c) 1998-2006 DVL Software Limited
 --
@@ -2604,9 +2604,21 @@ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION Port_ID(text, text) returns integer AS '
 	SELECT P.id
-	  FROM element EP, ports P, categories C, ports_categories PC
-	WHERE EP.name        = $2
-	  AND EP.id          = P.element_id
+	  FROM element E, ports P, categories C, ports_categories PC
+	WHERE E.name         = $2
+	  AND E.id           = P.element_id
+	  AND C.name         = $1
+	  AND PC.port_id     = P.id
+	  AND PC.category_id = C.id
+	  AND P.category_id  = C.id;
+' LANGUAGE SQL STABLE;
+
+
+CREATE OR REPLACE FUNCTION Element_ID(text, text) returns integer AS '
+	SELECT E.id
+	  FROM element E, ports P, categories C, ports_categories PC
+	WHERE E.name         = $2
+	  AND E.id           = P.element_id
 	  AND C.name         = $1
 	  AND PC.port_id     = P.id
 	  AND PC.category_id = C.id
@@ -2630,4 +2642,16 @@ SELECT CL.date_added
                ORDER BY LCP.commit_log_id DESC
                   LIMIT 1)
 ' LANGUAGE SQL STABLE;
+
+
+CREATE OR REPLACE FUNCTION OnWatchList(integer, integer) returns bigint AS '
+	  SELECT COUNT(watch_list_id) as onwatchlist
+	    FROM watch_list WL JOIN watch_list_element WLE
+	      ON WL.id          = WLE.watch_list_id
+	     AND WL.user_id     = $1
+	     AND WL.in_service
+	     AND WLE.element_id = $2
+	GROUP BY element_id
+' LANGUAGE SQL STABLE;
+
 
