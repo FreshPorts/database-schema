@@ -1,7 +1,7 @@
 --
--- $Id: datatype.txt,v 1.19 2006-02-13 15:16:45 dan Exp $
+-- $Id: datatype.txt,v 1.20 2006-07-27 19:12:12 dan Exp $
 --
--- Copyright (c) 1998-2003 DVL Software Limited
+-- Copyright (c) 1998-2006 DVL Software Limited
 --
 
 CREATE TYPE commit_record AS (
@@ -30,7 +30,6 @@ CREATE TYPE commit_record AS (
 	port                 text,
 	status               character(1),
 	category             text,
-	security_notice_id   integer,
 	vulnerable_current   integer,
 	vulnerable_past      integer,
     restricted           text,
@@ -78,7 +77,6 @@ CREATE TYPE freshports_commit_record AS (
 	deprecated         text,
 	ignore             text,
 	broken             text,
-	security_notice_id integer,
 	vulnerable_current integer,
 	vulnerable_past    integer,
     restricted         text,
