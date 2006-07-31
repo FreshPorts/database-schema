@@ -1,5 +1,5 @@
 --
--- $Id: createdb.sql,v 1.82 2005-06-25 17:57:58 dan Exp $
+-- $Id: createdb.sql,v 1.83 2006-07-31 01:37:11 dan Exp $
 --
 -- The following options should be used to create the database schema
 --
@@ -261,6 +261,47 @@ create table vuxml
     primary key (id)
 );
 
+create table releases
+(
+    id                         serial                not null,
+    name                       text                  not null,
+    revision                   text                  not null,
+    primary key (id)
+);
+
+create unique index release_name_idx on releases (name);
+
+create table archs
+(
+    id                         serial                not null,
+    name                       text                  not null,
+    primary key (id)
+);
+
+insert into archs (name) values ('alpha');
+insert into archs (name) values ('amd64');
+insert into archs (name) values ('i386');
+insert into archs (name) values ('ia64');
+insert into archs (name) values ('pc98');
+insert into archs (name) values ('ppc');
+insert into archs (name) values ('sparc64');
+
+create unique index archs_name_idx on archs (name);
+
+create table port_status
+(
+    id                         serial                not null,
+    name                       text                  not null,
+    description                text                  not null,
+    primary key (id)
+);
+
+insert into port_status (name, description) values ('BROKEN', 'port is broken on this ARCH/RELEASE');
+insert into port_status (name, description) values ('ONLY_FOR_ARCHS', 'port works only on these ARCHS');
+insert into port_status (name, description) values ('NOT_FOR_ARCHS', 'port does not work on these ARCHS');
+
+create unique index port_status_name_idx on port_status (name);
+
 create table element_revision
 (
     element_id                 integer               not null,
@@ -313,6 +354,9 @@ create table ports
     restricted                 text                          ,
     no_cdrom                   text                          ,
     expiration_date            date                          ,
+    is_interactive             text                          ,
+    only_for_archs             text                          ,
+    not_for_archs              text                          ,
     primary key (id)
 );
 
@@ -374,8 +418,12 @@ create table watch_list
         default FALSE,
     in_service                 boolean               not null
         default FALSE,
+    token                      text                  not null
+        default generate_watch_list_token(),
     primary key (id)
 );
+
+create unique index watch_list_token on watch_list (token);
 
 create table security_notice
 (
@@ -700,6 +748,23 @@ create table ports_vulnerable
     primary key (port_id)
 );
 
+create table arch_release_port_status
+(
+    port_id                    integer               not null,
+    arch_id                    integer               not null,
+    release_id                 integer               not null,
+    status_id                  integer               not null,
+    message                    text                  not null,
+    primary key (port_id, arch_id, release_id, status_id)
+);
+
+create table element_pathname
+(
+    element_id                 integer               not null,
+    pathname                   text                  not null,
+    primary key (element_id)
+);
+
 create view commits_recent as
 select distinct commit_log.id, commit_log.message_id, commit_log.message_date,
 commit_log.message_subject, commit_log.date_added, commit_log.commit_date,
@@ -980,4 +1045,24 @@ alter table vuxml_names
 alter table ports_vulnerable
     add foreign key  (port_id)
        references ports (id) on update restrict on delete cascade;
+
+alter table arch_release_port_status
+    add foreign key  (release_id)
+       references releases (id) on update cascade on delete cascade;
+
+alter table arch_release_port_status
+    add foreign key  (arch_id)
+       references archs (id) on update cascade on delete cascade;
+
+alter table arch_release_port_status
+    add foreign key  (port_id)
+       references ports (id) on update cascade on delete cascade;
+
+alter table arch_release_port_status
+    add foreign key  (status_id)
+       references port_status (id) on update cascade on delete cascade;
+
+alter table element_pathname
+    add foreign key  (element_id)
+       references element (id) on update cascade on delete cascade;
 
