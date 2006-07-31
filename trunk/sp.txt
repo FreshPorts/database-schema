@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.151 2006-07-04 19:49:05 dan Exp $
+-- $Id: sp.txt,v 1.152 2006-07-31 14:20:13 dan Exp $
 --
 -- Copyright (c) 1998-2006 DVL Software Limited
 --
@@ -1556,71 +1556,6 @@ CREATE OR REPLACE FUNCTION CategoryPortCount(text) returns bigint AS '
 	   AND element.status               = \'A\';
 ' LANGUAGE SQL STABLE;
 
-CREATE OR REPLACE FUNCTION SecurityNoticeCreate(integer, inet, text, text, text) RETURNS bigint
-    AS '
-   DECLARE
-      UserID       ALIAS for $1;
-      IPAddress    ALIAS for $2;
-      NoticeMsg    ALIAS for $3;
-      MessageID    ALIAS for $4;
-      p_Status     ALIAS for $5;
-      CommitLogID       int8;
-      SecurityNoticeID  int8;
-
-   BEGIN
-      SELECT id, commit_log_id
-        INTO SecurityNoticeID, CommitLogID
-        FROM security_notice
-       WHERE commit_log_id =
-                (SELECT id
-                   FROM commit_log
-                  WHERE message_id = MessageID
-                 );
-
-      IF FOUND THEN
-			RAISE NOTICE '' Updating security notice for % MessageID User % from % said %'', MessageID, UserId, IPAddress, NoticeMsg;
-         UPDATE security_notice
-            SET user_id                   = UserID,
-                ip_address                = IPAddress,
-                description               = NoticeMsg,
-                security_notice_status_id = p_Status
-          WHERE id                        = SecurityNoticeID;
-      ELSE
-         SELECT id
-           INTO CommitLogID
-           FROM commit_log
-          WHERE message_id = MessageID;
-
-         IF FOUND THEN
-            -- obtain the next number in the sequence
-            SecurityNoticeID := nextval(\'security_notice_id_seq\');
-
-   			RAISE NOTICE '' Creating security notice % for % MessageID User % from % said %'', SecurityNoticeID, MessageID, UserId, IPAddress, NoticeMsg;
-
-            INSERT INTO security_notice
-                   (id,
-                    user_id,
-                    ip_address,
-                    description,
-                    commit_log_id,
-                    security_notice_status_id)
-            VALUES (SecurityNoticeID,
-                    UserID,
-                    IPAddress,
-                    NoticeMsg,
-                    CommitLogID,
-                    p_Status);
-         ELSE
-            RAISE NOTICE ''attempt to insert security notice for unknown message % by User % from % message %'', MessageID, UserID, IPAddress, NoticeMsg;
-         END IF;
-      END IF;
-
-      return SecurityNoticeID;
-
-   END
-'
-    LANGUAGE plpgsql;
-
 
 CREATE OR REPLACE FUNCTION watch_list_count(integer) RETURNS bigint
     AS '
@@ -1643,6 +1578,34 @@ BEGIN
 	IF MaxCommits = 100 THEN
 		FOR r IN
 			SELECT * FROM LatestCommitsLarge(UserID)
+		LOOP
+    	    RETURN NEXT r;
+	    END LOOP;
+	ELSE
+		FOR r IN
+			SELECT * FROM LatestCommitsSmall(UserID)
+		LOOP
+    	    RETURN NEXT r;
+	    END LOOP;
+	END IF;
+
+    RETURN;
+END
+'
+LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION LatestCommitsFiltered(int, int, text) RETURNS SETOF commit_record AS '
+DECLARE
+	MaxCommits	ALIAS for $1;
+	UserID		ALIAS for $2;
+	Filter		ALIAS for $3;
+
+	r 	commit_record%rowtype;
+
+BEGIN
+	IF MaxCommits = 100 THEN
+		FOR r IN
+			SELECT * FROM LatestCommitsLargeFiltered(UserID, Filter)
 		LOOP
     	    RETURN NEXT r;
 	    END LOOP;
@@ -1692,7 +1655,6 @@ SELECT SECURITY.commit_log_id,
        SECURITY.port,
        SECURITY.status,
        SECURITY.category,
-       SECURITY.security_notice_id,
        SECURITY.vulnerable_current,
        SECURITY.vulnerable_past,
        SECURITY.restricted,
@@ -1704,8 +1666,7 @@ SELECT SECURITY.commit_log_id,
        W.watch,
        element_pathname(SECURITY.element_id, FALSE) as element_pathname
 FROM (
-SELECT PEC.*,
-       security_notice.id  AS security_notice_id
+SELECT PEC.*
 FROM (
 SELECT PORTELEMENT.*,
        categories.name AS category
@@ -1786,8 +1747,153 @@ SELECT CLPE.*,
 on LCPPORTS.element_id = element.id) AS PORTELEMENT LEFT JOIN categories
 on PORTELEMENT.category_id = categories.id)
 
- AS PEC LEFT OUTER JOIN security_notice
-ON PEC.commit_log_id = security_notice.commit_log_id) AS SECURITY LEFT OUTER JOIN
+ AS PEC) AS SECURITY LEFT OUTER JOIN
+(SELECT element_id as wle_element_id, COUNT(watch_list_id) as watch
+  FROM watch_list JOIN watch_list_element
+        ON watch_list.id      = watch_list_element.watch_list_id
+       AND watch_list.user_id = UserID
+       AND watch_list.in_service
+GROUP BY wle_element_id) AS W ON W.wle_element_id = SECURITY.element_id
+order by commit_date_raw desc, category, port
+
+	LOOP
+        RETURN NEXT r;
+    END LOOP;
+    RETURN;
+END
+'
+LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION LatestCommitsLargeFiltered(int, text) RETURNS SETOF commit_record AS '
+DECLARE
+	UserID		ALIAS for $1;
+	Filter		ALIAS for $2;
+
+	r 	commit_record%rowtype;
+
+BEGIN
+    FOR r IN
+SELECT SECURITY.commit_log_id,
+       SECURITY.commit_date_raw,
+       SECURITY.message_subject,
+       SECURITY.message_id,
+       SECURITY.committer,
+       SECURITY.commit_description,
+       SECURITY.commit_date,
+       SECURITY.commit_time,
+       SECURITY.encoding_losses,
+       SECURITY.port_id,
+       SECURITY.needs_refresh,
+       SECURITY.forbidden,
+       SECURITY.broken,
+       SECURITY.deprecated,
+       SECURITY.ignore,
+       SECURITY.element_id,
+       SECURITY.version,
+       SECURITY.revision,
+       SECURITY.epoch,
+       SECURITY.date_added,
+       SECURITY.short_description,
+       SECURITY.category_id,
+       SECURITY.port,
+       SECURITY.status,
+       SECURITY.category,
+       SECURITY.vulnerable_current,
+       SECURITY.vulnerable_past,
+       SECURITY.restricted,
+       SECURITY.no_cdrom,
+       SECURITY.expiration_date,
+       SECURITY.is_interactive,
+       SECURITY.only_for_archs,
+       SECURITY.not_for_archs,
+       W.watch,
+       element_pathname(SECURITY.element_id, FALSE) as element_pathname
+FROM (
+SELECT PEC.*
+FROM (
+SELECT PORTELEMENT.*,
+       categories.name AS category
+FROM (
+SELECT LCPPORTS.*,
+       element.name    AS port,
+       element.status  AS status,
+        CASE WHEN port_id IS NULL THEN commit_log_id ELSE NULL END AS non_port_commit_log_id,
+        CASE when clp_version  IS NULL then ports_version  else clp_version  END as version,
+        CASE when clp_revision IS NULL then ports_revision else clp_revision END AS revision,
+        CASE when clp_epoch    IS NULL then ports_epoch    else clp_epoch    END AS epoch
+FROM (
+  SELECT VERSIONS_VULN.*, 
+        CLP.port_version  AS clp_version,
+        CLP.port_revision AS clp_revision,
+        CLP.port_epoch    AS clp_epoch,
+        CLP.needs_refresh AS needs_refresh
+FROM
+(
+SELECT VERSIONS.*,
+       ports_vulnerable.current AS vulnerable_current,
+       ports_vulnerable.past    AS vulnerable_past
+FROM
+( 
+SELECT CLPE.*,
+         P.id as port_id,
+         P.forbidden,
+         P.broken,
+         P.deprecated,
+         P.ignore,
+         date_part(\'epoch\', P.date_added)::integer AS date_added,
+         P.short_description              AS short_description,
+         P.category_id,
+         P.revision  as ports_revision,
+         P.version   as ports_version,
+         P.portepoch as ports_epoch,
+         P.restricted,
+         P.expiration_date,
+         P.no_cdrom,
+         P.is_interactive,
+         P.only_for_archs,
+         P.not_for_archs
+    FROM
+
+
+  (SELECT LCPCL.*,
+          CLPE.element_id,
+          element_pathname(CLPE.element_id)
+   FROM 
+   (SELECT commit_log.id     AS commit_log_id, 
+           commit_date       AS commit_date_raw,
+           message_subject,
+           message_id,
+           committer,
+           description       AS commit_description,
+           to_char(commit_log.commit_date - SystemTimeAdjust(), \'DD Mon YYYY\')  AS commit_date,
+           to_char(commit_log.commit_date - SystemTimeAdjust(), \'HH24:MI\')      AS commit_time,
+           encoding_losses
+     FROM commit_log JOIN
+                (  SELECT distinct LC.commit_log_id, LC.commit_date as dummy_field
+                     FROM latest_commits LC, commit_log_elements CLE, element_pathname EP
+                    WHERE LC.commit_log_id = CLE.commit_log_id
+                      AND CLE.element_id   = EP.element_id
+                      AND EP.pathname      like Filter
+                 ORDER BY LC.commit_date DESC
+                    LIMIT 5) AS 
+                  LCP ON commit_log.id = LCP.commit_log_id) AS LCPCL
+                      JOIN commit_log_ports_elements CLPE on CLPE.commit_log_id = LCPCL.commit_log_id
+                                                         AND CLPE.commit_log_id > latest_commits_ports_anchor()
+
+
+) AS CLPE
+           LEFT OUTER JOIN ports P ON CLPE.element_id = P.element_id) AS VERSIONS
+           LEFT OUTER JOIN ports_vulnerable ON VERSIONS.port_id = ports_vulnerable.port_ID) AS VERSIONS_VULN
+           LEFT OUTER JOIN commit_log_ports CLP ON CLP.commit_log_id = VERSIONS_VULN.commit_log_id
+                                     AND VERSIONS_VULN.port_id = CLP.port_id
+                                AND CLP.commit_log_id > latest_commits_ports_anchor()
+
+
+) AS LCPPORTS JOIN element
+on LCPPORTS.element_id = element.id) AS PORTELEMENT LEFT JOIN categories
+on PORTELEMENT.category_id = categories.id)
+
+ AS PEC) AS SECURITY LEFT OUTER JOIN
 (SELECT element_id as wle_element_id, COUNT(watch_list_id) as watch
   FROM watch_list JOIN watch_list_element
         ON watch_list.id      = watch_list_element.watch_list_id
@@ -1838,7 +1944,6 @@ SELECT SECURITY.commit_log_id,
        SECURITY.port,
        SECURITY.status,
        SECURITY.category,
-       SECURITY.security_notice_id,
        SECURITY.vulnerable_current,
        SECURITY.vulnerable_past,
        SECURITY.restricted,
@@ -1850,8 +1955,7 @@ SELECT SECURITY.commit_log_id,
        W.watch,
        element_pathname(SECURITY.element_id, FALSE) as element_pathname
 FROM (
-SELECT PEC.*,
-       security_notice.id  AS security_notice_id
+SELECT PEC.*
 FROM (
 SELECT PORTELEMENT.*,
        categories.name AS category
@@ -1932,8 +2036,7 @@ SELECT CLPE.*,
 on LCPPORTS.element_id = element.id) AS PORTELEMENT LEFT JOIN categories
 on PORTELEMENT.category_id = categories.id)
 
- AS PEC LEFT OUTER JOIN security_notice
-ON PEC.commit_log_id = security_notice.commit_log_id) AS SECURITY LEFT OUTER JOIN
+ AS PEC) AS SECURITY LEFT OUTER JOIN
 (SELECT element_id as wle_element_id, COUNT(watch_list_id) as watch
   FROM watch_list JOIN watch_list_element
         ON watch_list.id      = watch_list_element.watch_list_id
@@ -2030,7 +2133,6 @@ SELECT FOURTH1.port_id,
        FOURTH1.deprecated,
        FOURTH1.ignore,
        FOURTH1.broken,
-       FOURTH1.security_notice_id,
        FOURTH1.vulnerable_current,
        FOURTH1.vulnerable_past,
        FOURTH1.restricted,
@@ -2076,11 +2178,8 @@ FROM
         CL.id           AS commit_log_id,
         CLPE.element_id AS element_id,
         CL.commit_date,
-        CL.encoding_losses,
-        SN.id           AS security_notice_id
+        CL.encoding_losses
    FROM commit_log CL JOIN commit_log_ports_elements CLPE ON CL.id = CLPE.commit_log_id
-                LEFT OUTER JOIN security_notice SN ON CLPE.commit_log_id           = SN.commit_log_id
-                                                  AND SN.security_notice_status_id = \'A\'
   WHERE CL.message_id = $1) AS FIRST1
        LEFT OUTER JOIN ports P ON P.element_id = FIRST1.element_id) AS SECOND1
        JOIN element E on SECOND1.element_id = E.id) AS THIRD1
