@@ -1,4 +1,9 @@
-define SPOOLINGDIR in config.sh first
+30 July 2006
+
+define SPOOLINGDIR in scripts/config.sh
+
+
+
 
 
 For adding personal watch lists:
