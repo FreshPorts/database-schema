@@ -2,9 +2,20 @@
 
 define SPOOLINGDIR in scripts/config.sh
 
+for adding element_pathname:
+
+create table element_pathname(element_id integer not null, pathname
+text not null);
+
+alter table element_pathname add foreign key (element_id) references
+element(id) on delete cascade;
+
+create UNIQUE index element_pathname_pathname on element_pathname(pathname);
+
+will triggers that maintain the above based on triggers.
 
 
-
+#####
 
 For adding personal watch lists:
 
