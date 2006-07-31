@@ -1,5 +1,5 @@
 --
--- $Id: ri.txt,v 1.36 2006-07-27 19:11:51 dan Exp $
+-- $Id: ri.txt,v 1.37 2006-07-31 02:15:35 dan Exp $
 --
 -- Copyright (c) 1998-2006 DVL Software Limited
 --
@@ -71,13 +71,6 @@ end;
   DROP TRIGGER check_siblings ON element;
 CREATE TRIGGER check_siblings AFTER INSERT OR UPDATE ON element FOR EACH ROW
 EXECUTE PROCEDURE check_siblings();
-
-
-
-
-
-
-
 
 
 CREATE OR REPLACE FUNCTION on_delete_remove_children() RETURNS TRIGGER as '
@@ -179,6 +172,38 @@ CREATE TRIGGER id_change BEFORE UPDATE ON element FOR EACH ROW
 EXECUTE PROCEDURE id_change();
 
 
+
+
+CREATE OR REPLACE FUNCTION element_pathname_insert() RETURNS TRIGGER AS $$
+   BEGIN
+		INSERT INTO element_pathname (element_id, pathname)
+			VALUES (NEW.id, element_pathname(NEW.id));
+      RETURN NEW;
+   END
+$$ LANGUAGE 'plpgsql';
+
+  DROP TRIGGER element_pathname_insert ON element;
+CREATE TRIGGER element_pathname_insert
+    AFTER INSERT on element
+    FOR EACH ROW
+    EXECUTE PROCEDURE element_pathname_insert();
+
+CREATE OR REPLACE FUNCTION element_pathname_update() RETURNS TRIGGER AS $$
+   BEGIN
+		if (NEW.name != old.name) THEN
+			UPDATE element_pathname SET pathname = element_pathname(new.id) WHERE element_id = NEW.id;
+		END IF;
+      RETURN NEW;
+   END
+$$ LANGUAGE 'plpgsql';
+
+  DROP TRIGGER element_pathname_insert ON element;
+CREATE TRIGGER element_pathname_insert
+    AFTER UPDATE on element
+    FOR EACH ROW
+    EXECUTE PROCEDURE element_pathname_update();
+
+
 CREATE OR REPLACE FUNCTION version_revision_uniqueness() RETURNS TRIGGER as '
    declare 
       ElementID            int4;
@@ -237,10 +262,6 @@ end;
   DROP TRIGGER element_delete_check ON commit_log_elements;
 CREATE TRIGGER element_delete_check BEFORE INSERT OR UPDATE ON commit_log_elements FOR EACH ROW
 EXECUTE PROCEDURE element_delete_check();
-
-
-
-
 
 
 
@@ -343,13 +364,12 @@ EXECUTE PROCEDURE categories_insert_update();
 
 CREATE OR REPLACE FUNCTION ports_categories_set() RETURNS TRIGGER AS '
    DECLARE
-      CategoryCount  integer;
+		CategoryCount	integer;
 		CategoryNames	text;
-      Category       text;
+		Category		text;
 		CategoryID		int8;
 		UpdateNeeded	boolean;
    BEGIN
-
 		UpdateNeeded := TRUE;
 
 		IF TG_OP = ''UPDATE'' THEN
@@ -410,8 +430,9 @@ CREATE TRIGGER ports_ports_categories
     FOR EACH ROW
     EXECUTE PROCEDURE ports_categories_set();
 
+
 --
--- These routine keep track of the latest commits.
+-- These routines keep track of the latest commits.
 -- It is a short cut mechanism.
 --
 
@@ -482,4 +503,5 @@ CREATE TRIGGER commit_log_ports_insert
 AFTER INSERT on commit_log_ports
 FOR EACH ROW
 EXECUTE PROCEDURE commit_log_ports_insert ();
+
 
