@@ -1,5 +1,5 @@
 --
--- $Id: datatype.txt,v 1.20 2006-07-27 19:12:12 dan Exp $
+-- $Id: datatype.txt,v 1.21 2006-07-31 15:14:23 dan Exp $
 --
 -- Copyright (c) 1998-2006 DVL Software Limited
 --
@@ -84,7 +84,8 @@ CREATE TYPE freshports_commit_record AS (
     no_cdrom           text,
     is_interactive     text,
     only_for_archs     text,
-    not_for_archs      text
+    not_for_archs      text,
+	watch              bigint
 );
 
 CREATE TYPE logincounts_record AS (

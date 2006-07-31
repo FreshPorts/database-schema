@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.152 2006-07-31 14:20:13 dan Exp $
+-- $Id: sp.txt,v 1.153 2006-07-31 15:14:24 dan Exp $
 --
 -- Copyright (c) 1998-2006 DVL Software Limited
 --
@@ -2108,7 +2108,7 @@ CREATE OR REPLACE FUNCTION freshports_commit_count_elements(text) RETURNS bigint
   WHERE CL.message_id = $1;
 ' LANGUAGE SQL STABLE;
 
-CREATE OR REPLACE FUNCTION freshports_commit(text, int, int) RETURNS SETOF freshports_commit_record AS '
+CREATE OR REPLACE FUNCTION freshports_commit(text, int, int, int) RETURNS SETOF freshports_commit_record AS '
 SELECT FOURTH1.port_id,
        FOURTH1.short_description,
        C.name   AS category,
@@ -2140,7 +2140,8 @@ SELECT FOURTH1.port_id,
        FOURTH1.no_cdrom,
        FOURTH1.is_interactive,
        FOURTH1.only_for_archs,
-       FOURTH1.not_for_archs
+       FOURTH1.not_for_archs,
+       OnWatchList($4, FOURTH1.element_id) as watch
 FROM
 (SELECT THIRD1b.*,
         ports_vulnerable.current AS vulnerable_current,
