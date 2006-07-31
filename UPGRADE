@@ -1,3 +1,6 @@
+define SPOOLINGDIR in config.sh first
+
+
 For adding personal watch lists:
 
 CREATE OR REPLACE FUNCTION Generate_Watch_List_Token() returns text as '
