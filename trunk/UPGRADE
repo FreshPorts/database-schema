@@ -1,11 +1,27 @@
 30 July 2006
 
+create table category_stats
+(
+    category_id                integer               not null,
+    port_count                 integer               not null,
+    last_update                timestamp without time zone not null,
+    primary key (category_id)
+);
+
+alter table category_stats
+    add foreign key  (category_id)
+       references categories (id) on update cascade on delete cascade;
+
+
 define SPOOLINGDIR in scripts/config.sh
 
 for adding element_pathname:
 
 create table element_pathname(element_id integer not null, pathname
 text not null);
+
+insert into element_pathname (select id, element_pathname(id) from
+element);
 
 alter table element_pathname add foreign key (element_id) references
 element(id) on delete cascade;
