@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.153 2006-07-31 15:14:24 dan Exp $
+-- $Id: sp.txt,v 1.154 2006-08-02 17:33:33 dan Exp $
 --
 -- Copyright (c) 1998-2006 DVL Software Limited
 --
@@ -2754,4 +2754,30 @@ CREATE OR REPLACE FUNCTION OnWatchList(integer, integer) returns bigint AS '
 	GROUP BY element_id
 ' LANGUAGE SQL STABLE;
 
+
+CREATE OR REPLACE FUNCTION CategoryStatsUpdate() returns int as $$
+BEGIN
+ DELETE FROM category_stats;
+ INSERT INTO category_stats (
+  SELECT categories.id               AS category_id,
+         count(ports_active.id)      AS count,
+         max(commit_log.commit_date) AS updated
+         
+    FROM categories, ports_active left outer join commit_log on ( ports_active.last_commit_id = commit_log.id )
+   WHERE categories.id   = ports_active.category_id
+     AND categories.is_primary
+GROUP BY categories.id, categories.name, categories.description, is_primary, categories.element_id
+UNION
+  SELECT categories.id               AS category_id,
+         count(ports_active.id)      AS count,
+         max(commit_log.commit_date) AS updated
+    FROM ports_categories, categories, ports_active left outer join commit_log on ( ports_active.last_commit_id = commit_log.id )
+   WHERE ports_active.id = ports_categories.port_id
+     AND categories.id   = ports_categories.category_id
+     AND NOT categories.is_primary
+GROUP BY categories.id, categories.name, categories.description, is_primary, categories.element_id);
+
+	return 1;
+END;
+$$ LANGUAGE plpgsql;
 
