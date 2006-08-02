@@ -1,5 +1,5 @@
 --
--- $Id: ri.txt,v 1.37 2006-07-31 02:15:35 dan Exp $
+-- $Id: ri.txt,v 1.38 2006-08-02 14:13:45 dan Exp $
 --
 -- Copyright (c) 1998-2006 DVL Software Limited
 --
@@ -197,8 +197,8 @@ CREATE OR REPLACE FUNCTION element_pathname_update() RETURNS TRIGGER AS $$
    END
 $$ LANGUAGE 'plpgsql';
 
-  DROP TRIGGER element_pathname_insert ON element;
-CREATE TRIGGER element_pathname_insert
+  DROP TRIGGER element_pathname_update ON element;
+CREATE TRIGGER element_pathname_update
     AFTER UPDATE on element
     FOR EACH ROW
     EXECUTE PROCEDURE element_pathname_update();
