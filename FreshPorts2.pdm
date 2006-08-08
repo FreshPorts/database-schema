@@ -48,7 +48,7 @@ FreshPorts2
 PostgreSQL 7.x
 PostgreSQL.def
 --\
--- $Id: FreshPorts2.pdm,v 1.105 2006-08-08 18:51:01 dan Exp $\
+-- $Id: FreshPorts2.pdm,v 1.106 2006-08-08 19:09:35 dan Exp $\
 --\
 -- The following options should be used to create the database schema\
 --\
@@ -20403,18 +20403,22 @@ Arial
 MS Sans Serif
 8
 0
-4
-Arial
-8
-8
-5
-Arial
 6
-0
-6
+Comic Sans MS
+14
+1
+10
 Comic Sans MS
 9
 1
+11
+Arial
+8
+8
+12
+Arial
+6
+0
 /END_TABLE AMCFONT
 
 /BEGIN_TABLE AMCPENS
@@ -20512,7 +20516,7 @@ LineStyle
 0
 DataArchitect
 PrnScale
-100
+43
 4
 2
 0
@@ -22648,10 +22652,10 @@ OLE     BIN
 0
 0
 0
-28434
--199619
-51083
--179668
+-24937
+13953
+-2288
+33904
 2
 1
 0
@@ -22668,7 +22672,7 @@ OLE     BIN
 
 
 
-2
+23529
 22
 
 3
@@ -22681,10 +22685,10 @@ OLE     BIN
 0
 0
 0
-68303
--191307
-79852
--184031
+14932
+22265
+26481
+29541
 2
 1
 0
@@ -22701,7 +22705,7 @@ OLE     BIN
 
 
 
-2
+23529
 25
 
 3
@@ -22714,10 +22718,10 @@ OLE     BIN
 0
 0
 0
-67001
--210766
-76525
--207242
+13630
+2806
+23154
+6330
 2
 1
 0
@@ -22734,7 +22738,7 @@ OLE     BIN
 
 
 
-2
+23529
 29
 
 3
@@ -22747,10 +22751,10 @@ OLE     BIN
 0
 0
 0
-1999
--186840
-19173
--181514
+-51372
+26732
+-34198
+32058
 2
 1
 0
@@ -22767,7 +22771,7 @@ OLE     BIN
 
 
 
-2
+23529
 192
 
 3
@@ -22780,10 +22784,10 @@ OLE     BIN
 0
 0
 0
--24952
--186475
--4253
--180174
+-78323
+27097
+-57624
+33398
 2
 1
 0
@@ -22800,7 +22804,7 @@ OLE     BIN
 
 
 
-2
+23529
 197
 
 3
@@ -22813,14 +22817,14 @@ OLE     BIN
 0
 0
 0
-41255
--256329
-63079
--252205
+-12116
+-42757
+9708
+-38633
 1
 1
 0
-6
+10
 529
 0
 0
@@ -22835,7 +22839,7 @@ Copyright © 2001-2006 DVL Software Limited\
 Wellington, New Zealand  - 8 August 2007
 
 
-2
+23529
 0
 
 3
@@ -22848,10 +22852,10 @@ Wellington, New Zealand  - 8 August 2007
 0
 0
 0
-33433
--210915
-43557
--207469
+-19938
+2657
+-9814
+6103
 2
 1
 0
@@ -22868,7 +22872,7 @@ Wellington, New Zealand  - 8 August 2007
 
 
 
-2
+23529
 467
 
 3
@@ -22881,10 +22885,10 @@ Wellington, New Zealand  - 8 August 2007
 0
 0
 0
--14408
--236594
-5166
--225418
+-67779
+-23022
+-48205
+-11846
 2
 1
 0
@@ -22901,7 +22905,7 @@ Wellington, New Zealand  - 8 August 2007
 
 
 
-2
+23529
 1
 
 3
@@ -22914,10 +22918,10 @@ Wellington, New Zealand  - 8 August 2007
 0
 0
 0
-31427
--222940
-41776
--216639
+-21944
+-9368
+-11595
+-3067
 2
 1
 0
@@ -22934,7 +22938,7 @@ Wellington, New Zealand  - 8 August 2007
 
 
 
-2
+23529
 4
 
 3
@@ -22967,7 +22971,7 @@ Wellington, New Zealand  - 8 August 2007
 
 
 
-2
+23529
 0
 
 3
@@ -22980,10 +22984,10 @@ Wellington, New Zealand  - 8 August 2007
 0
 0
 0
--9612
--210314
-212
--205963
+-62983
+3258
+-53159
+7609
 2
 1
 0
@@ -23000,7 +23004,7 @@ Wellington, New Zealand  - 8 August 2007
 
 
 
-2
+23529
 469
 
 3
@@ -23013,10 +23017,10 @@ Wellington, New Zealand  - 8 August 2007
 0
 0
 0
--17608
--210172
--9434
--205973
+-70979
+3400
+-62805
+7599
 1
 1
 0
@@ -23036,7 +23040,7 @@ Sample entries are \
 5.0-CURRENT
 
 
-2
+23529
 0
 
 3
@@ -23069,7 +23073,7 @@ Sample entries are \
 
 
 
-2
+23529
 0
 
 3
@@ -23082,10 +23086,10 @@ Sample entries are \
 0
 0
 0
--17240
--218326
--5466
--215102
+-70611
+-4754
+-58837
+-1530
 1
 1
 0
@@ -23104,7 +23108,7 @@ Operating Systems\
 in the same database
 
 
-2
+23529
 0
 
 3
@@ -23117,10 +23121,10 @@ in the same database
 0
 0
 0
--8855
--220519
-294
--216168
+-62226
+-6947
+-53077
+-2596
 2
 1
 0
@@ -23137,7 +23141,7 @@ in the same database
 
 
 
-2
+23529
 505
 
 3
@@ -23170,7 +23174,7 @@ in the same database
 
 
 
-2
+23529
 0
 
 3
@@ -23183,10 +23187,10 @@ in the same database
 0
 0
 0
-10192
--214706
-23616
--210355
+-43179
+-1134
+-29755
+3217
 2
 1
 0
@@ -23203,7 +23207,7 @@ in the same database
 
 
 
-2
+23529
 468
 
 3
@@ -23216,10 +23220,10 @@ in the same database
 0
 0
 0
-2648
--217915
-15397
--214691
+-50723
+-4343
+-37974
+-1119
 1
 1
 0
@@ -23238,7 +23242,7 @@ same element referred to more \
 than once by the same tag.
 
 
-2
+23529
 0
 
 3
@@ -23251,10 +23255,10 @@ than once by the same tag.
 0
 0
 0
-42129
--206209
-49928
--202685
+-11242
+7363
+-3443
+10887
 2
 1
 0
@@ -23271,7 +23275,7 @@ than once by the same tag.
 
 
 
-2
+23529
 2324
 
 3
@@ -23284,10 +23288,10 @@ than once by the same tag.
 0
 0
 0
-15277
--242125
-25926
--234849
+-38094
+-28553
+-27445
+-21277
 2
 1
 0
@@ -23304,7 +23308,7 @@ than once by the same tag.
 
 
 
-2
+23529
 2836
 
 3
@@ -23317,10 +23321,10 @@ than once by the same tag.
 0
 0
 0
-5189
--206289
-27763
--198038
+-48182
+7283
+-25608
+15534
 2
 1
 0
@@ -23337,7 +23341,7 @@ than once by the same tag.
 
 
 
-2
+23529
 3363
 
 3
@@ -23350,10 +23354,10 @@ than once by the same tag.
 0
 0
 0
-53789
--205639
-64738
--196413
+418
+7933
+11367
+17159
 2
 1
 0
@@ -23370,7 +23374,7 @@ than once by the same tag.
 
 
 
-2
+23529
 5703
 
 3
@@ -23383,10 +23387,10 @@ than once by the same tag.
 0
 0
 0
-27692
--161121
-47266
--150920
+-26127
+52629
+-6553
+62830
 2
 1
 0
@@ -23403,7 +23407,7 @@ than once by the same tag.
 
 
 
-2
+23529
 6230
 
 3
@@ -23416,10 +23420,10 @@ than once by the same tag.
 0
 0
 0
-52395
--140494
-64844
--133218
+-976
+73078
+11473
+80354
 2
 1
 0
@@ -23436,7 +23440,7 @@ than once by the same tag.
 
 
 
-2
+23529
 6547
 
 3
@@ -23449,10 +23453,10 @@ than once by the same tag.
 0
 0
 0
-76634
--133355
-68385
--136879
+-12871
+79949
+-21120
+76425
 2
 1
 0
@@ -23469,7 +23473,7 @@ than once by the same tag.
 
 
 
-2
+23529
 8543
 
 3
@@ -23482,10 +23486,10 @@ than once by the same tag.
 0
 0
 0
-29457
--116544
-41481
--108620
+-23371
+-82273
+-11347
+-74349
 2
 5
 0
@@ -23502,7 +23506,7 @@ than once by the same tag.
 
 
 
-2
+23529
 7239
 
 3
@@ -23515,10 +23519,10 @@ than once by the same tag.
 0
 0
 0
-29018
--127031
-44267
--118132
+-23371
+-92760
+-8122
+-83861
 2
 5
 0
@@ -23535,7 +23539,7 @@ than once by the same tag.
 
 
 
-2
+23529
 7906
 
 3
@@ -23548,10 +23552,10 @@ than once by the same tag.
 0
 0
 0
-28447
--141425
-51421
--128626
+-655
+-105509
+22319
+-92710
 2
 5
 0
@@ -23568,7 +23572,7 @@ than once by the same tag.
 
 
 
-2
+23529
 6871
 
 3
@@ -23601,7 +23605,7 @@ than once by the same tag.
 
 
 
-2
+23529
 0
 
 3
@@ -23614,10 +23618,10 @@ than once by the same tag.
 0
 0
 0
-69941
--114663
-79315
--108362
+-24738
+98641
+-15364
+104942
 2
 1
 0
@@ -23634,7 +23638,7 @@ than once by the same tag.
 
 
 
-2
+23529
 9430
 
 3
@@ -23647,10 +23651,10 @@ than once by the same tag.
 0
 0
 0
-69750
--120865
-79499
--115539
+-24929
+92439
+-15180
+97765
 2
 1
 0
@@ -23667,7 +23671,7 @@ than once by the same tag.
 
 
 
-2
+23529
 10451
 
 3
@@ -23680,10 +23684,10 @@ than once by the same tag.
 0
 0
 0
-71671
--130314
-77595
--125963
+-23008
+82990
+-17084
+87341
 2
 1
 0
@@ -23700,7 +23704,7 @@ than once by the same tag.
 
 
 
-2
+23529
 10456
 
 3
@@ -23713,10 +23717,10 @@ than once by the same tag.
 0
 0
 0
-49216
--163959
-60765
--158633
+-4155
+49613
+7394
+54939
 2
 1
 0
@@ -23733,7 +23737,7 @@ than once by the same tag.
 
 
 
-2
+23529
 10812
 
 3
@@ -23746,10 +23750,10 @@ than once by the same tag.
 0
 0
 0
-56385
--155239
-74834
--146988
+3014
+58333
+21463
+66584
 2
 1
 0
@@ -23766,7 +23770,7 @@ than once by the same tag.
 
 
 
-2
+23529
 10814
 
 3
@@ -23779,10 +23783,10 @@ than once by the same tag.
 0
 0
 0
-59353
--174466
-71577
--170115
+5982
+39106
+18206
+43457
 2
 1
 0
@@ -23799,7 +23803,7 @@ than once by the same tag.
 
 
 
-2
+23529
 10829
 
 3
@@ -23812,10 +23816,10 @@ than once by the same tag.
 0
 0
 0
-70901
--163117
-79525
--158766
+17530
+50455
+26154
+54806
 2
 1
 0
@@ -23832,7 +23836,7 @@ than once by the same tag.
 
 
 
-2
+23529
 10838
 
 3
@@ -23845,10 +23849,10 @@ than once by the same tag.
 0
 0
 0
-29227
--149773
-49351
--141849
+-23371
+-105509
+-3247
+-97585
 2
 5
 0
@@ -23865,7 +23869,7 @@ than once by the same tag.
 
 
 
-2
+23529
 10864
 
 3
@@ -23878,10 +23882,10 @@ than once by the same tag.
 0
 0
 0
-65826
--183435
-74150
--179084
+12455
+30137
+20779
+34488
 2
 1
 0
@@ -23898,7 +23902,7 @@ than once by the same tag.
 
 
 
-2
+23529
 11332
 
 3
@@ -23911,10 +23915,10 @@ than once by the same tag.
 0
 0
 0
-87272
--247800
-106696
--212249
+33901
+-34228
+53325
+1323
 2
 1
 0
@@ -23931,7 +23935,7 @@ than once by the same tag.
 
 
 
-2
+23529
 209
 
 3
@@ -23944,10 +23948,10 @@ than once by the same tag.
 0
 0
 0
-54986
--235639
-64360
--229338
+1615
+-22067
+10989
+-15766
 2
 1
 0
@@ -23964,7 +23968,7 @@ than once by the same tag.
 
 
 
-2
+23529
 304
 
 3
@@ -23977,10 +23981,10 @@ than once by the same tag.
 0
 0
 0
-53964
--220157
-62138
--214831
+593
+-6585
+8767
+-1259
 2
 1
 0
@@ -23997,7 +24001,7 @@ than once by the same tag.
 
 
 
-2
+23529
 8
 
 3
@@ -24010,10 +24014,10 @@ than once by the same tag.
 0
 0
 0
-73076
--221010
-82000
--217486
+19705
+-7438
+28629
+-3914
 2
 1
 0
@@ -24030,7 +24034,7 @@ than once by the same tag.
 
 
 
-2
+23529
 11727
 
 3
@@ -24043,10 +24047,10 @@ than once by the same tag.
 0
 0
 0
-29766
--167456
-37790
--163105
+-14773
+46116
+-6749
+50467
 2
 1
 0
@@ -24063,7 +24067,7 @@ than once by the same tag.
 
 
 
-2
+23529
 14576
 
 3
@@ -24076,10 +24080,10 @@ than once by the same tag.
 0
 0
 0
-29797
--174807
-37071
--171283
+-14742
+38765
+-7468
+42289
 2
 1
 0
@@ -24096,7 +24100,7 @@ than once by the same tag.
 
 
 
-2
+23529
 14577
 
 3
@@ -24109,10 +24113,10 @@ than once by the same tag.
 0
 0
 0
-45579
--128245
-66128
--114144
+-7792
+85327
+12757
+99428
 2
 1
 0
@@ -24129,7 +24133,7 @@ than once by the same tag.
 
 
 
-2
+23529
 15520
 
 3
@@ -24142,10 +24146,10 @@ than once by the same tag.
 0
 0
 0
-7371
--248623
-26195
--243297
+-46000
+-35051
+-27176
+-29725
 2
 1
 0
@@ -24162,7 +24166,7 @@ than once by the same tag.
 
 
 
-2
+23529
 15995
 
 3
@@ -24175,10 +24179,10 @@ than once by the same tag.
 0
 0
 0
--24928
--243917
--6104
--240393
+-78299
+-30345
+-59475
+-26821
 2
 1
 0
@@ -24195,7 +24199,7 @@ than once by the same tag.
 
 
 
-2
+23529
 17130
 
 3
@@ -24208,10 +24212,10 @@ than once by the same tag.
 0
 0
 0
-69252
--239155
-78251
--235631
+15881
+-25583
+24880
+-22059
 2
 1
 0
@@ -24228,7 +24232,7 @@ than once by the same tag.
 
 
 
-2
+23529
 17588
 
 3
@@ -24241,10 +24245,10 @@ than once by the same tag.
 0
 0
 0
--16038
--197209
-6536
--187983
+-69409
+16363
+-46835
+25589
 2
 1
 0
@@ -24261,7 +24265,7 @@ than once by the same tag.
 
 
 
-2
+23529
 18036
 
 3
@@ -24274,10 +24278,10 @@ than once by the same tag.
 0
 0
 0
--21026
--248405
--2202
--244881
+-74397
+-34833
+-55573
+-31309
 2
 1
 0
@@ -24294,7 +24298,7 @@ than once by the same tag.
 
 
 
-2
+23529
 18531
 
 3
@@ -24307,10 +24311,10 @@ than once by the same tag.
 0
 0
 0
-48047
--113389
-64771
--108063
+-5324
+100183
+11400
+105509
 2
 1
 0
@@ -24327,7 +24331,7 @@ than once by the same tag.
 
 
 
-2
+23529
 19455
 
 3
@@ -24340,10 +24344,10 @@ than once by the same tag.
 0
 0
 0
-13681
--233188
-25230
--229664
+-39690
+-19616
+-28141
+-16092
 2
 1
 0
@@ -24360,7 +24364,7 @@ than once by the same tag.
 
 
 
-2
+23529
 20390
 
 3
@@ -24373,10 +24377,10 @@ than once by the same tag.
 0
 0
 0
-9881
--166881
-22555
--157655
+-22493
+64266
+-9819
+73492
 2
 1
 0
@@ -24393,7 +24397,7 @@ than once by the same tag.
 
 
 
-2
+23529
 20903
 
 3
@@ -24406,10 +24410,10 @@ than once by the same tag.
 0
 0
 0
-118067
--221014
-127516
--214713
+64696
+-7442
+74145
+-1141
 2
 1
 0
@@ -24426,7 +24430,7 @@ than once by the same tag.
 
 
 
-2
+23529
 21523
 
 3
@@ -24439,10 +24443,10 @@ than once by the same tag.
 0
 0
 0
-15813
--176704
-26387
--167478
+-26127
+42362
+-15553
+51588
 2
 1
 0
@@ -24459,7 +24463,7 @@ than once by the same tag.
 
 
 
-2
+23529
 22267
 
 3
@@ -24472,10 +24476,10 @@ than once by the same tag.
 0
 0
 0
--25391
--202330
--16392
--197979
+-78762
+11242
+-69763
+15593
 2
 1
 0
@@ -24492,7 +24496,7 @@ than once by the same tag.
 
 
 
-2
+23529
 22810
 
 3
@@ -24505,10 +24509,10 @@ than once by the same tag.
 0
 0
 0
-126131
--248370
-132505
--242069
+72310
+-34798
+78684
+-28497
 2
 1
 0
@@ -24525,7 +24529,7 @@ than once by the same tag.
 
 
 
-2
+23529
 24168
 
 3
@@ -24538,10 +24542,10 @@ than once by the same tag.
 0
 0
 0
-113444
--240750
-124918
--237226
+60073
+-27178
+71547
+-23654
 2
 1
 0
@@ -24558,7 +24562,7 @@ than once by the same tag.
 
 
 
-2
+23529
 24175
 
 3
@@ -24571,10 +24575,10 @@ than once by the same tag.
 0
 0
 0
-42088
--276999
-52287
--267773
+-11283
+-63427
+-1084
+-54201
 2
 1
 0
@@ -24591,7 +24595,7 @@ than once by the same tag.
 
 
 
-2
+23529
 24687
 
 3
@@ -24604,10 +24608,10 @@ than once by the same tag.
 0
 0
 0
-28136
--269450
-38485
--264124
+-25235
+-55878
+-14886
+-50552
 2
 1
 0
@@ -24624,7 +24628,7 @@ than once by the same tag.
 
 
 
-2
+23529
 24694
 
 3
@@ -24637,10 +24641,10 @@ than once by the same tag.
 0
 0
 0
-58627
--269140
-70251
--261864
+5256
+-55568
+16880
+-48292
 2
 1
 0
@@ -24657,7 +24661,7 @@ than once by the same tag.
 
 
 
-2
+23529
 24706
 
 3
@@ -24670,10 +24674,10 @@ than once by the same tag.
 0
 0
 0
-29271
--283043
-37370
--277717
+-24100
+-69471
+-16001
+-64145
 2
 1
 0
@@ -24690,7 +24694,7 @@ than once by the same tag.
 
 
 
-2
+23529
 25783
 
 3
@@ -24703,10 +24707,10 @@ than once by the same tag.
 0
 0
 0
-59161
--278856
-67185
--274541
+5790
+-65284
+13814
+-60969
 2
 1
 0
@@ -24723,7 +24727,7 @@ than once by the same tag.
 
 
 
-2
+23529
 25789
 
 3
@@ -24736,10 +24740,10 @@ than once by the same tag.
 0
 0
 0
-57211
--290729
-68835
--286378
+3840
+-77157
+15464
+-72806
 2
 1
 0
@@ -24756,7 +24760,7 @@ than once by the same tag.
 
 
 
-2
+23529
 25804
 
 3
@@ -24769,10 +24773,10 @@ than once by the same tag.
 0
 0
 0
-52514
--132258
-71338
--128734
+-6567
+81136
+12257
+84660
 2
 1
 0
@@ -24789,7 +24793,7 @@ than once by the same tag.
 
 
 
-2
+23529
 27515
 
 3
@@ -24802,10 +24806,10 @@ than once by the same tag.
 0
 0
 0
-113607
--234361
-120806
--230010
+60236
+-20789
+67435
+-16438
 2
 1
 0
@@ -24822,7 +24826,7 @@ than once by the same tag.
 
 
 
-2
+23529
 28151
 
 3
@@ -24835,10 +24839,10 @@ than once by the same tag.
 0
 0
 0
-83135
--195608
-89884
--191257
+29764
+17964
+36513
+22315
 2
 1
 0
@@ -24855,7 +24859,7 @@ than once by the same tag.
 
 
 
-2
+23529
 30263
 
 3
@@ -24868,10 +24872,10 @@ than once by the same tag.
 0
 0
 0
-93834
--195195
-99833
--191671
+40463
+18377
+46462
+21901
 2
 1
 0
@@ -24888,7 +24892,7 @@ than once by the same tag.
 
 
 
-2
+23529
 30269
 
 3
@@ -24901,10 +24905,10 @@ than once by the same tag.
 0
 0
 0
-91771
--207086
-101896
--200785
+38400
+6486
+48525
+12787
 2
 1
 0
@@ -24921,7 +24925,7 @@ than once by the same tag.
 
 
 
-2
+23529
 30274
 
 3
@@ -24934,10 +24938,10 @@ than once by the same tag.
 0
 0
 0
-103590
--195609
-111614
--191258
+50219
+17963
+58243
+22314
 2
 1
 0
@@ -24954,7 +24958,7 @@ than once by the same tag.
 
 
 
-2
+23529
 30278
 
 3
@@ -24967,10 +24971,10 @@ than once by the same tag.
 0
 0
 0
-35113
--231714
-44037
--228190
+-18258
+-18142
+-9334
+-14618
 2
 1
 0
@@ -24987,7 +24991,7 @@ than once by the same tag.
 
 
 
-2
+23529
 30896
 
 3
@@ -25015,12 +25019,12 @@ than once by the same tag.
 0
 0
 2
-69970000fdc8fcff699700008caafcff
+eec6ffff410b0000eec6ffffd0ecffff
 2
 
 
 
-2
+23529
 1572
 
 3
@@ -25048,12 +25052,12 @@ than once by the same tag.
 0
 0
 3
-0b0700006888fcff0b070000ec9efcff0d810000ec9efcff
+9036ffffaccaffff9036ffff30e1ffff92b0ffff30e1ffff
 2
 
 
 
-2
+23529
 32
 
 3
@@ -25081,12 +25085,12 @@ than once by the same tag.
 0
 0
 3
-0ded0000f1b7fcff84170100f1b7fcff8417010053d3fcff
+921c000035faffff0947000035faffff0947000097150000
 2
 
 
 
-2
+23529
 41
 
 3
@@ -25114,12 +25118,12 @@ than once by the same tag.
 0
 0
 4
-d0230100f61cfdffd023010096f5fcff0b16010096f5fcff0b1601005ad0fcff
+555300003a5f000055530000da37000090450000da370000904500009e120000
 2
 
 
 
-2
+23529
 44
 
 3
@@ -25147,12 +25151,12 @@ d0230100f61cfdffd023010096f5fcff0b16010096f5fcff0b1601005ad0fcff
 0
 0
 4
-59ebffff0fd6fcffcf1600000fd6fcffcf160000b9c2fcffff410000b9c2fcff
+de1affff531800005446ffff531800005446fffffd0400008471fffffd040000
 2
 
 
 
-2
+23529
 479
 
 3
@@ -25180,12 +25184,12 @@ d0230100f61cfdffd023010096f5fcff0b16010096f5fcff0b1601005ad0fcff
 0
 0
 3
-42dd00002cb6fcff42dd000084cbfcff3e95000084cbfcff
+c70c000070f8ffffc70c0000c80d0000c3c4ffffc80d0000
 2
 
 
 
-2
+23529
 495
 
 3
@@ -25213,12 +25217,12 @@ d0230100f61cfdffd023010096f5fcff0b16010096f5fcff0b1601005ad0fcff
 0
 0
 2
-c4ebffffcbaafcffc4ebffff8dccfcff
+491bffff0fedffff491bffffd10e0000
 2
 
 
 
-2
+23529
 821
 
 3
@@ -25246,12 +25250,12 @@ c4ebffffcbaafcffc4ebffff8dccfcff
 0
 0
 2
-60bb0000a52cfdff9c0b0100a52cfdff
+e5eaffffe96e0000213b0000e96e0000
 2
 
 
 
-2
+23529
 893
 
 3
@@ -25279,12 +25283,12 @@ c4ebffffcbaafcffc4ebffff8dccfcff
 0
 0
 2
-a43d0000cf28fdffd8ab0000cf28fdff
+296dffff136b00005ddbffff136b0000
 2
 
 
 
-2
+23529
 964
 
 3
@@ -25312,12 +25316,12 @@ a43d0000cf28fdffd8ab0000cf28fdff
 0
 0
 4
-9d840000bcd2fcff6c6f0000bcd2fcff25430000bcd2fcff25430000c6c8fcff
+22b4ffff00150000f19effff00150000aa72ffff00150000aa72ffff0a0b0000
 2
 
 
 
-2
+23529
 1578
 
 3
@@ -25345,12 +25349,12 @@ a43d0000cf28fdffd8ab0000cf28fdff
 0
 0
 2
-06f0fffff4aafcff06f0ffffe57bfcff
+8b1fffff38edffff8b1fffff29beffff
 2
 
 
 
-2
+23529
 2092
 
 3
@@ -25378,12 +25382,12 @@ a43d0000cf28fdffd8ab0000cf28fdff
 0
 0
 3
-b988000001f6fcffb988000032e5fcff09b2000032e5fcff
+3eb8ffff453800003eb8ffff762700008ee1ffff76270000
 2
 
 
 
-2
+23529
 2328
 
 3
@@ -25411,12 +25415,12 @@ b988000001f6fcffb988000032e5fcff09b2000032e5fcff
 0
 0
 2
-ad0c00001b68fcff366000001b68fcff
+323cffff5faaffffbb8fffff5faaffff
 2
 
 
 
-2
+23529
 2840
 
 3
@@ -25444,12 +25448,12 @@ ad0c00001b68fcff366000001b68fcff
 0
 0
 2
-f6650100d056fcff374f0000d056fcff
+7b9500001499ffffbc7effff1499ffff
 2
 
 
 
-2
+23529
 2841
 
 3
@@ -25477,12 +25481,12 @@ f6650100d056fcff374f0000d056fcff
 0
 0
 3
-537400008817fdff7c4500008817fdff7c45000061f1fcff
+d8a3ffffcc5900000175ffffcc5900000175ffffa5330000
 2
 
 
 
-2
+23529
 3368
 
 3
@@ -25510,12 +25514,12 @@ f6650100d056fcff374f0000d056fcff
 0
 0
 2
-faea00003eb4fcfffaea000060e4fcff
+7f1a000082f6ffff7f1a0000a4260000
 2
 
 
 
-2
+23529
 6049
 
 3
@@ -25543,12 +25547,12 @@ faea00003eb4fcfffaea000060e4fcff
 0
 0
 2
-0f2800004232fdff5caeffff4232fdff
+9457ffff86740000e1ddfeff86740000
 2
 
 
 
-2
+23529
 6875
 
 3
@@ -25576,12 +25580,12 @@ faea00003eb4fcfffaea000060e4fcff
 0
 0
 4
-38970000ab3cfdff389700004c4cfdff96fd00004c4cfdff96fd00009259fdff
+a2f0ffff857f0000a2f0ffff268f00001b2d0000268f00001b2d0000d69b0000
 2
 
 
 
-2
+23529
 10833
 
 3
@@ -25609,12 +25613,12 @@ faea00003eb4fcfffaea000060e4fcff
 0
 0
 2
-57c30000c338fdff00150100c338fdff
+dcf2ffff077b000085440000077b0000
 2
 
 
 
-2
+23529
 11336
 
 3
@@ -25642,12 +25646,12 @@ faea00003eb4fcfffaea000060e4fcff
 0
 0
 3
-c3c100002818fdff11e600002818fdff11e60000a4fdfcff
+48f1ffff6c5a0000961500006c5a000096150000e83f0000
 2
 
 
 
-2
+23529
 12188
 
 3
@@ -25675,12 +25679,12 @@ c3c100002818fdff11e600002818fdff11e60000a4fdfcff
 0
 0
 2
-eb110100d924fdff0dc50000d924fdff
+704100001d67000092f4ffff1d670000
 2
 
 
 
-2
+23529
 13301
 
 3
@@ -25708,12 +25712,12 @@ eb110100d924fdff0dc50000d924fdff
 0
 0
 4
-1fc8ffff9d71fcff0eafffff9d71fcff0eafffff92dcfcff9c26000092dcfcff
+a4f7feffe1b3ffff93defeffe1b3ffff93defeffd61e00002156ffffd61e0000
 2
 
 
 
-2
+23529
 14563
 
 3
@@ -25741,12 +25745,12 @@ eb110100d924fdff0dc50000d924fdff
 0
 0
 2
-317d0000d43afdff317d00003058fdff
+8fcfffff377800008fcfffff749a0000
 2
 
 
 
-2
+23529
 14585
 
 3
@@ -25774,12 +25778,12 @@ eb110100d924fdff0dc50000d924fdff
 0
 0
 3
-f8c80000458ffdfff8c80000f7b6fdff48dd0000f7b6fdff
+7df8ffff89d100007df8ffff3bf90000cd0c00003bf90000
 2
 
 
 
-2
+23529
 14986
 
 3
@@ -25807,12 +25811,12 @@ f8c80000458ffdfff8c80000f7b6fdff48dd0000f7b6fdff
 0
 0
 3
-f22c01005b91fdfff22c010033b3fdff7721010033b3fdff
+775c00009fd30000775c000077f50000fc50000077f50000
 2
 
 
 
-2
+23529
 14989
 
 3
@@ -25840,12 +25844,12 @@ f22c01005b91fdfff22c010033b3fdff7721010033b3fdff
 0
 0
 3
-27cc00000784fdff27cc0000a462fdff70ee0000a462fdff
+acfbffff4bc60000acfbffffe8a40000f51d0000e8a40000
 2
 
 
 
-2
+23529
 14998
 
 3
@@ -25873,12 +25877,12 @@ f22c01005b91fdfff22c010033b3fdff7721010033b3fdff
 0
 0
 3
-3f2b0100418cfdff3f2b0100f55dfdff8c120100f55dfdff
+c45a000085ce0000c45a000039a000001142000039a00000
 2
 
 
 
-2
+23529
 14999
 
 3
@@ -25906,12 +25910,12 @@ f22c01005b91fdfff22c010033b3fdff7721010033b3fdff
 0
 0
 2
-25e4000017a9fcff25e40000027dfcff
+aa1300005bebffffaa13000046bfffff
 2
 
 
 
-2
+23529
 671
 
 3
@@ -25939,12 +25943,12 @@ f22c01005b91fdfff22c010033b3fdff7721010033b3fdff
 0
 0
 3
-93eb0000a3a5fcff93eb0000c198fcff1f9e0100c198fcff
+181b0000e7e7ffff181b000005dbffffa4cd000005dbffff
 2
 
 
 
-2
+23529
 674
 
 3
@@ -25972,12 +25976,12 @@ f22c01005b91fdfff22c010033b3fdff7721010033b3fdff
 0
 0
 2
-55d90000d174fcff0d9e0100d174fcff
+da08000015b7ffff92cd000015b7ffff
 2
 
 
 
-2
+23529
 677
 
 3
@@ -26005,12 +26009,12 @@ f22c01005b91fdfff22c010033b3fdff7721010033b3fdff
 0
 0
 4
-48d30000eba7fcff6cc90000eba7fcff6cc90000e9b4fcffb4d60000e9b4fcff
+cd0200002feafffff1f8ffff2feafffff1f8ffff2df7ffff390600002df7ffff
 2
 
 
 
-2
+23529
 751
 
 3
@@ -26038,12 +26042,12 @@ f22c01005b91fdfff22c010033b3fdff7721010033b3fdff
 0
 0
 2
-7ced0000eaa8fcff93300100eaa8fcff
+011d00002eebffff186000002eebffff
 2
 
 
 
-2
+23529
 11730
 
 3
@@ -26071,12 +26075,12 @@ f22c01005b91fdfff22c010033b3fdff7721010033b3fdff
 0
 0
 2
-a07e00007579fdffa07e00005360fdff
+a5d0ffffb9bb0000a5d0ffff97a20000
 2
 
 
 
-2
+23529
 15187
 
 3
@@ -26104,12 +26108,12 @@ a07e00007579fdffa07e00005360fdff
 0
 0
 2
-1a6101002c3cfcfff06200002c3cfcff
+9f900000b684ffff7592ffffb684ffff
 2
 
 
 
-2
+23529
 16003
 
 3
@@ -26137,12 +26141,12 @@ a07e00007579fdffa07e00005360fdff
 0
 0
 3
-8f0f00001768fcff8f0f00004547fcff541d00004547fcff
+143fffff5baaffff143fffff8989ffffd94cffff8989ffff
 2
 
 
 
-2
+23529
 16442
 
 3
@@ -26170,12 +26174,12 @@ a07e00007579fdffa07e00005360fdff
 0
 0
 2
-8cd5ffffb774fcff8cd5ffff8c53fcff
+1105fffffbb6ffff1105ffffd095ffff
 2
 
 
 
-2
+23529
 17133
 
 3
@@ -26203,12 +26207,12 @@ a07e00007579fdffa07e00005360fdff
 0
 0
 2
-7ba00100665efcffbf110100665efcff
+00d00000aaa0ffff44410000aaa0ffff
 2
 
 
 
-2
+23529
 17591
 
 3
@@ -26236,12 +26240,12 @@ a07e00007579fdffa07e00005360fdff
 0
 0
 3
-f2e50000a56cfcfff2e50000cf5ffcff0c2f0100cf5ffcff
+77150000e9aeffff7715000013a2ffff915e000013a2ffff
 2
 
 
 
-2
+23529
 17592
 
 3
@@ -26269,12 +26273,12 @@ f2e50000a56cfcfff2e50000cf5ffcff0c2f0100cf5ffcff
 0
 0
 3
-602b0000d9edfcff602b00005d09fdffa30b00005d09fdff
+e55affff1d300000e55affffa14b0000283bffffa14b0000
 1
 
 
 
-2
+23529
 18047
 
 3
@@ -26302,12 +26306,12 @@ f2e50000a56cfcfff2e50000cf5ffcff0c2f0100cf5ffcff
 0
 0
 2
-82f2ffffc466fcff82f2fffffc42fcff
+0722ffff08a9ffff0722ffff4085ffff
 2
 
 
 
-2
+23529
 18534
 
 3
@@ -26335,12 +26339,12 @@ f2e50000a56cfcfff2e50000cf5ffcff0c2f0100cf5ffcff
 0
 0
 2
-870c0000367bfcff1b3d0000367bfcff
+0c3cffff7abdffffa06cffff7abdffff
 2
 
 
 
-2
+23529
 20397
 
 3
@@ -26368,12 +26372,12 @@ f2e50000a56cfcfff2e50000cf5ffcff0c2f0100cf5ffcff
 0
 0
 3
-aa6001003792fcff4ee001003792fcff4ee001001bb0fcff
+2f9000007bd4ffffd30f01007bd4ffffd30f01005ff2ffff
 2
 
 
 
-2
+23529
 21527
 
 3
@@ -26401,12 +26405,12 @@ aa6001003792fcff4ee001003792fcff4ee001001bb0fcff
 0
 0
 2
-f46101006babfcff00e201006babfcff
+79910000afedffff85110100afedffff
 2
 
 
 
-2
+23529
 21530
 
 3
@@ -26433,13 +26437,13 @@ f46101006babfcff00e201006babfcff
 1
 0
 0
-3
-a26f00004a3bfdffee5300004a3bfdffee5300001c53fdff
+2
+1daeffff017700001daeffffd6aa0000
 2
 
 
 
-2
+23529
 22282
 
 3
@@ -26467,12 +26471,12 @@ a26f00004a3bfdffee5300004a3bfdffee5300001c53fdff
 0
 0
 3
-feaeffffe7f8fcfffeaeffffe20dfdff43d5ffffe20dfdff
+83defeff2b3b000083defeff26500000c804ffff26500000
 2
 
 
 
-2
+23529
 22814
 
 3
@@ -26500,12 +26504,12 @@ feaeffffe7f8fcfffeaeffffe20dfdff43d5ffffe20dfdff
 0
 0
 2
-e2bbffffc0f0fcff65150000c0f0fcff
+67ebfeff04330000ea44ffff04330000
 2
 
 
 
-2
+23529
 22817
 
 3
@@ -26533,12 +26537,12 @@ e2bbffffc0f0fcff65150000c0f0fcff
 0
 0
 2
-7e7601000b58fcffb6c401000b58fcff
+03a600004f9affff3bf400004f9affff
 2
 
 
 
-2
+23529
 24178
 
 3
@@ -26566,12 +26570,12 @@ e2bbffffc0f0fcff65150000c0f0fcff
 0
 0
 3
-76f70100f33efcff7ad00100f33efcff7ad001003755fcff
+392501003781ffffffff00003781ffffffff00007b97ffff
 2
 
 
 
-2
+23529
 24179
 
 3
@@ -26599,12 +26603,12 @@ e2bbffffc0f0fcff65150000c0f0fcff
 0
 0
 3
-5ab80000b3dcfbff1d800000b3dcfbff1d800000a5effbff
+dfe7fffff71effffa2affffff71effffa2afffffe931ffff
 2
 
 
 
-2
+23529
 24699
 
 3
@@ -26632,12 +26636,12 @@ e2bbffffc0f0fcff65150000c0f0fcff
 0
 0
 3
-43bc0000f9d1fbff52810000f9d1fbff52810000acb5fbff
+c8ebffff3d14ffffd7b0ffff3d14ffffd7b0fffff0f7feff
 2
 
 
 
-2
+23529
 25784
 
 3
@@ -26665,12 +26669,12 @@ e2bbffffc0f0fcff65150000c0f0fcff
 0
 0
 4
-55af00007ce2fbff42da00007ce2fbff42da000070c6fbfffaeb000070c6fbff
+dadeffffc024ffffc7090000c024ffffc7090000b408ffff7f1b0000b408ffff
 2
 
 
 
-2
+23529
 25793
 
 3
@@ -26698,12 +26702,12 @@ e2bbffffc0f0fcff65150000c0f0fcff
 0
 0
 2
-0ff7000086c5fbff0ff700004999fbff
+94260000ca07ffff942600008ddbfeff
 2
 
 
 
-2
+23529
 25808
 
 3
@@ -26731,12 +26735,12 @@ e2bbffffc0f0fcff65150000c0f0fcff
 0
 0
 4
-4d5a01001f3ffcff4d5a01001e05fcff0d8000001e05fcff0d80000085f5fbff
+2b8a00008d7dffffb92500008d7dffff92afffff8d7dffff92afffffc937ffff
 2
 
 
 
-2
+23529
 25823
 
 3
@@ -26764,12 +26768,12 @@ e2bbffffc0f0fcff65150000c0f0fcff
 0
 0
 3
-a7fcffff8466fcffa7fcffffb8eefbff46720000b8eefbff
+2c2cffffc0afffff6ba8ffffc0afffff6ba8fffff12fffff
 2
 
 
 
-2
+23529
 25843
 
 3
@@ -26797,12 +26801,12 @@ a7fcffff8466fcffa7fcffffb8eefbff46720000b8eefbff
 0
 0
 2
-d5f9000090c6fbffd5f900004cf2fbff
+5a290000d408ffff5a2900009034ffff
 2
 
 
 
-2
+23529
 26865
 
 3
@@ -26830,12 +26834,12 @@ d5f9000090c6fbffd5f900004cf2fbff
 0
 0
 2
-e55d0100f671fcff66ce0100f671fcff
+6a8d00003ab4ffffebfd00003ab4ffff
 2
 
 
 
-2
+23529
 28155
 
 3
@@ -26863,12 +26867,12 @@ e55d0100f671fcff66ce0100f671fcff
 0
 0
 4
-edd5000006acfcffedd50000248efcff63460000248efcff63460000e878fcff
+720500004aeeffff7205000068d0ffffe875ffff68d0ffffe875ffff2cbbffff
 2
 
 
 
-2
+23529
 28159
 
 3
@@ -26896,12 +26900,12 @@ edd5000006acfcffedd50000248efcff63460000248efcff63460000e878fcff
 0
 0
 3
-da5001002a0cfdffda500100f8e2fcff516d0100f8e2fcff
+5f8000006e4e00005f8000003c250000d69c00003c250000
 2
 
 
 
-2
+23529
 30286
 
 3
@@ -26929,12 +26933,12 @@ da5001002a0cfdffda500100f8e2fcff516d0100f8e2fcff
 0
 0
 2
-217a01002e0efdff217a010053dcfcff
+a6a9000072500000a6a90000971e0000
 2
 
 
 
-2
+23529
 30287
 
 3
@@ -26962,12 +26966,12 @@ da5001002a0cfdffda500100f8e2fcff516d0100f8e2fcff
 0
 0
 2
-117a0100bab0fcff117a010002dffcff
+96a90000fef2ffff96a9000046210000
 2
 
 
 
-2
+23529
 30294
 
 3
@@ -26995,12 +26999,12 @@ da5001002a0cfdffda500100f8e2fcff516d0100f8e2fcff
 0
 0
 3
-e8a301007508fdffe8a3010058e2fcff1f76010058e2fcff
+6dd30000b94a00006dd300009c240000a4a500009c240000
 2
 
 
 
-2
+23529
 30299
 
 3
@@ -27028,12 +27032,12 @@ e8a301007508fdffe8a3010058e2fcff1f76010058e2fcff
 0
 0
 5
-62da000037a9fcff62da00006085fcff8cc300006085fcff8cc30000a87ffcffdfa80000a87ffcff
+e70900007bebffffe7090000a4c7ffff11f3ffffa4c7ffff11f3ffffecc1ffff64d8ffffecc1ffff
 2
 
 
 
-2
+23529
 30899
 
 /END_TABLE AMCSYMB
