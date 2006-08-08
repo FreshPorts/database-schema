@@ -1,5 +1,5 @@
 --
--- $Id: createdb.sql,v 1.83 2006-07-31 01:37:11 dan Exp $
+-- $Id: createdb.sql,v 1.84 2006-08-08 18:51:01 dan Exp $
 --
 -- The following options should be used to create the database schema
 --
@@ -532,8 +532,6 @@ create table commit_log_ports
 
 create index needs_refresh on commit_log_ports (needs_refresh);
 
-create index commit_log_ports_port_id on commit_log_ports (port_id);
-
 create table watch_list_staging
 (
     id                         serial                not null,
@@ -664,8 +662,6 @@ create table commit_log_ports_elements
     primary key (commit_log_id, element_id)
 );
 
-create index commit_log_ports_elements_clid on commit_log_ports_elements (commit_log_id);
-
 create table ports_moved
 (
     id                         serial                not null,
@@ -698,7 +694,8 @@ create index page_load_ip_address on page_load_detail (ip_address);
 create table ports_updating_ports_xref
 (
     ports_updating_id          integer               not null,
-    port_id                    integer               not null
+    port_id                    integer               not null,
+    primary key (ports_updating_id, port_id)
 );
 
 create table commit_log_ports_vuxml
