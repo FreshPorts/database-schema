@@ -1,5 +1,5 @@
 --
--- $Id: ri.txt,v 1.38 2006-08-02 14:13:45 dan Exp $
+-- $Id: ri.txt,v 1.39 2006-09-11 02:27:26 dan Exp $
 --
 -- Copyright (c) 1998-2006 DVL Software Limited
 --
@@ -170,6 +170,91 @@ end;
   DROP TRIGGER id_change ON element;
 CREATE TRIGGER id_change BEFORE UPDATE ON element FOR EACH ROW
 EXECUTE PROCEDURE id_change();
+
+
+-- keep ports.status in sync with element.status
+-- this is a performance boosting exercise
+
+CREATE OR REPLACE FUNCTION element_ports_status() RETURNS TRIGGER AS $$
+   BEGIN
+      IF (NEW.status <> OLD.status) then
+         UPDATE ports
+            SET status = NEW.status
+          WHERE ports.element_id = NEW.id;
+      END IF;
+      RETURN NEW;
+   END
+$$ LANGUAGE 'plpgsql';
+
+  DROP TRIGGER element_ports_status ON element;
+CREATE TRIGGER element_ports_status
+    AFTER UPDATE on element
+    FOR EACH ROW
+    EXECUTE PROCEDURE element_ports_status();
+
+CREATE OR REPLACE FUNCTION ports_status() RETURNS TRIGGER AS $$
+   DECLARE
+      l_status    text;
+   BEGIN
+      -- the port status always takes its value
+      -- from the corresponding element
+      SELECT status
+        INTO l_status
+        FROM element
+       WHERE element.id = NEW.element_id;
+       
+      NEW.status := l_status;
+
+      RETURN NEW;
+   END
+$$ LANGUAGE 'plpgsql';
+
+  DROP TRIGGER ports_status ON ports;
+CREATE TRIGGER ports_status
+    BEFORE UPDATE OR INSERT on ports
+    FOR EACH ROW
+    EXECUTE PROCEDURE ports_status();
+    
+   
+
+
+CREATE OR REPLACE FUNCTION ports_clear_cache() RETURNS TRIGGER AS $$
+   DECLARE
+      l_cache_clearing_ports_id   int8;
+      l_port      text;
+      l_category  text;
+   BEGIN
+		IF TG_OP = 'UPDATE' THEN
+         SELECT id
+           INTO l_cache_clearing_ports_id
+           FROM cache_clearing_ports
+          WHERE port_id = NEW.id;
+          
+          IF NOT FOUND THEN
+            SELECT category, name
+              INTO l_category, l_port
+              FROM ports_all
+             WHERE id = NEW.id;
+            INSERT INTO cache_clearing_ports (port_id, category, port)
+            VALUES (NEW.id, l_category, l_port);
+          END IF;
+          
+          NOTIFY port_updated;
+      END IF;
+
+      -- when a port changes, add an entry to the cache clearing table
+      RETURN NEW;
+   END
+$$ LANGUAGE 'plpgsql';
+
+  DROP TRIGGER ports_clear_cache ON ports;
+CREATE TRIGGER ports_clear_cache
+    AFTER UPDATE on ports
+    FOR EACH ROW
+    EXECUTE PROCEDURE ports_clear_cache();
+
+
+
 
 
 

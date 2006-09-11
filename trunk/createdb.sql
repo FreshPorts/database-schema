@@ -1,5 +1,5 @@
 --
--- $Id: createdb.sql,v 1.84 2006-08-08 18:51:01 dan Exp $
+-- $Id: createdb.sql,v 1.85 2006-09-11 02:27:26 dan Exp $
 --
 -- The following options should be used to create the database schema
 --
@@ -125,6 +125,21 @@ create table commits_latest_ports
     commit_log_id              integer               not null,
     commit_date                timestamp without time zone not null
 );
+
+create table listen_for
+(
+    id                         serial                not null,
+    name                       text                  not null,
+    script_name                text                  not null,
+    primary key (id)
+);
+
+insert into listen_for (name, script_name) values ('notify_port_updated', 'listen_port');
+insert into listen_for (name, script_name) values ('notify_ports_moved', 'listen_ports_moved');
+insert into listen_for (name, script_name) values ('notify_ports_updating', 'listen_ports_updating');
+insert into listen_for (name, script_name) values ('notify_vuxml', 'listen_vuxml');
+
+create unique index listen_for_name_idx on listen_for (name);
 
 create table element
 (
@@ -302,6 +317,29 @@ insert into port_status (name, description) values ('NOT_FOR_ARCHS', 'port does 
 
 create unique index port_status_name_idx on port_status (name);
 
+create table top_questions
+(
+    id                         serial                not null,
+    question                   text                  not null,
+    number_of_answers          smallint              not null
+        default 1
+        check (number_of_answers >= 1),
+    primary key (id)
+);
+
+create table event_types
+(
+    id                         serial                not null,
+    name                       text                  not null,
+    description                text                  not null,
+    primary key (id)
+);
+
+insert into event_types(name, description) values ('port_updated', 'a port has changed and the cache entry needs to be removed');
+insert into event_types(name, description) values ('ports_moved', 'A commit has been performed on /usr/ports/MOVED');
+insert into event_types(name, description) values ('ports_updating',  'A commit has been performed on /usr/ports/UPDATING');
+insert into event_types(name, description) values ('vuxml',  'A commit has been performed on /usr/ports/security/vuxml/vuln.xml');
+
 create table element_revision
 (
     element_id                 integer               not null,
@@ -357,6 +395,8 @@ create table ports
     is_interactive             text                          ,
     only_for_archs             text                          ,
     not_for_archs              text                          ,
+    status                     char(1)               not null
+        check (status in ('A','D')),
     primary key (id)
 );
 
@@ -762,6 +802,34 @@ create table element_pathname
     primary key (element_id)
 );
 
+create table top_answers
+(
+    user_id                    integer               not null,
+    top_question_id            integer               not null,
+    seq                        smallint              not null,
+    port_id                    integer               not null,
+    primary key (user_id, top_question_id, seq)
+);
+
+create table events
+(
+    id                         serial                not null,
+    event_type_id              integer               not null,
+    date_added                 timestamp without time zone not null,
+    primary key (id)
+);
+
+create table cache_clearing_ports
+(
+    id                         serial                not null,
+    port_id                    integer               not null,
+    category                   text                  not null,
+    port                       text                  not null,
+    date_added                 timestamp without time zone not null
+        default CURRENT_TIMESTAMP,
+    primary key (id)
+);
+
 create view commits_recent as
 select distinct commit_log.id, commit_log.message_id, commit_log.message_date,
 commit_log.message_subject, commit_log.date_added, commit_log.commit_date,
@@ -1062,4 +1130,24 @@ alter table arch_release_port_status
 alter table element_pathname
     add foreign key  (element_id)
        references element (id) on update cascade on delete cascade;
+
+alter table top_answers
+    add foreign key  (top_question_id)
+       references top_questions (id) on update cascade on delete cascade;
+
+alter table top_answers
+    add foreign key  (user_id)
+       references users (id) on update cascade on delete cascade;
+
+alter table top_answers
+    add foreign key  (port_id)
+       references ports (id) on update cascade on delete cascade;
+
+alter table events
+    add foreign key  (event_type_id)
+       references event_types (id) on update restrict on delete restrict;
+
+alter table cache_clearing_ports
+    add foreign key  (port_id)
+       references ports (id) on update cascade on delete cascade;
 
