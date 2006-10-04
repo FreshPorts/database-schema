@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.154 2006-08-02 17:33:33 dan Exp $
+-- $Id: sp.txt,v 1.155 2006-10-04 11:54:35 dan Exp $
 --
 -- Copyright (c) 1998-2006 DVL Software Limited
 --
@@ -2777,6 +2777,29 @@ UNION
      AND NOT categories.is_primary
 GROUP BY categories.id, categories.name, categories.description, is_primary, categories.element_id);
 
+	return 1;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION MigrateStagingAreaToWatchList(bigint) returns int as $$
+DECLARE
+	p_Watch_List_ID ALIAS FOR $1;
+BEGIN
+-- take everything from the staging area and put it on the indicated watch list
+-- ignore items on the watch list which do not relate to a port
+-- also ignore items in the staging area that are already on the watch list
+
+   INSERT INTO watch_list_element
+   SELECT p_Watch_List_ID, WLS.element_id
+     FROM watch_list_staging WLS
+ WHERE WLS.element_id IS NOT NULL
+   AND NOT EXISTS ( SELECT WLE.element_id
+                      FROM watch_list_element WLE, watch_list_staging WLS
+                     WHERE WLE.watch_list_id = p_Watch_List_ID
+                       AND WLE.element_id    = WLS.element_id
+                       AND WLS.user_id       = (SELECT user_id 
+                                                  FROM watch_list
+                                                 WHERE id = p_Watch_List_ID));
 	return 1;
 END;
 $$ LANGUAGE plpgsql;
