@@ -1,5 +1,5 @@
 --
--- $Id: createdb.sql,v 1.85 2006-09-11 02:27:26 dan Exp $
+-- $Id: createdb.sql,v 1.86 2006-10-05 23:45:58 dan Exp $
 --
 -- The following options should be used to create the database schema
 --
@@ -134,10 +134,10 @@ create table listen_for
     primary key (id)
 );
 
-insert into listen_for (name, script_name) values ('notify_port_updated', 'listen_port');
-insert into listen_for (name, script_name) values ('notify_ports_moved', 'listen_ports_moved');
-insert into listen_for (name, script_name) values ('notify_ports_updating', 'listen_ports_updating');
-insert into listen_for (name, script_name) values ('notify_vuxml', 'listen_vuxml');
+insert into listen_for (name, script_name) values ('port_updated', 'listen_port');
+insert into listen_for (name, script_name) values ('ports_moved', 'listen_ports_moved');
+insert into listen_for (name, script_name) values ('ports_updating', 'listen_ports_updating');
+insert into listen_for (name, script_name) values ('vuxml', 'listen_vuxml');
 
 create unique index listen_for_name_idx on listen_for (name);
 
@@ -774,6 +774,8 @@ create table vuxml_names
     name                       text                  not null,
     primary key (id)
 );
+
+create index vuxml_names_name on vuxml_names (name);
 
 create table ports_vulnerable
 (
