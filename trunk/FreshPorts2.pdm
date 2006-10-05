@@ -48,7 +48,7 @@ FreshPorts2
 PostgreSQL 7.x
 PostgreSQL.def
 --\
--- $Id: FreshPorts2.pdm,v 1.107 2006-09-11 02:27:25 dan Exp $\
+-- $Id: FreshPorts2.pdm,v 1.108 2006-10-05 23:46:26 dan Exp $\
 --\
 -- The following options should be used to create the database schema\
 --\
@@ -80,7 +80,7 @@ PostgreSQL.def
 Dan Langille
 
 968886895
-1157243671
+1160091707
 0
 0
 0
@@ -2361,10 +2361,10 @@ listen_for
 
 
 
-insert into listen_for (name, script_name) values ('notify_port_updated', 'listen_port');\
-insert into listen_for (name, script_name) values ('notify_ports_moved', 'listen_ports_moved');\
-insert into listen_for (name, script_name) values ('notify_ports_updating', 'listen_ports_updating');\
-insert into listen_for (name, script_name) values ('notify_vuxml', 'listen_vuxml');
+insert into listen_for (name, script_name) values ('port_updated', 'listen_port');\
+insert into listen_for (name, script_name) values ('ports_moved', 'listen_ports_moved');\
+insert into listen_for (name, script_name) values ('ports_updating', 'listen_ports_updating');\
+insert into listen_for (name, script_name) values ('vuxml', 'listen_vuxml');
 0
 0
 0
@@ -2382,7 +2382,7 @@ A list of ports that need to have their cache cleared from disk.  port_id is sup
 0
 0
 0
-
+cache_clearing_ports
 
 
 
@@ -2408,7 +2408,7 @@ event_types
 0
 0
 0
-
+event_types
 
 
 
@@ -15146,7 +15146,7 @@ serial
 1
 0
 0
-
+id
 
 1
 0
@@ -15187,7 +15187,7 @@ integer
 1
 0
 0
-
+event_type_id
 
 2
 0
@@ -15228,7 +15228,7 @@ timestamp without time zone
 1
 0
 0
-
+date_added
 
 3
 0
@@ -15394,7 +15394,7 @@ serial
 1
 0
 0
-
+id
 
 1
 0
@@ -15435,7 +15435,7 @@ integer
 1
 0
 0
-
+port_id
 
 2
 0
@@ -15476,7 +15476,7 @@ text
 1
 0
 0
-
+category
 
 3
 0
@@ -15517,7 +15517,7 @@ text
 1
 0
 0
-
+port
 
 4
 0
@@ -15558,7 +15558,7 @@ CURRENT_TIMESTAMP
 1
 0
 0
-
+date_added
 
 5
 0
@@ -15599,7 +15599,7 @@ serial
 1
 0
 0
-
+id
 
 1
 0
@@ -15640,7 +15640,7 @@ text
 1
 0
 0
-
+name
 
 2
 0
@@ -15681,7 +15681,7 @@ text
 1
 0
 0
-
+description
 
 3
 0
@@ -17466,7 +17466,7 @@ Ref_33068
 1
 0
 0
-
+Ref_33068
 
 0
 n
@@ -17490,7 +17490,7 @@ Ref_33077
 1
 0
 0
-
+Ref_33077
 
 0
 n
@@ -19385,6 +19385,26 @@ listen_for_name_idx
 51
 
 0
+3
+33724
+33724
+vuxml_names_name
+vuxml_names_name
+25804
+
+
+
+0
+0
+0
+0
+0
+0
+
+
+52
+
+0
 /END_TABLE AMCINDX
 
 /BEGIN_TABLE AMCCIDX
@@ -19807,6 +19827,13 @@ NUMR    N8
 32356
 32355
 32353
+1
+1
+3
+33725
+33725
+33724
+25807
 1
 1
 /END_TABLE AMCCIDX
@@ -24112,10 +24139,10 @@ OLE     BIN
 0
 0
 0
--12117
--42758
-9707
--38634
+-12118
+-42759
+9706
+-38635
 1
 1
 0
@@ -24131,7 +24158,7 @@ OLE     BIN
 0
 FreshPorts 2 - physical database model\
 Copyright © 2001-2006 DVL Software Limited\
-Wellington, New Zealand  - 31 August 2006
+Wellington, New Zealand  - 10 October 2006
 
 
 2
@@ -26035,10 +26062,10 @@ than once by the same tag.
 0
 0
 0
-3840
--77157
-15464
--72806
+3837
+-77160
+15461
+-72809
 2
 1
 0
@@ -26398,10 +26425,10 @@ than once by the same tag.
 0
 0
 0
-39024
--76813
-47498
--72462
+39023
+-76814
+47497
+-72463
 2
 1
 0
@@ -28195,7 +28222,7 @@ dadeffffc024ffffc7090000c024ffffc7090000b408ffff7f1b0000b408ffff
 0
 0
 2
-94260000ca07ffff942600008ddbfeff
+91260000ca07ffff912600008adbfeff
 2
 
 
