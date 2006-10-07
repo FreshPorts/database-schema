@@ -28,8 +28,7 @@ element(id) on delete cascade;
 
 create UNIQUE index element_pathname_pathname on element_pathname(pathname);
 
-will triggers that maintain the above based on triggers.
-
+insert into element_pathname (select id, element_pathname(id) from element);
 
 #####
 
