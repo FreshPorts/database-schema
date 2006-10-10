@@ -1,5 +1,5 @@
 --
--- $Id: createdb.sql,v 1.86 2006-10-05 23:45:58 dan Exp $
+-- $Id: createdb.sql,v 1.87 2006-10-10 12:10:10 dan Exp $
 --
 -- The following options should be used to create the database schema
 --
@@ -832,6 +832,14 @@ create table cache_clearing_ports
     primary key (id)
 );
 
+create table sanity_test_failures
+(
+    id                         serial                not null,
+    commit_log_id              integer               not null,
+    message                    text                  not null,
+    primary key (id)
+);
+
 create view commits_recent as
 select distinct commit_log.id, commit_log.message_id, commit_log.message_date,
 commit_log.message_subject, commit_log.date_added, commit_log.commit_date,
@@ -1152,4 +1160,8 @@ alter table events
 alter table cache_clearing_ports
     add foreign key  (port_id)
        references ports (id) on update cascade on delete cascade;
+
+alter table sanity_test_failures
+    add foreign key  (commit_log_id)
+       references commit_log (id) on update restrict on delete restrict;
 
