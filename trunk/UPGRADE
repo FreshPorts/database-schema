@@ -1,3 +1,27 @@
+14 October 2006 - Adding Sanity Test Failures
+
+create table sanity_test_failures
+(
+    id                         serial                not null,
+    commit_log_id              integer               not null,
+    message                    text                  not null,
+    primary key (id)
+);
+
+alter table sanity_test_failures
+    add foreign key  (commit_log_id)
+       references commit_log (id) on update restrict on delete restrict;
+
+
+-- get the new SP
+psql freshports.org  < sp.txt
+
+-- set permissions
+psql freshports.org  < POSTGESQL.txt
+
+
+
+
 30 July 2006
 
 create table category_stats
