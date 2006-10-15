@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.156 2006-10-14 15:23:40 dan Exp $
+-- $Id: sp.txt,v 1.157 2006-10-15 02:37:41 dan Exp $
 --
 -- Copyright (c) 1998-2006 DVL Software Limited
 --
@@ -2785,7 +2785,8 @@ CREATE OR REPLACE FUNCTION MigrateStagingAreaToWatchList(bigint) returns int as 
 DECLARE
 	p_Watch_List_ID ALIAS FOR $1;
 BEGIN
--- take everything from the staging area and put it on the indicated watch list
+-- take everything from the staging area (for this user) and put it on the 
+-- indicated watch list.
 -- ignore items on the watch list which do not relate to a port
 -- also ignore items in the staging area that are already on the watch list
 
@@ -2793,6 +2794,7 @@ BEGIN
    SELECT p_Watch_List_ID, WLS.element_id
      FROM watch_list_staging WLS
  WHERE WLS.element_id IS NOT NULL
+   AND WLS.user_id = (SELECT user_id FROM watch_list WHERE id = 4656 ) 
    AND NOT EXISTS ( SELECT WLE.element_id
                       FROM watch_list_element WLE, watch_list_staging WLS
                      WHERE WLE.watch_list_id = p_Watch_List_ID
