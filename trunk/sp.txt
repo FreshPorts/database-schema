@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.157 2006-10-15 02:37:41 dan Exp $
+-- $Id: sp.txt,v 1.158 2006-10-21 13:41:31 dan Exp $
 --
 -- Copyright (c) 1998-2006 DVL Software Limited
 --
@@ -2109,6 +2109,89 @@ CREATE OR REPLACE FUNCTION freshports_commit_count_elements(text) RETURNS bigint
 ' LANGUAGE SQL STABLE;
 
 CREATE OR REPLACE FUNCTION freshports_commit(text, int, int, int) RETURNS SETOF freshports_commit_record AS '
+DECLARE
+	p_MessageID   ALIAS FOR $1;
+	p_Limit       ALIAS FOR $2;
+	p_Offset      ALIAS FOR $3;
+	p_UserID      ALIAS FOR $4;
+	
+	l_CommitLogID	int8;
+	r               freshports_commit_record%rowtype;
+BEGIN
+
+	-- is this a port commit or not?	
+	SELECT CLP.commit_log_id
+	  INTO l_CommitLogID
+	  FROM commit_log CL, commit_log_ports CLP
+	 WHERE CL.message_id = p_MessageID
+	   AND CL.id         = CLP.commit_log_id;
+
+	IF FOUND THEN
+		FOR r IN
+			SELECT * FROM freshports_commit_port(p_MessageID, p_Limit, p_Offset, p_UserID)
+		LOOP
+			RETURN NEXT r;
+		END LOOP;
+	ELSE
+		FOR r IN
+			SELECT * FROM freshports_commit_regular(p_MessageID, p_Limit, p_Offset, p_UserID)
+		LOOP
+			RETURN NEXT r;
+		END LOOP;
+	END IF;
+
+	RETURN;
+END
+'
+LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION freshports_commit_regular(text, int, int, int) RETURNS SETOF freshports_commit_record AS $$
+SELECT 0 AS port_id,
+       NULL::text AS short_description,
+       NULL::text AS category,
+       CL.message_id,
+       CL.committer   AS committer,
+       CL.description AS commit_description,
+       CL.id AS commit_log_id,
+       NULL::text AS port,
+       to_char(CL.commit_date - SystemTimeAdjust(), 'DD Mon YYYY')  AS commit_date,
+       to_char(CL.commit_date - SystemTimeAdjust(), 'HH24:MI:SS')   AS commit_time,
+       CL.encoding_losses,
+       E.status   AS status,
+       NULL::text AS port_version,
+       NULL::text AS port_revision,
+       NULL::text AS port_epoch,
+       CLE.revision_name        AS revision,
+       CLE.change_type::text    AS change_type,
+       element_pathname(E.id)   AS element_pathname,
+       FALSE AS is_port,
+       CLE.element_id,
+       NULL::text AS forbidden,
+       NULL::text AS deprecated,
+       NULL::text AS ignore,
+       NULL::text AS broken,
+       NULL::int  AS vulnerable_current,
+       NULL::int  AS vulnerable_past,
+       NULL::text AS restricted,
+       NULL::date AS expiration_date,
+       NULL::text AS no_cdrom,
+       NULL::text AS is_interactive,
+       NULL::text AS only_for_archs,
+       NULL::text AS not_for_archs,
+       OnWatchList($4, CLE.element_id) AS watch
+  FROM commit_log CL, commit_log_elements CLE, element E
+ WHERE CL.id          = CLE.commit_log_id
+   AND CL.message_id  = $1
+   AND CLE.element_id = E.id
+ORDER BY 3, port, element_pathname
+   LIMIT $2
+  OFFSET $3;
+
+$$ LANGUAGE SQL STABLE;
+
+
+CREATE OR REPLACE FUNCTION freshports_commit_port(text, int, int, int) RETURNS SETOF freshports_commit_record AS '
 SELECT FOURTH1.port_id,
        FOURTH1.short_description,
        C.name   AS category,
@@ -2192,7 +2275,6 @@ order by 3, port, pathname
   OFFSET $3;
 
 ' LANGUAGE SQL STABLE;
-
 
 
 CREATE OR REPLACE FUNCTION LoginCounts(int) RETURNS SETOF logincounts_record AS '
