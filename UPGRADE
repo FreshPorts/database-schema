@@ -17,7 +17,7 @@ alter table sanity_test_failures
 psql freshports.org  < sp.txt
 
 -- set permissions
-psql freshports.org  < POSTGESQL.txt
+psql freshports.org  < POSTGRESQL.sql
 
 
 
