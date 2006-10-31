@@ -1,3 +1,31 @@
+29 October User specified page size
+
+update users set page_size = 100 where page_size = 25 or page_size is null;
+
+27 October Database size Stats
+
+insert into daily_stats (title, query) values ('Database size', 'select Stats_DatabaseSize()');
+
+insert into graphs (title, query, label, is_clickable)
+   values ('Database size - daily', '
+SELECT to_char(date, \'YYYY-Mon-DD\'), value / 1024.0 / 1024
+  FROM daily_stats, daily_stats_data
+ WHERE daily_stats_data.daily_stats_id = daily_stats.id 
+   AND title = \'Database size\'
+ORDER BY daily_stats_data.date DESC
+LIMIT 90', 'database size (daily) MB', FALSE);
+
+insert into graphs (title, query, label, is_clickable) 
+   values ('Database size - monthly', '
+SELECT to_char(date, \'YYYY-MM\') AS MONTH,
+       max(value) / 1024.0 / 1024
+  FROM daily_stats, daily_stats_data
+ WHERE daily_stats_data.daily_stats_id = daily_stats.id 
+   AND title = \'Database size\'
+GROUP BY to_char(date, \'YYYY-MM\')
+ORDER BY to_char(date, \'YYYY-MM\') DESC
+LIMIT 90', 'database size (monthly) GB', FALSE);
+
 14 October 2006 - Adding Sanity Test Failures
 
 create table sanity_test_failures
