@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.158 2006-10-21 13:41:31 dan Exp $
+-- $Id: sp.txt,v 1.159 2006-10-31 13:34:08 dan Exp $
 --
 -- Copyright (c) 1998-2006 DVL Software Limited
 --
@@ -1113,6 +1113,10 @@ CREATE OR REPLACE FUNCTION DailyStatsCaculate() returns int8 AS '
 	END
 ' LANGUAGE 'plpgsql';
 
+CREATE OR REPLACE FUNCTION Stats_DatabaseSize() returns int8 AS $$
+	SELECT pg_database_size(current_database());
+$$ LANGUAGE SQL STABLE;
+
 CREATE OR REPLACE FUNCTION Stats_PortCount() returns int8 AS '
 	DECLARE
 		PortCount	int8;
@@ -2184,7 +2188,7 @@ SELECT 0 AS port_id,
  WHERE CL.id          = CLE.commit_log_id
    AND CL.message_id  = $1
    AND CLE.element_id = E.id
-ORDER BY 3, port, element_pathname
+ORDER BY port, element_pathname
    LIMIT $2
   OFFSET $3;
 
@@ -2270,7 +2274,7 @@ FROM
        LEFT OUTER JOIN commit_log_ports CLP ON THIRD1.port_id = CLP.port_ID AND THIRD1.commit_log_id = CLP.commit_log_id) AS THIRD1b
    LEFT OUTER JOIN ports_vulnerable ON THIRD1b.port_id = ports_vulnerable.port_ID) AS FOURTH1
        LEFT OUTER JOIN categories C ON FOURTH1.category_id = C.id
-order by 3, port, pathname
+order by port, pathname
    LIMIT $2
   OFFSET $3;
 
