@@ -1,3 +1,17 @@
+5 Nov 2006
+
+Give more room in daily stats table:
+
+begin;
+alter table daily_stats_data add column newvalues bigint;
+update daily_stats_data set newvalues = value;
+select * from daily_stats_data where newvalues != value;
+alter table daily_stats_data drop column value;
+alter table daily_stats_data rename column newvalues to value;
+select * from daily_stats_data limit 60;
+commit;
+
+
 29 October User specified page size
 
 update users set page_size = 100 where page_size = 25 or page_size is null;
