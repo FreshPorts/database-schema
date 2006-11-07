@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.159 2006-10-31 13:34:08 dan Exp $
+-- $Id: sp.txt,v 1.160 2006-11-07 12:34:30 dan Exp $
 --
 -- Copyright (c) 1998-2006 DVL Software Limited
 --
@@ -1094,9 +1094,9 @@ CREATE OR REPLACE FUNCTION DailySummaryDateRemove(date) returns int8 AS '
 CREATE OR REPLACE FUNCTION DailyStatsCaculate() returns int8 AS '
 	DECLARE
 		queries		RECORD;
-		curs1			REFCURSOR;
+		curs1		REFCURSOR;
 		TheDate		date;
-		QueryTotal	int4;
+		QueryTotal	bigint;
 
 	BEGIN
 		select (current_date - 1)::date
