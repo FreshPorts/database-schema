@@ -1,3 +1,35 @@
+8 Nov 2006
+
+Change of element_type to include pathname:
+
+BEGIN;
+  DROP TYPE element_type CASCADE;
+CREATE TYPE element_type AS (
+	id               integer,
+	name             text,
+	type             text,
+	status           text,
+	iscategory       boolean,
+	isport           boolean,
+	element_pathname text
+);
+
+CREATE OR REPLACE FUNCTION elementGet (text) RETURNS SETOF element_type AS '
+   SELECT id,
+          name::text,
+          directory_file_flag::text,
+          status::text,
+          case when IsCategory(Pathname_ID($1)) IS NULL THEN FALSE ELSE TRUE END,
+          case when IsPort(    Pathname_ID($1)) IS NULL THEN FALSE ELSE TRUE END,
+          element_pathname(id)
+     FROM element
+    WHERE id = PathName_ID($1);
+' LANGUAGE SQL STABLE;
+
+
+commit;
+
+
 5 Nov 2006
 
 Give more room in daily stats table:
