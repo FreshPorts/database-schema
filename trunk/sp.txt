@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.160 2006-11-07 12:34:30 dan Exp $
+-- $Id: sp.txt,v 1.161 2006-11-10 03:27:23 dan Exp $
 --
 -- Copyright (c) 1998-2006 DVL Software Limited
 --
@@ -2101,7 +2101,8 @@ CREATE OR REPLACE FUNCTION elementGet (text) RETURNS SETOF element_type AS '
           directory_file_flag::text,
           status::text,
           case when IsCategory(Pathname_ID($1)) IS NULL THEN FALSE ELSE TRUE END,
-          case when IsPort(    Pathname_ID($1)) IS NULL THEN FALSE ELSE TRUE END
+          case when IsPort(    Pathname_ID($1)) IS NULL THEN FALSE ELSE TRUE END,
+          element_pathname(id)
      FROM element
     WHERE id = PathName_ID($1);
 ' LANGUAGE SQL STABLE;
