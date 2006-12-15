@@ -1,5 +1,5 @@
 --
--- $Id: createdb.sql,v 1.87 2006-10-10 12:10:10 dan Exp $
+-- $Id: createdb.sql,v 1.88 2006-12-15 19:21:03 dan Exp $
 --
 -- The following options should be used to create the database schema
 --
@@ -479,6 +479,14 @@ create table security_notice
     primary key (id)
 );
 
+create table commit_group
+(
+    id                         serial                not null,
+    user_id                    integer               not null,
+    name                       text                  not null,
+    primary key (id)
+);
+
 create table system_branch
 (
     id                         serial                not null,
@@ -590,7 +598,7 @@ create table daily_stats_data
     id                         serial                not null,
     daily_stats_id             integer               not null,
     date                       date                  not null,
-    value                      integer               not null,
+    value                      bigint                not null,
     primary key (id)
 );
 
@@ -840,6 +848,15 @@ create table sanity_test_failures
     primary key (id)
 );
 
+create table commit_group_contents
+(
+    commit_group_id            integer               not null,
+    commit_log_id              integer               not null,
+    date                       date                          ,
+    comment                    text                          ,
+    primary key (commit_group_id, commit_log_id)
+);
+
 create view commits_recent as
 select distinct commit_log.id, commit_log.message_id, commit_log.message_date,
 commit_log.message_subject, commit_log.date_added, commit_log.commit_date,
@@ -912,6 +929,10 @@ alter table security_notice
 alter table security_notice
     add foreign key  (security_notice_status_id)
        references security_notice_status (id) on update restrict on delete restrict;
+
+alter table commit_group
+    add foreign key  (user_id)
+       references users (id) on update cascade on delete cascade;
 
 alter table system_branch
     add foreign key  (system_id)
@@ -1164,4 +1185,12 @@ alter table cache_clearing_ports
 alter table sanity_test_failures
     add foreign key  (commit_log_id)
        references commit_log (id) on update restrict on delete restrict;
+
+alter table commit_group_contents
+    add foreign key  (commit_group_id)
+       references commit_group (id) on update cascade on delete cascade;
+
+alter table commit_group_contents
+    add foreign key  (commit_log_id)
+       references commit_log (id) on update cascade on delete cascade;
 
