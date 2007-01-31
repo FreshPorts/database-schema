@@ -1,5 +1,5 @@
 --
--- $Id: ri.txt,v 1.39 2006-09-11 02:27:26 dan Exp $
+-- $Id: ri.txt,v 1.40 2007-01-31 22:43:35 dan Exp $
 --
 -- Copyright (c) 1998-2006 DVL Software Limited
 --
@@ -444,6 +444,18 @@ language 'plpgsql';
   DROP TRIGGER categories_insert ON categories;
 CREATE TRIGGER categories_insert AFTER INSERT OR UPDATE ON categories FOR EACH ROW
 EXECUTE PROCEDURE categories_insert_update();
+
+
+CREATE OR REPLACE FUNCTION categories_new() RETURNS TRIGGER AS $$
+   BEGIN
+		NOTIFY category_new;
+   END;
+$$ language 'plpgsql';
+
+
+  DROP TRIGGER categories_new ON categories;
+CREATE TRIGGER categories_new AFTER INSERT ON categories FOR EACH ROW
+EXECUTE PROCEDURE categories_new();
 
 
 
