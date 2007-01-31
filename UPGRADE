@@ -9,6 +9,8 @@ sudo svc -d /var/service/fp-listen
 sudo svc -u /var/service/fp-listen
 sudo svc -u /var/service/freshports
 
+copy values from daemontools/fp-listen/config.py.sample to config.py
+
 
 8 Nov 2006
 
