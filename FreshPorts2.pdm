@@ -48,7 +48,7 @@ FreshPorts2
 PostgreSQL 7.x
 PostgreSQL.def
 --\
--- $Id: FreshPorts2.pdm,v 1.111 2006-12-15 19:21:02 dan Exp $\
+-- $Id: FreshPorts2.pdm,v 1.112 2007-01-31 21:49:24 dan Exp $\
 --\
 -- The following options should be used to create the database schema\
 --\
@@ -80,7 +80,7 @@ PostgreSQL.def
 Dan Langille
 
 968886895
-1166209982
+1170280095
 0
 0
 0
@@ -2364,7 +2364,8 @@ listen_for
 insert into listen_for (name, script_name) values ('port_updated', 'listen_port');\
 insert into listen_for (name, script_name) values ('ports_moved', 'listen_ports_moved');\
 insert into listen_for (name, script_name) values ('ports_updating', 'listen_ports_updating');\
-insert into listen_for (name, script_name) values ('vuxml', 'listen_vuxml');
+insert into listen_for (name, script_name) values ('vuxml', 'listen_vuxml');\
+insert into listen_for (name, script_name) values ('category_new', 'listen_category_new');
 0
 0
 0
@@ -2463,7 +2464,7 @@ commit_group
 0
 0
 0
-
+commit_group
 
 
 
@@ -2489,7 +2490,7 @@ commit_group_contents
 0
 0
 0
-
+commit_group_contents
 
 
 
@@ -15923,7 +15924,7 @@ serial
 1
 0
 0
-
+id
 
 1
 0
@@ -15964,7 +15965,7 @@ integer
 1
 0
 0
-
+user_id
 
 2
 0
@@ -16005,7 +16006,7 @@ text
 1
 0
 0
-
+name
 
 3
 0
@@ -16046,7 +16047,7 @@ integer
 1
 0
 0
-
+commit_group_id
 
 1
 0
@@ -16087,7 +16088,7 @@ integer
 1
 0
 0
-
+commit_log_id
 
 2
 0
@@ -16128,7 +16129,7 @@ date
 1
 0
 0
-
+date
 
 3
 0
@@ -16169,7 +16170,7 @@ text
 1
 0
 0
-
+comment
 
 4
 0
@@ -18026,7 +18027,7 @@ Ref_34474
 1
 0
 0
-
+Ref_34474
 
 0
 n
@@ -18050,7 +18051,7 @@ Ref_34491
 1
 0
 0
-
+Ref_34491
 
 0
 n
@@ -18074,7 +18075,7 @@ Ref_34498
 1
 0
 0
-
+Ref_34498
 
 0
 n
@@ -24921,10 +24922,10 @@ OLE     BIN
 0
 0
 0
--12120
--42761
-9704
--38637
+-12121
+-42687
+9703
+-38563
 1
 1
 0
@@ -24939,8 +24940,8 @@ OLE     BIN
 
 0
 FreshPorts 2 - physical database model\
-Copyright © 2001-2006 DVL Software Limited\
-Wellington, New Zealand  - 15 December 2006
+Copyright © 2001-2007 DVL Software Limited\
+Wellington, New Zealand  - 31 January 2007
 
 
 2
@@ -27174,10 +27175,10 @@ than once by the same tag.
 0
 0
 0
-39023
--76814
-47497
--72463
+39021
+-76816
+47495
+-72465
 2
 1
 0
