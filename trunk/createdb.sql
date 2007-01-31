@@ -1,5 +1,5 @@
 --
--- $Id: createdb.sql,v 1.88 2006-12-15 19:21:03 dan Exp $
+-- $Id: createdb.sql,v 1.89 2007-01-31 21:49:24 dan Exp $
 --
 -- The following options should be used to create the database schema
 --
@@ -138,6 +138,7 @@ insert into listen_for (name, script_name) values ('port_updated', 'listen_port'
 insert into listen_for (name, script_name) values ('ports_moved', 'listen_ports_moved');
 insert into listen_for (name, script_name) values ('ports_updating', 'listen_ports_updating');
 insert into listen_for (name, script_name) values ('vuxml', 'listen_vuxml');
+insert into listen_for (name, script_name) values ('category_new', 'listen_category_new');
 
 create unique index listen_for_name_idx on listen_for (name);
 
