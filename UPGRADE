@@ -1,3 +1,15 @@
+31 January 2006
+
+for the categories update
+
+insert into listen_for (name, script_name) values ('category_new', 'listen_category_new');
+psql freshports.org < ri.txt
+sudo svc -d /var/service/freshports
+sudo svc -d /var/service/fp-listen
+sudo svc -u /var/service/fp-listen
+sudo svc -u /var/service/freshports
+
+
 8 Nov 2006
 
 Change of element_type to include pathname:
