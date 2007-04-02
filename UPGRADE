@@ -1,3 +1,61 @@
+1 April 2006 - Voting
+
+
+-- Table: design_results
+
+-- DROP TABLE design_results;
+
+CREATE TABLE design_results
+(
+  id serial NOT NULL,
+  user_id int4 NOT NULL,
+  choice1 char(1) NOT NULL,
+  choice2 char(1) NOT NULL,
+  choice3 char(1) NOT NULL,
+  CONSTRAINT design_results_user_id FOREIGN KEY (user_id)
+      REFERENCES users (id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION,
+  CONSTRAINT user_id UNIQUE (user_id),
+  CONSTRAINT choice_all_different CHECK (choice1 <> choice2 AND choice1 <>
+choice3 AND choice2 <> choice3),
+  CONSTRAINT valid_choices CHECK ((choice1 = ANY (ARRAY['A'::bpchar,
+'B'::bpchar, 'C'::bpchar])) AND (choice2 = ANY (ARRAY['A'::bpchar,
+'B'::bpchar, 'C'::bpchar])) AND (choice3 = ANY (ARRAY['A'::bpchar,
+'B'::bpchar, 'C'::bpchar])))
+) 
+WITHOUT OIDS;
+ALTER TABLE design_results OWNER TO dan;
+
+
+-- Index: fki_design_results_user_id
+
+-- DROP INDEX fki_design_results_user_id;
+
+CREATE INDEX fki_design_results_user_id
+  ON design_results
+  USING btree
+  (user_id);
+
+
+
+grant select, insert on design_results         to group www;
+grant select, update on design_results_id_seq  to group www;
+
+
+
+
+20 February 2006 - Philadelphia
+
+insert into reports (name, description, needs_frequency) values ('Watch List
+Non-Ports', 'Similar to Watch List Notification, but for all of the source
+tree, including non-ports', true);
+
+
+insert into reports (name, description, needs_frequency) values ('Watch List
+Directories', 'Similar to Watch List Notification, but allows you to watch
+directories (e.g. /docs)', true);
+
+
 31 January 2006
 
 for the categories update
