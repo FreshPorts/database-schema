@@ -1,3 +1,10 @@
+6 April 2006 - Announcements
+
+ALTER TABLE announcements add column text_plain text;
+UPDATE announcements SET text_plain = text;
+ALTER TABLE announcements ALTER text_plain SET NOT NULL;
+
+
 1 April 2006 - Voting
 
 
