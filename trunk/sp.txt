@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.164 2007-03-18 23:31:45 dan Exp $
+-- $Id: sp.txt,v 1.165 2007-04-06 16:08:22 dan Exp $
 --
 -- Copyright (c) 1998-2006 DVL Software Limited
 --
@@ -2431,8 +2431,15 @@ CREATE OR REPLACE FUNCTION AnnouncementsGet() RETURNS SETOF text AS '
    SELECT text
 	  FROM announcements
 	 WHERE start_date <= current_date
-	   AND end_date   >= current_date;
+	   AND ((end_date IS NULL) OR (end_date >= current_date));
 ' LANGUAGE SQL STABLE;
+
+CREATE OR REPLACE FUNCTION AnnouncementsGetPlain() RETURNS SETOF text AS $$
+   SELECT text_plain
+	  FROM announcements
+	 WHERE start_date <= current_date
+	   AND ((end_date IS NULL) OR (end_date >= current_date));
+$$ LANGUAGE SQL STABLE;
 
 CREATE OR REPLACE FUNCTION SetSlavePort(text, text) returns int4 AS '
 --
