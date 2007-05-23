@@ -1,5 +1,5 @@
 --
--- $Id: ri.txt,v 1.40 2007-01-31 22:43:35 dan Exp $
+-- $Id: ri.txt,v 1.41 2007-05-23 03:22:01 dan Exp $
 --
 -- Copyright (c) 1998-2006 DVL Software Limited
 --
@@ -449,6 +449,8 @@ EXECUTE PROCEDURE categories_insert_update();
 CREATE OR REPLACE FUNCTION categories_new() RETURNS TRIGGER AS $$
    BEGIN
 		NOTIFY category_new;
+
+		RETURN new;
    END;
 $$ language 'plpgsql';
 
