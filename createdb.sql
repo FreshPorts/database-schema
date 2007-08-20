@@ -1,5 +1,5 @@
 --
--- $Id: createdb.sql,v 1.89 2007-01-31 21:49:24 dan Exp $
+-- $Id: createdb.sql,v 1.90 2007-08-20 13:24:53 dan Exp $
 --
 -- The following options should be used to create the database schema
 --
@@ -1185,7 +1185,7 @@ alter table cache_clearing_ports
 
 alter table sanity_test_failures
     add foreign key  (commit_log_id)
-       references commit_log (id) on update restrict on delete restrict;
+       references commit_log (id) on update cascade on delete cascade;
 
 alter table commit_group_contents
     add foreign key  (commit_group_id)

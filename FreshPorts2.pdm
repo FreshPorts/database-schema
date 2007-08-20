@@ -48,7 +48,7 @@ FreshPorts2
 PostgreSQL 7.x
 PostgreSQL.def
 --\
--- $Id: FreshPorts2.pdm,v 1.112 2007-01-31 21:49:24 dan Exp $\
+-- $Id: FreshPorts2.pdm,v 1.113 2007-08-20 13:24:53 dan Exp $\
 --\
 -- The following options should be used to create the database schema\
 --\
@@ -80,7 +80,7 @@ PostgreSQL.def
 Dan Langille
 
 968886895
-1170280095
+1187616200
 0
 0
 0
@@ -17997,8 +17997,8 @@ Ref_33795
 1
 33791
 1
-1
-1
+2
+2
 1
 1
 0
@@ -18462,11 +18462,6 @@ COLN2   N10
 210
 33076
 1
-33798
-33798
-2
-33793
-1
 34496
 34496
 34462
@@ -18486,6 +18481,11 @@ COLN2   N10
 34509
 13310
 11333
+1
+35178
+35178
+2
+33793
 /END_TABLE AMCCCOL
 
 /BEGIN_TABLE AMCCREF
@@ -18947,10 +18947,10 @@ NUMR    N8
 33082
 1
 3
-33799
-33799
+35179
+35179
 33795
-33798
+35178
 1
 3
 34506
@@ -24915,17 +24915,17 @@ OLE     BIN
 3
 749
 6
-0
+2
 6
 0
 0
 0
 0
 0
--12121
--42687
-9703
--38563
+-12122
+-42688
+9702
+-38564
 1
 1
 0
@@ -24941,7 +24941,7 @@ OLE     BIN
 0
 FreshPorts 2 - physical database model\
 Copyright © 2001-2007 DVL Software Limited\
-Wellington, New Zealand  - 31 January 2007
+Wellington, New Zealand  - 20 August 2007
 
 
 2
@@ -27274,10 +27274,10 @@ than once by the same tag.
 0
 0
 0
--58230
--49382
--47881
--45031
+-58232
+-49384
+-47883
+-45033
 2
 1
 0
@@ -29599,7 +29599,7 @@ e209000076ebffffe209000028cbffff11f3ffff28cbffff63d8ffff28cbffff63d8ffffecc1ffff
 0
 0
 2
-0f31ffff3cabffff0f31ffff7a4dffff
+0d31ffff87abffff0d31ffffc34dffff
 2
 
 
