@@ -1,5 +1,5 @@
 --
--- $Id: createdb.sql,v 1.90 2007-08-20 13:24:53 dan Exp $
+-- $Id: createdb.sql,v 1.91 2007-10-12 15:16:43 dan Exp $
 --
 -- The following options should be used to create the database schema
 --
@@ -858,6 +858,13 @@ create table commit_group_contents
     primary key (commit_group_id, commit_log_id)
 );
 
+create table master_slave
+(
+    master_port_id             integer               not null,
+    slave_port_id              integer               not null,
+    primary key (master_port_id, slave_port_id)
+);
+
 create view commits_recent as
 select distinct commit_log.id, commit_log.message_id, commit_log.message_date,
 commit_log.message_subject, commit_log.date_added, commit_log.commit_date,
@@ -1194,4 +1201,12 @@ alter table commit_group_contents
 alter table commit_group_contents
     add foreign key  (commit_log_id)
        references commit_log (id) on update cascade on delete cascade;
+
+alter table master_slave
+    add foreign key  (master_port_id)
+       references ports (id) on update cascade on delete cascade;
+
+alter table master_slave
+    add foreign key  (slave_port_id)
+       references ports (id) on update cascade on delete cascade;
 
