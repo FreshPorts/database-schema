@@ -1,7 +1,7 @@
 --
--- $Id: ri.txt,v 1.41 2007-05-23 03:22:01 dan Exp $
+-- $Id: ri.txt,v 1.42 2007-10-16 18:28:49 dan Exp $
 --
--- Copyright (c) 1998-2006 DVL Software Limited
+-- Copyright (c) 1998-2007 DVL Software Limited
 --
 
 CREATE OR REPLACE FUNCTION check_siblings() RETURNS TRIGGER as '
@@ -238,7 +238,7 @@ CREATE OR REPLACE FUNCTION ports_clear_cache() RETURNS TRIGGER AS $$
             INSERT INTO cache_clearing_ports (port_id, category, port)
             VALUES (NEW.id, l_category, l_port);
           END IF;
-          
+
           NOTIFY port_updated;
       END IF;
 
@@ -602,5 +602,78 @@ CREATE TRIGGER commit_log_ports_insert
 AFTER INSERT on commit_log_ports
 FOR EACH ROW
 EXECUTE PROCEDURE commit_log_ports_insert ();
+
+
+--
+-- watch list count refresh
+--
+CREATE OR REPLACE FUNCTION watch_list_element_insert () RETURNS TRIGGER AS $$
+DECLARE
+	l_port_id	int8;
+	l_port      text;
+	l_category  text;
+BEGIN
+	RAISE NOTICE 'into watch_list_element_insert with %', NEW.element_id;
+	SELECT id, category, name
+	  INTO l_port_id, l_category, l_port
+     FROM ports_all
+    WHERE element_id = NEW.element_id
+      AND NOT EXISTS (SELECT CCP.port_id 
+                        FROM cache_clearing_ports CCP
+                       WHERE CCP.port_id = ports_all.id);
+          
+   IF FOUND THEN
+		RAISE NOTICE 'not found in cache.  will insert %, %, %', l_port_id, l_category, l_port;
+		INSERT INTO cache_clearing_ports (port_id, category, port)
+          VALUES (l_port_id, l_category, l_port);
+		NOTIFY port_updated;
+	ELSE
+		RAISE NOTICE 'found in cache.  will not insert';
+   END IF;
+
+	RETURN new;
+END; $$
+LANGUAGE plpgsql;
+
+  DROP TRIGGER watch_list_element_insert on watch_list_element;
+CREATE TRIGGER watch_list_element_insert
+AFTER INSERT on watch_list_element
+FOR EACH ROW
+EXECUTE PROCEDURE watch_list_element_insert ();
+
+
+CREATE OR REPLACE FUNCTION watch_list_element_delete () RETURNS TRIGGER AS $$
+DECLARE
+	l_port_id	int8;
+	l_port      text;
+	l_category  text;
+BEGIN
+	RAISE NOTICE 'into watch_list_element_delete with %', OLD.element_id;
+	SELECT id, category, name
+	  INTO l_port_id, l_category, l_port
+     FROM ports_all
+    WHERE element_id = OLD.element_id
+      AND NOT EXISTS (SELECT CCP.port_id 
+                        FROM cache_clearing_ports CCP
+                       WHERE CCP.port_id = ports_all.id);
+          
+   IF FOUND THEN
+		RAISE NOTICE 'not found in cache.  will insert %, %, %', l_port_id, l_category, l_port;
+		INSERT INTO cache_clearing_ports (port_id, category, port)
+          VALUES (l_port_id, l_category, l_port);
+		NOTIFY port_updated;
+	ELSE
+		RAISE NOTICE 'found in cache.  will not insert';
+   END IF;
+
+	RETURN OLD;
+END; $$
+LANGUAGE plpgsql;
+
+  DROP TRIGGER watch_list_element_delete on watch_list_element;
+CREATE TRIGGER watch_list_element_delete
+BEFORE DELETE on watch_list_element
+FOR EACH ROW
+EXECUTE PROCEDURE watch_list_element_delete ();
 
 
