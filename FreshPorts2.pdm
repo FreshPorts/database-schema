@@ -48,7 +48,7 @@ FreshPorts2
 PostgreSQL 7.x
 PostgreSQL.def
 --\
--- $Id: FreshPorts2.pdm,v 1.115 2007-10-16 18:27:56 dan Exp $\
+-- $Id: FreshPorts2.pdm,v 1.116 2007-10-24 12:37:15 dan Exp $\
 --\
 -- The following options should be used to create the database schema\
 --\
@@ -80,7 +80,7 @@ PostgreSQL.def
 Dan Langille
 
 968886895
-1192201835
+1193229339
 0
 0
 0
@@ -18105,7 +18105,7 @@ Ref_33795
 1
 33791
 1
-2
+1
 2
 1
 1
@@ -18638,11 +18638,6 @@ COLN2   N10
 13310
 11333
 1
-35178
-35178
-2
-33793
-1
 35394
 35394
 210
@@ -18652,6 +18647,11 @@ COLN2   N10
 35398
 210
 35389
+1
+36096
+36096
+2
+33793
 /END_TABLE AMCCCOL
 
 /BEGIN_TABLE AMCCREF
@@ -19113,10 +19113,10 @@ NUMR    N8
 33082
 1
 3
-35179
-35179
+36097
+36097
 33795
-35178
+36096
 1
 3
 34506
@@ -27452,10 +27452,10 @@ than once by the same tag.
 0
 0
 0
--58232
--49384
--47883
--45033
+-58235
+-49387
+-47886
+-45036
 2
 1
 0
@@ -29810,7 +29810,7 @@ e209000076ebffffe209000028cbffff11f3ffff28cbffff63d8ffff28cbffff63d8ffffecc1ffff
 0
 0
 2
-0d31ffff87abffff0d31ffffc34dffff
+0a31ffff87abffff0a31ffffc04dffff
 2
 
 
