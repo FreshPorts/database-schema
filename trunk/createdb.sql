@@ -1,5 +1,5 @@
 --
--- $Id: createdb.sql,v 1.92 2007-10-24 12:37:15 dan Exp $
+-- $Id: createdb.sql,v 1.93 2008-01-18 18:42:23 dan Exp $
 --
 -- The following options should be used to create the database schema
 --
@@ -398,6 +398,7 @@ create table ports
     not_for_archs              text                          ,
     status                     char(1)               not null
         check (status in ('A','D')),
+    showconfig                 text                          ,
     primary key (id)
 );
 
