@@ -1,3 +1,10 @@
+18 January 2008 - makeconfig
+
+ALTER TABLE ports ADD COLUMN showconfig text;
+svc -d /var/service/freshports/
+cd scripts/Verify && perl set-showconfig.pl  > loading.txt 2>&1
+svc -u /var/service/freshports/
+
 6 April 2006 - Announcements
 
 ALTER TABLE announcements add column text_plain text;
