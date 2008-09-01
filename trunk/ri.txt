@@ -1,5 +1,5 @@
 --
--- $Id: ri.txt,v 1.43 2008-09-01 13:51:23 dan Exp $
+-- $Id: ri.txt,v 1.44 2008-09-01 13:58:18 dan Exp $
 --
 -- Copyright (c) 1998-2007 DVL Software Limited
 --
@@ -320,16 +320,16 @@ EXECUTE PROCEDURE version_revision_uniqueness();
 
 
 -- the procedure
-CREATE OR REPLACE FUNCTION element_delete_check() RETURNS TRIGGER as '
+CREATE OR REPLACE FUNCTION element_delete_check() RETURNS TRIGGER as $$
 begin
 
    -- if we are removing an element, make sure we set the
    -- element status to deleted.
 
-   if (NEW.change_type = \'R\') then
---      select Element_SetStatus(new.element_id, \'D\');
+   if (NEW.change_type = 'R') then
+--      select Element_SetStatus(new.element_id, 'D');
       update element
-         set status = \'D\'
+         set status = 'D'
        where id     = NEW.element_id;
    end if;
 
@@ -340,7 +340,7 @@ begin
    -- * * * * * * * * * * * * * * * *
    RETURN NEW;
 end;
-' LANGUAGE 'plpgsql';
+$$ LANGUAGE 'plpgsql';
 
 
 -- the trigger
@@ -381,18 +381,18 @@ EXECUTE PROCEDURE commit_log_delete_check();
 
 
 
-CREATE OR REPLACE FUNCTION user_watch_list_create() RETURNS TRIGGER as '
+CREATE OR REPLACE FUNCTION user_watch_list_create() RETURNS TRIGGER as $$
 begin
 
 	insert into watch_list (user_id, name, in_service) 
-                    values (new.id, \'main\', TRUE);
+                    values (new.id, 'main', TRUE);
 
 	insert into user_confirmations (user_id, token)
-					values (new.id, ENCODE((DIGEST(random() * 105311100709)::text, \'md5\'), \'hex\'));
+					values (new.id, ENCODE((DIGEST(random() * 105311100709)::text, 'md5'), 'hex'));
 
    RETURN OLD;
 end;
-' LANGUAGE 'plpgsql';
+$$ LANGUAGE 'plpgsql';
 
 
 
@@ -461,7 +461,7 @@ EXECUTE PROCEDURE categories_new();
 
 
 
-CREATE OR REPLACE FUNCTION ports_categories_set() RETURNS TRIGGER AS '
+CREATE OR REPLACE FUNCTION ports_categories_set() RETURNS TRIGGER AS $$
    DECLARE
 		CategoryCount	integer;
 		CategoryNames	text;
@@ -471,7 +471,7 @@ CREATE OR REPLACE FUNCTION ports_categories_set() RETURNS TRIGGER AS '
    BEGIN
 		UpdateNeeded := TRUE;
 
-		IF TG_OP = ''UPDATE'' THEN
+		IF TG_OP = 'UPDATE' THEN
 			IF old.categories = new.categories THEN
 				UpdateNeeded := FALSE;
 			END IF;
@@ -489,10 +489,10 @@ CREATE OR REPLACE FUNCTION ports_categories_set() RETURNS TRIGGER AS '
 				CategoryNames := new.categories;
       		LOOP
          		CategoryCount := CategoryCount + 1;
-	         	Category := split_part(CategoryNames, \' \', CategoryCount);
+	         	Category := split_part(CategoryNames, ' ', CategoryCount);
 
 					-- let us not get carried away....
-   		      IF Category = \'\' OR CategoryCount > 100 THEN
+   		      IF Category = '' OR CategoryCount > 100 THEN
       		      EXIT;
          		END IF;
 
@@ -502,8 +502,8 @@ CREATE OR REPLACE FUNCTION ports_categories_set() RETURNS TRIGGER AS '
 					 WHERE name = Category;
 
 					IF NOT FOUND THEN
-						RAISE NOTICE '' we need to create category % '', Category;
-						CategoryID := CreateCategory(Category, ''no description supplied'', FALSE);
+						RAISE NOTICE ' we need to create category % ', Category;
+						CategoryID := CreateCategory(Category, 'no description supplied', FALSE);
 					END IF;
 
 					INSERT INTO ports_categories (port_id, category_id)
@@ -514,14 +514,14 @@ CREATE OR REPLACE FUNCTION ports_categories_set() RETURNS TRIGGER AS '
 					                       WHERE port_id     = new.id
 					                         AND category_id = CategoryID);
 
---					RAISE NOTICE '' category % is % with id %'', CategoryCount, Category, CategoryID;
+--					RAISE NOTICE ' category % is % with id %', CategoryCount, Category, CategoryID;
       		END LOOP;
 			END IF;
 		END IF;
 
       RETURN NEW;
    END
-' LANGUAGE 'plpgsql';
+$$ LANGUAGE 'plpgsql';
 
   DROP TRIGGER ports_ports_categories ON ports;
 CREATE TRIGGER ports_ports_categories
