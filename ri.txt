@@ -1,5 +1,5 @@
 --
--- $Id: ri.txt,v 1.42 2007-10-16 18:28:49 dan Exp $
+-- $Id: ri.txt,v 1.43 2008-09-01 13:51:23 dan Exp $
 --
 -- Copyright (c) 1998-2007 DVL Software Limited
 --
@@ -388,7 +388,7 @@ begin
                     values (new.id, \'main\', TRUE);
 
 	insert into user_confirmations (user_id, token)
-					values (new.id, ENCODE(DIGEST(random() * 105311100709, \'md5\'), \'hex\'));
+					values (new.id, ENCODE((DIGEST(random() * 105311100709)::text, \'md5\'), \'hex\'));
 
    RETURN OLD;
 end;
