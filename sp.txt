@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.167 2008-09-01 14:16:08 dan Exp $
+-- $Id: sp.txt,v 1.168 2008-09-01 14:45:53 dan Exp $
 --
 -- Copyright (c) 1998-2006 DVL Software Limited
 --
@@ -2619,7 +2619,7 @@ CREATE OR REPLACE FUNCTION currenttimestamputc() RETURNS timestamp without time 
 
 CREATE OR REPLACE FUNCTION WatchersAlsoWatched(int) RETURNS SETOF also_watched_record AS $$
 SELECT O.element_id as element_id, 
-       '<a href="/' || P.Category || '/' || P.name || '/" TITLE="' || replace(P.short_description, '"', '\\') || '">' 
+       '<a href="/' || P.Category || '/' || P.name || '/" TITLE="' || replace(P.short_description, '"', E'\'') || E'\">' 
                            || P.package_name || '</a>' as url
   FROM ports_active P JOIN (
      SELECT W.element_id
@@ -2630,6 +2630,7 @@ SELECT O.element_id as element_id,
    ORDER BY count(W.watch_list_id) DESC
       LIMIT 5) AS O ON P.element_id = O.element_id;
 $$ LANGUAGE SQL STABLE;
+
 
 CREATE OR REPLACE function WatchListCountDefault(int) returns bigint as $$
 	SELECT count(*)
