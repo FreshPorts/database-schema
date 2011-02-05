@@ -1,3 +1,25 @@
+5 February 2011 - port_dependencies
+create table port_dependencies
+(
+    port_id                    integer               not null,
+    port_id_dependent_upon     integer               not null,
+    dependency_type            char(1)               not null,
+    primary key (port_id, port_id_dependent_upon, dependency_type)
+);
+
+alter table port_dependencies
+    add foreign key  (port_id)
+       references ports (id) on update cascade on delete cascade;
+
+alter table port_dependencies
+    add foreign key  (port_id_dependent_upon)
+       references ports (id) on update cascade on delete cascade;
+
+grant select on port_dependencies              to group www;
+grant select, insert, update, delete on port_dependencies              to group commits;
+
+
+
 17 September 2010 - password
 
 create table user_password_reset(
