@@ -1,5 +1,5 @@
 --
--- $Id: createdb.sql,v 1.93 2008-01-18 18:42:23 dan Exp $
+-- $Id: createdb.sql,v 1.94 2011-02-05 18:18:50 dan Exp $
 --
 -- The following options should be used to create the database schema
 --
@@ -399,6 +399,7 @@ create table ports
     status                     char(1)               not null
         check (status in ('A','D')),
     showconfig                 text                          ,
+    license                    text                          ,
     primary key (id)
 );
 
@@ -866,6 +867,14 @@ create table master_slave
     primary key (master_port_id, slave_port_id)
 );
 
+create table port_dependencies
+(
+    port_id                    integer               not null,
+    port_id_dependent_upon     integer               not null,
+    dependency_type            char(1)               not null,
+    primary key (port_id, port_id_dependent_upon, dependency_type)
+);
+
 create view commits_recent as
 select distinct commit_log.id, commit_log.message_id, commit_log.message_date,
 commit_log.message_subject, commit_log.date_added, commit_log.commit_date,
@@ -1209,5 +1218,13 @@ alter table master_slave
 
 alter table master_slave
     add foreign key  (slave_port_id)
+       references ports (id) on update cascade on delete cascade;
+
+alter table port_dependencies
+    add foreign key  (port_id)
+       references ports (id) on update cascade on delete cascade;
+
+alter table port_dependencies
+    add foreign key  (port_id_dependent_upon)
        references ports (id) on update cascade on delete cascade;
 
