@@ -18,6 +18,40 @@ alter table port_dependencies
 grant select on port_dependencies              to group www;
 grant select, insert, update, delete on port_dependencies              to group commits;
 
+CREATE OR REPLACE FUNCTION PortsDependenciesAdd (text, text, text) returns
+int AS $$
+  DECLARE
+    p_PortName              ALIAS FOR $1;
+    p_PortNameDependentUpon ALIAS FOR $2;
+    p_DependencyType        ALIAS FOR $3;
+
+    l_PortID           int;
+    l_PortIDDependency int;
+    OID                int8;
+
+  BEGIN
+    select GetPort(p_PortName)
+      INTO l_PortID;
+
+    select GetPort(p_PortNameDependentUpon)
+      INTO l_PortIDDependency;
+
+    if l_PortID IS NOT NULL AND l_PortIDDependency IS NOT NULL then
+      INSERT INTO port_dependencies (port_id, port_id_dependent_upon, dependency_type)
+            VALUES (l_PortID, l_PortIDDependency, p_DependencyType);
+      RETURN 1;
+    else
+      if l_PortID IS NULL then
+        RAISE EXCEPTION 'cannot find this port: %', p_PortName;
+      end if;
+      if l_PortIDDependency IS NULL then
+        RAISE EXCEPTION 'cannot find this port: %', p_PortNameDependentUpon;
+      end if;
+    end if;
+
+    RETURN 0;
+  END;
+$$  LANGUAGE 'plpgsql';
 
 
 17 September 2010 - password
