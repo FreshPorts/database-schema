@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.170 2011-02-06 15:02:30 dan Exp $
+-- $Id: sp.txt,v 1.171 2011-09-24 19:28:29 dan Exp $
 --
 -- Copyright (c) 1998-2006 DVL Software Limited
 --
@@ -2185,13 +2185,14 @@ SELECT 0 AS port_id,
        NULL::text AS only_for_archs,
        NULL::text AS not_for_archs,
        OnWatchList($4, CLE.element_id) AS watch
-  FROM commit_log CL, commit_log_elements CLE, element E
- WHERE CL.id          = CLE.commit_log_id
-   AND CL.message_id  = $1
-   AND CLE.element_id = E.id
+  FROM commit_log CL LEFT OUTER JOIN commit_log_elements CLE ON (CL.id = CLE.commit_log_id)
+       LEFT OUTER JOIN element E ON (CLE.element_id = E.id)
+ WHERE CL.message_id  = $1
 ORDER BY port, element_pathname
    LIMIT $2
   OFFSET $3;
+  
+  -- NOTE some commits touch nothing....  e.g. 201109230051.p8N0pbV2045995@svn.freebsd.org
 
 $$ LANGUAGE SQL STABLE;
 
@@ -3050,10 +3051,10 @@ int AS $$
       RETURN 1;
     else
       if l_PortID IS NULL then
-        RAISE EXCEPTION 'cannot find this port: %', p_PortName;
+        RAISE NOTICE 'cannot find this port: %', p_PortName;
       end if;
       if l_PortIDDependency IS NULL then
-        RAISE EXCEPTION 'cannot find this port: %', p_PortNameDependentUpon;
+        RAISE NOTICE 'cannot find this port: %', p_PortNameDependentUpon;
       end if;
     end if;
 
