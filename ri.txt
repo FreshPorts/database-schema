@@ -1,5 +1,5 @@
 --
--- $Id: ri.txt,v 1.45 2008-09-09 13:02:38 dan Exp $
+-- $Id: ri.txt,v 1.46 2011-10-02 17:30:40 dan Exp $
 --
 -- Copyright (c) 1998-2007 DVL Software Limited
 --
@@ -252,6 +252,42 @@ CREATE TRIGGER ports_clear_cache
     AFTER UPDATE on ports
     FOR EACH ROW
     EXECUTE PROCEDURE ports_clear_cache();
+
+
+CREATE OR REPLACE FUNCTION ports_vulnerable_delete_clear_cache() RETURNS TRIGGER AS $$
+   DECLARE
+      l_cache_clearing_ports_id   int8;
+      l_port      text;
+      l_category  text;
+   BEGIN
+		IF TG_OP = 'DELETE' THEN
+         SELECT port_id
+           INTO l_cache_clearing_ports_id
+           FROM cache_clearing_ports
+          WHERE port_id = OLD.port_id;
+          
+          IF NOT FOUND THEN
+            SELECT category, name
+              INTO l_category, l_port
+              FROM ports_all
+             WHERE id = OLD.port_id;
+            INSERT INTO cache_clearing_ports (port_id, category, port)
+            VALUES (OLD.port_id, l_category, l_port);
+          END IF;
+
+          NOTIFY port_updated;
+    END IF;
+
+      -- when a port changes, add an entry to the cache clearing table
+      RETURN OLD;
+   END
+$$ LANGUAGE 'plpgsql';
+
+  DROP TRIGGER ports_vulnerable_delete_clear_cache ON ports_vulnerable;
+CREATE TRIGGER ports_vulnerable_delete_clear_cache
+    AFTER DELETE on ports_vulnerable
+    FOR EACH ROW
+    EXECUTE PROCEDURE ports_vulnerable_delete_clear_cache();
 
 
 
