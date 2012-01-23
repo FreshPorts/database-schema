@@ -1,5 +1,5 @@
 --
--- $Id: createdb.sql,v 1.94 2011-02-05 18:18:50 dan Exp $
+-- $Id: createdb.sql,v 1.95 2012-01-23 16:51:16 dan Exp $
 --
 -- The following options should be used to create the database schema
 --
@@ -1227,4 +1227,12 @@ alter table port_dependencies
 alter table port_dependencies
     add foreign key  (port_id_dependent_upon)
        references ports (id) on update cascade on delete cascade;
+
+alter table commit_log_ports_elements
+    add foreign key (element_id)
+       references element(id) on update cascade on delete cascade;
+
+alter table commit_log_ports_elements
+    add foreign key (commit_log_id)
+       references commit_log(id) on update cascade on delete cascade;
 
