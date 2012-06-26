@@ -1,3 +1,10 @@
+22 June 2012 - performance
+
+create index commit_log_ports_vuxml_port_id on
+commit_log_ports_vuxml(port_id);
+
+
+
 5 February 2011 - port_dependencies
 create table port_dependencies
 (
