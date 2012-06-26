@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.171 2011-09-24 19:28:29 dan Exp $
+-- $Id: sp.txt,v 1.172 2012-06-26 12:29:25 dan Exp $
 --
 -- Copyright (c) 1998-2006 DVL Software Limited
 --
@@ -2662,19 +2662,16 @@ BEGIN
 
 	IF l_VulnCount > 0 THEN
 
-
 		SELECT count(distinct vuxml_id)
 		  INTO l_VulnCurrent
-		  FROM commit_log_ports_vuxml CLPV, commit_log_ports CLP, ports P, ports_vulnerable PV
+		  FROM commit_log_ports_vuxml CLPV, commit_log_ports CLP, ports P
 		 WHERE CLP.commit_log_id = CLPV.commit_log_id
 		   AND CLPV.port_id      = CLP.port_id
 		   AND P.id              = CLP.port_id
 		   AND P.version         = CLP.port_version
 		   AND P.revision        = CLP.port_revision
 		   AND CLP.port_epoch    = P.portepoch
-		   AND PV.port_id        = P.id
-		   AND P.id              = p_PortID
-		 GROUP BY P.id;
+		   AND P.id              = p_PortID;
 
 		IF l_VulnCurrent IS NULL THEN
 			l_VulnCurrent := 0;
