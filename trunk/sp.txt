@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.172 2012-06-26 12:29:25 dan Exp $
+-- $Id: sp.txt,v 1.173 2012-07-21 23:56:21 dan Exp $
 --
 -- Copyright (c) 1998-2006 DVL Software Limited
 --
@@ -2564,6 +2564,14 @@ BEGIN
 END;
 $$ LANGUAGE 'plpgsql' IMMUTABLE;
 
+CREATE OR REPLACE FUNCTION commit_log_ports_vuxml_purge(text) RETURNS SETOF int AS $$
+DELETE FROM commit_log_ports_vuxml CLPV
+ USING vuxml V
+ WHERE V.id  = CLPV.vuxml_id
+   AND V.vid = $1
+RETURNING 1
+$$ LANGUAGE SQL VOLATILE;
+
 
 CREATE OR REPLACE FUNCTION vuxml_ranges() RETURNS SETOF vuxml_record AS $$
 SELECT V.id,
@@ -2577,6 +2585,22 @@ SELECT V.id,
  WHERE V.id                 = VA.vuxml_id
    AND VN.vuxml_affected_id = VA.id
    AND VR.vuxml_affected_id = VA.id
+ ORDER BY VN.name, V.vid;
+$$ LANGUAGE SQL STABLE;
+
+CREATE OR REPLACE FUNCTION vuxml_ranges(text) RETURNS SETOF vuxml_record AS $$
+SELECT V.id,
+       V.vid,
+       VN.name      AS package_name,
+       VR.operator1 AS op1,
+       VR.version1  AS v1,
+       VR.operator2 AS op2,
+       VR.version2  AS v2
+  FROM vuxml_ranges VR, vuxml_names VN, vuxml_affected VA, vuxml V
+ WHERE V.id                 = VA.vuxml_id
+   AND VN.vuxml_affected_id = VA.id
+   AND VR.vuxml_affected_id = VA.id
+   AND V.vid                = $1
  ORDER BY VN.name, V.vid;
 $$ LANGUAGE SQL STABLE;
 
