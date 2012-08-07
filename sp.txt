@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.173 2012-07-21 23:56:21 dan Exp $
+-- $Id: sp.txt,v 1.174 2012-08-07 13:07:32 dan Exp $
 --
 -- Copyright (c) 1998-2006 DVL Software Limited
 --
@@ -2821,12 +2821,10 @@ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION Port_ID(text, text) returns integer AS $$
 	SELECT P.id
-	  FROM element E, ports P, categories C, ports_categories PC
+	  FROM element E, ports P, categories C
 	WHERE E.name         = $2
 	  AND E.id           = P.element_id
 	  AND C.name         = $1
-	  AND PC.port_id     = P.id
-	  AND PC.category_id = C.id
 	  AND P.category_id  = C.id;
 $$ LANGUAGE SQL STABLE;
 
