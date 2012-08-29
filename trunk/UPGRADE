@@ -1,3 +1,14 @@
+9 August 2012 - adding revision to commit-log
+
+alter table commit_log add column svn_revision text;
+
+create unique index commit_log_svn_revision_idx on commit_log(svn_revision)
+where svn_revision is not null;
+
+create index commit_log_ports_needs_refresh_idx on
+commit_log_ports(needs_refresh) where needs_refresh <> 0;
+
+
 12 July 2012 - vuxml performance
 
 alter table vuxml add column checksum text;
