@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.174 2012-08-07 13:07:32 dan Exp $
+-- $Id: sp.txt,v 1.175 2012-09-03 00:26:52 dan Exp $
 --
 -- Copyright (c) 1998-2006 DVL Software Limited
 --
@@ -486,18 +486,18 @@ $$ LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION SystemBranchIDGet(int4, text) RETURNS int4 AS $$
    DECLARE
-      System_ID           ALIAS for $1;
-      System_Branch_Name  ALIAS for $2;
-      System_Branch_ID    int4;
+      a_System_ID           ALIAS for $1;
+      a_System_Branch_Name  ALIAS for $2;
+      l_System_Branch_ID    int4;
 
    BEGIN
       select id
-        into System_Branch_ID
+        into l_System_Branch_ID
         from system_branch
-       where system_id    = System_ID
-         and branch_name  = System_Branch_Name;
+       where system_id    = a_System_ID
+         and branch_name  = a_System_Branch_Name;
 
-      return System_Branch_ID;
+      return l_System_Branch_ID;
    END;
 $$ LANGUAGE 'plpgsql';
 
