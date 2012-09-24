@@ -1,5 +1,5 @@
 --
--- $Id: sp.txt,v 1.175 2012-09-03 00:26:52 dan Exp $
+-- $Id: sp.txt,v 1.176 2012-09-24 15:14:42 dan Exp $
 --
 -- Copyright (c) 1998-2006 DVL Software Limited
 --
@@ -606,7 +606,7 @@ CREATE OR REPLACE FUNCTION GetPort(text) RETURNS int4 AS $$
       port_element_id  int4;       
       port_id          int4;
    BEGIN
-      pathname        := 'ports/' || category_port;
+      pathname        := '/ports/head/' || category_port;
       port_element_id := Pathname_ID(pathname);
       if port_element_id IS NOT NULL THEN
          select id
@@ -1667,6 +1667,9 @@ SELECT SECURITY.commit_log_id,
        SECURITY.is_interactive,
        SECURITY.only_for_archs,
        SECURITY.not_for_archs,
+       SECURITY.svn_revision,
+       SECURITY.svn_hostname,
+       SECURITY.path_to_repo,
        W.watch,
        element_pathname(SECURITY.element_id, FALSE) as element_pathname
 FROM (
@@ -1720,21 +1723,24 @@ SELECT CLPE.*,
           CLPE.element_id,
           element_pathname(CLPE.element_id)
    FROM 
-   (SELECT commit_log.id     AS commit_log_id, 
-           commit_date       AS commit_date_raw,
+   (SELECT CL.id       AS commit_log_id, 
+           commit_date AS commit_date_raw,
            message_subject,
            message_id,
            committer,
-           description       AS commit_description,
-           to_char(commit_log.commit_date - SystemTimeAdjust(), 'DD Mon YYYY')  AS commit_date,
-           to_char(commit_log.commit_date - SystemTimeAdjust(), 'HH24:MI')      AS commit_time,
-           encoding_losses
-     FROM commit_log JOIN
+           CL.description AS commit_description,
+           to_char(CL.commit_date - SystemTimeAdjust(), 'DD Mon YYYY')  AS commit_date,
+           to_char(CL.commit_date - SystemTimeAdjust(), 'HH24:MI')      AS commit_time,
+           encoding_losses,
+           svn_revision,
+           repo.svn_hostname,
+           repo.path_to_repo
+     FROM commit_log CL LEFT OUTER JOIN repo ON CL.repo_id = repo.id JOIN 
                 (SELECT latest_commits_ports.commit_log_id
                    FROM latest_commits_ports
                ORDER BY latest_commits_ports.commit_date DESC
                   LIMIT 100) AS 
-                  LCP ON commit_log.id = LCP.commit_log_id) AS LCPCL
+                  LCP ON CL.id = LCP.commit_log_id) AS LCPCL
                       JOIN commit_log_ports_elements CLPE on CLPE.commit_log_id = LCPCL.commit_log_id
                                                          AND CLPE.commit_log_id > latest_commits_ports_anchor()
 
@@ -1810,6 +1816,9 @@ SELECT SECURITY.commit_log_id,
        SECURITY.is_interactive,
        SECURITY.only_for_archs,
        SECURITY.not_for_archs,
+       SECURITY.svn_revision,
+       SECURITY.svn_hostname,
+       SECURITY.path_to_repo,
        W.watch,
        element_pathname(SECURITY.element_id, FALSE) as element_pathname
 FROM (
@@ -1863,16 +1872,19 @@ SELECT CLPE.*,
           CLPE.element_id,
           element_pathname(CLPE.element_id)
    FROM 
-   (SELECT commit_log.id     AS commit_log_id, 
-           commit_date       AS commit_date_raw,
+   (SELECT CL.id       AS commit_log_id, 
+           commit_date AS commit_date_raw,
            message_subject,
            message_id,
            committer,
-           description       AS commit_description,
-           to_char(commit_log.commit_date - SystemTimeAdjust(), 'DD Mon YYYY')  AS commit_date,
-           to_char(commit_log.commit_date - SystemTimeAdjust(), 'HH24:MI')      AS commit_time,
-           encoding_losses
-     FROM commit_log JOIN
+           CL.description       AS commit_description,
+           to_char(CL.commit_date - SystemTimeAdjust(), 'DD Mon YYYY')  AS commit_date,
+           to_char(CL.commit_date - SystemTimeAdjust(), 'HH24:MI')      AS commit_time,
+           encoding_losses,
+            svn_revision,
+           repo.svn_hostname,
+           repo.path_to_repo
+    FROM commit_log CL LEFT OUTER JOIN repo ON CL.repo_id = repo.id JOIN
                 (  SELECT distinct LC.commit_log_id, LC.commit_date as dummy_field
                      FROM latest_commits LC, commit_log_elements CLE, element_pathname EP
                     WHERE LC.commit_log_id = CLE.commit_log_id
@@ -1880,7 +1892,7 @@ SELECT CLPE.*,
                       AND EP.pathname      like Filter
                  ORDER BY LC.commit_date DESC
                     LIMIT 5) AS 
-                  LCP ON commit_log.id = LCP.commit_log_id) AS LCPCL
+                  LCP ON CL.id = LCP.commit_log_id) AS LCPCL
                       JOIN commit_log_ports_elements CLPE on CLPE.commit_log_id = LCPCL.commit_log_id
                                                          AND CLPE.commit_log_id > latest_commits_ports_anchor()
 
@@ -1956,6 +1968,9 @@ SELECT SECURITY.commit_log_id,
        SECURITY.is_interactive,
        SECURITY.only_for_archs,
        SECURITY.not_for_archs,
+       SECURITY.svn_revision,
+       SECURITY.svn_hostname,
+       SECURITY.path_to_repo,
        W.watch,
        element_pathname(SECURITY.element_id, FALSE) as element_pathname
 FROM (
@@ -2009,21 +2024,24 @@ SELECT CLPE.*,
           CLPE.element_id,
           element_pathname(CLPE.element_id)
    FROM 
-   (SELECT commit_log.id     AS commit_log_id, 
-           commit_date       AS commit_date_raw,
+   (SELECT CL.id       AS commit_log_id, 
+           commit_date AS commit_date_raw,
            message_subject,
            message_id,
            committer,
-           description       AS commit_description,
-           to_char(commit_log.commit_date - SystemTimeAdjust(), 'DD Mon YYYY')  AS commit_date,
-           to_char(commit_log.commit_date - SystemTimeAdjust(), 'HH24:MI')      AS commit_time,
-           encoding_losses
-     FROM commit_log JOIN
+           CL.description AS commit_description,
+           to_char(CL.commit_date - SystemTimeAdjust(), 'DD Mon YYYY')  AS commit_date,
+           to_char(CL.commit_date - SystemTimeAdjust(), 'HH24:MI')      AS commit_time,
+           encoding_losses,
+           svn_revision,
+           repo.svn_hostname,
+           repo.path_to_repo
+     FROM commit_log CL LEFT OUTER JOIN repo ON CL.repo_id = repo.id JOIN
                 (SELECT latest_commits_ports.commit_log_id
                    FROM latest_commits_ports
                ORDER BY latest_commits_ports.commit_date DESC
                   LIMIT 10) AS 
-                  LCP ON commit_log.id = LCP.commit_log_id) AS LCPCL
+                  LCP ON CL.id = LCP.commit_log_id) AS LCPCL
                       JOIN commit_log_ports_elements CLPE on CLPE.commit_log_id = LCPCL.commit_log_id
                                                          AND CLPE.commit_log_id > latest_commits_ports_anchor()
 
@@ -2184,8 +2202,11 @@ SELECT 0 AS port_id,
        NULL::text AS is_interactive,
        NULL::text AS only_for_archs,
        NULL::text AS not_for_archs,
+       CL.svn_revision,
+       R.svn_hostname,
+       R.path_to_repo,
        OnWatchList($4, CLE.element_id) AS watch
-  FROM commit_log CL LEFT OUTER JOIN commit_log_elements CLE ON (CL.id = CLE.commit_log_id)
+  FROM commit_log CL LEFT OUTER JOIN repo R ON CL.repo_id = R.id LEFT OUTER JOIN commit_log_elements CLE ON (CL.id = CLE.commit_log_id)
        LEFT OUTER JOIN element E ON (CLE.element_id = E.id)
  WHERE CL.message_id  = $1
 ORDER BY port, element_pathname
@@ -2230,6 +2251,9 @@ SELECT FOURTH1.port_id,
        FOURTH1.is_interactive,
        FOURTH1.only_for_archs,
        FOURTH1.not_for_archs,
+       FOURTH1.svn_revision,
+       FOURTH1.svn_hostname,
+       FOURTH1.path_to_repo,
        OnWatchList($4, FOURTH1.element_id) as watch
 FROM
 (SELECT THIRD1b.*,
@@ -2268,8 +2292,12 @@ FROM
         CL.id           AS commit_log_id,
         CLPE.element_id AS element_id,
         CL.commit_date,
-        CL.encoding_losses
-   FROM commit_log CL JOIN commit_log_ports_elements CLPE ON CL.id = CLPE.commit_log_id
+        CL.encoding_losses,
+	CL.svn_revision,
+	R.svn_hostname,
+	R.path_to_repo
+   FROM commit_log CL LEFT OUTER JOIN repo R ON CL.repo_id = R.id 
+JOIN commit_log_ports_elements CLPE ON CL.id = CLPE.commit_log_id
   WHERE CL.message_id = $1) AS FIRST1
        LEFT OUTER JOIN ports P ON P.element_id = FIRST1.element_id) AS SECOND1
        JOIN element E on SECOND1.element_id = E.id) AS THIRD1
@@ -2962,9 +2990,12 @@ SELECT CL.id           AS commit_log_id,
        P.is_interactive,
        P.only_for_archs,
        P.not_for_archs,
+       CL.svn_revision,
+       repo.svn_hostname,
+       repo.path_to_repo,
        0 AS watch,
        EP.pathname AS element_pathname
-  FROM commit_log           CL, 
+  FROM commit_log           CL LEFT OUTER JOIN repo ON CL.repo_id = repo.id,
        commit_log_ports     CLP,
        sanity_test_failures STF, 
        element              E,
@@ -3080,3 +3111,35 @@ int AS $$
     RETURN 0;
   END;
 $$  LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION ElementPathnameUpdateChildren (int4) returns
+int4 AS $$
+  DECLARE
+    p_ParentID  ALIAS FOR $1;
+
+    l_element_pathname  RECORD;
+    l_record_count      int4;
+    l_temp_count        int4;
+
+  BEGIN
+    l_record_count := 0;
+--    RAISE NOTICE 'ElementPathnameUpdateChildren invoked for: %', p_ParentID;
+    FOR l_element_pathname IN SELECT * FROM element WHERE parent_id = p_ParentID LOOP
+      l_record_count := l_record_count + 1;
+--      RAISE NOTICE 'ElementPathnameUpdateChildren updating: %', l_element_pathname.id;
+      UPDATE element_pathname 
+         SET pathname   = element_pathname(l_element_pathname.id)
+       WHERE element_id = l_element_pathname.id;
+
+      IF l_element_pathname.directory_file_flag = 'D' THEN
+        SELECT ElementPathnameUpdateChildren(l_element_pathname.id)
+          INTO l_temp_count;
+        l_record_count := l_record_count + l_temp_count;
+      END IF;
+    END LOOP;
+
+    RETURN l_record_count;
+  END;
+$$  LANGUAGE 'plpgsql';
+

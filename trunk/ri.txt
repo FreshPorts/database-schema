@@ -1,5 +1,5 @@
 --
--- $Id: ri.txt,v 1.46 2011-10-02 17:30:40 dan Exp $
+-- $Id: ri.txt,v 1.47 2012-09-24 15:14:42 dan Exp $
 --
 -- Copyright (c) 1998-2007 DVL Software Limited
 --
@@ -311,8 +311,9 @@ CREATE TRIGGER element_pathname_insert
 
 CREATE OR REPLACE FUNCTION element_pathname_update() RETURNS TRIGGER AS $$
    BEGIN
-		if (NEW.name != old.name) THEN
+		if (NEW.name != old.name OR new.parent_id != old.parent_id) THEN
 			UPDATE element_pathname SET pathname = element_pathname(new.id) WHERE element_id = NEW.id;
+                        PERFORM ElementPathnameUpdateChildren(new.id);
 		END IF;
       RETURN NEW;
    END

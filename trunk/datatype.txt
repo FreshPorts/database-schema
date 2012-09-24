@@ -1,5 +1,5 @@
 --
--- $Id: datatype.txt,v 1.23 2006-11-10 03:26:54 dan Exp $
+-- $Id: datatype.txt,v 1.24 2012-09-24 15:14:42 dan Exp $
 --
 -- Copyright (c) 1998-2006 DVL Software Limited
 --
@@ -39,6 +39,9 @@ CREATE TYPE commit_record AS (
     is_interactive       text,
     only_for_archs       text,
     not_for_archs        text,
+	svn_revision         text,
+	svn_hostname         text,
+	path_to_repo         text,
 	watch                bigint,
 	pathname             text
 );
@@ -88,6 +91,9 @@ CREATE TYPE freshports_commit_record AS (
     is_interactive     text,
     only_for_archs     text,
     not_for_archs      text,
+	svn_revision         text,
+	svn_hostname         text,
+	path_to_repo         text,
 	watch              bigint
 );
 
