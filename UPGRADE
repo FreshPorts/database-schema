@@ -1,3 +1,34 @@
+8 September 2012 - full paths
+
+drop index commit_log_svn_revision_idx;
+create index commit_log_svn_revision_idx on commit_log(svn_revision)
+where svn_revision is not null;
+
+CREATE TABLE repo(
+   id           serial not null,
+   name         text   not null,
+   description  text   not null,
+   svn_hostname text   not null,
+   path_to_repo text   not null
+);
+
+create unique index repo_id          on repo(id);
+create unique index repo_name        on repo(name);
+create unique index repo_description on repo(description);
+create unique index repo_path_to_repo   on repo(path_to_repo);
+
+insert into repo (name, description, svn_hostname, path_to_repo) values ('ports', 'The FreeBSD Ports tree', 'svnweb.freebsd.org', '/ports');
+insert into repo (name, description, svn_hostname, path_to_repo) values ('doc',   'The FreeBSD doc tree',   'svnweb.freebsd.org', '/doc');
+insert into repo (name, description, svn_hostname, path_to_repo) values ('src',   'The FreeBSD src tree',   'svnweb.freebsd.org', '/base');
+
+ALTER TABLE commit_log add repo_id integer;
+alter table commit_log
+    add foreign key (repo_id)
+       references repo(id) on update cascade on delete restrict;
+
+grant select on repo to group www;
+grant select on repo to group commits;
+
 9 August 2012 - adding revision to commit-log
 
 alter table commit_log add column svn_revision text;
