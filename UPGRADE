@@ -29,6 +29,16 @@ alter table commit_log
 grant select on repo to group www;
 grant select on repo to group commits;
 
+create index element_pathname_element_id on element_pathname(element_id);
+
+Other things to do:
+
+copy from scripts/: config.pm.sample to config.pm
+
+$FreshPorts::Config::DB_Root_Prefix_DOC
+
+
+
 9 August 2012 - adding revision to commit-log
 
 alter table commit_log add column svn_revision text;
