@@ -1,3 +1,18 @@
+29 December 2012 - jails
+
+cd scripts/Jail
+./create-jail-directories.sh /wdc/dan/FreshPorts/ports-jail /wdc/dan/PORTS-SVN
+
+cd scripts
+update config.sh & config.pm from their repsective .sample files
+
+add to visudo:
+
+dan      ALL=(ALL) NOPASSWD:/usr/sbin/chroot -u dan /wdc/dan/FreshPorts/ports-jail /make-port.sh *
+dan      ALL=(ALL) NOPASSWD:/usr/sbin/chroot -u dan /wdc/dan/FreshPorts/ports-jail /make-category-comment.sh *
+dan      ALL=(ALL) NOPASSWD:/usr/sbin/chroot -u dan /wdc/dan/FreshPorts/ports-jail /make-master-port-test.sh *
+
+
 8 September 2012 - full paths
 
 drop index commit_log_svn_revision_idx;
