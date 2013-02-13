@@ -1,4 +1,8 @@
-29 December 2012 - jails
+13 February 2013 - speed up searches
+
+create index commit_log_committer_idx on commit_log(committer);
+
+29 December 2012 - jails - not implemented yet
 
 cd scripts/Jail
 ./create-jail-directories.sh /wdc/dan/FreshPorts/ports-jail /wdc/dan/PORTS-SVN
