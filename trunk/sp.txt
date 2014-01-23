@@ -462,10 +462,11 @@ CREATE OR REPLACE FUNCTION RevisionAdd(int4, text) RETURNS boolean AS $$
 $$ LANGUAGE 'plpgsql';
 
 
-CREATE OR REPLACE FUNCTION RevisionForTagGet(int4, int4 ) RETURNS text AS $$
+CREATE OR REPLACE FUNCTION RevisionForTagGet(int4, int4, text) RETURNS text AS $$
    DECLARE
       SystemBranchID   ALIAS for $1;
       ElementID        ALIAS for $2;
+      RevisionName     ALIAS for $3;
       TempRevisionName text;
 
 -- for a given Element and TagName (System version id)
@@ -476,7 +477,8 @@ CREATE OR REPLACE FUNCTION RevisionForTagGet(int4, int4 ) RETURNS text AS $$
         into TempRevisionName
         from system_branch_element_revision
        where system_branch_id = SystemBranchID
-         and element_id       = ElementID;
+         and element_id       = ElementID
+         and revision_name    = RevisionName;
 
       return TempRevisionName;
    END;
@@ -513,12 +515,12 @@ CREATE OR REPLACE FUNCTION ElementTagSet(int4, int4, text) RETURNS boolean AS $$
    BEGIN  
 
 -- has this element already been tagged with this version?
-      ExistingRevisionFound := RevisionForTagGet(SystemBranchID, ElementID);
+      ExistingRevisionFound := RevisionForTagGet(SystemBranchID, ElementID, RevisionName);
 
       IF ExistingRevisionFound IS NULL THEN
          insert into system_branch_element_revision
-							 (system_branch_id, element_id, revision_name)
-							values (SystemBranchID, ElementID, RevisionName);
+		(system_branch_id, element_id, revision_name)
+	  values (SystemBranchID, ElementID, RevisionName);
       END IF;
 
       return 1;
