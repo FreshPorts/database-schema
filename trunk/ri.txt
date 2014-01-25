@@ -714,3 +714,46 @@ FOR EACH ROW
 EXECUTE PROCEDURE watch_list_element_delete ();
 
 
+ALTER TABLE ports                                                     
+    ADD FOREIGN KEY (last_commit_id)
+       REFERENCES commit_log (id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+CREATE OR REPLACE FUNCTION check_last_commit_id() RETURNS TRIGGER as '
+   declare 
+      l_max_commit_date  timestamp with time zone;
+      l_commit_log_id    integer;
+begin
+
+  if new.last_commit_id is null then
+    SELECT max(CL.commit_date)
+      INTO l_max_commit_date
+      FROM commit_log CL, commit_log_ports CLP
+     WHERE CLP.port_id = NEW.id
+       AND CL.id       = CLP.commit_log_id;
+
+    IF FOUND THEN
+      SELECT CL.id
+        INTO l_commit_log_id
+        FROM commit_log CL, commit_log_ports CLP
+       WHERE CLP.port_id    = NEW.id
+         AND CL.id          = CLP.commit_log_id
+         AND CL.commit_date = l_max_commit_date;
+
+      IF FOUND THEN
+        NEW.last_commit_id := l_commit_log_id;
+      END IF;
+    END IF;
+
+  end if;
+
+  RETURN NEW;
+
+end;
+' LANGUAGE 'plpgsql';
+
+
+  DROP TRIGGER check_last_commit_id on ports;
+CREATE TRIGGER check_last_commit_id
+BEFORE update on ports
+FOR EACH ROW
+EXECUTE PROCEDURE check_last_commit_id();
