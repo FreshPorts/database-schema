@@ -1236,3 +1236,21 @@ alter table commit_log_ports_elements
     add foreign key (commit_log_id)
        references commit_log(id) on update cascade on delete cascade;
 
+create index on system_branch_element_revision(element_id);
+
+
+CREATE TABLE commit_log_branch(
+  commit_log_id integer NOT NULL,
+  branch_id     integer NOT NULL,
+  primary key (commit_log_id, branch_id)
+);
+
+alter table commit_log_branch
+    add foreign key (commit_log_id)
+       references commit_log(id) on update cascade on delete cascade;
+
+alter table commit_log_branch
+    add foreign key (branch_id)
+       references system_branch (id) on update cascade on delete cascade;
+
+

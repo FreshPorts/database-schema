@@ -1,3 +1,27 @@
+29 January 2014 - branches
+
+create index on system_branch_element_revision(element_id);
+begin; update system_branch set branch_name = 'head' where branch_name = 'HEAD';
+
+CREATE TABLE commit_log_branch(
+  commit_log_id integer NOT NULL,
+  branch_id     integer NOT NULL,
+  primary key (commit_log_id, branch_id)
+);
+
+alter table commit_log_branch
+    add foreign key (commit_log_id)
+       references commit_log(id) on update cascade on delete cascade;
+
+alter table commit_log_branch
+    add foreign key (branch_id)
+       references system_branch (id) on update cascade on delete cascade;
+
+
+psql freshports.org < session-variables.sql
+psql freshports.org < sp.txt
+
+
 13 February 2013 - speed up searches
 
 create index commit_log_committer_idx on commit_log(committer);
