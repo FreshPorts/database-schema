@@ -607,16 +607,27 @@ CREATE OR REPLACE FUNCTION GetPort(text) RETURNS int4 AS $$
       pathname         text;
       port_element_id  int4;       
       port_id          int4;
+      l_branch         text;
    BEGIN
-      pathname        := '/ports/head/' || category_port;
-      port_element_id := Pathname_ID(pathname);
-      if port_element_id IS NOT NULL THEN
-         select id
-           into port_id
-           from ports    
-          where element_id = port_element_id;    
+      l_branch := freshports_branch_get();
+
+      IF l_branch = 'head' THEN
+          pathname := '/ports/head/'                        || category_port;
+      ELSE
+          pathname := '/ports/branches/' || l_branch || '/' || category_port;
       END IF;
-      return port_id;
+
+      RAISE NOTICE ' GetPort pathname is=%', pathname;
+
+      port_element_id := Pathname_ID(pathname);
+      IF port_element_id IS NOT NULL THEN
+         SELECT id
+           INTO port_id
+           FROM ports    
+          WHERE element_id = port_element_id;    
+      END IF;
+
+      RETURN port_id;
    END;
 $$ LANGUAGE 'plpgsql';
 
@@ -1573,23 +1584,24 @@ $$
 
 
 
-CREATE OR REPLACE FUNCTION LatestCommits(int, int) RETURNS SETOF commit_record AS $$
+CREATE OR REPLACE FUNCTION LatestCommits(int, int, text) RETURNS SETOF commit_record AS $$
 DECLARE
 	MaxCommits	ALIAS for $1;
 	UserID		ALIAS for $2;
+    Branch      ALIAS for $3;
 
 	r 	commit_record%rowtype;
 
 BEGIN
 	IF MaxCommits = 100 THEN
 		FOR r IN
-			SELECT * FROM LatestCommitsLarge(UserID)
+			SELECT * FROM LatestCommitsLarge(UserID, Branch)
 		LOOP
     	    RETURN NEXT r;
 	    END LOOP;
 	ELSE
 		FOR r IN
-			SELECT * FROM LatestCommitsSmall(UserID)
+			SELECT * FROM LatestCommitsSmall(UserID, Branch)
 		LOOP
     	    RETURN NEXT r;
 	    END LOOP;
@@ -1628,9 +1640,10 @@ END
 $$
 LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION LatestCommitsLarge(int) RETURNS SETOF commit_record AS $$
+CREATE OR REPLACE FUNCTION LatestCommitsLarge(int, text) RETURNS SETOF commit_record AS $$
 DECLARE
 	UserID		ALIAS for $1;
+    Branch      ALIAS for $2;
 
 	r 	commit_record%rowtype;
 
@@ -1738,9 +1751,10 @@ SELECT CLPE.*,
            repo.svn_hostname,
            repo.path_to_repo
      FROM commit_log CL LEFT OUTER JOIN repo ON CL.repo_id = repo.id JOIN 
-                (SELECT latest_commits_ports.commit_log_id
-                   FROM latest_commits_ports
-               ORDER BY latest_commits_ports.commit_date DESC
+                (SELECT LCP.commit_log_id
+                   FROM latest_commits_ports LCP JOIN commit_log_branches CLB ON LCP.commit_log_id = CLB.commit_log_id
+                            JOIN system_branch SB ON SB.branch_name = Branch AND SB.id = CLB.branch_id
+               ORDER BY LCP.commit_date DESC
                   LIMIT 100) AS 
                   LCP ON CL.id = LCP.commit_log_id) AS LCPCL
                       JOIN commit_log_ports_elements CLPE on CLPE.commit_log_id = LCPCL.commit_log_id
@@ -1928,10 +1942,27 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE OR REPLACE FUNCTION LatestCommitsSmall(int) RETURNS SETOF commit_record AS $$
+    DECLARE
+        UserID  ALIAS for $1;
+        r       commit_record%rowtype;
+
+    BEGIN
+        FOR r IN SELECT * FROM LatestCommitsSmall(UserID, 'head')
+        LOOP
+            RETURN NEXT r;
+        END LOOP;
+    END;$$
+
+LANGUAGE plpgsql;
+
+
+
+
+CREATE OR REPLACE FUNCTION LatestCommitsSmall(int, text) RETURNS SETOF commit_record AS $$
 DECLARE
 	UserID		ALIAS for $1;
+	Branch      ALIAS for $2;
 
 	r 	commit_record%rowtype;
 
@@ -2039,9 +2070,10 @@ SELECT CLPE.*,
            repo.svn_hostname,
            repo.path_to_repo
      FROM commit_log CL LEFT OUTER JOIN repo ON CL.repo_id = repo.id JOIN
-                (SELECT latest_commits_ports.commit_log_id
-                   FROM latest_commits_ports
-               ORDER BY latest_commits_ports.commit_date DESC
+                (SELECT LCP.commit_log_id
+                   FROM latest_commits_ports LCP JOIN commit_log_branches CLB ON LCP.commit_log_id = CLB.commit_log_id
+                            JOIN system_branch SB ON SB.branch_name = Branch AND SB.id = CLB.branch_id
+               ORDER BY LCP.commit_date DESC
                   LIMIT 10) AS 
                   LCP ON CL.id = LCP.commit_log_id) AS LCPCL
                       JOIN commit_log_ports_elements CLPE on CLPE.commit_log_id = LCPCL.commit_log_id
@@ -3144,4 +3176,21 @@ int4 AS $$
     RETURN l_record_count;
   END;
 $$  LANGUAGE 'plpgsql';
+
+
+
+CREATE OR REPLACE FUNCTION CommitLogBranchesInsert (int4, int4) RETURNS boolean AS $$
+    DECLARE
+        l_CommitLogId  ALIAS for $1;
+        l_BranchId     ALIAS for $2;
+
+    BEGIN
+        INSERT INTO commit_log_branches (commit_log_id, branch_id) values (l_CommitLogId, l_BranchId);
+        IF FOUND THEN
+            RETURN TRUE;
+        ELSE
+            RETURN FALSE;
+        END IF;
+   END;
+$$ LANGUAGE 'plpgsql';
 
