@@ -155,10 +155,15 @@ $$ language plpgsql;
 
 
 CREATE OR REPLACE FUNCTION freshports_branch_set( TEXT ) RETURNS void as $$
+    DECLARE
+        BranchName ALIAS FOR $1;
+    BEGIN
 
-   SELECT session_variables.set_value('branch', $1);
+        PERFORM set_config('freshports.branch', BranchName, false);
+        
+    END;
 
-$$ language sql;
+$$ language plpgsql;
 
 CREATE OR REPLACE FUNCTION freshports_branch_get() RETURNS TEXT as $$
 
@@ -167,7 +172,7 @@ DECLARE
     
 BEGIN
 
-   reply := session_variables.get_value( 'branch' );
+   reply := current_setting('freshports.branch');
    
    IF reply IS NULL THEN
       reply := 'head';
