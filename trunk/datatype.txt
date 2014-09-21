@@ -39,11 +39,12 @@ CREATE TYPE commit_record AS (
     is_interactive       text,
     only_for_archs       text,
     not_for_archs        text,
+	repo_name            text,
 	svn_revision         text,
 	svn_hostname         text,
 	path_to_repo         text,
 	watch                bigint,
-	pathname             text
+	element_pathname     text
 );
 
   DROP TYPE element_type CASCADE;
@@ -76,7 +77,7 @@ CREATE TYPE freshports_commit_record AS (
 	port_epoch         text,
 	revision_name      text,
 	change_type        text,
-	pathname           text,
+	element_pathname   text,
     is_port            boolean,
 	element_id         integer,
 	forbidden          text,
