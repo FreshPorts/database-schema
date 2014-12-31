@@ -1,3 +1,14 @@
+23 December 2014
+
+FETCH_DEPENDS, EXTRACT_DEPENDS, PATCH_DEPENDS, and USES
+
+begin;
+
+ALTER TABLE ports ADD fetch_depends   text;
+ALTER TABLE ports ADD extract_depends text;
+ALTER TABLE ports ADD patch_depends   text;
+ALTER TABLE ports ADD uses            text;
+
 29 January 2014 - branches
 
 create index on system_branch_element_revision(element_id);
