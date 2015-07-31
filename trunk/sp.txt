@@ -617,7 +617,7 @@ CREATE OR REPLACE FUNCTION GetPort(text) RETURNS int4 AS $$
           pathname := '/ports/branches/' || l_branch || '/' || category_port;
       END IF;
 
-      RAISE NOTICE ' GetPort pathname is=%', pathname;
+--      RAISE NOTICE ' GetPort pathname is=%', pathname;
 
       port_element_id := Pathname_ID(pathname);
       IF port_element_id IS NOT NULL THEN
