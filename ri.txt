@@ -578,6 +578,16 @@ CREATE OR REPLACE FUNCTION commit_log_insert () RETURNS trigger
 AS '
 BEGIN
    INSERT INTO latest_commits (commit_log_id, commit_date) values (new.id,  new.commit_date);
+
+   -- see also commit_log_update
+   INSERT INTO cache_clearing_dates (date_to_clear) 
+     SELECT new.commit_date
+     WHERE NOT EXISTS (SELECT date_to_clear FROM cache_clearing_dates WHERE date_to_clear = new.commit_date);
+
+   IF FOUND THEN
+     NOTIFY date_updated;
+   END IF;
+
    RETURN new;
 END;'
 LANGUAGE plpgsql;
@@ -602,6 +612,14 @@ BEGIN
    UPDATE latest_commits
       SET commit_date = new.commit_date
     WHERE (latest_commits.commit_log_id = new.id);
+
+   -- see also commit_log_insert
+   INSERT INTO cache_clearing_dates (date_to_clear) 
+     SELECT new.commit_date
+     WHERE NOT EXISTS (SELECT date_to_clear FROM cache_clearing_dates WHERE date_to_clear = new.commit_date);
+   IF FOUND THEN
+     NOTIFY date_updated;
+   END IF;
 
    RETURN new;
 END;'
