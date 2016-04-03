@@ -1,5 +1,9 @@
 3 April 2016
 
+Add this entry to: listen_for
+
+"date_updated";"listen_date_updated"
+
 -- Table: cache_clearing_dates
 
 -- DROP TABLE cache_clearing_dates;
