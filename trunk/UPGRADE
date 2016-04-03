@@ -1,3 +1,30 @@
+3 April 2016
+
+-- Table: cache_clearing_dates
+
+-- DROP TABLE cache_clearing_dates;
+
+CREATE TABLE cache_clearing_dates
+(
+  id serial NOT NULL, -- primary key
+  date_to_clear date, -- The date which should be cleared from the archives
+  date_added time without time zone DEFAULT now() -- The timestamp this entry was added to the table
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE cache_clearing_dates
+  OWNER TO dan;
+COMMENT ON COLUMN cache_clearing_dates.id IS 'primary key';
+COMMENT ON COLUMN cache_clearing_dates.date_to_clear IS 'The date which should be cleared from the archives';
+COMMENT ON COLUMN cache_clearing_dates.date_added IS 'The timestamp this entry was added to the table';
+
+changes to ri.txt as well
+
+
+
+I'm sure there were other update after this one... and before the one above
+
 23 December 2014
 
 FETCH_DEPENDS, EXTRACT_DEPENDS, PATCH_DEPENDS, and USES
