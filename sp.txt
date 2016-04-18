@@ -609,7 +609,11 @@ CREATE OR REPLACE FUNCTION GetPort(text) RETURNS int4 AS $$
       port_id          int4;
       l_branch         text;
    BEGIN
-      l_branch := freshports_branch_get();
+--      l_branch := freshports_branch_get();
+      SELECT freshports_branch_get()
+        INTO l_branch;
+
+      RAISE NOTICE ' branch is %', l_branch;
 
       IF l_branch = 'head' THEN
           pathname := '/ports/head/'                        || category_port;
@@ -617,7 +621,7 @@ CREATE OR REPLACE FUNCTION GetPort(text) RETURNS int4 AS $$
           pathname := '/ports/branches/' || l_branch || '/' || category_port;
       END IF;
 
---      RAISE NOTICE ' GetPort pathname is=%', pathname;
+      RAISE NOTICE ' GetPort pathname is=%', pathname;
 
       port_element_id := Pathname_ID(pathname);
       IF port_element_id IS NOT NULL THEN
@@ -1757,7 +1761,7 @@ SELECT CLPE.*,
                    FROM latest_commits_ports LCP JOIN commit_log_branches CLB ON LCP.commit_log_id = CLB.commit_log_id
                             JOIN system_branch SB ON SB.branch_name = Branch AND SB.id = CLB.branch_id
                ORDER BY LCP.commit_date DESC
-                  LIMIT 100) AS 
+                  LIMIT 10) AS 
                   LCP ON CL.id = LCP.commit_log_id) AS LCPCL
                       JOIN commit_log_ports_elements CLPE on CLPE.commit_log_id = LCPCL.commit_log_id
                                                          AND CLPE.commit_log_id > latest_commits_ports_anchor()
@@ -1960,7 +1964,6 @@ LANGUAGE plpgsql;
 
 
 
-
 CREATE OR REPLACE FUNCTION LatestCommitsSmall(int, text) RETURNS SETOF commit_record AS $$
 DECLARE
 	UserID		ALIAS for $1;
@@ -2003,6 +2006,7 @@ SELECT SECURITY.commit_log_id,
        SECURITY.is_interactive,
        SECURITY.only_for_archs,
        SECURITY.not_for_archs,
+       SECURITY.repo_name,
        SECURITY.svn_revision,
        SECURITY.svn_hostname,
        SECURITY.path_to_repo,
@@ -2069,6 +2073,7 @@ SELECT CLPE.*,
            to_char(CL.commit_date - SystemTimeAdjust(), 'HH24:MI')      AS commit_time,
            encoding_losses,
            svn_revision,
+           repo.name AS repo_name,
            repo.svn_hostname,
            repo.path_to_repo
      FROM commit_log CL LEFT OUTER JOIN repo ON CL.repo_id = repo.id JOIN
@@ -2110,6 +2115,7 @@ order by commit_date_raw desc, category, port
 END
 $$
 LANGUAGE plpgsql;
+
 
 CREATE OR REPLACE FUNCTION commit_log_ports_insert(int) RETURNS boolean
 AS $$
@@ -2442,16 +2448,20 @@ CREATE OR REPLACE FUNCTION PortsUpdatingPortsXrefAdd (integer, text) returns int
       select GetPort(p_Port)
         INTO l_PortID;
 
---      RAISE NOTICE ' PortsUpdatingPortsXrefAdd p_PortsUpdatingID=% p_Port=% l_PortID=%', p_PortsUpdatingID, p_Port, l_PortID;
+      RAISE NOTICE ' PortsUpdatingPortsXrefAdd p_PortsUpdatingID=% p_Port=% l_PortID=%', p_PortsUpdatingID, p_Port, l_PortID;
       IF l_PortID IS NOT NULL THEN
+         RAISE NOTICE ' We found that port';
 
          INSERT INTO ports_updating_ports_xref(ports_updating_id, port_id)
              VALUES (p_PortsUpdatingID, l_PortID);
 
          GET DIAGNOSTICS OID = RESULT_OID;
       ELSE
+         RAISE NOTICE ' We DID NOT LOCATE that port';
          OID := NULL;
       END IF;
+
+      RAISE NOTICE ' OID is %' , OID;
 
       RETURN OID;
    END;
