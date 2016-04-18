@@ -173,8 +173,8 @@ DECLARE
 BEGIN
 
    reply := current_setting('freshports.branch');
-   
-   IF reply IS NULL THEN
+
+   IF reply IS NULL OR reply = '' THEN
       reply := 'head';
    END IF;
    
