@@ -1,3 +1,9 @@
+22 April 2016
+Add pkg_mesage
+
+alter table ports add column pkgmessage text;
+
+
 3 April 2016
 
 Add this entry to: listen_for
