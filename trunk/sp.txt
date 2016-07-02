@@ -3207,3 +3207,87 @@ CREATE OR REPLACE FUNCTION CommitLogBranchesInsert (int4, int4) RETURNS boolean 
    END;
 $$ LANGUAGE 'plpgsql';
 
+
+
+CREATE OR REPLACE FUNCTION categoryport(integer) returns text AS $$
+  SELECT C.name || '/' || E.name
+    FROM ports P, categories C, element E
+   WHERE P.id          = $1
+     AND P.category_id = C.id
+     AND P.element_id  = E.id;
+$$ LANGUAGE SQL STABLE;
+
+
+--
+-- this function copies a port from /ports/head/CATEGORY/PORT to /ports/branches/BRANCH
+-- It returns the id of the new port.
+--
+CREATE OR REPLACE FUNCTION CopyPortFromHeadToBranch(text, text, text) returns int4 AS $$
+DECLARE
+  a_category_name ALIAS for $1;
+  a_port_name     ALIAS for $2;
+  a_branch_name   ALIAS for $3;
+ 
+  l_r             element_id_pathname%rowtype;
+  l_port_id       int4;
+ 
+  BEGIN
+ 
+  FOR l_r IN
+  WITH RECURSIVE all_descendents AS ( 
+  SELECT id, name, parent_id, directory_file_flag, status
+    FROM element
+    WHERE id = (select pathname_id('/ports/head/' || a_category_name || '/' || a_port_name || '/'))
+  UNION
+  SELECT E.id, E.name, E.parent_id, E.directory_file_flag, E.status
+    FROM element E
+    JOIN all_descendents AD
+      ON (E.parent_id = AD.id)
+)
+    SELECT element_add(replace(element_pathname(id), '/ports/head/', '/ports/branches/' || a_branch_name || '/'), directory_file_flag),
+                       replace(element_pathname(id), '/ports/head/', '/ports/branches/2016Q2/')
+      FROM all_descendents
+     WHERE status = 'A'
+  LOOP
+  END LOOP;
+ 
+  IF FOUND THEN
+    SELECT pathname_id('/ports/branches/' || a_branch_name || '/' || a_category_name || '/' || a_port_name || '/')
+      INTO l_port_id;
+  END IF;
+ 
+  return l_port_id;
+  END;
+$$  LANGUAGE 'plpgsql';
+
+
+--
+-- this function create a port on a branch using head as a starting point.
+-- i.e. from /ports/head/CATEGORY/PORT to /ports/branches/BRANCH/CATEGORY/PORT
+-- is created.
+-- It returns the id of the new port.
+--
+CREATE OR REPLACE FUNCTION CreatePort(text, text, text) returns int4 AS $$
+DECLARE
+  a_category_name ALIAS for $1;
+  a_port_name     ALIAS for $2;
+  a_branch_name   ALIAS for $3;
+ 
+  l_element_id_of_new_port int4;
+  l_port_id                int4;
+ 
+  BEGIN
+ 
+  SELECT CopyPortFromHeadToBranch(a_category_name, a_port_name, a_branch_name)
+    INTO l_element_id_of_new_port;
+ 
+  IF FOUND THEN
+    SELECT createport(l_element_id_of_new_port, getcategory(a_category_name))
+      INTO l_port_id;
+  END IF;
+  
+  RETURN l_port_id;
+ 
+  END;
+$$  LANGUAGE 'plpgsql';
+
