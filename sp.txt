@@ -389,7 +389,7 @@ CREATE OR REPLACE FUNCTION GetCategory (text ) RETURNS int4 AS $$
       category_element_id  int4;
       category_id          int4;
    BEGIN
-      pathname            := 'ports/' || category_name;
+      pathname            := 'ports/head/' || category_name;
       category_element_id := Pathname_ID(pathname);
       if NOT category_element_id IS NULL THEN
          select id
