@@ -4,7 +4,7 @@
 -- Copyright (c) 1998-2006 DVL Software Limited
 --
 
-  DROP TYPE commit_record CASCADE;
+  DROP TYPE IF EXISTS commit_record CASCADE;
 CREATE TYPE commit_record AS (
 	commit_log_id        integer,
 	commit_date_raw      timestamp with time zone,
@@ -47,7 +47,7 @@ CREATE TYPE commit_record AS (
 	element_pathname     text
 );
 
-  DROP TYPE element_type CASCADE;
+  DROP TYPE IF EXISTS element_type CASCADE;
 CREATE TYPE element_type AS (
 	id               integer,
 	name             text,
@@ -58,7 +58,7 @@ CREATE TYPE element_type AS (
 	element_pathname text
 );
 
-  DROP TYPE freshports_commit_record CASCADE;
+  DROP TYPE IF EXISTS freshports_commit_record CASCADE;
 CREATE TYPE freshports_commit_record AS (
 	port_id            integer,
 	short_description  text,
@@ -98,13 +98,13 @@ CREATE TYPE freshports_commit_record AS (
 	watch              bigint
 );
 
-  DROP TYPE logincounts_record CASCADE;
+  DROP TYPE IF EXISTS logincounts_record CASCADE;
 CREATE TYPE logincounts_record AS (
 	date            date,
 	count           integer
 );
 
-  DROP TYPE vuxml_record CASCADE;
+  DROP TYPE IF EXISTS vuxml_record CASCADE;
 CREATE TYPE vuxml_record AS (
 	id				integer,
 	vid				text,
@@ -115,16 +115,22 @@ CREATE TYPE vuxml_record AS (
 	v2				text
 );
 
-  DROP TYPE also_watched_record CASCADE;
+  DROP TYPE IF EXISTS also_watched_record CASCADE;
 CREATE TYPE also_watched_record AS (
 	element_id			integer,
 	url					text
 );
 
-  DROP TYPE old_new_ports_record CASCADE;
+  DROP TYPE IF EXISTS old_new_ports_record CASCADE;
 CREATE TYPE old_new_ports_record AS (
 	name_old			text,
 	category_old		text,
 	name_new			text,
 	category_new		text
+);
+
+  DROP TYPE IF EXISTS IF EXISTS element_id_pathname CASCADE;
+CREATE TYPE element_id_pathname AS (
+	element_id			int4,
+	pathname			text
 );
