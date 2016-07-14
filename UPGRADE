@@ -7,6 +7,17 @@ alter table ports add license_perms        text;
 
 
 
+26 June 2016
+
+- Branches
+
+-- nope, don't need this.
+-- ALTER TABLE ports ADD COLUMN branch_id integer NOT NULL REFERENCES system_branch(id) DEFAULT 1;
+
+copy make-port.sh into port jail
+alter table ports add column distinfo text;
+
+
 22 April 2016
 Add pkg_mesage
 
