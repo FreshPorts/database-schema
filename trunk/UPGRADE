@@ -1,3 +1,12 @@
+https://github.com/FreshPorts/freshports/issues/9 - Not all ports have packages
+
+alter table ports add license_restricted   text;
+alter table ports add manual_package_build text;
+alter table ports add license_perms        text;
+
+
+
+
 22 April 2016
 Add pkg_mesage
 
