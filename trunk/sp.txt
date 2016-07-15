@@ -609,7 +609,6 @@ CREATE OR REPLACE FUNCTION GetPort(text) RETURNS int4 AS $$
       port_id          int4;
       l_branch         text;
    BEGIN
---      l_branch := freshports_branch_get();
       SELECT freshports_branch_get()
         INTO l_branch;
 
@@ -642,6 +641,7 @@ CREATE OR REPLACE FUNCTION GetPort(text, text) RETURNS int4 AS $$
 
       l_port_id          int4;
    BEGIN
+      RAISE WARNING 'GetPort has been called with %/% - this procedure is not branch aware.', p_Category, p_Port;
       SELECT id
         INTO l_port_id
         FROM ports_active
@@ -707,6 +707,7 @@ CREATE OR REPLACE FUNCTION GetPortNameFromFileName(text) RETURNS text AS $$
 		pos			int4;
 
     BEGIN
+		RAISE WARNING 'GetPortNameFromFileName is not branch aware';
 		-- remove the first /
 		temp := substring(file_name from 2);
 
@@ -1537,6 +1538,7 @@ CREATE OR REPLACE FUNCTION GetPortID(text, text) returns bigint AS $$
 
    BEGIN
 
+      RAISE WARNING 'GetPort has been called with %/% - this procedure is not branch aware.', CategoryName, PortName;
       SELECT id, is_primary
         INTO CategoryID, IsPrimary
         FROM categories
@@ -3219,20 +3221,23 @@ $$ LANGUAGE SQL STABLE;
 
 
 --
--- this function copies a port from /ports/head/CATEGORY/PORT to /ports/branches/BRANCH
--- It returns the id of the new port.
+-- this function copies a port files from /ports/head/CATEGORY/PORT to /ports/branches/BRANCH
+-- It returns the id of the new element for that port.
+-- This function DOES not create the port itself (i.e. no entries added to port table).
 --
-CREATE OR REPLACE FUNCTION CopyPortFromHeadToBranch(text, text, text) returns int4 AS $$
+CREATE OR REPLACE FUNCTION CopyPortFilesFromHeadToBranch(text, text, text) returns int4 AS $$
 DECLARE
   a_category_name ALIAS for $1;
   a_port_name     ALIAS for $2;
   a_branch_name   ALIAS for $3;
  
-  l_r             element_id_pathname%rowtype;
-  l_port_id       int4;
- 
+  l_r                      element_id_pathname%rowtype;
+  l_element_id_of_new_port int4;
+
   BEGIN
- 
+
+  -- this query will add the new port... the key is the element_add() function call
+
   FOR l_r IN
   WITH RECURSIVE all_descendents AS ( 
   SELECT id, name, parent_id, directory_file_flag, status
@@ -3243,20 +3248,22 @@ DECLARE
     FROM element E
     JOIN all_descendents AD
       ON (E.parent_id = AD.id)
-)
-    SELECT element_add(replace(element_pathname(id), '/ports/head/', '/ports/branches/' || a_branch_name || '/'), directory_file_flag),
-                       replace(element_pathname(id), '/ports/head/', '/ports/branches/2016Q2/')
+  )
+    SELECT element_add(replace(element_pathname(id), '/ports/head/', '/ports/branches/' || a_branch_name || '/'), directory_file_flag)
       FROM all_descendents
      WHERE status = 'A'
   LOOP
   END LOOP;
- 
+
   IF FOUND THEN
-    SELECT pathname_id('/ports/branches/' || a_branch_name || '/' || a_category_name || '/' || a_port_name || '/')
-      INTO l_port_id;
+    -- based on the element_id of the pathname for newly created port, grab the port id
+     SELECT pathname_id('/ports/branches/' || a_branch_name || '/' || a_category_name || '/' || a_port_name || '/')
+      INTO l_element_id_of_new_port;
+
   END IF;
- 
-  return l_port_id;
+
+  return l_element_id_of_new_port;
+
   END;
 $$  LANGUAGE 'plpgsql';
 
@@ -3278,12 +3285,27 @@ DECLARE
  
   BEGIN
  
-  SELECT CopyPortFromHeadToBranch(a_category_name, a_port_name, a_branch_name)
+  SELECT CopyPortFilesFromHeadToBranch(a_category_name, a_port_name, a_branch_name)
     INTO l_element_id_of_new_port;
  
   IF FOUND THEN
     SELECT createport(l_element_id_of_new_port, getcategory(a_category_name))
       INTO l_port_id;
+
+    SELECT PA.id
+      FROM ports_active PA
+     WHERE PA.element_id = l_element_id_of_new_port
+      INTO l_port_id;
+
+    -- we need to set up the port_categories table first...
+
+    RAISE WARNING 'about to call GetPort and I only want stuff from head, so branch agnostic is OK.';
+
+    INSERT INTO ports_categories(port_id, category_id)
+     SELECT l_port_id, PC.category_id
+       FROM ports_categories PC
+      WHERE PC.port_id = GetPort(a_category_name, a_port_name);
+
   END IF;
   
   RETURN l_port_id;
