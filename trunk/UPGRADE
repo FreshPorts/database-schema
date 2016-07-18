@@ -4,6 +4,9 @@ alter table ports add license_restricted   text;
 alter table ports add manual_package_build text;
 alter table ports add license_perms        text;
 
+alter table ports add pkg_plist text;
+alter table ports add makefile  text;
+
 
 
 
