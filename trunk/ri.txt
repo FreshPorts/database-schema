@@ -220,24 +220,17 @@ CREATE TRIGGER ports_status
 
 CREATE OR REPLACE FUNCTION ports_clear_cache() RETURNS TRIGGER AS $$
    DECLARE
-      l_cache_clearing_ports_id   int8;
       l_port      text;
       l_category  text;
    BEGIN
-	IF TG_OP = 'UPDATE' THEN
-         SELECT id
-           INTO l_cache_clearing_ports_id
-           FROM cache_clearing_ports
-          WHERE port_id = NEW.id;
-          
-          IF NOT FOUND THEN
+      IF TG_OP = 'UPDATE' THEN
             SELECT category, name
               INTO l_category, l_port
               FROM ports_all
              WHERE id = NEW.id;
+
             INSERT INTO cache_clearing_ports (port_id, category, port)
-            VALUES (NEW.id, l_category, l_port);
-          END IF;
+                 VALUES (NEW.id, l_category, l_port);
 
           NOTIFY port_updated;
       END IF;
@@ -256,47 +249,31 @@ CREATE TRIGGER ports_clear_cache
 
 CREATE OR REPLACE FUNCTION port_dependencies_insert_clear_cache() RETURNS TRIGGER AS $$
    DECLARE
-      l_cache_clearing_ports_id   int8;
       l_port      text;
       l_category  text;
    BEGIN
-	--
-	-- This function handles the addition of a new dependency.
-	-- yes, we need to clear the cache for both port_id and port_id_dependent_upon
-	-- from the cache_clearing_ports.  I figure there is a shorter way to this but
-	-- I cannot think it through right now.
-	--
-	RAISE NOTICE 'into port_dependencies_insert_clear_cache';
-
-	IF TG_OP = 'INSERT' THEN
-	RAISE NOTICE 'into port_dependencies_insert_clear_cache - yes INSERT';
-         SELECT port_id
-           INTO l_cache_clearing_ports_id
-           FROM cache_clearing_ports
-          WHERE port_id = NEW.port_id;
-          
-          IF NOT FOUND THEN
+      --
+      -- This function handles the addition of a new dependency.
+      -- yes, we need to clear the cache for both port_id and port_id_dependent_upon
+      -- from the cache_clearing_ports.  I figure there is a shorter way to this but
+      -- I cannot think it through right now.
+      --
+      IF TG_OP = 'INSERT' THEN
             SELECT category, name
               INTO l_category, l_port
               FROM ports_all
              WHERE id = NEW.port_id;
-            INSERT INTO cache_clearing_ports (port_id, category, port)
-            VALUES (NEW.port_id, l_category, l_port);
-          END IF;
 
-         SELECT port_id
-           INTO l_cache_clearing_ports_id
-           FROM cache_clearing_ports
-          WHERE port_id = NEW.port_id_dependent_upon;
-          
-          IF NOT FOUND THEN
+            INSERT INTO cache_clearing_ports (port_id, category, port)
+              VALUES (NEW.port_id, l_category, l_port);
+
             SELECT category, name
               INTO l_category, l_port
               FROM ports_all
              WHERE id = NEW.port_id_dependent_upon;
+
             INSERT INTO cache_clearing_ports (port_id, category, port)
-            VALUES (NEW.port_id_dependent_upon, l_category, l_port);
-          END IF;
+              VALUES (NEW.port_id_dependent_upon, l_category, l_port);
 
           NOTIFY port_updated;
       END IF;
@@ -315,45 +292,32 @@ CREATE TRIGGER port_dependencies_insert_clear_cache
 
 CREATE OR REPLACE FUNCTION port_dependencies_delete_clear_cache() RETURNS TRIGGER AS $$
    DECLARE
-      l_cache_clearing_ports_id   int8;
       l_port      text;
       l_category  text;
    BEGIN
-	--
-	-- This function handles the deletion of a existing dependency.
-	-- yes, we need to clear the cache for both port_id and port_id_dependent_upon
-	-- from the cache_clearing_ports.  I figure there is a shorter way to this but
-	-- I cannot think it through right now.
-	--
+      --
+      -- This function handles the deletion of a existing dependency.
+      -- yes, we need to clear the cache for both port_id and port_id_dependent_upon
+      -- from the cache_clearing_ports.  I figure there is a shorter way to this but
+      -- I cannot think it through right now.
+      --
 
-	IF TG_OP = 'DELETE' THEN
-         SELECT port_id
-           INTO l_cache_clearing_ports_id
-           FROM cache_clearing_ports
-          WHERE port_id = OLD.port_id;
-          
-          IF NOT FOUND THEN
+      IF TG_OP = 'DELETE' THEN
             SELECT category, name
               INTO l_category, l_port
               FROM ports_all
              WHERE id = OLD.port_id;
-            INSERT INTO cache_clearing_ports (port_id, category, port)
-            VALUES (OLD.port_id, l_category, l_port);
-          END IF;
 
-         SELECT port_id
-           INTO l_cache_clearing_ports_id
-           FROM cache_clearing_ports
-          WHERE port_id = OLD.port_id_dependent_upon;
-          
-          IF NOT FOUND THEN
+            INSERT INTO cache_clearing_ports (port_id, category, port)
+              VALUES (OLD.port_id, l_category, l_port);
+
             SELECT category, name
               INTO l_category, l_port
               FROM ports_all
              WHERE id = OLD.port_id_dependent_upon;
+
             INSERT INTO cache_clearing_ports (port_id, category, port)
-            VALUES (OLD.port_id_dependent_upon, l_category, l_port);
-          END IF;
+              VALUES (OLD.port_id_dependent_upon, l_category, l_port);
 
           NOTIFY port_updated;
       END IF;
@@ -372,27 +336,20 @@ CREATE TRIGGER port_dependencies_delete_clear_cache
 
 CREATE OR REPLACE FUNCTION ports_vulnerable_delete_clear_cache() RETURNS TRIGGER AS $$
    DECLARE
-      l_cache_clearing_ports_id   int8;
       l_port      text;
       l_category  text;
    BEGIN
-	IF TG_OP = 'DELETE' THEN
-         SELECT port_id
-           INTO l_cache_clearing_ports_id
-           FROM cache_clearing_ports
-          WHERE port_id = OLD.port_id;
-          
-          IF NOT FOUND THEN
+      IF TG_OP = 'DELETE' THEN
             SELECT category, name
               INTO l_category, l_port
               FROM ports_all
              WHERE id = OLD.port_id;
+
             INSERT INTO cache_clearing_ports (port_id, category, port)
-            VALUES (OLD.port_id, l_category, l_port);
-          END IF;
+              VALUES (OLD.port_id, l_category, l_port);
 
           NOTIFY port_updated;
-    END IF;
+      END IF;
 
       -- when a port changes, add an entry to the cache clearing table
       RETURN OLD;
