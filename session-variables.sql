@@ -159,6 +159,7 @@ CREATE OR REPLACE FUNCTION freshports_branch_set( TEXT ) RETURNS void as $$
         BranchName ALIAS FOR $1;
     BEGIN
 
+        RAISE NOTICE 'setting branch to %', BranchName;
         PERFORM set_config('freshports.branch', BranchName, false);
         
     END;
@@ -178,6 +179,7 @@ BEGIN
       reply := 'head';
    END IF;
    
+   RAISE NOTICE 'obtaining branch to %', reply;
    RETURN reply;
 
 END;
