@@ -24,7 +24,7 @@ and ports.element_id = element.id;
 grant select on ports_active to group www;
 grant select on ports_active to group commits;
 
-\i datatypes.txt
+\i datatype.txt
 \i sp.txt
 
 Then decide on commit / rollback;
