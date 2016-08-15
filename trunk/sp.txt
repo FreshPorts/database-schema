@@ -2216,13 +2216,17 @@ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION freshports_commit_regular(text, int, int, int) RETURNS SETOF freshports_commit_record AS $$
 SELECT 0 AS port_id,
        NULL::text AS short_description,
+       NULL::timestamp with time zone AS date_added,
+       NULL::smallint AS needs_refresh,
        NULL::text AS category,
+       NULL::integer AS category_id,
        CL.message_id,
        CL.committer   AS committer,
        CL.description AS commit_description,
        CL.id AS commit_log_id,
        NULL::text AS port,
        to_char(CL.commit_date - SystemTimeAdjust(), 'DD Mon YYYY')  AS commit_date,
+       CL.commit_date - SystemTimeAdjust()                          AS commit_date_raw,
        to_char(CL.commit_date - SystemTimeAdjust(), 'HH24:MI:SS')   AS commit_time,
        CL.encoding_losses,
        E.status   AS status,
@@ -2249,6 +2253,7 @@ SELECT 0 AS port_id,
        CL.svn_revision,
        R.svn_hostname,
        R.path_to_repo,
+       R.name AS repo_name,
        OnWatchList($4, CLE.element_id) AS watch
   FROM commit_log CL LEFT OUTER JOIN repo R ON CL.repo_id = R.id LEFT OUTER JOIN commit_log_elements CLE ON (CL.id = CLE.commit_log_id)
        LEFT OUTER JOIN element E ON (CLE.element_id = E.id)
@@ -2265,20 +2270,24 @@ $$ LANGUAGE SQL STABLE;
 CREATE OR REPLACE FUNCTION freshports_commit_port(text, int, int, int) RETURNS SETOF freshports_commit_record AS $$
 SELECT FOURTH1.port_id,
        FOURTH1.short_description,
+       FOURTH1.date_added,
+       FOURTH1.needs_refresh,
        C.name   AS category,
+       C.id     AS category_id,
        FOURTH1.message_id,
        FOURTH1.committer   AS committer,
        FOURTH1.commit_description AS commit_description,
        FOURTH1.commit_log_id,
        CASE WHEN FOURTH1.port_id IS NULL THEN NULL ELSE FOURTH1.name END AS port,
        to_char(FOURTH1.commit_date - SystemTimeAdjust(), 'DD Mon YYYY')  AS commit_date,
+       FOURTH1.commit_date - SystemTimeAdjust()                          AS commit_date_raw,
        to_char(FOURTH1.commit_date - SystemTimeAdjust(), 'HH24:MI:SS')   AS commit_time,
        FOURTH1.encoding_losses,
        FOURTH1.status     AS status,
        FOURTH1.port_version,
        FOURTH1.port_revision,
        FOURTH1.port_epoch,
-       NULL::text         AS revision_name,
+       NULL::text        AS revision,
        NULL::text         AS change_type,
        FOURTH1.pathname   AS pathname,
        CASE WHEN FOURTH1.port_id IS NULL THEN FALSE ELSE TRUE END AS is_port,
@@ -2298,6 +2307,7 @@ SELECT FOURTH1.port_id,
        FOURTH1.svn_revision,
        FOURTH1.svn_hostname,
        FOURTH1.path_to_repo,
+       FOURTH1.repo_name,
        OnWatchList($4, FOURTH1.element_id) as watch
 FROM
 (SELECT THIRD1b.*,
@@ -2308,7 +2318,8 @@ FROM
 SELECT THIRD1.*,
        CLP.port_version,
        CLP.port_revision,
-       CLP.port_epoch
+       CLP.port_epoch,
+       CLP.needs_refresh
 FROM 
 (SELECT SECOND1.*,
        element_pathname(E.id, false)   AS pathname,
@@ -2317,6 +2328,7 @@ FROM
 FROM
 (SELECT FIRST1.*,
         P.id as port_id,
+        P.date_added,
         P.short_description,
         P.category_id,
         P.forbidden,
@@ -2339,7 +2351,8 @@ FROM
         CL.encoding_losses,
 	CL.svn_revision,
 	R.svn_hostname,
-	R.path_to_repo
+	R.path_to_repo,
+	R.name as repo_name
    FROM commit_log CL LEFT OUTER JOIN repo R ON CL.repo_id = R.id 
 JOIN commit_log_ports_elements CLPE ON CL.id = CLPE.commit_log_id
   WHERE CL.message_id = $1) AS FIRST1

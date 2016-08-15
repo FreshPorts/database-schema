@@ -62,23 +62,27 @@ CREATE TYPE element_type AS (
 CREATE TYPE freshports_commit_record AS (
 	port_id            integer,
 	short_description  text,
+	date_added         timestamp with time zone,
+	needs_refresh      smallint,
 	category           text,
+        category_id        integer,
 	message_id         text,
 	committer          text,
 	commit_description text,
 	commit_log_id      integer,
 	port               text,
 	commit_date        text,
+	commit_date_raw    timestamp with time zone,
 	commit_time        text,
 	encoding_losses    boolean,
 	status             character(1),
-	port_version       text,
-	port_revision      text,
-	port_epoch         text,
-	revision_name      text,
+	version       text,
+	revision      text,
+	epoch         text,
+	version_name       text,
 	change_type        text,
 	element_pathname   text,
-    is_port            boolean,
+	is_port            boolean,
 	element_id         integer,
 	forbidden          text,
 	deprecated         text,
@@ -86,16 +90,17 @@ CREATE TYPE freshports_commit_record AS (
 	broken             text,
 	vulnerable_current integer,
 	vulnerable_past    integer,
-    restricted         text,
-    expiration_date    date,
-    no_cdrom           text,
-    is_interactive     text,
-    only_for_archs     text,
-    not_for_archs      text,
-	svn_revision         text,
-	svn_hostname         text,
-	path_to_repo         text,
-	watch              bigint
+	restricted         text,
+	expiration_date    date,
+	no_cdrom           text,
+	is_interactive     text,
+	only_for_archs     text,
+	not_for_archs      text,
+	svn_revision       text,
+	svn_hostname       text,
+	path_to_repo       text,
+	repo_name          text,
+	onwatchlist        bigint
 );
 
   DROP TYPE IF EXISTS logincounts_record CASCADE;
@@ -129,7 +134,7 @@ CREATE TYPE old_new_ports_record AS (
 	category_new		text
 );
 
-  DROP TYPE IF EXISTS IF EXISTS element_id_pathname CASCADE;
+  DROP TYPE IF EXISTS element_id_pathname CASCADE;
 CREATE TYPE element_id_pathname AS (
 	element_id			int4,
 	pathname			text
