@@ -340,15 +340,19 @@ CREATE OR REPLACE FUNCTION ports_vulnerable_delete_clear_cache() RETURNS TRIGGER
       l_category  text;
    BEGIN
       IF TG_OP = 'DELETE' THEN
-            SELECT category, name
-              INTO l_category, l_port
-              FROM ports_all
-             WHERE id = OLD.port_id;
 
-            INSERT INTO cache_clearing_ports (port_id, category, port)
-              VALUES (OLD.port_id, l_category, l_port);
+        SELECT category, name
+          INTO l_category, l_port
+          FROM ports_all
+         WHERE id = OLD.port_id;
+
+        -- if we are deleting a port, we'll get back null values for this
+        IF l_category IS NOT NULL AND l_port IS NOT NULL THEN
+          INSERT INTO cache_clearing_ports (port_id, category, port)
+            VALUES (OLD.port_id, l_category, l_port);
 
           NOTIFY port_updated;
+        END IF;
       END IF;
 
       -- when a port changes, add an entry to the cache clearing table
