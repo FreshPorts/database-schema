@@ -3234,7 +3234,7 @@ $$ LANGUAGE SQL STABLE;
 
 
 --
--- this function copies a port files from /ports/head/CATEGORY/PORT to /ports/branches/BRANCH
+-- this function copies a port's files from /ports/head/CATEGORY/PORT to /ports/branches/BRANCH
 -- It returns the id of the new element for that port.
 -- This function DOES not create the port itself (i.e. no entries added to port table).
 --
@@ -3311,6 +3311,7 @@ DECLARE
       INTO l_port_id;
 
     -- we need to set up the port_categories table first...
+    -- why? Can't this be set up during refresh of the port?
 
     RAISE WARNING 'about to call GetPort and I only want stuff from head, so branch agnostic is OK.';
 
