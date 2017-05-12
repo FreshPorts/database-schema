@@ -106,7 +106,7 @@ begin
          RAISE EXCEPTION ''modifications to element % with name=% cannot be completed as the parent % does not exist.'', new.id, new.name, new.parent_id;
       end if;
       if new.parent_id = new.id then
-         RAISE EXCEPTION ''modifications to element % with name=% cannot be completed as the an element cannot be a child of itself.'', new.id, new.name, new.parent_id;
+         RAISE EXCEPTION ''modifications to element % with name=% cannot be completed as the element cannot be a child of itself.'', new.id, new.name;
       end if;
    end if;
    --    message ''check_parent 4''
