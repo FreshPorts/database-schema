@@ -841,7 +841,8 @@ CREATE OR REPLACE FUNCTION WatchListStagingProcess(int4) RETURNS int4 AS $$
 				 WHERE element.name      = watch_list_staging.port
 				   AND categories.name   = watch_list_staging.category
 				   AND ports.element_id  = element.id
-				   AND ports.category_id = categories.id)
+				   AND ports.category_id = categories.id
+				   AND element_pathname(ports.element_id) ilike '/ports/head/%')
 		 WHERE user_id = UserID;
 
 		SELECT count(*)
