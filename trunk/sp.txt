@@ -1210,12 +1210,15 @@ CREATE OR REPLACE FUNCTION Stats_PortCountRestricted() returns int8 AS $$
 		PortCount	int8;
 
 	BEGIN
-		SELECT count(*)
-		  INTO PortCount
-		  FROM ports, element
-		 WHERE element.status   = 'A'
-		   AND ports.element_id = element.id
-		   AND ports.restricted <> '';
+             SELECT COUNT(*)
+	       INTO PortCount
+               FROM (
+                SELECT element_pathname(NP.element_id)
+                  FROM (
+                SELECT P.element_id
+                  FROM ports P JOIN element E ON P.element_id = E.id AND E.status = 'A' AND P.restricted <> '') AS NP
+                GROUP BY NP.element_id
+                HAVING element_pathname(NP.element_id) ilike '/ports/head/%') AS paths;
 
 		return PortCount;
 	END
@@ -1226,12 +1229,15 @@ CREATE OR REPLACE FUNCTION Stats_PortCountNoCDROM() returns int8 AS $$
 		PortCount	int8;
 
 	BEGIN
-		SELECT count(*)
-		  INTO PortCount
-		  FROM ports, element
-		 WHERE element.status   = 'A'
-		   AND ports.element_id = element.id
-		   AND ports.no_cdrom <> '';
+             SELECT COUNT(*)
+               INTO PortCount
+               FROM (
+                SELECT element_pathname(NP.element_id)
+                  FROM (
+                SELECT P.element_id
+                  FROM ports P JOIN element E ON P.element_id = E.id AND E.status = 'A' AND P.no_cdrom <> '') AS NP
+                GROUP BY NP.element_id
+                HAVING element_pathname(NP.element_id) ilike '/ports/head/%') AS paths;
 
 		return PortCount;
 	END
@@ -1249,6 +1255,17 @@ CREATE OR REPLACE FUNCTION Stats_PortCountVulnerable() returns int8 AS $$
 		   AND P.element_id = E.id
 		   AND P.id         = PV.port_id
            AND PV.current   > 0;
+
+             SELECT COUNT(*)
+               INTO PortCount
+               FROM (
+                SELECT element_pathname(NP.element_id)
+                  FROM (
+                SELECT P.element_id
+                  FROM ports_vulnerable PV JOIN ports P ON PV.current > 0 AND PV.port_id = P.id
+                  JOIN element E ON P.element_id = E.id AND E.status = 'A') AS NP
+                GROUP BY NP.element_id
+                HAVING element_pathname(NP.element_id) ilike '/ports/head/%') AS paths;
 
 		return PortCount;
 	END
