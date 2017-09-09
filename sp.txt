@@ -1191,12 +1191,15 @@ CREATE OR REPLACE FUNCTION Stats_PortCountDeprecated() returns int8 AS $$
 		PortCount	int8;
 
 	BEGIN
-		SELECT count(*)
-		  INTO PortCount
-		  FROM ports, element
-		 WHERE element.status   = 'A'
-		   AND ports.element_id = element.id
-		   AND ports.deprecated <> '';
+             SELECT COUNT(*)
+	       INTO PortCount
+               FROM (
+                SELECT element_pathname(NP.element_id)
+                  FROM (
+                SELECT P.element_id
+                  FROM ports P JOIN element E ON P.element_id = E.id AND E.status = 'A' AND P.deprecated <> '') AS NP
+                GROUP BY NP.element_id
+                HAVING element_pathname(NP.element_id) ilike '/ports/head/%') AS paths;
 
 		return PortCount;
 	END
