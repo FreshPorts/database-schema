@@ -1289,10 +1289,15 @@ CREATE OR REPLACE FUNCTION Stats_PortCountNewInterval(interval) returns int8 AS 
 	BEGIN
 		SELECT count(*)
 		  INTO PortCount
-		  FROM ports, element
-		 WHERE element.status   = 'A'
-		   AND ports.element_id = element.id
-		   AND date_added > now() - SinceWhen;
+		  FROM (
+		SELECT P.last_commit_id
+		  FROM ports P JOIN element E ON (P.date_added > now() - SinceWhen)
+		                              AND E.status   = 'A'
+		                              AND P.element_id = E.id) AS NP
+			LEFT OUTER JOIN commit_log          CL  ON NP.last_commit_id = CL.id
+                                   JOIN commit_log_ports    CLP ON CLP.commit_log_id = CL.id 
+                                   JOIN commit_log_branches CLB ON CLP.commit_log_id = CLB.commit_log_id
+                                   JOIN system_branch       SB  ON SB.branch_name    = 'head' AND SB.id = CLB.branch_id;
 
 		return PortCount;
 	END
