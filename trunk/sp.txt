@@ -1470,10 +1470,16 @@ CREATE OR REPLACE FUNCTION Stats_Expiration() returns int8 AS $$
 		ExpirationCount	int8;
 
 	BEGIN
-		SELECT count(*)
-		  INTO ExpirationCount
-		  FROM ports_active
-		 WHERE ports_active.expiration_date is not null;
+             SELECT COUNT(*)
+	       INTO ExpirationCount
+               FROM (
+                SELECT element_pathname(NP.element_id)
+                  FROM (
+                SELECT P.id, P.last_commit_id, P.element_id,  P.expiration_date
+                  FROM ports P JOIN element E ON P.expiration_date IS NOT NULL and P.element_id = E.id and E.status = 'A') AS NP
+                GROUP BY NP.element_id
+                HAVING element_pathname(NP.element_id) ilike '/ports/head/%') AS paths;
+		-- adding the HAVING was faster than doing the regular stuff (seeStats_Expired()).
 
 		return ExpirationCount;
 	END
@@ -1488,8 +1494,15 @@ CREATE OR REPLACE FUNCTION Stats_Expired() returns int8 AS $$
 	BEGIN
 		SELECT count(*)
 		  INTO ExpirationCount
-		  FROM ports_active
-		 WHERE ports_active.expiration_date <= CURRENT_DATE;
+		  FROM (
+		SELECT P.id, P.last_commit_id
+		  FROM ports_active P 
+                 WHERE CURRENT_DATE > P.expiration_date) AS NP
+			LEFT OUTER JOIN commit_log          CL  ON NP.last_commit_id = CL.id
+                                   JOIN commit_log_ports    CLP ON CLP.commit_log_id = CL.id AND NP.id = CLP.port_id
+                                   JOIN commit_log_branches CLB ON CLP.commit_log_id = CLB.commit_log_id
+                                   JOIN system_branch       SB  ON SB.branch_name    = 'head' AND SB.id = CLB.branch_id;
+
 
 		return ExpirationCount;
 	END
