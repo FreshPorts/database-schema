@@ -247,6 +247,50 @@ CREATE TRIGGER ports_clear_cache
     EXECUTE PROCEDURE ports_clear_cache();
 
 
+CREATE OR REPLACE FUNCTION port_dependencies_clear_cache() RETURNS TRIGGER AS $$
+   DECLARE
+      l_cache_clearing_ports_id   int8;
+      l_port      text;
+      l_category  text;
+   BEGIN
+      IF TG_OP = 'UPDATE' OR TG_OP = 'INSERT' THEN
+         INSERT INTO cache_clearing_ports (port_id, category, port)
+            SELECT distinct id, category, name
+              FROM port_dependencies PD, ports_all PA
+             WHERE PD.port_id                = NEW.id
+               AND PD.port_id_dependent_upon = PA.id
+               AND NOT EXISTS (SELECT port_id 
+                                 FROM cache_clearing_ports
+                                WHERE port_id = PD.port_id_dependent_upon);
+
+          NOTIFY port_updated;
+      END IF;
+
+      IF TG_OP = 'DELETE' THEN
+         INSERT INTO cache_clearing_ports (port_id, category, port)
+            SELECT distinct id, category, name
+              FROM port_dependencies PD, ports_all PA
+             WHERE PD.port_id                = OLD.id
+               AND PD.port_id_dependent_upon = PA.id
+               AND NOT EXISTS (SELECT port_id 
+                                 FROM cache_clearing_ports
+                                WHERE port_id = PD.port_id_dependent_upon);
+
+          NOTIFY port_updated;
+      END IF;
+
+      -- when a port changes, add an entry to the cache clearing table
+      RETURN NEW;
+   END
+$$ LANGUAGE 'plpgsql';
+
+  DROP TRIGGER port_dependencies_clear_cache ON ports;
+CREATE TRIGGER port_dependencies_clear_cache
+    AFTER UPDATE OR INSERT OR DELETE on ports
+    FOR EACH ROW
+    EXECUTE PROCEDURE port_dependencies_clear_cache();
+
+
 CREATE OR REPLACE FUNCTION port_dependencies_insert_clear_cache() RETURNS TRIGGER AS $$
    DECLARE
       l_port      text;
@@ -365,9 +409,6 @@ CREATE TRIGGER ports_vulnerable_delete_clear_cache
     AFTER DELETE on ports_vulnerable
     FOR EACH ROW
     EXECUTE PROCEDURE ports_vulnerable_delete_clear_cache();
-
-
-
 
 
 
