@@ -1,3 +1,128 @@
+25 September 2017
+
+
+
+CREATE SEQUENCE public.generate_plist_id_seq;
+
+
+CREATE TABLE public.generate_plist
+(                
+    id bigint NOT NULL DEFAULT nextval('generate_plist_id_seq'::regclass),
+    port_id integer NOT NULL,
+    installed_file text COLLATE pg_catalog."default" NOT NULL
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+GRANT ALL ON TABLE public.generate_plist TO dan;
+
+ ALTER TABLE public.generate_plist
+    OWNER to dan;
+
+-- Index: generate_plist_installed_file_gin_idx
+-- DROP INDEX public.generate_plist_installed_file_gin_idx;
+CREATE INDEX generate_plist_installed_file_gin_idx
+    ON public.generate_plist USING gin
+    (to_tsvector('english'::regconfig, installed_file))
+    TABLESPACE pg_default;
+
+
+-- Index: generate_plist_installed_file_idx
+-- DROP INDEX public.generate_plist_installed_file_idx;
+CREATE INDEX generate_plist_installed_file_idx
+    ON public.generate_plist USING btree
+    (installed_file COLLATE pg_catalog."default")
+    TABLESPACE pg_default;
+
+-- Index: generate_plist_pk         
+-- DROP INDEX public.generate_plist_pk;         
+CREATE INDEX generate_plist_pk         
+    ON public.generate_plist USING btree
+    (id)
+    TABLESPACE pg_default;
+
+-- Index: generate_plist_port_id_idx
+-- DROP INDEX public.generate_plist_port_id_idx;
+CREATE INDEX generate_plist_port_id_idx
+    ON public.generate_plist USING btree
+    (port_id)
+    TABLESPACE pg_default;
+
+
+GRANT SELECT ON generate_plist TO GROUP www;
+GRANT SELECT, UPDATE ON SEQUENCE public.generate_plist_id_seq TO commits;
+
+DROP VIEW public.ports_active;
+alter table ports drop column makefile;
+alter table ports drop column pkg_plist;
+
+CREATE OR REPLACE VIEW public.ports_active AS
+ SELECT ports.id,
+    ports.element_id,
+    ports.category_id,
+    ports.short_description,
+    ports.long_description,
+    ports.version,
+    ports.revision,
+    ports.maintainer,
+    ports.homepage,
+    ports.master_sites,
+    ports.extract_suffix,
+    ports.package_exists,
+    ports.depends_build,
+    ports.depends_run,
+    ports.last_commit_id,
+    ports.found_in_index,
+    ports.forbidden,
+    ports.broken,
+    ports.date_added,
+    ports.categories,
+    ports.deprecated,
+    ports.ignore,
+    ports.master_port,
+    ports.latest_link,
+    ports.depends_lib,
+    ports.no_latest_link,
+    ports.no_package,
+    ports.package_name,
+    ports.portepoch,
+    ports.no_cdrom,
+    ports.restricted,
+    ports.expiration_date,
+    ports.is_interactive,
+    ports.only_for_archs,
+    ports.not_for_archs,
+    ports.status,
+    ports.showconfig,
+    ports.license,
+    ports.fetch_depends,
+    ports.extract_depends,
+    ports.patch_depends,
+    ports.uses,
+    ports.pkgmessage,
+    ports.branch_id,
+    ports.distinfo,
+    ports.license_restricted,
+    ports.manual_package_build,
+    ports.license_perms,
+    element.name,
+    categories.name AS category
+   FROM categories,
+    ports,
+    element
+  WHERE element.status = 'A'::bpchar AND categories.id = ports.category_id AND ports.element_id = element.id;
+
+ALTER TABLE public.ports_active
+    OWNER TO dan;
+
+GRANT SELECT ON TABLE public.ports_active TO www;
+GRANT ALL ON TABLE public.ports_active TO dan;
+GRANT SELECT ON TABLE public.ports_active TO commits;
+
+
+
 13 August 2016
 
 
