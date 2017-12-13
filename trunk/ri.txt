@@ -893,3 +893,36 @@ CREATE TRIGGER check_last_commit_id
 BEFORE update on ports
 FOR EACH ROW
 EXECUTE PROCEDURE check_last_commit_id();
+
+
+CREATE OR REPLACE FUNCTION commit_log_ports_vuxml_clear_cache() RETURNS TRIGGER AS $$
+   BEGIN
+      IF TG_OP = 'INSERT' OR TG_OP = 'UPDATE' THEN
+         INSERT INTO cache_clearing_ports(port_id, category, port)
+             SELECT PA.id, PA.category, PA.name
+               FROM ports_all PA
+              WHERE PA.id = NEW.port_id;
+
+         NOTIFY port_updated;
+      END IF;
+
+      IF TG_OP = 'DELETE' THEN
+         INSERT INTO cache_clearing_ports(port_id, category, port)
+            SELECT PA.id, PA.category, PA.name
+              FROM ports_all PA
+             WHERE PA.id = OLD.port_id;
+
+         NOTIFY port_updated;
+      END IF;
+      RETURN NEW;
+   END
+$$ LANGUAGE 'plpgsql';
+
+
+  DROP TRIGGER IF EXISTS commit_log_ports_vuxml_clear_cache ON commit_log_ports_vuxml;
+CREATE TRIGGER commit_log_ports_vuxml_clear_cache
+    AFTER UPDATE OR INSERT OR DELETE on commit_log_ports_vuxml
+    FOR EACH ROW
+    EXECUTE PROCEDURE commit_log_ports_vuxml_clear_cache();
+
+
