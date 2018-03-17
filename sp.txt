@@ -3205,7 +3205,8 @@ int AS $$
 
     if l_PortID IS NOT NULL AND l_PortIDDependency IS NOT NULL then
       INSERT INTO port_dependencies (port_id, port_id_dependent_upon, dependency_type)
-            VALUES (l_PortID, l_PortIDDependency, p_DependencyType);
+            VALUES (l_PortID, l_PortIDDependency, p_DependencyType)
+            ON CONFLICT ON CONSTRAINT port_dependencies_pkey DO NOTHING;
       RETURN 1;
     else
       if l_PortID IS NULL then
