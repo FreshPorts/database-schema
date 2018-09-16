@@ -3384,23 +3384,6 @@ $$ LANGUAGE SQL STABLE;
 
 
 CREATE OR REPLACE FUNCTION  ports_conflicts_populate(int) RETURNS int4 AS $$
-  DECLARE
-    a_Port_ID    ALIAS FOR $1;
-    l_curMatches CURSOR FOR SELECT regexp_split_to_table(conflicts_install, E'\\s+') AS conflict FROM ports WHERE id = a_Port_ID;
-    l_Matches    RECORD;
-
-  BEGIN
-    FOR l_Matches IN l_curMatches
-      LOOP
---        FETCH l_curMatches into l_Matches;
-        RAISE NOTICE 'found %', l_Matches.conflict;
-      END LOOP;
-
-      RETURN 0;
-  END
-$$ LANGUAGE 'plpgsql' STABLE;
-
-CREATE OR REPLACE FUNCTION  ports_conflicts_populate(int) RETURNS int4 AS $$
 
   DECLARE
     a_Port_ID ALIAS FOR $1;
