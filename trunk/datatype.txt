@@ -111,31 +111,42 @@ CREATE TYPE logincounts_record AS (
 
   DROP TYPE IF EXISTS vuxml_record CASCADE;
 CREATE TYPE vuxml_record AS (
-	id				integer,
-	vid				text,
+	id		integer,
+	vid		text,
 	package_name	text,
-	op1				text,
-	v1				text,
-	op2				text,
-	v2				text
+	op1		text,
+	v1		text,
+	op2		text,
+	v2		text
 );
 
   DROP TYPE IF EXISTS also_watched_record CASCADE;
 CREATE TYPE also_watched_record AS (
-	element_id			integer,
-	url					text
+	element_id	integer,
+	url		text
 );
 
   DROP TYPE IF EXISTS old_new_ports_record CASCADE;
 CREATE TYPE old_new_ports_record AS (
-	name_old			text,
-	category_old		text,
-	name_new			text,
-	category_new		text
+	name_old	text,
+	category_old	text,
+	name_new	text,
+	category_new	text
 );
 
   DROP TYPE IF EXISTS element_id_pathname CASCADE;
 CREATE TYPE element_id_pathname AS (
-	element_id			int4,
-	pathname			text
+	element_id	int4,
+	pathname	text
+);
+
+
+  DROP TYPE IF EXISTS conflicts CASCADE;
+CREATE TYPE conflicts AS ENUM ('conflicts', 'conflicts_build', 'conflicts_install');
+
+
+  DROP TYPE IF EXISTS element_id_pathname CASCADE;
+CREATE TYPE element_id_pathname AS (
+	element_id	int4,
+	pathname	text
 );
