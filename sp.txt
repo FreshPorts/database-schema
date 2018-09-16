@@ -1570,7 +1570,8 @@ CREATE OR REPLACE FUNCTION latest_commits_ports_anchor () RETURNS integer
 ORDER BY commit_log_id
    LIMIT 1;
 $$
-    LANGUAGE sql STABLE;
+    LANGUAGE sql 
+STABLE;
 
 
 CREATE OR REPLACE FUNCTION GetPortID(text, text) returns bigint AS $$
@@ -3373,4 +3374,169 @@ DECLARE
  
   END;
 $$  LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION PackageName(integer) RETURNS TEXT AS $$
+  SELECT P.package_name 
+  FROM ports P 
+ WHERE P.id = $1
+$$ LANGUAGE SQL STABLE;
+
+
+CREATE OR REPLACE FUNCTION  ports_conflicts_populate(int) RETURNS int4 AS $$
+  DECLARE
+    a_Port_ID    ALIAS FOR $1;
+    l_curMatches CURSOR FOR SELECT regexp_split_to_table(conflicts_install, E'\\s+') AS conflict FROM ports WHERE id = a_Port_ID;
+    l_Matches    RECORD;
+
+  BEGIN
+    FOR l_Matches IN l_curMatches
+      LOOP
+--        FETCH l_curMatches into l_Matches;
+        RAISE NOTICE 'found %', l_Matches.conflict;
+      END LOOP;
+
+      RETURN 0;
+  END
+$$ LANGUAGE 'plpgsql' STABLE;
+
+CREATE OR REPLACE FUNCTION port_conflicts(integer) RETURNS SETOF text AS $$
+  SELECT 'conflicts_install', regexp_split_to_table(conflicts_install, E'\\s+') AS conflict
+    FROM ports
+   WHERE id = $1
+  JOIN
+  SELECT regexp_split_to_table(conflicts_install, E'\\s+') AS conflict
+    FROM ports
+   WHERE id = $1
+
+$$ LANGUAGE SQL STABLE;
+
+CREATE OR REPLACE FUNCTION  ports_conflicts_populate(int) RETURNS int4 AS $$
+
+  DECLARE
+    a_Port_ID ALIAS FOR $1;
+    l_num_rows bigint;
+
+  BEGIN
+    DELETE FROM ports_conflicts WHERE port_id = a_Port_ID;
+
+    INSERT INTO ports_conflicts(port_id, conflicts_type, item_num, item_value)
+      SELECT P.id        AS port_id, 
+             'conflicts'::conflicts AS conflict_type,
+             row_number() OVER (ORDER BY item_value),
+             glob_to_regex(R.item_value)
+        FROM ports P, regexp_split_to_table(P.conflicts, E'\\s+') AS R(item_value)
+       WHERE P.id = a_Port_ID
+
+      UNION
+
+      SELECT P.id              AS port_id, 
+             'conflicts_build'::conflicts AS conflict_type,
+             row_number() OVER (ORDER BY item_value),
+             glob_to_regex(R.item_value)
+        FROM ports P, regexp_split_to_table(P.conflicts_build, E'\\s+') AS R(item_value)
+       WHERE P.id = a_Port_ID
+
+      UNION
+
+      SELECT P.id                AS port_id, 
+             'conflicts_install'::conflicts AS conflict_type,
+             row_number() OVER (ORDER BY item_value),
+             glob_to_regex(R.item_value)
+        FROM ports P, regexp_split_to_table(P.conflicts_install, E'\\s+') AS R(item_value)
+       WHERE P.id = a_Port_ID;
+
+      IF FOUND THEN
+         GET DIAGNOSTICS l_num_rows = ROW_COUNT;
+      ELSE
+         l_num_rows = 0;
+      END IF;
+
+    RETURN l_num_rows;
+
+  END
+$$ LANGUAGE 'plpgsql' VOLATILE;
+
+
+
+CREATE FUNCTION glob_to_regex(text) RETURNS text AS $$
+    my $w = quotemeta shift;
+    $w =~ s{\\([*?]|\\(\\?.)|\[(?:\\\!)?(?:\\\])?[^]]*\\\])}
+                   {($1 eq '*' ? '.*' :
+                         $1 eq '?' ? '.'  :
+                         defined($2) ? $2 :
+                         do { my $p = $1; $p =~ s/\\([][^-])/$1/g; $p =~ s/^\[\\!/[^/; $p; })}eg;
+    return $w;
+$$ LANGUAGE plperl;
+
+CREATE OR REPLACE FUNCTION port_conflicts(text) RETURNS SETOF integer AS $$
+  SELECT distinct CLP.port_id FROM commit_log_ports CLP WHERE CLP.port_name_revision ~ $1
+$$ LANGUAGE SQL STABLE;
+
+
+CREATE OR REPLACE FUNCTION ports_conflicts_pgsql(text) RETURNS SETOF element_id_pathname AS $$
+  DECLARE
+    a_regex ALIAS FOR $1;
+    r       element_id_pathname%rowtype;
+
+    l_regex text;
+
+  BEGIN
+      l_regex := '^(' || a_regex || ')';
+      FOR r IN
+        SELECT distinct port_id, port_name_revision FROM commit_log_ports WHERE port_name_revision ~ l_regex
+      LOOP
+         RETURN NEXT r;
+      END LOOP;
+      RETURN;
+END;
+$$ LANGUAGE 'plpgsql' STABLE;
+
+
+CREATE OR REPLACE FUNCTION ports_conflicts_pgsql_nor(text) RETURNS SETOF element_id_pathname AS $$
+  DECLARE
+    a_regex ALIAS FOR $1;
+
+
+  BEGIN
+      l_regex := '^(' || a_regex || ')';
+      SELECT distinct port_id, port_name_revision FROM commit_log_ports WHERE port_name_revision ~ l_regex
+END;
+$$ LANGUAGE 'plpgsql' STABLE;
+
+
+CREATE OR REPLACE FUNCTION port_conflicts2(text) RETURNS SETOF element_id_pathname AS $$
+  SELECT distinct port_id,port_name_revision FROM commit_log_ports WHERE port_name_revision ~ $1
+$$ LANGUAGE SQL STABLE;
+
+CREATE OR REPLACE FUNCTION port_conflicts3(integer) RETURNS SETOF ports_conflicts_matches AS $$
+  SELECT DISTINCT PC.id, CLP.port_id
+    FROM commit_log_ports CLP JOIN ports_conflicts PC 
+                              ON (PC.port_id = $1 AND CLP.port_name_revision ~ ('^' || PC.item_value || '$'));
+$$ LANGUAGE SQL STABLE;
+
+CREATE OR REPLACE FUNCTION port_conflicts4(bigint, text) RETURNS SETOF ports_conflicts_matches AS $$
+  SELECT DISTINCT PC.id, CLP.port_id
+    FROM commit_log_ports CLP JOIN ports_conflicts PC 
+                              ON (PC.id = $1 AND CLP.port_name_revision ~ $2);
+$$ LANGUAGE SQL STRICT;
+
+CREATE OR REPLACE FUNCTION port_conflicts5(bigint, text) RETURNS SETOF ports_conflicts_matches AS $$
+  DECLARE
+    a_ports_conflicts_id ALIAS FOR $1;
+    a_regex              ALIAS FOR $2;
+
+    l_regex text;
+    r       ports_conflicts_matches%rowtype;
+  BEGIN
+    l_regex := '^(' || a_regex || ')';
+    
+    FOR r in SELECT distinct a_ports_conflicts_id, port_id FROM commit_log_ports WHERE port_name_revision ~ l_regex
+    LOOP
+      RETURN NEXT r;
+    END LOOP;
+  END;
+
+$$ LANGUAGE 'plpgsql' STABLE;
+
 
