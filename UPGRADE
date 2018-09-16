@@ -1,3 +1,216 @@
+5 September 2018
+
+Add new column: commit_log_ports.port_name_revision
+
+Add the following to the ports_active view:
+
+    ports.pkg_plist,
+    ports.makefile,
+    ports.conflicts,
+    ports.dddconflicts_build,
+    ports.conflicts_install
+
+
+-- Table: public.ports_conflicts
+
+-- DROP TABLE public.ports_conflicts;
+
+CREATE TABLE public.ports_conflicts
+(
+    id bigint NOT NULL DEFAULT nextval('ports_conflicts_id_seq'::regclass),
+    port_id integer NOT NULL,
+    conflicts_type conflicts NOT NULL,
+    item_num integer NOT NULL,
+    item_value text COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT ports_conflicts_pkey PRIMARY KEY (id),
+    CONSTRAINT ports_conflicts_port_id FOREIGN KEY (port_id)
+        REFERENCES public.ports (id) MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+ALTER TABLE public.ports_conflicts
+    OWNER to dan;
+
+-- Index: fki_ports_conflicts_port_id
+
+-- DROP INDEX public.fki_ports_conflicts_port_id;
+
+CREATE INDEX fki_ports_conflicts_port_id
+    ON public.ports_conflicts USING btree
+    (port_id)
+    TABLESPACE pg_default;
+
+
+
+
+-- Table: public.ports_conflicts_matches
+
+-- DROP TABLE public.ports_conflicts_matches;
+
+CREATE TABLE public.ports_conflicts_matches
+(
+    ports_conflicts_id bigint NOT NULL,
+    port_id integer NOT NULL,
+    CONSTRAINT ports_conflicts_matches_pkey PRIMARY KEY (ports_conflicts_id, port_id),
+    CONSTRAINT ports_conflicts_matches_conflicts_id FOREIGN KEY (ports_conflicts_id)
+        REFERENCES public.ports_conflicts (id) MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    CONSTRAINT ports_conflicts_matches_port_id FOREIGN KEY (port_id)
+        REFERENCES public.ports (id) MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+ALTER TABLE public.ports_conflicts_matches
+    OWNER to dan;
+
+-- Index: fki_ports_conflicts_matches_conflicts_id
+
+-- DROP INDEX public.fki_ports_conflicts_matches_conflicts_id;
+
+CREATE INDEX fki_ports_conflicts_matches_conflicts_id
+    ON public.ports_conflicts_matches USING btree
+    (ports_conflicts_id)
+    TABLESPACE pg_default;
+
+-- Index: fki_ports_conflicts_matches_port_id
+
+-- DROP INDEX public.fki_ports_conflicts_matches_port_id;
+
+CREATE INDEX fki_ports_conflicts_matches_port_id
+    ON public.ports_conflicts_matches USING btree
+    (port_id)
+    TABLESPACE pg_default;
+
+-- Type: conflicts
+
+-- DROP TYPE public.conflicts;
+
+CREATE TYPE public.conflicts AS ENUM
+    ('conflicts', 'conflicts_build', 'conflicts_install');
+
+ALTER TYPE public.conflicts
+    OWNER TO dan;
+
+CREATE TRUSTED PROCEDURAL LANGUAGE plperl
+    HANDLER plperl_call_handler
+    INLINE plperl_inline_handler
+    VALIDATOR plperl_validator;
+    
+ALTER LANGUAGE plperl
+    OWNER TO dan;
+
+COMMENT ON LANGUAGE plperl
+    IS 'PL/Perl procedural language';
+
+
+
+-- FUNCTION: public.glob_to_regex(text)
+
+-- DROP FUNCTION public.glob_to_regex(text);
+
+CREATE OR REPLACE FUNCTION public.glob_to_regex(
+	text)
+    RETURNS text
+    LANGUAGE 'plperl'
+
+    COST 100
+    VOLATILE 
+AS $BODY$
+
+    my $w = quotemeta shift;
+    $w =~ s{\([*?]|\(\?.)|\[(?:\\!)?(?:\\])?[^]]*\\])}
+                   {($1 eq '*' ? '.*' :
+                         $1 eq '?' ? '.'  :
+                         defined($2) ? $2 :
+                         do { my $p = $1; $p =~ s/\([][^-])/$1/g; $p =~ s/^\[\!/[^/; $p; })}eg;
+    return $w;
+
+$BODY$;
+
+ALTER FUNCTION public.glob_to_regex(text)
+    OWNER TO dan;
+
+
+
+
+-- FUNCTION: public.ports_conflicts_populate(integer)
+
+-- DROP FUNCTION public.ports_conflicts_populate(integer);
+
+CREATE OR REPLACE FUNCTION public.ports_conflicts_populate(
+	integer)
+    RETURNS integer
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+AS $BODY$
+
+  DECLARE
+    a_Port_ID ALIAS FOR $1;
+    l_num_rows bigint;
+
+  BEGIN
+    DELETE FROM ports_conflicts WHERE port_id = a_Port_ID;
+
+    INSERT INTO ports_conflicts(port_id, conflicts_type, item_num, item_value)
+      SELECT P.id        AS port_id, 
+             'conflicts'::conflicts AS conflict_type,
+             row_number() OVER (ORDER BY item_value),
+             glob_to_regex(R.item_value)
+        FROM ports P, regexp_split_to_table(P.conflicts, E'\\s+') AS R(item_value)
+       WHERE P.id = a_Port_ID
+
+      UNION
+
+      SELECT P.id              AS port_id, 
+             'conflicts_build'::conflicts AS conflict_type,
+             row_number() OVER (ORDER BY item_value),
+             glob_to_regex(R.item_value)
+        FROM ports P, regexp_split_to_table(P.conflicts_build, E'\\s+') AS R(item_value)
+       WHERE P.id = a_Port_ID
+
+      UNION
+
+      SELECT P.id                AS port_id, 
+             'conflicts_install'::conflicts AS conflict_type,
+             row_number() OVER (ORDER BY item_value),
+             glob_to_regex(R.item_value)
+        FROM ports P, regexp_split_to_table(P.conflicts_install, E'\\s+') AS R(item_value)
+       WHERE P.id = a_Port_ID;
+
+      IF FOUND THEN
+         GET DIAGNOSTICS l_num_rows = ROW_COUNT;
+      ELSE
+         l_num_rows = 0;
+      END IF;
+
+    RETURN l_num_rows;  
+
+  END
+
+$BODY$;
+
+ALTER FUNCTION public.ports_conflicts_populate(integer)
+    OWNER TO dan;
+
+
+
+
+
+
+
 25 September 2017
 
 
