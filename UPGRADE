@@ -1,25 +1,16 @@
 5 September 2018
 
-Add new column: commit_log_ports.port_name_revision
-
-Add the following to the ports_active view:
-
-    ports.pkg_plist,
-    ports.makefile,
-    ports.conflicts,
-    ports.dddconflicts_build,
-    ports.conflicts_install
 
 begin;
 
-ALTER TABLE public.ports
-    ADD COLUMN conflicts text COLLATE pg_catalog."default";
-
-ALTER TABLE public.ports
-    ADD COLUMN conflicts_build text COLLATE pg_catalog."default";
-
-ALTER TABLE public.ports
-    ADD COLUMN conflicts_install text COLLATE pg_catalog."default";
+--ALTER TABLE public.ports
+--    ADD COLUMN conflicts text COLLATE pg_catalog."default";
+--
+--ALTER TABLE public.ports
+--    ADD COLUMN conflicts_build text COLLATE pg_catalog."default";
+--
+--ALTER TABLE public.ports
+--    ADD COLUMN conflicts_install text COLLATE pg_catalog."default";
 
 CREATE OR REPLACE FUNCTION PackageName(integer) RETURNS TEXT AS $$
   SELECT P.package_name 
@@ -27,9 +18,9 @@ CREATE OR REPLACE FUNCTION PackageName(integer) RETURNS TEXT AS $$
  WHERE P.id = $1
 $$ LANGUAGE SQL STABLE;
 
-
 ALTER TABLE commit_log_ports ADD COLUMN port_name_revision TEXT default NULL;
 UPDATE commit_log_ports SET port_name_revision = PackageName(port_id) || '-' || port_revision;
+
 
 CREATE TYPE public.conflicts AS ENUM
     ('conflicts', 'conflicts_build', 'conflicts_install');
