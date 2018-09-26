@@ -10,6 +10,30 @@ Add the following to the ports_active view:
     ports.dddconflicts_build,
     ports.conflicts_install
 
+begin;
+
+ALTER TABLE public.ports
+    ADD COLUMN conflicts text COLLATE pg_catalog."default";
+
+ALTER TABLE public.ports
+    ADD COLUMN conflicts_build text COLLATE pg_catalog."default";
+
+ALTER TABLE public.ports
+    ADD COLUMN conflicts_install text COLLATE pg_catalog."default";
+
+CREATE OR REPLACE FUNCTION PackageName(integer) RETURNS TEXT AS $$
+  SELECT P.package_name 
+  FROM ports P 
+ WHERE P.id = $1
+$$ LANGUAGE SQL STABLE;
+
+
+ALTER TABLE commit_log_ports ADD COLUMN port_name_revision TEXT default NULL;
+UPDATE commit_log_ports SET port_name_revision = PackageName(port_id) || '-' || port_revision;
+
+CREATE TYPE public.conflicts AS ENUM
+    ('conflicts', 'conflicts_build', 'conflicts_install');
+
 
 -- Table: public.ports_conflicts
 
@@ -17,7 +41,7 @@ Add the following to the ports_active view:
 
 CREATE TABLE public.ports_conflicts
 (
-    id bigint NOT NULL DEFAULT nextval('ports_conflicts_id_seq'::regclass),
+    id BIGSERIAL,
     port_id integer NOT NULL,
     conflicts_type conflicts NOT NULL,
     item_num integer NOT NULL,
@@ -96,9 +120,6 @@ CREATE INDEX fki_ports_conflicts_matches_port_id
 
 -- DROP TYPE public.conflicts;
 
-CREATE TYPE public.conflicts AS ENUM
-    ('conflicts', 'conflicts_build', 'conflicts_install');
-
 ALTER TYPE public.conflicts
     OWNER TO dan;
 
@@ -119,24 +140,17 @@ COMMENT ON LANGUAGE plperl
 
 -- DROP FUNCTION public.glob_to_regex(text);
 
-CREATE OR REPLACE FUNCTION public.glob_to_regex(
-	text)
-    RETURNS text
-    LANGUAGE 'plperl'
-
-    COST 100
-    VOLATILE 
-AS $BODY$
-
+CREATE FUNCTION public.glob_to_regex(text) RETURNS text
+    LANGUAGE plperl
+    AS $_$
     my $w = quotemeta shift;
-    $w =~ s{\([*?]|\(\?.)|\[(?:\\!)?(?:\\])?[^]]*\\])}
+    $w =~ s{\\([*?]|\\(\\?.)|\[(?:\\\!)?(?:\\\])?[^]]*\\\])}
                    {($1 eq '*' ? '.*' :
                          $1 eq '?' ? '.'  :
                          defined($2) ? $2 :
-                         do { my $p = $1; $p =~ s/\([][^-])/$1/g; $p =~ s/^\[\!/[^/; $p; })}eg;
+                         do { my $p = $1; $p =~ s/\\([][^-])/$1/g; $p =~ s/^\[\\!/[^/; $p; })}eg;
     return $w;
-
-$BODY$;
+$_$;
 
 ALTER FUNCTION public.glob_to_regex(text)
     OWNER TO dan;
