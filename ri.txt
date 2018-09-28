@@ -894,6 +894,51 @@ BEFORE update on ports
 FOR EACH ROW
 EXECUTE PROCEDURE check_last_commit_id();
 
+CREATE OR REPLACE FUNCTION ports_conflicts_set() RETURNS TRIGGER AS $$
+  BEGIN
+    DELETE FROM ports_conflicts WHERE port_id = NEW.id;
+
+    INSERT INTO ports_conflicts(port_id, conflicts_type, item_num, item_value)
+      SELECT NEW.id        AS port_id, 
+             'conflicts'::conflicts AS conflict_type,
+             row_number() OVER (ORDER BY item_value),
+             glob_to_regex(R.item_value)
+        FROM regexp_split_to_table(NEW.conflicts, E'\\s+') AS R(item_value)
+
+      UNION
+
+      SELECT NEW.id              AS port_id, 
+             'conflicts_build'::conflicts AS conflict_type,
+             row_number() OVER (ORDER BY item_value),
+             glob_to_regex(R.item_value)
+        FROM regexp_split_to_table(NEW.conflicts_build, E'\\s+') AS R(item_value)
+
+      UNION
+
+      SELECT NEW.id                AS port_id, 
+             'conflicts_install'::conflicts AS conflict_type,
+             row_number() OVER (ORDER BY item_value),
+             glob_to_regex(R.item_value)
+        FROM regexp_split_to_table(NEW.conflicts_install, E'\\s+') AS R(item_value);
+
+    RETURN NEW;
+  END
+$$ LANGUAGE 'plpgsql';
+
+
+  DROP TRIGGER IF EXISTS ports_conflicts_insert ON ports;
+CREATE TRIGGER ports_conflicts_insert
+    AFTER INSERT on ports
+    FOR EACH ROW
+    EXECUTE PROCEDURE ports_conflicts_set();
+
+  DROP TRIGGER IF EXISTS ports_conflicts_update ON ports;
+CREATE TRIGGER ports_conflicts_update
+    AFTER UPDATE on ports
+    FOR EACH ROW
+    EXECUTE PROCEDURE ports_conflicts_set();
+
+
 
 CREATE OR REPLACE FUNCTION commit_log_ports_vuxml_clear_cache() RETURNS TRIGGER AS $$
    BEGIN
