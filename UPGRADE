@@ -212,8 +212,16 @@ ALTER FUNCTION public.ports_conflicts_populate(integer)
 
 
 
+GRANT SELECT, INSERT, UPDATE, DELETE ON ports_conflicts         TO GROUP commits;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ports_conflicts_matches TO GROUP commits;
 
+GRANT SELECT, UPDATE                 ON ports_conflicts_id_seq  TO GROUP commits;
 
+GRANT SELECT                         ON ports_conflicts         TO GROUP www;
+GRANT SELECT                         ON ports_conflicts_matches TO GROUP www;
+
+GRANT SELECT                         ON ALL TABLES    IN SCHEMA pg_catalog TO GROUP rsyncer;
+GRANT SELECT                         ON ALL SEQUENCES IN SCHEMA pg_catalog TO GROUP rsyncer;
 
 
 25 September 2017
@@ -510,9 +518,9 @@ create unique index repo_name        on repo(name);
 create unique index repo_description on repo(description);
 create unique index repo_path_to_repo   on repo(path_to_repo);
 
-insert into repo (name, description, svn_hostname, path_to_repo) values ('ports', 'The FreeBSD Ports tree', 'svnweb.freebsd.org', '/ports');
-insert into repo (name, description, svn_hostname, path_to_repo) values ('doc',   'The FreeBSD doc tree',   'svnweb.freebsd.org', '/doc');
-insert into repo (name, description, svn_hostname, path_to_repo) values ('src',   'The FreeBSD src tree',   'svnweb.freebsd.org', '/base');
+INSERT into repo (name, description, svn_hostname, path_to_repo) values ('ports', 'The FreeBSD Ports tree', 'svnweb.freebsd.org', '/ports');
+INSERT into repo (name, description, svn_hostname, path_to_repo) values ('doc',   'The FreeBSD doc tree',   'svnweb.freebsd.org', '/doc');
+INSERT into repo (name, description, svn_hostname, path_to_repo) values ('src',   'The FreeBSD src tree',   'svnweb.freebsd.org', '/base');
 
 ALTER TABLE commit_log add repo_id integer;
 alter table commit_log
