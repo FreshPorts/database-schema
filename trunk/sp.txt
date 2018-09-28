@@ -3383,7 +3383,7 @@ CREATE OR REPLACE FUNCTION PackageName(integer) RETURNS TEXT AS $$
 $$ LANGUAGE SQL STABLE;
 
 
-CREATE OR REPLACE FUNCTION  ports_conflicts_populate(int) RETURNS int4 AS $$
+CREATE OR REPLACE FUNCTION ports_conflicts_populate(int) RETURNS int4 AS $$
 
   DECLARE
     a_Port_ID ALIAS FOR $1;
@@ -3431,7 +3431,17 @@ $$ LANGUAGE 'plpgsql' VOLATILE;
 
 
 
-CREATE FUNCTION glob_to_regex(text) RETURNS text AS $$
+CREATE TRUSTED PROCEDURAL LANGUAGE plperl
+    HANDLER plperl_call_handler
+    INLINE plperl_inline_handler
+    VALIDATOR plperl_validator;
+    
+COMMENT ON LANGUAGE plperl
+    IS 'PL/Perl procedural language';
+
+CREATE OR REPLACE FUNCTION public.glob_to_regex(text) RETURNS text
+    LANGUAGE plperl
+    AS $_$
     my $w = quotemeta shift;
     $w =~ s{\\([*?]|\\(\\?.)|\[(?:\\\!)?(?:\\\])?[^]]*\\\])}
                    {($1 eq '*' ? '.*' :
@@ -3439,5 +3449,5 @@ CREATE FUNCTION glob_to_regex(text) RETURNS text AS $$
                          defined($2) ? $2 :
                          do { my $p = $1; $p =~ s/\\([][^-])/$1/g; $p =~ s/^\[\\!/[^/; $p; })}eg;
     return $w;
-$$ LANGUAGE plperl;
+$_$;
 
