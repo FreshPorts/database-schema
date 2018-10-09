@@ -150,3 +150,11 @@ CREATE TYPE element_id_pathname AS (
 	element_id	int4,
 	pathname	text
 );
+
+  DROP TYPE IF EXISTS GetPortFromPackageName_record CASCADE;
+CREATE TYPE GetPortFromPackageName_record AS (
+	port_id			integer,
+	category		text,
+	port			text,
+	element_pathname	text
+);
