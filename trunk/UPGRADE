@@ -1,3 +1,32 @@
+9 October 2018
+
+  DROP TYPE IF EXISTS GetPortFromPackageName_record CASCADE;
+CREATE TYPE GetPortFromPackageName_record AS (
+	port_id			integer,
+	category		text,
+	port			text,
+	element_pathname	text
+);
+
+CREATE OR REPLACE FUNCTION GetPortFromPackageName(text) RETURNS SETOF GetPortFromPackageName_RECORD AS $$
+DECLARE
+	a_PackageName	ALIAS for $1;
+
+	r		GetPortFromPackageName_RECORD%rowtype;
+
+BEGIN
+	FOR r IN
+		SELECT P.id AS port_id, C.name AS category, packagename(P.id) as port, element_pathname(P.element_id)
+		  FROM ports P JOIN element_pathname EP ON P.element_id  = EP.element_id
+		               JOIN categories       C  ON P.category_id = C.id
+		 WHERE package_name = a_PackageName
+		   AND EP.pathname LIKE '/ports/head/%'
+
+	LOOP
+		RETURN NEXT r;
+	END LOOP;
+END $$ LANGUAGE plpgsql;
+
 5 September 2018
 
 
