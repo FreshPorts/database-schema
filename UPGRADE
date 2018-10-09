@@ -27,6 +27,27 @@ BEGIN
 	END LOOP;
 END $$ LANGUAGE plpgsql;
 
+GRANT SELECT ON element_pathname TO GROUP reading;
+
+CREATE OR REPLACE FUNCTION Stats_PortCountNewInterval(interval) returns int8 AS $$
+	DECLARE
+		SinceWhen	ALIAS FOR $1;
+		PortCount	int8;
+
+	BEGIN
+		SELECT count(*)
+		  INTO PortCount
+		  FROM ports P
+		  JOIN element_pathname EP ON P.element_id = EP.element_id
+		 WHERE P.date_added > now() - SinceWhen
+		  AND EP.pathname LIKE '/ports/head/%';
+
+		return PortCount;
+	END
+$$ LANGUAGE 'plpgsql';
+
+
+
 5 September 2018
 
 
