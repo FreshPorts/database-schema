@@ -1,3 +1,18 @@
+10 October 2018
+
+CREATE OR REPLACE FUNCTION CategoryPortCount(text) returns bigint AS $$
+        SELECT count(*)
+          FROM categories C 
+          JOIN ports_categories PC ON C.id         = PC.category_id
+          JOIN ports            P  ON PC.port_id   = P.id
+          JOIN element          E  ON P.element_id = E.id
+          JOIN element_pathname EP on E.id         = EP.element_id
+         WHERE C.name   = 'databases'
+           AND E.status = 'A'
+           AND EP.pathname like '/ports/head/%';
+$$ LANGUAGE SQL STABLE;
+
+
 9 October 2018
 
   DROP TYPE IF EXISTS GetPortFromPackageName_record CASCADE;
@@ -46,6 +61,76 @@ CREATE OR REPLACE FUNCTION Stats_PortCountNewInterval(interval) returns int8 AS 
 	END
 $$ LANGUAGE 'plpgsql';
 
+CREATE OR REPLACE FUNCTION ports_conflicts_set() RETURNS TRIGGER AS $$
+  BEGIN
+    DELETE FROM ports_conflicts WHERE port_id = NEW.id;
+
+    INSERT INTO ports_conflicts(port_id, conflicts_type, item_num, item_value)
+      SELECT NEW.id        AS port_id, 
+             'conflicts'::conflicts AS conflict_type,
+             row_number() OVER (ORDER BY item_value),
+             glob_to_regex(R.item_value)
+        FROM regexp_split_to_table(NEW.conflicts, E'\\s+') AS R(item_value)
+
+      UNION
+
+      SELECT NEW.id              AS port_id, 
+             'conflicts_build'::conflicts AS conflict_type,
+             row_number() OVER (ORDER BY item_value),
+             glob_to_regex(R.item_value)
+        FROM regexp_split_to_table(NEW.conflicts_build, E'\\s+') AS R(item_value)
+
+      UNION
+
+      SELECT NEW.id                AS port_id, 
+             'conflicts_install'::conflicts AS conflict_type,
+             row_number() OVER (ORDER BY item_value),
+             glob_to_regex(R.item_value)
+        FROM regexp_split_to_table(NEW.conflicts_install, E'\\s+') AS R(item_value);
+
+    RETURN NEW;
+  END
+$$ LANGUAGE 'plpgsql';
+
+
+  DROP TRIGGER IF EXISTS ports_conflicts_insert ON ports;
+CREATE TRIGGER ports_conflicts_insert
+    AFTER INSERT on ports
+    FOR EACH ROW
+    EXECUTE PROCEDURE ports_conflicts_set();
+
+  DROP TRIGGER IF EXISTS ports_conflicts_update ON ports;
+CREATE TRIGGER ports_conflicts_update
+    AFTER UPDATE on ports
+    FOR EACH ROW
+    EXECUTE PROCEDURE ports_conflicts_set();
+
+CREATE INDEX commit_log_ports_port_name_revision
+    ON public.commit_log_ports USING btree
+    (port_name_revision COLLATE pg_catalog."default")
+    TABLESPACE pg_default;
+
+
+CREATE OR REPLACE FUNCTION port_conflicts(bigint, text) RETURNS SETOF ports_conflicts_matches AS $$
+  DECLARE
+    a_ports_conflicts_id ALIAS FOR $1;
+    a_regex              ALIAS FOR $2;
+ 
+    l_regex text;
+    r       ports_conflicts_matches%rowtype;
+  BEGIN
+    l_regex := '^(' || a_regex || ')';
+     
+    FOR r in SELECT distinct a_ports_conflicts_id, port_id FROM commit_log_ports WHERE port_name_revision ~ l_regex
+    LOOP
+      RETURN NEXT r;
+    END LOOP;
+  END;
+ 
+$$ LANGUAGE 'plpgsql' STABLE;
+
+insert into ports_conflicts_matches SELECT PC4.*                                                                                
+  FROM ports_conflicts PC, LATERAL (SELECT * FROM port_conflicts(PC.id, '^' || PC.item_value || '$')) PC4;
 
 
 5 September 2018

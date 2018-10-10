@@ -1612,13 +1612,15 @@ $$ LANGUAGE 'plpgsql';
 
 
 CREATE OR REPLACE FUNCTION CategoryPortCount(text) returns bigint AS $$
-	SELECT count(*)
-	  FROM categories, ports_categories, ports, element
-	 WHERE categories.name = $1
-	   AND ports_categories.category_id = categories.id
-	   AND ports_categories.port_id     = ports.id
-	   AND ports.element_id             = element.id
-	   AND element.status               = 'A';
+        SELECT count(*)
+          FROM categories C 
+          JOIN ports_categories PC ON C.id         = PC.category_id
+          JOIN ports            P  ON PC.port_id   = P.id
+          JOIN element          E  ON P.element_id = E.id
+          JOIN element_pathname EP on E.id         = EP.element_id
+         WHERE C.name   = 'databases'
+           AND E.status = 'A'
+           AND EP.pathname like '/ports/head/%';
 $$ LANGUAGE SQL STABLE;
 
 
