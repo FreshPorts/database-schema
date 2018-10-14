@@ -1618,7 +1618,7 @@ CREATE OR REPLACE FUNCTION CategoryPortCount(text) returns bigint AS $$
           JOIN ports            P  ON PC.port_id   = P.id
           JOIN element          E  ON P.element_id = E.id
           JOIN element_pathname EP on E.id         = EP.element_id
-         WHERE C.name   = 'databases'
+         WHERE C.name   = $1
            AND E.status = 'A'
            AND EP.pathname like '/ports/head/%';
 $$ LANGUAGE SQL STABLE;
