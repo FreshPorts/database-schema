@@ -1248,24 +1248,12 @@ CREATE OR REPLACE FUNCTION Stats_PortCountVulnerable() returns int8 AS $$
 		PortCount	int8;
 
 	BEGIN
-		SELECT count(*)
+                SELECT count(*)
 		  INTO PortCount
-		  FROM element E, ports P, ports_vulnerable PV
-		 WHERE E.status     = 'A'
-		   AND P.element_id = E.id
-		   AND P.id         = PV.port_id
-           AND PV.current   > 0;
-
-             SELECT COUNT(*)
-               INTO PortCount
-               FROM (
-                SELECT element_pathname(NP.element_id)
-                  FROM (
-                SELECT P.element_id
-                  FROM ports_vulnerable PV JOIN ports P ON PV.current > 0 AND PV.port_id = P.id
-                  JOIN element E ON P.element_id = E.id AND E.status = 'A') AS NP
-                GROUP BY NP.element_id
-                HAVING element_pathname(NP.element_id) ilike '/ports/head/%') AS paths;
+                  FROM ports            P
+		  JOIN ports_vulnerable PV ON PV.current    > 0            AND PV.port_id = P.id
+                  JOIN element_pathname EP ON EP.element_id = P.element_id AND EP.pathname like '/ports/head/%'
+                  JOIN element          E  ON P.element_id  = E.id         AND E.status = 'A';
 
 		return PortCount;
 	END
