@@ -1,3 +1,37 @@
+21 October 2018
+
+
+CREATE OR REPLACE FUNCTION PackageFlavorsDelete (int4) returns int4 AS $$
+	DECLARE
+		a_port_id ALIAS FOR $1;
+		RowCount	int4;
+
+	BEGIN
+		DELETE FROM package_flavors
+		      WHERE port_id  = a_port_id;
+
+		GET DIAGNOSTICS RowCount = ROW_COUNT;
+
+		RETURN RowCount;
+	END
+$$ LANGUAGE 'plpgsql';
+
+
+
+
+
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON flavors                 TO GROUP commits;
+GRANT SELECT, UPDATE                 ON flavors_id_seq          TO GROUP commits;
+GRANT SELECT, INSERT, UPDATE, DELETE ON package_flavors         TO GROUP commits;
+GRANT SELECT, UPDATE                 ON package_flavors_id_seq  TO GROUP commits;
+
+GRANT SELECT                         ON flavors         TO GROUP www;
+GRANT SELECT                         ON package_flavors TO GROUP www;
+
+GRANT SELECT                         ON ALL TABLES    IN SCHEMA pg_catalog TO GROUP rsyncer;
+GRANT SELECT                         ON ALL SEQUENCES IN SCHEMA pg_catalog TO GROUP rsyncer;
+
 10 October 2018
 
 CREATE OR REPLACE FUNCTION CategoryPortCount(text) returns bigint AS $$
