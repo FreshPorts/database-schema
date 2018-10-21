@@ -3456,3 +3456,81 @@ BEGIN
 		RETURN NEXT r;
 	END LOOP;
 END $$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION PackageFlavorsDelete (int4) returns int4 AS $$
+	DECLARE
+		a_port_id ALIAS FOR $1;
+		RowCount	int4;
+
+	BEGIN
+		DELETE FROM package_flavors
+		      WHERE port_id  = a_port_id;
+
+		GET DIAGNOSTICS RowCount = ROW_COUNT;
+
+		RETURN RowCount;
+	END
+$$ LANGUAGE 'plpgsql';
+
+
+
+CREATE OR REPLACE FUNCTION PackageFlavorAdd (int4, text, text, int) returns int4 AS $$
+	DECLARE
+		a_port_id       ALIAS FOR $1;
+		a_flavor        ALIAS FOR $2;
+		a_flavor_name   ALIAS FOR $3;
+		a_flavor_number ALIAS for $4;
+
+		l_flavor_id          BIGINT;
+		l_package_flavors_id BIGINT;
+
+	BEGIN
+		INSERT INTO flavors (name) VALUES (a_flavor)
+		  ON CONFLICT ON CONSTRAINT flavors_name_unique DO NOTHING
+		  RETURNING id
+		  INTO l_flavor_id;
+
+		IF l_flavor_id IS NULL THEN
+			SELECT id
+			  INTO l_flavor_id
+			  FROM flavors
+			 WHERE name = a_flavor;
+		END IF;
+
+		IF NOT FOUND THEN
+			RAISE EXCEPTION 'cannot find id for Flavor = % ', a_flavor;
+			RETURN 0;
+		END IF;
+		
+
+		RAISE NOTICE ' flavor is %', l_flavor_id;
+
+		INSERT INTO package_flavors (port_id, flavor_id, name, flavor_number)
+			VALUES (a_port_id, l_flavor_id, a_flavor_name, a_flavor_number)
+			RETURNING id
+			INTO l_package_flavors_id;
+		
+
+		RETURN l_package_flavors_id;
+	END;
+$$ LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION PackageFlavors(bigint) RETURNS SETOF PackageFlavors_record AS $$
+    DECLARE
+        a_port_id  ALIAS for $1;
+        r          PackageFlavors_record%rowtype;
+
+    BEGIN
+        FOR r IN SELECT PV.id, PV.port_id, PV.flavor_id, F.name as flavor_name, PV.name, PV.flavor_number
+                   FROM package_flavors PV
+                   JOIN flavors         F ON PV.flavor_id = F.id
+                  WHERE port_id = a_port_id
+               ORDER BY flavor_number ASC
+        LOOP
+            RETURN NEXT r;
+        END LOOP;
+    END;$$
+
+LANGUAGE plpgsql;
