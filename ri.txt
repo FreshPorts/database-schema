@@ -284,7 +284,7 @@ CREATE OR REPLACE FUNCTION port_dependencies_clear_cache() RETURNS TRIGGER AS $$
    END
 $$ LANGUAGE 'plpgsql';
 
-  DROP TRIGGER port_dependencies_clear_cache ON ports;
+  DROP TRIGGER IF EXISTS port_dependencies_clear_cache ON ports;
 CREATE TRIGGER port_dependencies_clear_cache
     AFTER UPDATE OR INSERT OR DELETE on ports
     FOR EACH ROW
