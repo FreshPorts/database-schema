@@ -3415,13 +3415,6 @@ $$ LANGUAGE 'plpgsql' VOLATILE;
 
 
 
-CREATE TRUSTED PROCEDURAL LANGUAGE plperl
-    HANDLER plperl_call_handler
-    INLINE plperl_inline_handler
-    VALIDATOR plperl_validator;
-    
-COMMENT ON LANGUAGE plperl
-    IS 'PL/Perl procedural language';
 
 CREATE OR REPLACE FUNCTION public.glob_to_regex(text) RETURNS text
     LANGUAGE plperl
