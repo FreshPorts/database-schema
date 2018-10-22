@@ -2971,12 +2971,11 @@ $$ LANGUAGE SQL STABLE;
 
 -- This function returns the latest commit date for the ports tree
 CREATE OR REPLACE FUNCTION LatestCommitDatePorts() returns timestamp with time zone AS $$
-SELECT CL.date_added
-  FROM commit_log CL
- WHERE CL.id = ( SELECT LCP.commit_log_id
-                   FROM latest_commits_ports LCP
-               ORDER BY LCP.commit_log_id DESC
-                  LIMIT 1)
+SELECT CL.commit_date as last_commit_date
+  FROM commit_log_ports CLP
+  JOIN commit_log       CL on CL.id = CLP.commit_log_id
+ ORDER BY CL.commit_date DESC
+  LIMIT 1
 $$ LANGUAGE SQL STABLE;
 
 
