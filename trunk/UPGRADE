@@ -1,5 +1,10 @@
 21 October 2018
 
+add $FreshPorts::Config::JailPackageFlavors to /usr/local/etc/freshports/config.pm
+install flavors script to /var/db/freshports/ports-jail
+
+Update FreshPorts-Scripts to install flavors script
+
 -- SEQUENCE: public.flavors_id_seq
 
 -- DROP SEQUENCE public.flavors_id_seq;
