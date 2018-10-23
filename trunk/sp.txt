@@ -612,7 +612,7 @@ CREATE OR REPLACE FUNCTION GetPort(text) RETURNS int4 AS $$
       SELECT freshports_branch_get()
         INTO l_branch;
 
-      RAISE NOTICE ' branch is %', l_branch;
+--      RAISE NOTICE ' branch is %', l_branch;
 
       IF l_branch = 'head' THEN
           pathname := '/ports/head/'                        || category_port;
@@ -620,7 +620,7 @@ CREATE OR REPLACE FUNCTION GetPort(text) RETURNS int4 AS $$
           pathname := '/ports/branches/' || l_branch || '/' || category_port;
       END IF;
 
-      RAISE NOTICE ' GetPort pathname is=%', pathname;
+--      RAISE NOTICE ' GetPort pathname is=%', pathname;
 
       port_element_id := Pathname_ID(pathname);
       IF port_element_id IS NOT NULL THEN
@@ -2495,9 +2495,9 @@ CREATE OR REPLACE FUNCTION PortsUpdatingPortsXrefAdd (integer, text) returns int
       select GetPort(p_Port)
         INTO l_PortID;
 
-      RAISE NOTICE ' PortsUpdatingPortsXrefAdd p_PortsUpdatingID=% p_Port=% l_PortID=%', p_PortsUpdatingID, p_Port, l_PortID;
+--      RAISE NOTICE ' PortsUpdatingPortsXrefAdd p_PortsUpdatingID=% p_Port=% l_PortID=%', p_PortsUpdatingID, p_Port, l_PortID;
       IF l_PortID IS NOT NULL THEN
-         RAISE NOTICE ' We found that port';
+--         RAISE NOTICE ' We found that port';
 
          INSERT INTO ports_updating_ports_xref(ports_updating_id, port_id)
              VALUES (p_PortsUpdatingID, l_PortID);
@@ -2508,7 +2508,7 @@ CREATE OR REPLACE FUNCTION PortsUpdatingPortsXrefAdd (integer, text) returns int
          OID := NULL;
       END IF;
 
-      RAISE NOTICE ' OID is %' , OID;
+--      RAISE NOTICE ' OID is %' , OID;
 
       RETURN OID;
    END;
@@ -3496,7 +3496,7 @@ CREATE OR REPLACE FUNCTION PackageFlavorAdd (int4, text, text, int) returns int4
 		END IF;
 		
 
-		RAISE NOTICE ' flavor is %', l_flavor_id;
+--		RAISE NOTICE ' flavor is %', l_flavor_id;
 
 		INSERT INTO package_flavors (port_id, flavor_id, name, flavor_number)
 			VALUES (a_port_id, l_flavor_id, a_flavor_name, a_flavor_number)
