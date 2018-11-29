@@ -415,8 +415,8 @@ CREATE TRIGGER ports_vulnerable_delete_clear_cache
 
 CREATE OR REPLACE FUNCTION element_pathname_insert() RETURNS TRIGGER AS $$
    BEGIN
-		INSERT INTO element_pathname (element_id, pathname)
-			VALUES (NEW.id, element_pathname(NEW.id));
+      INSERT INTO element_pathname (element_id, pathname)
+         VALUES (NEW.id, element_pathname(NEW.id));
       RETURN NEW;
    END
 $$ LANGUAGE 'plpgsql';
