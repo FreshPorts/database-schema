@@ -2504,7 +2504,7 @@ CREATE OR REPLACE FUNCTION PortsUpdatingPortsXrefAdd (integer, text) returns int
 
          GET DIAGNOSTICS OID = RESULT_OID;
       ELSE
-         RAISE NOTICE ' We DID NOT LOCATE that port';
+--         RAISE NOTICE ' We DID NOT LOCATE that port';
          OID := NULL;
       END IF;
 
