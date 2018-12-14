@@ -1,9 +1,14 @@
 21 October 2018
 
 add $FreshPorts::Config::JailPackageFlavors to /usr/local/etc/freshports/config.pm
-install flavors script to /var/db/freshports/ports-jail
+^ this needs to be done manually
 
-Update FreshPorts-Scripts to install flavors script
+install flavors script (make-flavors-package-names.sh) to /var/db/freshports/ports-jail
+^ This should be done by FreshPorts-Scripts
+
+This needs to be added to visudo:
+
+freshports      ALL=(ALL) NOPASSWD:/usr/sbin/chroot -u freshports /var/db/freshports/ports-jail /make-flavors-package-names.sh *
 
 -- SEQUENCE: public.flavors_id_seq
 
