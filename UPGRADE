@@ -10,7 +10,114 @@ Add sort-by last updated
 * fixes #116
 
 
+CREATE OR REPLACE FUNCTION CategoryPortCount(text, text) returns bigint AS $$
+        SELECT count(*)
+          FROM categories C 
+          JOIN ports_categories PC ON C.id         = PC.category_id
+          JOIN ports            P  ON PC.port_id   = P.id
+          JOIN element          E  ON P.element_id = E.id
+          JOIN element_pathname EP on E.id         = EP.element_id
+         WHERE C.name   = $1
+           AND E.status = 'A'
+           AND EP.pathname like '/ports/branches/' || $2 || '%';
+$$ LANGUAGE SQL STABLE;
 
+CREATE OR REPLACE FUNCTION package_version(text, text, text) RETURNS text AS $$
+DECLARE
+    p_PortVersion   ALIAS for $1;
+    p_PortRevision  ALIAS for $2;
+    p_PortEpoch     ALIAS for $3;
+
+    l_PKGNAME       text;
+BEGIN
+    l_PKGNAME := p_PortVersion;
+
+    IF p_PortRevision <> '' AND p_PortRevision != '0' THEN
+        l_PKGNAME := l_PKGNAME || '_' || p_PortRevision;
+    END IF;
+
+    IF p_PortEpoch <> '' AND p_PortEpoch != '0' THEN
+        l_PKGNAME := l_PKGNAME || ',' || p_PortEpoch;
+    END IF;
+
+    RETURN l_PKGNAME;
+END;
+$$ LANGUAGE 'plpgsql' IMMUTABLE;
+
+
+-- added on 2019-05-09 re https://github.com/FreshPorts/freshports/issues/115
+
+CREATE OR REPLACE FUNCTION QuarterPreviousStart() returns date AS $$
+   SELECT CAST(date_trunc('quarter', current_date) - interval '3 months' AS date)
+$$ LANGUAGE SQL STABLE;
+
+
+CREATE OR REPLACE FUNCTION QuarterPreviousFinish() returns date AS $$
+   SELECT CAST(date_trunc('quarter', current_date) - interval '1 day' AS date);
+$$ LANGUAGE SQL STABLE;
+
+CREATE OR REPLACE FUNCTION QuarterCurrent() returns text AS $$
+   --
+   -- returns something like 2019Q2
+   --
+   SELECT date_part('year', current_date) || 'Q' || date_part('quarter', current_date);
+$$ LANGUAGE SQL STABLE;
+
+
+CREATE OR REPLACE FUNCTION QuarterCurrentBranchID() returns integer AS $$
+   --
+   -- return id of the current quarter branch
+   --
+   SELECT id FROM system_branch WHERE branch_name = QuarterCurrent() ;
+$$ LANGUAGE SQL STABLE;
+
+
+-- above based on this:
+
+-- freshports.dev=# SELECT date_trunc('quarter', current_date);
+--        date_trunc       
+-- ------------------------
+--  2019-04-01 00:00:00+00
+-- (1 row)
+--
+-- as taken from https://dba.stackexchange.com/questions/179874/generic-end-date-of-quarter-postgresql
+
+
+
+CREATE OR REPLACE FUNCTION PortVersionLatestBeforeQuarterlyBranch(integer) returns text AS $$
+   -- for a port on head, pass in the id and you'll get the most recent version before the start of the current quarter
+   --- by default, this will be the most recent version on the current quarterly branch, if there have been no commits to that branch for this port
+   SELECT port_version
+     FROM commit_log_ports CLP JOIN commit_log CL ON (CL.commit_date <= QuarterPreviousFinish() 
+                                                  AND CL.id       = CLP.commit_log_id
+                                                  AND CLP.port_id = $1)
+ ORDER BY CL.commit_date DESC
+    LIMIT 1;
+$$ LANGUAGE SQL STABLE;
+
+
+CREATE OR REPLACE FUNCTION PortVersionOnQuarterlyBranch(text) returns text AS $$
+
+-- return pkg version for $1 on current quarterly branch, if any commits
+
+SELECT package_version(port_version, port_revision, port_epoch)
+  FROM commit_log_ports CLP JOIN commit_log CL ON (CL.id       = CLP.commit_log_id
+                                               AND CLP.port_id = (SELECT P.id
+  FROM ports P, element_pathname EP
+ WHERE EP.pathname = '/ports/branches/' || QuarterCurrent() || '/' || $1
+   AND P.element_id = EP.element_id))
+  JOIN commit_log_branches CLB ON (CLP.commit_log_id = CLB.commit_log_id
+                               AND CLB.branch_id = QuarterCurrentBranchID())
+ORDER BY CL.commit_date DESC
+LIMIT 1
+$$ LANGUAGE SQL STABLE;
+
+
+CREATE OR REPLACE FUNCTION PortVersionOnQuarterlyBranch(integer, text) returns text AS $$
+   -- for a given category/port and it's port id, tell me the version on the
+   -- quarterly branch
+   SELECT COALESCE(PortVersionOnQuarterlyBranch($2), PortVersionLatestBeforeQuarterlyBranch($1));
+$$ LANGUAGE SQL STABLE;
 
 
 
