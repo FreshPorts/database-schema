@@ -1,3 +1,19 @@
+25 May 2019
+
+Add Quarterly revision
+
+* fixes #115
+* display the port version on the latest quarterly branch
+
+Add sort-by last updated
+
+* fixes #116
+
+
+
+
+
+
 21 October 2018
 
 add $FreshPorts::Config::JailPackageFlavors to /usr/local/etc/freshports/config.pm
