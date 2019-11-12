@@ -125,8 +125,7 @@ begin
   END IF;
   return pathname;
 END;
-$$  LANGUAGE 'plpgsql'
-WITH (iscachable);
+$$  LANGUAGE 'plpgsql' IMMUTABLE;
 
 
 
@@ -802,20 +801,20 @@ $$ LANGUAGE 'plpgsql';
 CREATE OR REPLACE FUNCTION WatchListStagingAddItem(int4, text, text, int4) RETURNS int8 AS $$
 
 	DECLARE
-		UserID			ALIAS for $1;
+		UserID		ALIAS for $1;
 		CategoryName	ALIAS for $2;
-		PortName			ALIAS for $3;
-		Count				ALIAS for $4;
+		PortName	ALIAS for $3;
+		Count		ALIAS for $4;
 
-		OID			int8;
+		RC		int8;
 
 	BEGIN
 		INSERT INTO watch_list_staging (user_id, category, port, item_count, from_pkg_info, from_watch_list)
 		VALUES (UserID, CategoryName, PortName, Count, 'Y', 'N');
 
-		GET DIAGNOSTICS OID = RESULT_OID;
+		GET DIAGNOSTICS RC = ROW_COUNT;
 
-		RETURN OID;
+		RETURN RC;
 	END
 $$ LANGUAGE 'plpgsql';
 
@@ -916,14 +915,14 @@ $$ LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION WatchListStagingLogGeneral(int4, int4, int4, int4, int4, int4) returns int8 AS $$
 	DECLARE
-		UserID			ALIAS for $1;
-		CountTotal		ALIAS for $2;
+		UserID		ALIAS for $1;
+		CountTotal	ALIAS for $2;
 		CountMatches	ALIAS for $3;
 		CountMissing	ALIAS for $4;
 		CountDuplicates	ALIAS for $5;
 		CountCategories	ALIAS for $6;
 
-		OID	int8;
+		RC		int8;
 
 	BEGIN
 
@@ -937,18 +936,18 @@ CREATE OR REPLACE FUNCTION WatchListStagingLogGeneral(int4, int4, int4, int4, in
 					VALUES (UserID, 'U', CountTotal, CountMatches, 
 							CountMissing, CountDuplicates, CountCategories);
 
-		GET DIAGNOSTICS OID = RESULT_OID;
+		GET DIAGNOSTICS RC = ROW_COUNT;
 
-		RETURN OID;
+		RETURN RC;
 	END
 $$ LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION WatchListStagingLogClearing(int8, int8) returns int8 AS $$
 	DECLARE
-		UserID			ALIAS for $1;
-		ItemCount		ALIAS for $2;
+		UserID		ALIAS for $1;
+		ItemCount	ALIAS for $2;
 
-		OID	int8;
+		RC		int8;
 
 	BEGIN
 
@@ -957,18 +956,18 @@ CREATE OR REPLACE FUNCTION WatchListStagingLogClearing(int8, int8) returns int8 
 												count_total)
 					VALUES (UserID, 'C', ItemCount);
 
-		GET DIAGNOSTICS OID = RESULT_OID;
+		GET DIAGNOSTICS RC = ROW_COUNT;
 
-		RETURN OID;
+		RETURN RC;
 	END
 $$ LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION WatchListStagingLogDelete(int4, int4) returns int8 AS $$
 	DECLARE
-		UserID			ALIAS for $1;
-		ItemCount		ALIAS for $2;
+		UserID		ALIAS for $1;
+		ItemCount	ALIAS for $2;
 
-		OID	int8;
+		RC		int8;
 
 	BEGIN
 
@@ -977,18 +976,18 @@ CREATE OR REPLACE FUNCTION WatchListStagingLogDelete(int4, int4) returns int8 AS
 												count_total)
 					VALUES (UserID, 'D', ItemCount);
 
-		GET DIAGNOSTICS OID = RESULT_OID;
+		GET DIAGNOSTICS RC = ROW_COUNT;
 
-		RETURN OID;
+		RETURN RC;
 	END
 $$ LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION WatchListStagingLogWatch(int4, int4) returns int8 AS $$
 	DECLARE
-		UserID			ALIAS for $1;
-		CountTotal		ALIAS for $2;
+		UserID		ALIAS for $1;
+		CountTotal	ALIAS for $2;
 
-		OID	int8;
+		RC		int8;
 
 	BEGIN
 
@@ -997,9 +996,9 @@ CREATE OR REPLACE FUNCTION WatchListStagingLogWatch(int4, int4) returns int8 AS 
 												count_total)
 					VALUES (UserID, 'W', CountTotal);
 
-		GET DIAGNOSTICS OID = RESULT_OID;
+		GET DIAGNOSTICS RC = ROW_COUNT;
 
-		RETURN OID;
+		RETURN RC;
 	END
 $$ LANGUAGE 'plpgsql';
 
@@ -1026,15 +1025,15 @@ $$ LANGUAGE 'plpgsql';
 CREATE OR REPLACE FUNCTION PortVerifyAddOne(text, text) returns int8 AS $$
 	DECLARE
 		CategoryName	ALIAS for $1;
-		PortName		ALIAS for $2;
-		OID	int8;
+		PortName	ALIAS for $2;
+		RC		int8;
 
 	BEGIN
 		INSERT INTO Ports_Check (category_name, port_name) values (CategoryName, PortName);
 
-		GET DIAGNOSTICS OID = RESULT_OID;
+		GET DIAGNOSTICS RC = ROW_COUNT;
 
-		RETURN OID;
+		RETURN RC;
 	END
 $$ LANGUAGE 'plpgsql';
 
@@ -1073,9 +1072,9 @@ $$ LANGUAGE 'sql' immutable;
 
 CREATE OR REPLACE FUNCTION DailySummaryDateAdd(date) returns int8 AS $$
 	DECLARE
-        DateToAdd	ALIAS for $1;
+	        DateToAdd	ALIAS for $1;
 
-		OID         int8;
+		RC		int8;
 
 	BEGIN
 		INSERT INTO daily_refreshes
@@ -1085,9 +1084,9 @@ CREATE OR REPLACE FUNCTION DailySummaryDateAdd(date) returns int8 AS $$
 		             FROM daily_refreshes
 		            WHERE refresh_date = DateToAdd);
 
-		GET DIAGNOSTICS OID = RESULT_OID;
+		GET DIAGNOSTICS RC = ROW_COUNT;
 
-		RETURN OID;
+		RETURN RC;
 	END
 $$ LANGUAGE 'plpgsql';
 
@@ -2442,9 +2441,9 @@ CREATE OR REPLACE FUNCTION PortsMovedAdd (text, text, text, text) returns int AS
       p_Date     ALIAS FOR $3;
       p_Reason   ALIAS FOR $4;
 
-      l_FromPortID     int;
-      l_PortsMovedID   int;
-      OID              int8;
+      l_FromPortID	int;
+      l_PortsMovedID	int;
+      RC		int8;
 
    BEGIN
       select GetPort(p_FromPort)
@@ -2459,8 +2458,8 @@ CREATE OR REPLACE FUNCTION PortsMovedAdd (text, text, text, text) returns int AS
              VALUES (l_PortsMovedID, l_FromPortID, GetPort(p_ToPort),
                      p_Date::date, p_Reason);
 
-         GET DIAGNOSTICS OID = RESULT_OID;
-         IF OID IS NULL THEN
+         GET DIAGNOSTICS RC = ROW_COUNT;
+         IF RC == 0 THEN
             l_PortsMovedID := NULL;
          END IF;
       end if;
@@ -2476,8 +2475,8 @@ CREATE OR REPLACE FUNCTION PortsUpdatingAdd (date, text, text, text) returns int
       p_Author  ALIAS FOR $3;
       p_Reason  ALIAS FOR $4;
 
-      l_PortsUpdatingID   int;
-      OID                 int8;
+      l_PortsUpdatingID	int;
+      RC		int8;
 
    BEGIN
       -- obtain the next number in the sequence
@@ -2486,8 +2485,8 @@ CREATE OR REPLACE FUNCTION PortsUpdatingAdd (date, text, text, text) returns int
       INSERT INTO ports_updating (id, date, affects, author, reason)
              VALUES (l_PortsUpdatingID, p_Date::date, p_Affects, p_Author, p_Reason);
 
-      GET DIAGNOSTICS OID = RESULT_OID;
-      IF OID IS NULL THEN
+      GET DIAGNOSTICS RC = ROW_COUNT;
+      IF RC == 0 THEN
          l_PortsUpdatingID := NULL;
       END IF;
 
@@ -2500,11 +2499,11 @@ CREATE OR REPLACE FUNCTION PortsUpdatingPortsXrefAdd (integer, text) returns int
       p_PortsUpdatingID ALIAS FOR $1;
       p_Port            ALIAS FOR $2;
 
-      l_PortID     int;
-      OID          int8;
+      l_PortID	int;
+      RC	int8;
 
    BEGIN
-      OID := NULL;
+      RC := 0;
       select GetPort(p_Port)
         INTO l_PortID;
 
@@ -2515,15 +2514,15 @@ CREATE OR REPLACE FUNCTION PortsUpdatingPortsXrefAdd (integer, text) returns int
          INSERT INTO ports_updating_ports_xref(ports_updating_id, port_id)
              VALUES (p_PortsUpdatingID, l_PortID);
 
-         GET DIAGNOSTICS OID = RESULT_OID;
+         GET DIAGNOSTICS RC = ROW_COUNT;
       ELSE
 --         RAISE NOTICE ' We DID NOT LOCATE that port';
-         OID := NULL;
+         RC := 0;
       END IF;
 
---      RAISE NOTICE ' OID is %' , OID;
+--      RAISE NOTICE ' RC is %' , RC;
 
-      RETURN OID;
+      RETURN RC;
    END;
 $$  LANGUAGE 'plpgsql';
 
@@ -3192,7 +3191,6 @@ int AS $$
 
     l_PortID           int;
     l_PortIDDependency int;
-    OID                int8;
 
   BEGIN
     select GetPort(p_PortName)
