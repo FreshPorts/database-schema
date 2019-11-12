@@ -2459,7 +2459,7 @@ CREATE OR REPLACE FUNCTION PortsMovedAdd (text, text, text, text) returns int AS
                      p_Date::date, p_Reason);
 
          GET DIAGNOSTICS RC = ROW_COUNT;
-         IF RC == 0 THEN
+         IF RC = 0 THEN
             l_PortsMovedID := NULL;
          END IF;
       end if;
@@ -2486,7 +2486,7 @@ CREATE OR REPLACE FUNCTION PortsUpdatingAdd (date, text, text, text) returns int
              VALUES (l_PortsUpdatingID, p_Date::date, p_Affects, p_Author, p_Reason);
 
       GET DIAGNOSTICS RC = ROW_COUNT;
-      IF RC == 0 THEN
+      IF RC = 0 THEN
          l_PortsUpdatingID := NULL;
       END IF;
 
