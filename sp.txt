@@ -3337,7 +3337,8 @@ DECLARE
   a_branch_name   ALIAS for $3;
  
   l_element_id_of_new_port int4;
-  l_port_id                int4;
+  l_port_id_branch         int4;
+  l_port_id_head           int4;
  
   BEGIN
  
@@ -3346,26 +3347,28 @@ DECLARE
  
   IF FOUND THEN
     SELECT createport(l_element_id_of_new_port, getcategory(a_category_name))
-      INTO l_port_id;
+      INTO l_port_id_branch;
 
     SELECT PA.id
       FROM ports_active PA
      WHERE PA.element_id = l_element_id_of_new_port
-      INTO l_port_id;
+      INTO l_port_id_branch;
 
     -- we need to set up the port_categories table first...
     -- why? Can't this be set up during refresh of the port?
 
     RAISE WARNING 'about to call GetPort and I only want stuff from head, so branch agnostic is OK.';
 
+    -- we need head on this call, because we are copying from head to branch
+    l_port_id_head = GetPort(a_category_name, a_port_name);
     INSERT INTO ports_categories(port_id, category_id)
-     SELECT l_port_id, PC.category_id
+     SELECT l_port_id_branch, PC.category_id
        FROM ports_categories PC
-      WHERE PC.port_id = GetPort(a_category_name, a_port_name);
+      WHERE PC.port_id = l_port_id_head;
 
   END IF;
   
-  RETURN l_port_id;
+  RETURN l_port_id_branch;
  
   END;
 $$  LANGUAGE 'plpgsql';
