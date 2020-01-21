@@ -1,0 +1,172 @@
+--
+-- $Id: datatype.txt,v 1.24 2012-09-24 15:14:42 dan Exp $
+--
+-- Copyright (c) 1998-2006 DVL Software Limited
+--
+
+  DROP TYPE IF EXISTS commit_record CASCADE;
+CREATE TYPE commit_record AS (
+	commit_log_id        integer,
+	commit_date_raw      timestamp with time zone,
+	message_subject      text,
+	message_id           text,
+	committer            text,
+	commit_description   text,
+	commit_date          text,
+	commit_time          text,
+	encoding_losses      boolean,
+	port_id              integer,
+	needs_refresh        smallint,
+	forbidden            text,
+	broken               text,
+	deprecated           text,
+	ignore               text,
+	element_id           integer,
+	version              text,
+	revision             text,
+	epoch                text,
+	date_added           integer,
+	short_description    text,
+	category_id          integer,
+	port                 text,
+	status               character(1),
+	category             text,
+	vulnerable_current   integer,
+	vulnerable_past      integer,
+    restricted           text,
+    no_cdrom             text,
+    expiration_date      date,
+    is_interactive       text,
+    only_for_archs       text,
+    not_for_archs        text,
+	repo_name            text,
+	svn_revision         text,
+	svn_hostname         text,
+	path_to_repo         text,
+	watch                bigint,
+	element_pathname     text
+);
+
+  DROP TYPE IF EXISTS element_type CASCADE;
+CREATE TYPE element_type AS (
+	id               integer,
+	name             text,
+	type             text,
+	status           text,
+	iscategory       boolean,
+	isport           boolean,
+	element_pathname text
+);
+
+  DROP TYPE IF EXISTS freshports_commit_record CASCADE;
+CREATE TYPE freshports_commit_record AS (
+	port_id            integer,
+	short_description  text,
+	date_added         timestamp with time zone,
+	needs_refresh      smallint,
+	category           text,
+        category_id        integer,
+	message_id         text,
+	committer          text,
+	commit_description text,
+	commit_log_id      integer,
+	port               text,
+	commit_date        text,
+	commit_date_raw    timestamp with time zone,
+	commit_time        text,
+	encoding_losses    boolean,
+	status             character(1),
+	version       text,
+	revision      text,
+	epoch         text,
+	version_name       text,
+	change_type        text,
+	element_pathname   text,
+	is_port            boolean,
+	element_id         integer,
+	forbidden          text,
+	deprecated         text,
+	ignore             text,
+	broken             text,
+	vulnerable_current integer,
+	vulnerable_past    integer,
+	restricted         text,
+	expiration_date    date,
+	no_cdrom           text,
+	is_interactive     text,
+	only_for_archs     text,
+	not_for_archs      text,
+	svn_revision       text,
+	svn_hostname       text,
+	path_to_repo       text,
+	repo_name          text,
+	onwatchlist        bigint
+);
+
+  DROP TYPE IF EXISTS logincounts_record CASCADE;
+CREATE TYPE logincounts_record AS (
+	date            date,
+	count           integer
+);
+
+  DROP TYPE IF EXISTS vuxml_record CASCADE;
+CREATE TYPE vuxml_record AS (
+	id		integer,
+	vid		text,
+	package_name	text,
+	op1		text,
+	v1		text,
+	op2		text,
+	v2		text
+);
+
+  DROP TYPE IF EXISTS also_watched_record CASCADE;
+CREATE TYPE also_watched_record AS (
+	element_id	integer,
+	url		text
+);
+
+  DROP TYPE IF EXISTS old_new_ports_record CASCADE;
+CREATE TYPE old_new_ports_record AS (
+	name_old	text,
+	category_old	text,
+	name_new	text,
+	category_new	text
+);
+
+  DROP TYPE IF EXISTS element_id_pathname CASCADE;
+CREATE TYPE element_id_pathname AS (
+	element_id	int4,
+	pathname	text
+);
+
+
+--  DROP TYPE IF EXISTS conflicts CASCADE;
+-- if we drop a drop type here, we lose table ports_conflicts column conflicts_type
+CREATE TYPE conflicts AS ENUM ('conflicts', 'conflicts_build', 'conflicts_install');
+
+
+  DROP TYPE IF EXISTS element_id_pathname CASCADE;
+CREATE TYPE element_id_pathname AS (
+	element_id	int4,
+	pathname	text
+);
+
+  DROP TYPE IF EXISTS GetPortFromPackageName_record CASCADE;
+CREATE TYPE GetPortFromPackageName_record AS (
+	port_id			integer,
+	category		text,
+	port			text,
+	element_pathname	text
+);
+
+
+  DROP TYPE IF EXISTS PackageFlavors_record CASCADE;	
+CREATE TYPE PackageFlavors_record AS (
+	id            bigint,
+	port_id       bigint,
+	flavor_id     bigint,
+	flavor_name   text,
+	name          text,
+        flavor_number integer
+);
