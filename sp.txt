@@ -3615,3 +3615,23 @@ CREATE OR REPLACE FUNCTION PortVersionOnQuarterlyBranch(integer, text) returns t
    -- quarterly branch
    SELECT COALESCE(PortVersionOnQuarterlyBranch($2), PortVersionLatestBeforeQuarterlyBranch($1));
 $$ LANGUAGE SQL STABLE;
+
+CREATE OR REPLACE FUNCTION DeleteUser(int) returns void AS $$
+  DECLARE
+    in_id      ALIAS for $1;
+    l_RowCount int;
+  BEGIN
+    DELETE FROM users WHERE id = in_id;
+
+    GET DIAGNOSTICS l_RowCount = ROW_COUNT;
+    IF l_RowCount != 1 THEN
+      rollback;
+    END IF;
+  END
+$$ LANGUAGE 'plpgsql' VOLATILE
+    SECURITY DEFINER
+    -- Set a secure search_path: trusted schema(s), then 'pg_temp'.
+    SET search_path = public, pg_temp;;
+
+REVOKE ALL ON FUNCTION DeleteUser(int) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION DeleteUser(int) TO www;
