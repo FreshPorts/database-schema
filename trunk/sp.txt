@@ -3673,3 +3673,85 @@ RETURNS TABLE(ABI text, package_name text, package_version text) AS $$
      AND PKG.abi_id  = ABI.id
 ORDER BY ABI.name;
 $$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION PortPackages(a_port_id integer, a_branch_name text)
+RETURNS TABLE(ABI text, package_name text, package_version text) AS $$
+  SELECT ABI.NAME,
+         PKG.package_name,
+         PKG.package_version
+    FROM ABI LEFT OUTER JOIN
+     (SELECT package_name,
+             package_version,
+             abi_id,
+             branch_id
+        FROM packages, system_branch
+       WHERE packages.port_id          = a_port_id     
+         AND system_branch.branch_name = a_branch_name
+         AND packages.branch_id        = system_branch.id) AS PKG
+    ON ABI.id = PKG.abi_id
+      WHERE ABI.active
+   ORDER BY ABI.name;
+$$ LANGUAGE SQL;
+
+
+CREATE OR REPLACE FUNCTION PortPackages(a_port_id integer, a_branch_name1 text, a_branch_name2 text)
+RETURNS TABLE(ABI text, package_name1 text, package_version1 text, package_name2 text, package_version2 text) AS $$
+  SELECT ABI.NAME,
+         PKG1.package_name    AS package_name1,
+         PKG1.package_version AS package_version1,
+         PKG2.package_name    AS package_name2,
+         PKG2.package_version AS package_version2
+    FROM ABI LEFT OUTER JOIN
+     (SELECT package_name,
+             package_version,
+             abi_id,
+             branch_id
+        FROM packages, system_branch
+       WHERE packages.port_id          = a_port_id     
+         AND system_branch.branch_name = a_branch_name1
+         AND packages.branch_id        = system_branch.id) AS PKG1
+    ON ABI.id = PKG1.abi_id
+    LEFT OUTER JOIN
+     (SELECT package_name,
+             package_version,
+             abi_id,
+             branch_id
+        FROM packages, system_branch
+       WHERE packages.port_id          = a_port_id     
+         AND system_branch.branch_name = a_branch_name2
+         AND packages.branch_id        = system_branch.id) AS PKG2
+    ON ABI.id = PKG2.abi_id
+      WHERE ABI.active
+   ORDER BY ABI.name;
+$$ LANGUAGE SQL;
+
+
+
+CREATE OR REPLACE FUNCTION GetBranchID(a_branch_name text) RETURNS integer
+    LANGUAGE 'plpgsql' STABLE
+    AS $_$
+  DECLARE
+    l_branch_name TEXT;
+    l_branch_id   INTEGER;
+  BEGIN
+    IF a_branch_name = 'quarterly' THEN
+      SELECT GetQuarterlyBranchName()
+        INTO l_branch_name;
+    ELSE
+        l_branch_name = a_branch_name;
+    END IF;
+
+    SELECT id
+      FROM system_branch
+     WHERE branch_name = L_branch_name
+      INTO l_branch_id;
+
+    RETURN l_branch_id;
+  END;
+
+$_$;
+
+CREATE OR REPLACE FUNCTION public.GetQuarterlyBranchName() RETURNS text AS $$
+  SELECT EXTRACT(YEAR FROM CURRENT_TIMESTAMP) || 'Q' || (floor((EXTRACT(MONTH FROM CURRENT_TIMESTAMP) - 1) / 3) + 1);
+$$ LANGUAGE SQL STABLE;
+
