@@ -3635,3 +3635,41 @@ $$ LANGUAGE 'plpgsql' VOLATILE
 
 REVOKE ALL ON FUNCTION DeleteUser(int) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION DeleteUser(int) TO www;
+
+CREATE OR REPLACE FUNCTION ABIGetID(a_ABI text) RETURNS integer AS $$
+  SELECT id
+    FROM abi
+   WHERE name = a_ABI
+$$ LANGUAGE SQL STABLE;
+
+
+-- this function may no longer been needed.
+-- we are using copy to populate packages_raw
+CREATE OR REPLACE FUNCTION PackageAdd(a_ABI text, a_origin text, a_package_name text, a_version text) RETURNS bigint AS $$
+  DECLARE
+    l_id   bigint;
+  BEGIN
+    INSERT INTO packages(id, abi_id, port_id, package_name, package_version) VALUES (
+      DEFAULT,
+      ABIGetID(a_ABI),
+      GetPort(a_origin),
+      a_package_name,
+      a_version)
+    RETURNING id
+    INTO l_id;
+
+    RETURN l_id;
+  END;
+$$ LANGUAGE 'plpgsql' VOLATILE;
+
+
+CREATE OR REPLACE FUNCTION PortPackages(a_port_id integer)
+RETURNS TABLE(ABI text, package_name text, package_version text) AS $$
+  SELECT ABI.name,
+         PKG.package_name,
+         PKG.package_version
+    FROM packages PKG, ABI
+   WHERE PKG.port_id = $1
+     AND PKG.abi_id  = ABI.id
+ORDER BY ABI.name;
+$$ LANGUAGE SQL;
