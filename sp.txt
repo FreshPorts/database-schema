@@ -3811,6 +3811,23 @@ CREATE OR REPLACE FUNCTION NormalizeBranch(a_branch_name text) RETURNS text AS $
   END;
 $$ LANGUAGE 'plpgsql' STABLE;
 
+CREATE OR REPLACE FUNCTION DenormalizeBranchName(a_branch_name text) RETURNS text AS $$
+  DECLARE
+    l_branch_name  text;
+
+  BEGIN
+    CASE a_branch_name
+      WHEN 'head' THEN
+        l_branch_name = 'latest';
+
+      ELSE
+        l_branch_name = 'quarterly';
+      END CASE;
+
+    RETURN l_branch_name;
+  END;
+$$ LANGUAGE 'plpgsql' STABLE;
+
 CREATE OR REPLACE FUNCTION AddNewABIToPackagesLastChecked() RETURNS void AS
 $$
 -- invoke this function after adding a new row to the ABI table
@@ -3837,4 +3854,23 @@ $$
          last_checked = CURRENT_TIMESTAMP
    WHERE abi_id    = GetABIId(a_abi_name)
      AND branch_id = GetBranchID(NormalizeBranch(a_branch_name));
+$$ LANGUAGE SQL;
+
+
+CREATE OR REPLACE FUNCTION PackagesLastCheckedSetImportDate(a_abi_name text, a_branch_name text) returns void AS
+$$
+  UPDATE packages_last_checked
+     SET import_date = CURRENT_TIMESTAMP
+   WHERE abi_id    = GetABIId(a_abi_name)
+     AND branch_id = GetBranchID(NormalizeBranch(a_branch_name));
+$$ LANGUAGE SQL;
+
+
+CREATE OR REPLACE FUNCTION PackagesGetReposNeedingUpdates() RETURNS TABLE(abi_name text, branch text) AS $$
+  SELECT ABI.NAME,
+         DenormalizeBranchName(SB.branch_name)
+    FROM packages_last_checked PLC JOIN abi ABI          ON PLC.abi_id    = ABI.id
+                                   JOIN system_branch SB ON PLC.branch_id = SB.id
+   WHERE PLC.repo_date > PLC.import_date
+      OR (repo_date IS NOT NULL AND import_date IS NULL);
 $$ LANGUAGE SQL;
