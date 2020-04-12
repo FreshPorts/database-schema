@@ -3774,6 +3774,25 @@ CREATE OR REPLACE FUNCTION public.GetQuarterlyBranchName() RETURNS text AS $$
   SELECT EXTRACT(YEAR FROM CURRENT_TIMESTAMP) || 'Q' || (floor((EXTRACT(MONTH FROM CURRENT_TIMESTAMP) - 1) / 3) + 1);
 $$ LANGUAGE SQL STABLE;
 
+CREATE OR REPLACE FUNCTION NormalizeBranch(a_branch_name text) RETURNS text AS $$
+  DECLARE
+    l_branch_name  text;
+
+  BEGIN
+    CASE a_branch_name
+      WHEN 'latest' THEN
+        l_branch_name = 'head';
+
+      WHEN 'quarterly' THEN
+        l_branch_name = GetQuarterlyBranchName();
+
+      ELSE
+        l_branch_name = a_branch_name;
+      END CASE;
+
+    RETURN l_branch_name;
+  END;
+$$ LANGUAGE 'plpgsql' STABLE;
 
 CREATE OR REPLACE FUNCTION AddNewABIToPackagesLastChecked() RETURNS void AS
 $$
@@ -3792,4 +3811,13 @@ SELECT ABI_QTR.id, GetBranchId(GetQuarterlyBranchName())
                      FROM packages_last_checked PLC
                     WHERE PLC.abi_id    = ABI_QTR.id
                       AND PLC.branch_id = GetBranchId(GetQuarterlyBranchName()));
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION PackagesLastCheckedSetRepoDate(a_abi_name text, a_branch_name text, a_CheckedDate text) returns void AS
+$$
+  UPDATE packages_last_checked
+     SET repo_date    = a_CheckedDate::TIMESTAMP,
+         last_checked = CURRENT_TIMESTAMP
+   WHERE abi_id    = GetABIId(a_abi_name)
+     AND branch_id = GetBranchID(NormalizeBranch(a_branch_name));
 $$ LANGUAGE SQL;
