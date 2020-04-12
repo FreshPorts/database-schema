@@ -3674,6 +3674,25 @@ RETURNS TABLE(ABI text, package_name text, package_version text) AS $$
 ORDER BY ABI.name;
 $$ LANGUAGE SQL;
 
+CREATE FUNCTION public.abigetid(a_abi text) RETURNS integer
+    LANGUAGE sql STABLE
+    AS $$
+  SELECT id
+    FROM abi
+   WHERE name = a_ABI
+$$;
+
+
+CREATE FUNCTION public.getbranchid(a_branch_name text) RETURNS integer
+    LANGUAGE sql STABLE
+    AS $$
+
+  SELECT id
+    FROM system_branch
+   WHERE branch_name = a_branch_name;
+
+$$;
+
 CREATE OR REPLACE FUNCTION PortPackages(a_port_id integer, a_branch_name text)
 RETURNS TABLE(ABI text, package_name text, package_version text) AS $$
   SELECT ABI.NAME,
