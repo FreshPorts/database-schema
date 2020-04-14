@@ -3910,7 +3910,7 @@ CREATE OR REPLACE FUNCTION PackagesGetReposNeedingUpdates() RETURNS TABLE(abi_na
                                    JOIN system_branch SB ON PLC.branch_id = SB.id
    WHERE PLC.repo_date > PLC.import_date
       OR (repo_date IS NOT NULL AND import_date IS NULL);
-$$ LANGUAGE SQL;
+$$ LANGUAGE SQL STABLE;
 
 
 CREATE OR REPLACE FUNCTION PackagesGetPackageNamesForPort(a_port_id integer)
@@ -3943,18 +3943,27 @@ CREATE OR REPLACE FUNCTION PortPackagesNonPivot(a_port_id integer) RETURNS TABLE
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION PortPackages(a_port_id integer) RETURNS TABLE(package_name text, abi text, package_version_latest text, package_version_quarterly text, sort_key text)
+CREATE OR REPLACE FUNCTION PortPackages(a_port_id integer) 
+RETURNS TABLE(package_name text, abi text, package_version_latest text, package_version_quarterly text,
+     last_checked_latest    timestamp with time zone, repo_date_latest    timestamp with time zone, import_date_latest     timestamp with time zone,
+     last_checked_quarterly timestamp with time zone, repo_date_quarterly timestamp with time zone, import_date_quarterly  timestamp with time zone,
+     sort_key text)
   LANGUAGE SQL STABLE
   AS $$
 
-    SELECT package_name,
-           abi,
-           max(package_version) filter(where package_set = 'latest')    AS package_version_latest,
-           max(package_version) filter(where package_set = 'quarterly') AS package_version_quarterly,
+    SELECT P.package_name,
+           P.abi,
+           max(package_version)  filter(where P.package_set   = 'latest')    AS package_version_latest,
+           max(package_version)  filter(where P.package_set   = 'quarterly') AS package_version_quarterly,
+           max(PLC.last_checked) filter(where PLC.package_set = 'latest')    AS last_checked_latest,
+           max(PLC.repo_date)    filter(where PLC.package_set = 'latest')    AS repo_date_latest,
+           max(PLC.import_date)  filter(where PLC.package_set = 'latest')    AS import_date_latest,
+           max(PLC.last_checked) filter(where PLC.package_set = 'quarterly') AS last_checked_quarterly,
+           max(PLC.repo_date)    filter(where PLC.package_set = 'quarterly') AS repo_date_quarterly,
+           max(PLC.import_date)  filter(where PLC.package_set = 'quarterly') AS import_date_quarterly,
            sort_key
-      FROM PortPackagesNonPivot(a_port_id) JOIN packages_last_checked PCL
-
-  GROUP BY package_name, abi, sort_key
+      FROM PortPackagesNonPivot(a_port_id) P JOIN packages_last_checked PLC ON P.abi_id = PLC.abi_id
+  GROUP BY P.package_name, P.abi, sort_key
   ORDER BY sort_key;
 $$;
 
