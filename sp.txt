@@ -3915,13 +3915,13 @@ $$ LANGUAGE SQL STABLE;
 
 CREATE OR REPLACE FUNCTION PackagesGetPackageNamesForPort(a_port_id integer)
 RETURNS TABLE (package_name text) AS $$
-  SELECT DISTINCT(package_name)
+  SELECT DISTINCT package_name
     FROM packages
    WHERE port_id = a_port_id;
 $$ LANGUAGE SQL STABLE;
 
 
-CREATE OR REPLACE FUNCTION PortPackagesNonPivot(a_port_id integer) RETURNS TABLE(abi text, abi_id integer, package_name text, package_set public.package_sets, package_version text, sort_key text)
+CREATE OR REPLACE FUNCTION PortPackagesNonPivot(a_port_id integer) RETURNS TABLE(abi text, abi_id integer, package_name text, package_set package_sets, package_version text)
     LANGUAGE plpgsql STABLE
     AS $$
   DECLARE
@@ -3931,14 +3931,14 @@ CREATE OR REPLACE FUNCTION PortPackagesNonPivot(a_port_id integer) RETURNS TABLE
                  FROM PackagesGetPackageNamesForPort(a_port_id) ORDER BY 1
     LOOP
       RETURN QUERY
-        SELECT abi.name, abi.id, l_rec.package_name, P.package_set, P.package_version, l_rec.package_name || '-' || abi.name AS sort_key
+        SELECT abi.name, abi.id, l_rec.package_name, P.package_set, P.package_version
           FROM abi LEFT OUTER JOIN 
              (SELECT * 
                 FROM packages P 
                WHERE P.port_id = a_port_id
                  AND P.package_name = l_rec.package_name) AS P 
              ON abi.id = P.abi_id
-         ORDER BY sort_key;
+         ORDER BY l_rec.package_name, abi.name;
     END LOOP;
 END;
 $$;
@@ -3946,8 +3946,7 @@ $$;
 CREATE OR REPLACE FUNCTION PortPackages(a_port_id integer) 
 RETURNS TABLE(package_name text, abi text, package_version_latest text, package_version_quarterly text,
      last_checked_latest    timestamp with time zone, repo_date_latest    timestamp with time zone, import_date_latest     timestamp with time zone,
-     last_checked_quarterly timestamp with time zone, repo_date_quarterly timestamp with time zone, import_date_quarterly  timestamp with time zone,
-     sort_key text)
+     last_checked_quarterly timestamp with time zone, repo_date_quarterly timestamp with time zone, import_date_quarterly  timestamp with time zone)
   LANGUAGE SQL STABLE
   AS $$
 
@@ -3960,11 +3959,10 @@ RETURNS TABLE(package_name text, abi text, package_version_latest text, package_
            max(PLC.import_date)  filter(where PLC.package_set = 'latest')    AS import_date_latest,
            max(PLC.last_checked) filter(where PLC.package_set = 'quarterly') AS last_checked_quarterly,
            max(PLC.repo_date)    filter(where PLC.package_set = 'quarterly') AS repo_date_quarterly,
-           max(PLC.import_date)  filter(where PLC.package_set = 'quarterly') AS import_date_quarterly,
-           sort_key
+           max(PLC.import_date)  filter(where PLC.package_set = 'quarterly') AS import_date_quarterly
       FROM PortPackagesNonPivot(a_port_id) P JOIN packages_last_checked PLC ON P.abi_id = PLC.abi_id
-  GROUP BY P.package_name, P.abi, sort_key
-  ORDER BY sort_key;
+  GROUP BY P.package_name, P.abi
+  ORDER BY P.package_name, P.abi;
 $$;
 
 
