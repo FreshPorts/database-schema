@@ -3903,11 +3903,10 @@ $$
 $$ LANGUAGE SQL;
 
 
-CREATE OR REPLACE FUNCTION PackagesGetReposNeedingUpdates() RETURNS TABLE(abi_name text, branch text) AS $$
+CREATE OR REPLACE FUNCTION PackagesGetReposNeedingUpdates() RETURNS TABLE(abi_name text, package_set package_sets) AS $$
   SELECT ABI.NAME,
-         DenormalizeBranchName(SB.branch_name)
-    FROM packages_last_checked PLC JOIN abi ABI          ON PLC.abi_id    = ABI.id
-                                   JOIN system_branch SB ON PLC.branch_id = SB.id
+         package_set
+    FROM packages_last_checked PLC JOIN abi ABI ON PLC.abi_id    = ABI.id
    WHERE PLC.repo_date > PLC.import_date
       OR (repo_date IS NOT NULL AND import_date IS NULL);
 $$ LANGUAGE SQL STABLE;
@@ -3965,4 +3964,11 @@ RETURNS TABLE(package_name text, abi text, package_version_latest text, package_
   ORDER BY P.package_name, P.abi;
 $$;
 
+
+
+CREATE OR REPLACE FUNCTION PackagesRawDeleteForABIPackageSet( a_abi_name text, a_package_set package_sets) RETURNS void AS $$
+   DELETE FROM public.packages_raw
+    WHERE abi         = a_abi_name
+      AND package_set = a_package_set;
+$$ LANGUAGE SQL VOLATILE;
 
