@@ -1,4 +1,3 @@
---
 -- $Id: sp.txt,v 1.176 2012-09-24 15:14:42 dan Exp $
 --
 -- Copyright (c) 1998-2006 DVL Software Limited
@@ -3939,7 +3938,7 @@ CREATE OR REPLACE FUNCTION PortPackagesNonPivot(a_port_id integer) RETURNS TABLE
              ON abi.id = P.abi_id
          ORDER BY l_rec.package_name, abi.name;
     END LOOP;
-END;
+  END;
 $$;
 
 CREATE OR REPLACE FUNCTION PortPackages(a_port_id integer) 
@@ -3972,3 +3971,75 @@ CREATE OR REPLACE FUNCTION PackagesRawDeleteForABIPackageSet( a_abi_name text, a
       AND package_set = a_package_set;
 $$ LANGUAGE SQL VOLATILE;
 
+
+CREATE OR REPLACE FUNCTION UpdatePackagesFromRawPackages( IN a_abi_name text, IN a_package_set package_sets)
+    RETURNS TABLE(inserts integer, updates integer, deletes integer)
+    LANGUAGE plpgsql VOLATILE
+    AS $$
+  DECLARE
+    l_abi_id  integer;
+    l_inserts integer;
+    l_deletes integer;
+    l_updates integer;
+  BEGIN
+    SELECT id
+      INTO l_abi_id
+      FROM abi
+     WHERE name = a_abi_name;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'cannot find id for ABI %', a_abi_name;
+    END IF;
+
+    UPDATE packages p
+       SET package_version = PR.package_version
+      FROM packages_raw PR
+     WHERE P.abi_id           = PR.abi_id
+       AND P.package_set      = PR.package_set
+       AND P.package_name     = PR.package_name
+       AND P.package_version != PR.package_version
+       AND PR.abi             = a_abi_name
+       AND PR.package_set     = a_package_set;
+
+    GET DIAGNOSTICS l_updates = ROW_COUNT;
+
+    INSERT INTO packages (abi_id, port_id, package_version, package_name, package_set)
+    SELECT abi_id, port_id, package_version, package_name, package_set
+      FROM packages_raw PR
+     WHERE NOT EXISTS (
+     SELECT *
+       FROM packages P
+      WHERE P.abi_id           = PR.abi_id
+        AND P.package_set      = PR.package_set
+        AND P.package_name     = PR.package_name
+        AND P.package_version  = PR.package_version
+        AND PR.abi             = a_abi_name
+        AND PR.package_set     = a_package_set)
+     AND PR.abi_id  IS NOT NULL
+     AND PR.port_id IS NOT NULL
+     AND PR.abi             = a_abi_name
+     AND PR.package_set     = a_package_set;
+
+    GET DIAGNOSTICS l_inserts = ROW_COUNT;
+
+    DELETE FROM packages P
+     WHERE P.abi_id      = l_abi_id
+       AND P.package_set = a_package_set
+       AND NOT EXISTS (
+         SELECT *
+           FROM packages_raw PR
+          WHERE P.abi_id       = PR.abi_id
+            AND P.package_set  = PR.package_set
+            AND P.package_name = PR.package_name
+            AND PR.abi         = a_abi_name
+            AND PR.package_set = a_package_set);
+
+    GET DIAGNOSTICS l_deletes = ROW_COUNT;
+
+    INSERT INTO package_imports (abi_id, package_set, date, inserts, updates, deletes)
+                         values (l_abi_id, a_package_set, CURRENT_TIMESTAMP, l_inserts, l_updates, l_deletes);
+
+    RETURN QUERY (SELECT l_inserts, l_updates, l_deletes);
+
+  END;
+$$;
