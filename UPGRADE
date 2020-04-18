@@ -7,6 +7,31 @@ new user in that role
 new packages for script
 
 
+-- Type: package_sets
+
+-- DROP TYPE public.package_sets;
+
+CREATE TYPE public.package_sets AS ENUM
+    ('latest', 'quarterly');
+
+ALTER TYPE public.package_sets
+    OWNER TO dan;
+
+COMMENT ON TYPE public.package_sets
+    IS 'The name is derived from https://wiki.freebsd.org/Ports/QuarterlyBranch
+
+"Quarterly is the name for Ports branches cut from HEAD at the beginning of every (yearly) quarter in January, April, July, and October, and the name for the binary package sets that are produced from these branches."';
+
+
+
+
+
+
+
+
+
+
+
 25 May 2019
 
 Add Quarterly revision
