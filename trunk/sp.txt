@@ -3654,6 +3654,35 @@ CREATE OR REPLACE FUNCTION PackagesGetReposNeedingUpdates() RETURNS TABLE(abi_na
 $$ LANGUAGE SQL STABLE;
 
 
+CREATE OR REPLACE FUNCTION PortPackages(a_port_id integer) 
+RETURNS TABLE(package_name text, abi text, package_version_latest text, package_version_quarterly text,
+     last_checked_latest    timestamp with time zone, repo_date_latest    timestamp with time zone, import_date_latest     timestamp with time zone,
+     last_checked_quarterly timestamp with time zone, repo_date_quarterly timestamp with time zone, import_date_quarterly  timestamp with time zone)
+  LANGUAGE SQL STABLE
+  AS $$
+    WITH
+      pkg AS (SELECT * FROM packages WHERE port_id = a_port_id)
+    SELECT pn.package_name,
+           abi.name AS abi,
+           max(pkg.package_version) FILTER (WHERE pkg.package_set = 'latest')    AS package_version_latest,
+           max(pkg.package_version) FILTER (WHERE pkg.package_set = 'quarterly') AS package_version_quarterly,
+           max(PLC.last_checked)    FILTER (where PLC.package_set = 'latest')    AS last_checked_latest,
+           max(PLC.repo_date)       FILTER (where PLC.package_set = 'latest')    AS repo_date_latest,
+           max(PLC.import_date)     FILTER (where PLC.package_set = 'latest')    AS import_date_latest,
+           max(PLC.last_checked)    FILTER (where PLC.package_set = 'quarterly') AS last_checked_quarterly,
+           max(PLC.repo_date)       FILTER (where PLC.package_set = 'quarterly') AS repo_date_quarterly,
+           max(PLC.import_date)     FILTER (where PLC.package_set = 'quarterly') AS import_date_quarterly
+      FROM abi
+           CROSS JOIN (SELECT DISTINCT package_name FROM pkg) pn
+           LEFT JOIN pkg ON (pkg.abi_id = abi.id AND pkg.package_name = pn.package_name)
+           JOIN packages_last_checked PLC ON PLC.abi_id  = abi.id
+     GROUP BY pn.package_name, abi.name
+     ORDER BY pn.package_name, abi.name;
+$$;
+
+
+
+
 CREATE OR REPLACE FUNCTION PackagesRawDeleteForABIPackageSet( a_abi_name text, a_package_set package_sets) RETURNS void AS $$
    DELETE FROM public.packages_raw
     WHERE abi         = a_abi_name
