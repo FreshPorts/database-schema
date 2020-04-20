@@ -431,10 +431,10 @@ CREATE TRIGGER element_pathname_insert
 
 CREATE OR REPLACE FUNCTION element_pathname_update() RETURNS TRIGGER AS $$
    BEGIN
-		if (NEW.name != old.name OR new.parent_id != old.parent_id) THEN
-			UPDATE element_pathname SET pathname = element_pathname(new.id) WHERE element_id = NEW.id;
-                        PERFORM ElementPathnameUpdateChildren(new.id);
-		END IF;
+      if (NEW.name != old.name OR new.parent_id != old.parent_id) THEN
+         UPDATE element_pathname SET pathname = element_pathname(new.id) WHERE element_id = NEW.id;
+         PERFORM ElementPathnameUpdateChildren(new.id);
+      END IF;
       RETURN NEW;
    END
 $$ LANGUAGE 'plpgsql';
@@ -998,24 +998,24 @@ CREATE TRIGGER package_imports_completed
 
 CREATE OR REPLACE FUNCTION ports_origin_insert() RETURNS TRIGGER AS $$
 DECLARE
-  RowsModified bigint;
-
+  l_port_origin text;
 BEGIN
-   RAISE NOTICE 'ports_origin_insert has been called';
+   -- grab the origin for this port
+   SELECT categoryport(NEW.id)
+     INTO l_port_origin;
+
    IF TG_OP = 'INSERT' THEN
-      RAISE NOTICE 'ports_origin_insert has been called for INSERT';
       INSERT INTO ports_origin(port_id, port_origin)
-      SELECT NEW.id, categoryport(NEW.id);
+      SELECT NEW.id, l_port_origin;
    END IF;
    IF TG_OP = 'UPDATE' THEN
-      RAISE NOTICE 'ports_origin_insert has been called for UPDATE';
-      UPDATE ports_origin 
-         SET port_origin = (SELECT categoryport(NEW.element_id))
-       WHERE port_id = NEW.id;
+      -- only update if different
+      IF OLD.port_origin != l_port_origin THEN
+        UPDATE ports_origin 
+           SET port_origin = l_port_origin
+         WHERE port_id = NEW.id;
+      END IF;
    END IF;
-
-   GET DIAGNOSTICS RowsModified = ROW_COUNT;
-   RAISE NOTICE 'ports_origin_insert: % row affected', RowsModified;
 
    RETURN NEW;
 END
