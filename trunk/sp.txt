@@ -3911,6 +3911,7 @@ CREATE OR REPLACE FUNCTION PackagesGetReposNeedingUpdates() RETURNS TABLE(abi_na
 $$ LANGUAGE SQL STABLE;
 
 
+-- may not be needed
 CREATE OR REPLACE FUNCTION PackagesGetPackageNamesForPort(a_port_id integer)
 RETURNS TABLE (package_name text) AS $$
   SELECT DISTINCT package_name
@@ -3919,6 +3920,7 @@ RETURNS TABLE (package_name text) AS $$
 $$ LANGUAGE SQL STABLE;
 
 
+-- no longer required
 CREATE OR REPLACE FUNCTION PortPackagesNonPivot(a_port_id integer) RETURNS TABLE(abi text, abi_id integer, package_name text, package_set package_sets, package_version text)
     LANGUAGE plpgsql STABLE
     AS $$
@@ -3991,12 +3993,24 @@ CREATE OR REPLACE FUNCTION UpdatePackagesFromRawPackages( IN a_abi_name text, IN
         RAISE EXCEPTION 'cannot find id for ABI %', a_abi_name;
     END IF;
 
+    -- set abi_ic and port_id before updating the pacakges table.
+    UPDATE packages_raw PR
+       SET abi_id  = abi.id,
+           port_id = PO.port_id
+      FROM abi, ports_origin PO
+     WHERE PR.abi         = a_abi_name
+       AND PR.package_set = a_package_set
+       AND PR.abi         = abi.name
+       AND PO.port_origin = PR.package_origin;
+
+
     UPDATE packages p
        SET package_version = PR.package_version
       FROM packages_raw PR
      WHERE P.abi_id           = PR.abi_id
        AND P.package_set      = PR.package_set
        AND P.package_name     = PR.package_name
+       AND P.port_id          = PR.port_id
        AND P.package_version != PR.package_version
        AND PR.abi             = a_abi_name
        AND PR.package_set     = a_package_set;
@@ -4012,6 +4026,7 @@ CREATE OR REPLACE FUNCTION UpdatePackagesFromRawPackages( IN a_abi_name text, IN
       WHERE P.abi_id           = PR.abi_id
         AND P.package_set      = PR.package_set
         AND P.package_name     = PR.package_name
+        AND P.port_id          = PR.port_id
         AND P.package_version  = PR.package_version
         AND PR.abi             = a_abi_name
         AND PR.package_set     = a_package_set)
@@ -4031,6 +4046,7 @@ CREATE OR REPLACE FUNCTION UpdatePackagesFromRawPackages( IN a_abi_name text, IN
           WHERE P.abi_id       = PR.abi_id
             AND P.package_set  = PR.package_set
             AND P.package_name = PR.package_name
+            AND P.port_id      = PR.port_id
             AND PR.abi         = a_abi_name
             AND PR.package_set = a_package_set);
 
