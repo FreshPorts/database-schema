@@ -282,6 +282,15 @@ CREATE TRIGGER package_imports_completed
     EXECUTE PROCEDURE public.package_imports_update();
 
 
+1,FreeBSD:12:amd64,t
+2,FreeBSD:13:aarch64,t
+4,FreeBSD:11:i386,t
+6,FreeBSD:11:amd64,t
+7,FreeBSD:11:aarch64,t
+8,FreeBSD:12:i386,t
+9,FreeBSD:12:aarch64,t
+10,FreeBSD:13:i386,t
+11,FreeBSD:13:amd64,t
 
 
 
