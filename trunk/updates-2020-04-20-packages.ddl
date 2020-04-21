@@ -117,10 +117,10 @@ CREATE INDEX ports_origin_port_origin_idx
 CREATE TABLE public.packages_last_checked
 (
     abi_id integer NOT NULL,
+    package_set package_sets,
     last_checked timestamp with time zone,
     repo_date timestamp with time zone,
     import_date timestamp with time zone,
-    package_set package_sets,
     processed_date timestamp with time zone,
     CONSTRAINT packages_last_checked_abi_id_fk FOREIGN KEY (abi_id)
         REFERENCES public.abi (id) MATCH SIMPLE
@@ -156,10 +156,10 @@ CREATE TABLE public.packages
 (
     id bigint NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1 ),
     abi_id integer NOT NULL,
-    port_id integer NOT NULL,
-    package_version text COLLATE pg_catalog."default" NOT NULL,
-    package_name text COLLATE pg_catalog."default" NOT NULL,
     package_set package_sets,
+    package_name text COLLATE pg_catalog."default" NOT NULL,
+    package_version text COLLATE pg_catalog."default" NOT NULL,
+    port_id integer NOT NULL,
     CONSTRAINT packages_pkey PRIMARY KEY (id),
     CONSTRAINT packages_abi_id_fk FOREIGN KEY (abi_id)
         REFERENCES public.abi (id) MATCH SIMPLE
@@ -363,3 +363,13 @@ CREATE INDEX packages_raw_port_id_idx
     TABLESPACE pg_default;
 
 
+
+INSERT INTO public.abi (id, name, active) OVERRIDING SYSTEM VALUE VALUES (1, 'FreeBSD:12:amd64', true);
+INSERT INTO public.abi (id, name, active) OVERRIDING SYSTEM VALUE VALUES (2, 'FreeBSD:13:aarch64', true);
+INSERT INTO public.abi (id, name, active) OVERRIDING SYSTEM VALUE VALUES (4, 'FreeBSD:11:i386', true);
+INSERT INTO public.abi (id, name, active) OVERRIDING SYSTEM VALUE VALUES (6, 'FreeBSD:11:amd64', true);
+INSERT INTO public.abi (id, name, active) OVERRIDING SYSTEM VALUE VALUES (7, 'FreeBSD:11:aarch64', true);
+INSERT INTO public.abi (id, name, active) OVERRIDING SYSTEM VALUE VALUES (8, 'FreeBSD:12:i386', true);
+INSERT INTO public.abi (id, name, active) OVERRIDING SYSTEM VALUE VALUES (9, 'FreeBSD:12:aarch64', true);
+INSERT INTO public.abi (id, name, active) OVERRIDING SYSTEM VALUE VALUES (10, 'FreeBSD:13:i386', true);
+INSERT INTO public.abi (id, name, active) OVERRIDING SYSTEM VALUE VALUES (11, 'FreeBSD:13:amd64', true);
