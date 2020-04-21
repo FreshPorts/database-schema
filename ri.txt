@@ -996,7 +996,7 @@ CREATE TRIGGER package_imports_completed
 
 
 
-CREATE OR REPLACE FUNCTION ports_origin_insert() RETURNS TRIGGER AS $$
+CREATE OR REPLACE FUNCTION ports_origin_maintain() RETURNS TRIGGER AS $$
 DECLARE
   l_port_origin text;
 BEGIN
@@ -1011,9 +1011,10 @@ BEGIN
    IF TG_OP = 'UPDATE' THEN
       -- only update if different
       IF OLD.port_origin != l_port_origin THEN
-        UPDATE ports_origin 
+        UPDATE ports_origin po 
            SET port_origin = l_port_origin
-         WHERE port_id = NEW.id;
+         WHERE po.port_id = NEW.id
+           AND po.port_origin IS DISTINCT FROM l_port_origin;
       END IF;
    END IF;
 
@@ -1022,8 +1023,8 @@ END
 $$ LANGUAGE 'plpgsql';
 
 
-  DROP TRIGGER IF EXISTS ports_origin_insert ON ports;
-CREATE TRIGGER ports_origin_insert
+  DROP TRIGGER IF EXISTS ports_origin_maintain ON ports;
+CREATE TRIGGER ports_origin_maintain
     AFTER UPDATE OR INSERT ON ports
     FOR EACH ROW
-    EXECUTE PROCEDURE ports_origin_insert();
+    EXECUTE PROCEDURE ports_origin_maintain();
