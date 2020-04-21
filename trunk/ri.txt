@@ -1010,12 +1010,10 @@ BEGIN
    END IF;
    IF TG_OP = 'UPDATE' THEN
       -- only update if different
-      IF OLD.port_origin != l_port_origin THEN
-        UPDATE ports_origin po 
-           SET port_origin = l_port_origin
-         WHERE po.port_id = NEW.id
-           AND po.port_origin IS DISTINCT FROM l_port_origin;
-      END IF;
+      UPDATE ports_origin po 
+         SET port_origin = l_port_origin
+       WHERE po.port_id = NEW.id
+         AND po.port_origin IS DISTINCT FROM l_port_origin;
    END IF;
 
    RETURN NEW;
