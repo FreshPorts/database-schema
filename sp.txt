@@ -3775,3 +3775,37 @@ CREATE OR REPLACE FUNCTION UpdatePackagesFromRawPackages( IN a_abi_name text, IN
 
   END;
 $$;
+
+
+CREATE OR REPLACE FUNCTION public.getrepostoreview(
+	)
+    RETURNS TABLE(abi_name text, package_set package_sets) 
+    LANGUAGE 'sql'
+
+    COST 100
+    STABLE 
+    ROWS 1000
+    
+AS $BODY$
+  SELECT name, 'latest'::package_sets AS package_set
+    FROM ABI 
+   WHERE active 
+UNION
+  SELECT name, 'quarterly'::package_sets AS package_set
+    FROM ABI
+   WHERE active
+ORDER BY name, package_set;
+$BODY$;
+
+CREATE OR REPLACE FUNCTION PackagesLastCheckedSetRepoDate(a_abi_name text, a_package_set package_sets, a_CheckedDate text) returns void AS
+$$
+  UPDATE packages_last_checked PLC
+     SET repo_date    = a_CheckedDate::TIMESTAMP,
+         last_checked = CURRENT_TIMESTAMP
+    FROM abi
+   WHERE PLC.abi_id  = abi.id
+     AND abi.name    = a_abi_name
+     AND package_set = a_package_set;
+$$ LANGUAGE SQL;
+
+
