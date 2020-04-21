@@ -1026,3 +1026,22 @@ CREATE TRIGGER ports_origin_maintain
     AFTER UPDATE OR INSERT ON ports
     FOR EACH ROW
     EXECUTE PROCEDURE ports_origin_maintain();
+
+CREATE OR REPLACE FUNCTION packages_last_checked_maintain() RETURNS TRIGGER AS $$
+BEGIN
+   IF TG_OP = 'INSERT' THEN
+      INSERT INTO packages_last_checked(abi_id, package_set)
+            VALUES (NEW.id, 'latest'),
+                   (NEW.id, 'quarterly');
+   END IF;
+
+   RETURN NEW;
+END
+$$ LANGUAGE 'plpgsql';
+
+
+  DROP TRIGGER IF EXISTS packages_last_checked_maintain ON abi;
+CREATE TRIGGER packages_last_checked_maintain
+    AFTER INSERT ON abi
+    FOR EACH ROW
+    EXECUTE PROCEDURE packages_last_checked_maintain();
