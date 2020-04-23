@@ -3809,3 +3809,22 @@ $$
 $$ LANGUAGE SQL;
 
 
+CREATE OR REPLACE FUNCTION PackagesLastCheckedSetImportDate(a_abi_name text, a_package_set package_sets) returns void AS
+$$
+  UPDATE packages_last_checked PLC
+     SET import_date = CURRENT_TIMESTAMP
+    FROM abi
+   WHERE PLC.abi_id  = abi.id
+     AND abi.name    = a_abi_name
+     AND package_set = a_package_set;
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION PackagesGetReposNeedingImports() RETURNS TABLE(abi_name text, package_set package_sets) AS $$
+  SELECT ABI.NAME,
+         package_set
+    FROM packages_last_checked PLC JOIN abi ABI ON PLC.abi_id    = ABI.id
+   WHERE PLC.import_date > PLC.processed_date
+      OR (PLC.import_date IS NOT NULL AND PLC.processed_date IS NULL);
+$$ LANGUAGE SQL STABLE;
+
+
