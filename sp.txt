@@ -3710,15 +3710,18 @@ CREATE OR REPLACE FUNCTION UpdatePackagesFromRawPackages( IN a_abi_name text, IN
         RAISE EXCEPTION 'cannot find id for ABI %', a_abi_name;
     END IF;
 
-    -- set abi_ic and port_id before updating the pacakges table.
+    -- set abi_id and port_id before updating the pacakges table.
     UPDATE packages_raw PR
        SET abi_id  = abi.id,
            port_id = PO.port_id
-      FROM abi, ports_origin PO
-     WHERE PR.abi         = a_abi_name
-       AND PR.package_set = a_package_set
+      FROM abi, ports_origin PO, ports P, element_pathname EP
+     WHERE PR.abi         = 'FreeBSD:13:aarch64'
+       AND PR.package_set = 'latest'
        AND PR.abi         = abi.name
-       AND PO.port_origin = PR.package_origin;
+       AND PO.port_origin = PR.package_origin
+       AND PO.port_id     = P.id
+       AND P.element_id   = EP.element_id
+       AND EP.pathname like '/ports/head/%';
 
     -- this is required to allow the DELETE to properly plan the operation
     analyze packages_raw;
