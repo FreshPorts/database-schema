@@ -3720,8 +3720,8 @@ CREATE OR REPLACE FUNCTION UpdatePackagesFromRawPackages( IN a_abi_name text, IN
        AND PR.abi         = abi.name
        AND PO.port_origin = PR.package_origin;
 
+    -- this is required to allow the DELETE to properly plan the operation
     analyze packages_raw;
-
 
     UPDATE packages p
        SET package_version = PR.package_version
