@@ -3645,12 +3645,13 @@ $$ LANGUAGE SQL STABLE;
 
 
 
-CREATE OR REPLACE FUNCTION PackagesGetReposNeedingUpdates() RETURNS TABLE(abi_name text, package_set package_sets) AS $$
+CREATE OR REPLACE FUNCTION PackagesGetReposNeedingImports() RETURNS TABLE(abi_name text, package_set package_sets) AS $$
   SELECT ABI.NAME,
          package_set
     FROM packages_last_checked PLC JOIN abi ABI ON PLC.abi_id    = ABI.id
    WHERE PLC.repo_date > PLC.import_date
-      OR (repo_date IS NOT NULL AND import_date IS NULL);
+      OR (repo_date IS NOT NULL AND import_date IS NULL)
+ ORDER BY ABI.NAME, package_set;
 $$ LANGUAGE SQL STABLE;
 
 
@@ -3719,6 +3720,8 @@ CREATE OR REPLACE FUNCTION UpdatePackagesFromRawPackages( IN a_abi_name text, IN
        AND PR.abi         = abi.name
        AND PO.port_origin = PR.package_origin;
 
+    analyze packages_raw;
+
 
     UPDATE packages p
        SET package_version = PR.package_version
@@ -3752,6 +3755,7 @@ CREATE OR REPLACE FUNCTION UpdatePackagesFromRawPackages( IN a_abi_name text, IN
      AND PR.package_set     = a_package_set;
 
     GET DIAGNOSTICS l_inserts = ROW_COUNT;
+
 
     DELETE FROM packages P
      WHERE P.abi_id      = l_abi_id
@@ -3819,12 +3823,13 @@ $$
      AND package_set = a_package_set;
 $$ LANGUAGE SQL;
 
-CREATE OR REPLACE FUNCTION PackagesGetReposNeedingImports() RETURNS TABLE(abi_name text, package_set package_sets) AS $$
+CREATE OR REPLACE FUNCTION PackagesGetImportedReposNeedingProcessing() RETURNS TABLE(abi_name text, package_set package_sets) AS $$
   SELECT ABI.NAME,
          package_set
     FROM packages_last_checked PLC JOIN abi ABI ON PLC.abi_id    = ABI.id
    WHERE PLC.import_date > PLC.processed_date
-      OR (PLC.import_date IS NOT NULL AND PLC.processed_date IS NULL);
+      OR (PLC.import_date IS NOT NULL AND PLC.processed_date IS NULL)
+ORDER BY ABI.NAME, package_set;
 $$ LANGUAGE SQL STABLE;
 
 
