@@ -3802,16 +3802,27 @@ UNION
 ORDER BY name, package_set;
 $BODY$;
 
-CREATE OR REPLACE FUNCTION PackagesLastCheckedSetRepoDate(a_abi_name text, a_package_set package_sets, a_CheckedDate text) returns void AS
+CREATE OR REPLACE FUNCTION PackagesLastCheckedSetRepoDate(a_abi_name text, a_package_set package_sets, a_CheckedDate text) returns integer AS
 $$
-  UPDATE packages_last_checked PLC
-     SET repo_date    = a_CheckedDate::TIMESTAMP,
-         last_checked = CURRENT_TIMESTAMP
-    FROM abi
-   WHERE PLC.abi_id  = abi.id
-     AND abi.name    = a_abi_name
-     AND package_set = a_package_set;
-$$ LANGUAGE SQL;
+  DECLARE
+    RowsModified integer;
+  BEGIN
+    UPDATE packages_last_checked PLC
+       SET repo_date      = a_CheckedDate::TIMESTAMP,
+           last_checked   = CURRENT_TIMESTAMP,
+           import_date    = null,
+           processed_date = null
+      FROM abi
+     WHERE PLC.abi_id  = abi.id
+       AND abi.name    = a_abi_name
+       AND package_set = a_package_set
+       AND repo_date   IS DISTINCT FROM a_CheckedDate::TIMESTAMP;
+  
+    GET DIAGNOSTICS RowsModified = ROW_COUNT;
+
+    RETURN RowsModified; 
+  END;
+$$ LANGUAGE 'plpgsql' VOLATILE;
 
 
 CREATE OR REPLACE FUNCTION PackagesLastCheckedSetImportDate(a_abi_name text, a_package_set package_sets) returns void AS
