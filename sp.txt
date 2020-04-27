@@ -3806,25 +3806,32 @@ UNION
 ORDER BY name, package_set;
 $BODY$;
 
-CREATE OR REPLACE FUNCTION PackagesLastCheckedSetRepoDate(a_abi_name text, a_package_set package_sets, a_CheckedDate text) returns integer AS
+CREATE OR REPLACE FUNCTION PackagesLastCheckedSetRepoDate(a_abi_name text, a_package_set package_sets, a_RepoDate timestamp) returns boolean AS
 $$
   DECLARE
-    RowsModified integer;
+    l_repo_date  timestamp;
   BEGIN
-    UPDATE packages_last_checked PLC
-       SET repo_date      = a_CheckedDate::TIMESTAMP,
-           last_checked   = CURRENT_TIMESTAMP,
-           import_date    = null,
-           processed_date = null
-      FROM abi
+    SELECT repo_date
+      INTO l_repo_date
+      FROM packages_last_checked PLC, abi
      WHERE PLC.abi_id  = abi.id
        AND abi.name    = a_abi_name
        AND package_set = a_package_set
-       AND repo_date   IS DISTINCT FROM a_CheckedDate::TIMESTAMP;
-  
-    GET DIAGNOSTICS RowsModified = ROW_COUNT;
+       FOR UPDATE OF PLC;
 
-    RETURN RowsModified; 
+    -- last_checked must always be updated
+    UPDATE packages_last_checked PLC
+       SET last_checked   = CURRENT_TIMESTAMP,
+           repo_date      = CASE WHEN repo_date = a_RepoDate THEN repo_date      ELSE a_RepoDate END,
+           import_date    = CASE WHEN repo_date = a_RepoDate THEN import_date    ELSE null       END,
+           processed_date = CASE WHEN repo_date = a_RepoDate THEN processed_date ELSE null       END
+      FROM abi
+     WHERE PLC.abi_id  = abi.id
+       AND abi.name    = a_abi_name
+       AND package_set = a_package_set;
+
+    -- we compare against the value before the update
+    RETURN l_repo_date IS DISTINCT FROM a_RepoDate; 
   END;
 $$ LANGUAGE 'plpgsql' VOLATILE;
 
