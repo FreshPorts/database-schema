@@ -3773,8 +3773,12 @@ CREATE OR REPLACE FUNCTION UpdatePackagesFromRawPackages( IN a_abi_name text, IN
 
     GET DIAGNOSTICS l_deletes = ROW_COUNT;
 
-    INSERT INTO package_imports (abi_id, package_set, date, inserts, updates, deletes)
-                         values (l_abi_id, a_package_set, CURRENT_TIMESTAMP, l_inserts, l_updates, l_deletes);
+    INSERT INTO package_imports (abi_id, package_set, date, inserts, updates, deletes, last_checked, repo_date, import_date, processed_date)
+    SELECT l_abi_id, a_package_set, CURRENT_TIMESTAMP, l_inserts, l_updates, l_deletes,
+           PLC.last_checked, PLC.repo_date, PLC.import_date, CURRENT_TIMESTAMP
+      FROM packages_last_checked PLC
+     WHERE PLC.abi_id      = l_abi_id
+       AND PLC.package_set = a_package_set;
 
     RETURN QUERY (SELECT l_inserts, l_updates, l_deletes);
 
