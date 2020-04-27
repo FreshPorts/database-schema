@@ -241,10 +241,14 @@ CREATE TABLE public.package_imports
     id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
     abi_id integer NOT NULL,
     package_set package_sets NOT NULL,
-    date time with time zone NOT NULL,
+    date timestamp with time zone NOT NULL,
     inserts integer NOT NULL,
     updates integer NOT NULL,
     deletes integer NOT NULL,
+    last_checked timestamp with time zone,
+    repo_date timestamp with time zone,
+    import_date timestamp with time zone,
+    processed_date timestamp with time zone,
     CONSTRAINT package_imports_pkey PRIMARY KEY (id),
     CONSTRAINT package_imports_abi_id FOREIGN KEY (abi_id)
         REFERENCES public.abi (id) MATCH SIMPLE
@@ -261,6 +265,18 @@ ALTER TABLE public.package_imports
 GRANT SELECT ON TABLE public.package_imports TO rsyncer;
 
 GRANT ALL ON TABLE public.package_imports TO dan;
+
+GRANT INSERT ON TABLE public.package_imports TO packaging;
+
+-- Trigger: package_imports_completed
+
+-- DROP TRIGGER package_imports_completed ON public.package_imports;
+
+CREATE TRIGGER package_imports_completed
+    AFTER INSERT
+    ON public.package_imports
+    FOR EACH ROW
+    EXECUTE PROCEDURE public.package_imports_update();
 
 
 
