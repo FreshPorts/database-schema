@@ -3712,12 +3712,11 @@ CREATE OR REPLACE FUNCTION UpdatePackagesFromRawPackages( IN a_abi_name text, IN
 
     -- set abi_id and port_id before updating the pacakges table.
     UPDATE packages_raw PR
-       SET abi_id  = abi.id,
+       SET abi_id  = l_abi_id,
            port_id = P.id
-      FROM abi, ports P, element_pathname EP
-     WHERE PR.abi         = 'FreeBSD:13:aarch64'
-       AND PR.package_set = 'latest'
-       AND PR.abi         = abi.name
+      FROM ports P, element_pathname EP
+     WHERE PR.abi         = a_abi_name
+       AND PR.package_set = a_package_set
        AND EP.pathname    = '/ports/head/' || PR.package_origin
        AND P.element_id   = EP.element_id;
 
