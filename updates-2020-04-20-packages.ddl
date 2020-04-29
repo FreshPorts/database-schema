@@ -389,3 +389,5 @@ INSERT INTO public.abi (id, name, active) OVERRIDING SYSTEM VALUE VALUES (8, 'Fr
 INSERT INTO public.abi (id, name, active) OVERRIDING SYSTEM VALUE VALUES (9, 'FreeBSD:12:aarch64', true);
 INSERT INTO public.abi (id, name, active) OVERRIDING SYSTEM VALUE VALUES (10, 'FreeBSD:13:i386', true);
 INSERT INTO public.abi (id, name, active) OVERRIDING SYSTEM VALUE VALUES (11, 'FreeBSD:13:amd64', true);
+
+insert into listen_for (name, script_name) values ('packages_imported', 'listen_packages_imported');
