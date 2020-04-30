@@ -3855,3 +3855,22 @@ ORDER BY ABI.NAME, package_set;
 $$ LANGUAGE SQL STABLE;
 
 
+CREATE OR REPLACE FUNCTION iso_date(a_date timestamp with time zone) RETURNS text AS $$
+    SELECT to_char(a_date, 'YYYY-MM-DD" "HH24:MI:SS');
+$$  LANGUAGE SQL STABLE; 
+
+
+CREATE OR REPLACE FUNCTION GetPackageStatus() RETURNS TABLE (abi_name text,
+package_set text, last_checked text, repo_date text, import_date text, processed_date text) AS $$
+   SELECT abi.name, 
+          PLC.package_set::text,
+          iso_date(PLC.last_checked),
+          iso_date(PLC.repo_date),
+          iso_date(PLC.import_date),
+          iso_date(PLC.processed_date)
+     FROM packages_last_checked PLC join abi on PLC.abi_id = abi.id
+ ORDER BY abi.name, PLC.package_set;
+$$ LANGUAGE SQL STABLE;
+
+
+
