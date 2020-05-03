@@ -3654,6 +3654,16 @@ CREATE OR REPLACE FUNCTION PackagesGetReposNeedingImports() RETURNS TABLE(abi_na
  ORDER BY ABI.NAME, package_set;
 $$ LANGUAGE SQL STABLE;
 
+CREATE OR REPLACE FUNCTION iso_date(a_date timestamp with time zone) RETURNS text AS $$
+    SELECT to_char(a_date, 'YYYY-MM-DD" "HH24:MI');
+$$  LANGUAGE SQL STABLE; 
+
+CREATE OR REPLACE FUNCTION iso_date_seconds(a_date timestamp with time zone) RETURNS text AS $$
+    SELECT to_char(a_date, 'YYYY-MM-DD" "HH24:MI:SS');
+$$  LANGUAGE SQL STABLE; 
+
+
+
 
 
 CREATE OR REPLACE FUNCTION PortPackages(a_port_id integer) 
@@ -3856,15 +3866,6 @@ CREATE OR REPLACE FUNCTION PackagesGetImportedReposNeedingProcessing() RETURNS T
       OR (PLC.import_date IS NOT NULL AND PLC.processed_date IS NULL)
 ORDER BY ABI.NAME, package_set;
 $$ LANGUAGE SQL STABLE;
-
-
-CREATE OR REPLACE FUNCTION iso_date(a_date timestamp with time zone) RETURNS text AS $$
-    SELECT to_char(a_date, 'YYYY-MM-DD" "HH24:MI');
-$$  LANGUAGE SQL STABLE; 
-
-CREATE OR REPLACE FUNCTION iso_date_seconds(a_date timestamp with time zone) RETURNS text AS $$
-    SELECT to_char(a_date, 'YYYY-MM-DD" "HH24:MI:SS');
-$$  LANGUAGE SQL STABLE; 
 
 
 CREATE OR REPLACE FUNCTION GetPackageStatus() RETURNS TABLE (abi_name text,
