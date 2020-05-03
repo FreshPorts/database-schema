@@ -1,0 +1,11 @@
+INSERT INTO public.abi (id, name, active) OVERRIDING SYSTEM VALUE VALUES (1, 'FreeBSD:12:amd64', true);
+INSERT INTO public.abi (id, name, active) OVERRIDING SYSTEM VALUE VALUES (2, 'FreeBSD:13:aarch64', true);
+INSERT INTO public.abi (id, name, active) OVERRIDING SYSTEM VALUE VALUES (4, 'FreeBSD:11:i386', true);
+INSERT INTO public.abi (id, name, active) OVERRIDING SYSTEM VALUE VALUES (6, 'FreeBSD:11:amd64', true);
+INSERT INTO public.abi (id, name, active) OVERRIDING SYSTEM VALUE VALUES (7, 'FreeBSD:11:aarch64', true);
+INSERT INTO public.abi (id, name, active) OVERRIDING SYSTEM VALUE VALUES (8, 'FreeBSD:12:i386', true);
+INSERT INTO public.abi (id, name, active) OVERRIDING SYSTEM VALUE VALUES (9, 'FreeBSD:12:aarch64', true);
+INSERT INTO public.abi (id, name, active) OVERRIDING SYSTEM VALUE VALUES (10, 'FreeBSD:13:i386', true);
+INSERT INTO public.abi (id, name, active) OVERRIDING SYSTEM VALUE VALUES (11, 'FreeBSD:13:amd64', true);
+
+insert into listen_for (name, script_name) values ('packages_imported', 'listen_packages_imported');
