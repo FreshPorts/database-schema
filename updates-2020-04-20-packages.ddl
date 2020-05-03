@@ -271,6 +271,17 @@ GRANT INSERT ON TABLE public.package_imports TO packaging;
 -- Trigger: package_imports_completed
 
 -- DROP TRIGGER package_imports_completed ON public.package_imports;
+CREATE OR REPLACE FUNCTION package_imports_update() RETURNS TRIGGER AS $$
+BEGIN
+   IF TG_OP = 'INSERT' THEN
+      UPDATE packages_last_checked
+         SET processed_date = CURRENT_TIMESTAMP
+       WHERE abi_id      = NEW.abi_id
+         AND package_set = NEW.package_set;
+   END IF;
+   RETURN NEW;
+END
+$$ LANGUAGE 'plpgsql';
 
 CREATE TRIGGER package_imports_completed
     AFTER INSERT
