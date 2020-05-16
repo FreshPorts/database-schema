@@ -1,7 +1,7 @@
 2020-04-09
 
 The Packages table
-pg_hba,conf
+pg_hba.conf
 new packages roles and permissions
 new user in that role
 new packages for script
