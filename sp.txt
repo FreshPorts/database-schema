@@ -3583,7 +3583,7 @@ $$ LANGUAGE SQL STABLE;
 CREATE OR REPLACE FUNCTION PortVersionLatestBeforeQuarterlyBranch(integer) returns text AS $$
    -- for a port on head, pass in the id and you'll get the most recent version before the start of the current quarter
    --- by default, this will be the most recent version on the current quarterly branch, if there have been no commits to that branch for this port
-   SELECT port_version
+   SELECT package_version(port_version, port_revision, port_epoch)
      FROM commit_log_ports CLP JOIN commit_log CL ON (CL.commit_date <= QuarterPreviousFinish() 
                                                   AND CL.id       = CLP.commit_log_id
                                                   AND CLP.port_id = $1)
