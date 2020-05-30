@@ -3723,7 +3723,7 @@ CREATE OR REPLACE FUNCTION UpdatePackagesFromRawPackages( IN a_abi_name text, IN
         RAISE EXCEPTION 'cannot find id for ABI %', a_abi_name;
     END IF;
 
-    -- set abi_id and port_id before updating the pacakges table.
+    -- set abi_id and port_id before updating the packages table.
     UPDATE packages_raw PR
        SET abi_id  = l_abi_id,
            port_id = P.id
