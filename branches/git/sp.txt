@@ -1733,7 +1733,7 @@ SELECT SECURITY.commit_log_id,
        SECURITY.not_for_archs,
        SECURITY.repo_name,
        SECURITY.svn_revision,
-       SECURITY.svn_hostname,
+       SECURITY.repo_hostname,
        SECURITY.path_to_repo,
        W.watch,
        element_pathname(SECURITY.element_id, FALSE) as element_pathname
@@ -1799,7 +1799,7 @@ SELECT CLPE.*,
            encoding_losses,
            svn_revision,
            repo.name AS repo_name,
-           repo.svn_hostname,
+           repo.repo_hostname,
            repo.path_to_repo
      FROM commit_log CL LEFT OUTER JOIN repo ON CL.repo_id = repo.id JOIN 
                 (SELECT LCP.commit_log_id
@@ -1884,7 +1884,7 @@ SELECT SECURITY.commit_log_id,
        SECURITY.only_for_archs,
        SECURITY.not_for_archs,
        SECURITY.svn_revision,
-       SECURITY.svn_hostname,
+       SECURITY.repo_hostname,
        SECURITY.path_to_repo,
        W.watch,
        element_pathname(SECURITY.element_id, FALSE) as element_pathname
@@ -1949,7 +1949,7 @@ SELECT CLPE.*,
            to_char(CL.commit_date - SystemTimeAdjust(), 'HH24:MI')      AS commit_time,
            encoding_losses,
             svn_revision,
-           repo.svn_hostname,
+           repo.repo_hostname,
            repo.path_to_repo
     FROM commit_log CL LEFT OUTER JOIN repo ON CL.repo_id = repo.id JOIN
                 (  SELECT distinct LC.commit_log_id, LC.commit_date as dummy_field
@@ -2053,7 +2053,7 @@ SELECT SECURITY.commit_log_id,
        SECURITY.not_for_archs,
        SECURITY.repo_name,
        SECURITY.svn_revision,
-       SECURITY.svn_hostname,
+       SECURITY.repo_hostname,
        SECURITY.path_to_repo,
        W.watch,
        element_pathname(SECURITY.element_id, FALSE) as element_pathname
@@ -2119,7 +2119,7 @@ SELECT CLPE.*,
            encoding_losses,
            svn_revision,
            repo.name AS repo_name,
-           repo.svn_hostname,
+           repo.repo_hostname,
            repo.path_to_repo
      FROM commit_log CL LEFT OUTER JOIN repo ON CL.repo_id = repo.id JOIN
                 (SELECT LCP.commit_log_id
@@ -2294,7 +2294,7 @@ SELECT 0 AS port_id,
        NULL::text AS only_for_archs,
        NULL::text AS not_for_archs,
        CL.svn_revision,
-       R.svn_hostname,
+       R.repo_hostname,
        R.path_to_repo,
        R.name AS repo_name,
        OnWatchList($4, CLE.element_id) AS watch
@@ -2348,7 +2348,7 @@ SELECT FOURTH1.port_id,
        FOURTH1.only_for_archs,
        FOURTH1.not_for_archs,
        FOURTH1.svn_revision,
-       FOURTH1.svn_hostname,
+       FOURTH1.repo_hostname,
        FOURTH1.path_to_repo,
        FOURTH1.repo_name,
        OnWatchList($4, FOURTH1.element_id) as watch
@@ -2393,7 +2393,7 @@ FROM
         CL.commit_date,
         CL.encoding_losses,
 	CL.svn_revision,
-	R.svn_hostname,
+	R.repo_hostname,
 	R.path_to_repo,
 	R.name as repo_name
    FROM commit_log CL LEFT OUTER JOIN repo R ON CL.repo_id = R.id 
@@ -3099,7 +3099,7 @@ SELECT CL.id           AS commit_log_id,
        P.not_for_archs,
        repo.name,
        CL.svn_revision,
-       repo.svn_hostname,
+       repo.repo_hostname,
        repo.path_to_repo,
        0 AS watch,
        EP.pathname AS element_pathname
