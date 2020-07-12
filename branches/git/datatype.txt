@@ -143,7 +143,7 @@ CREATE TYPE element_id_pathname AS (
 
 --  DROP TYPE IF EXISTS conflicts CASCADE;
 -- if we drop a drop type here, we lose table ports_conflicts column conflicts_type
-CREATE TYPE conflicts AS ENUM ('conflicts', 'conflicts_build', 'conflicts_install');
+--CREATE TYPE conflicts AS ENUM ('conflicts', 'conflicts_build', 'conflicts_install');
 
 
   DROP TYPE IF EXISTS element_id_pathname CASCADE;
