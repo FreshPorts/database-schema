@@ -3883,6 +3883,3 @@ package_set text, last_checked text, repo_date text, import_date text, processed
      FROM packages_last_checked PLC join abi on PLC.abi_id = abi.id
  ORDER BY abi.name, PLC.package_set;
 $$ LANGUAGE SQL STABLE;
-
-
-
