@@ -1,0 +1,2288 @@
+2020-04-09
+
+The Packages table
+pg_hba.conf
+new packages roles and permissions
+new user in that role
+new packages for script
+
+
+-- Type: package_sets
+
+-- DROP TYPE public.package_sets;
+
+CREATE TYPE public.package_sets AS ENUM
+    ('latest', 'quarterly');
+
+ALTER TYPE public.package_sets
+    OWNER TO dan;
+
+COMMENT ON TYPE public.package_sets
+    IS 'The name is derived from https://wiki.freebsd.org/Ports/QuarterlyBranch
+
+"Quarterly is the name for Ports branches cut from HEAD at the beginning of every (yearly) quarter in January, April, July, and October, and the name for the binary package sets that are produced from these branches."';
+
+
+
+-- Table: public.abi
+
+-- DROP TABLE public.abi;
+
+CREATE TABLE public.abi
+(
+    id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
+    name text COLLATE pg_catalog."default" NOT NULL,
+    active boolean NOT NULL DEFAULT true,
+    CONSTRAINT abi_pkey PRIMARY KEY (id)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public.abi
+    OWNER to dan;
+
+GRANT SELECT ON TABLE public.abi TO www;
+
+GRANT SELECT ON TABLE public.abi TO rsyncer;
+
+GRANT ALL ON TABLE public.abi TO dan;
+
+GRANT INSERT, SELECT ON TABLE public.abi TO packaging;
+
+COMMENT ON TABLE public.abi
+    IS 'list of ABI - e.g. FreeBSD:12:amd64';
+
+COMMENT ON COLUMN public.abi.active
+    IS 'Do we still fetch packages for this ABI';
+-- Index: abi_name_idx
+
+-- DROP INDEX public.abi_name_idx;
+
+CREATE UNIQUE INDEX abi_name_idx
+    ON public.abi USING btree
+    (name COLLATE pg_catalog."default" ASC NULLS LAST)
+    TABLESPACE pg_default;
+
+
+-- Table: public.ports_origin
+
+-- DROP TABLE public.ports_origin;
+
+CREATE TABLE public.ports_origin
+(
+    port_id integer NOT NULL,
+    port_origin text COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT port_origin_pkey PRIMARY KEY (port_id),
+    CONSTRAINT ports_origin_port_id_fk FOREIGN KEY (port_id)
+        REFERENCES public.ports (id) MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+        NOT VALID
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public.ports_origin
+    OWNER to dan;
+
+GRANT INSERT, SELECT, UPDATE ON TABLE public.ports_origin TO commits;
+
+GRANT ALL ON TABLE public.ports_origin TO dan;
+
+GRANT SELECT ON TABLE public.ports_origin TO rsyncer;
+
+COMMENT ON TABLE public.ports_origin
+    IS 'This table is only for ports on head.
+
+can be pre-populated via:
+
+insert into ports_origin select id, categoryport(id) from ports_active;';
+
+COMMENT ON COLUMN public.ports_origin.port_origin
+    IS 'The category/port for this port';
+-- Index: ports_origin_port_id_idx
+
+-- DROP INDEX public.ports_origin_port_id_idx;
+
+CREATE INDEX ports_origin_port_id_idx
+    ON public.ports_origin USING btree
+    (port_id ASC NULLS LAST)
+    TABLESPACE pg_default;
+-- Index: ports_origin_port_origin_idx
+
+-- DROP INDEX public.ports_origin_port_origin_idx;
+
+CREATE INDEX ports_origin_port_origin_idx
+    ON public.ports_origin USING btree
+    (port_origin COLLATE pg_catalog."default" ASC NULLS LAST)
+    TABLESPACE pg_default;
+
+
+
+-- Table: public.packages_last_checked
+
+-- DROP TABLE public.packages_last_checked;
+
+CREATE TABLE public.packages_last_checked
+(
+    abi_id integer NOT NULL,
+    last_checked timestamp with time zone,
+    repo_date timestamp with time zone,
+    import_date timestamp with time zone,
+    package_set package_sets,
+    processed_date timestamp with time zone,
+    CONSTRAINT packages_last_checked_abi_id_fk FOREIGN KEY (abi_id)
+        REFERENCES public.abi (id) MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public.packages_last_checked
+    OWNER to dan;
+
+GRANT SELECT ON TABLE public.packages_last_checked TO www;
+
+GRANT SELECT ON TABLE public.packages_last_checked TO rsyncer;
+
+GRANT ALL ON TABLE public.packages_last_checked TO dan;
+
+GRANT SELECT, UPDATE ON TABLE public.packages_last_checked TO packaging;
+
+COMMENT ON COLUMN public.packages_last_checked.processed_date
+    IS 'The timestamp of the last processing of data, for a given ABI/branch, from packages_raw into packages.';
+
+
+
+
+
+-- Table: public.packages
+
+-- DROP TABLE public.packages;
+
+CREATE TABLE public.packages
+(
+    id bigint NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1 ),
+    abi_id integer NOT NULL,
+    port_id integer NOT NULL,
+    package_version text COLLATE pg_catalog."default" NOT NULL,
+    package_name text COLLATE pg_catalog."default" NOT NULL,
+    package_set package_sets,
+    CONSTRAINT packages_pkey PRIMARY KEY (id),
+    CONSTRAINT packages_abi_id_fk FOREIGN KEY (abi_id)
+        REFERENCES public.abi (id) MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+        DEFERRABLE INITIALLY DEFERRED
+        NOT VALID,
+    CONSTRAINT packages_port_id_fk FOREIGN KEY (port_id)
+        REFERENCES public.ports (id) MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+        DEFERRABLE INITIALLY DEFERRED
+        NOT VALID
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public.packages
+    OWNER to dan;
+
+GRANT ALL ON TABLE public.packages TO dan;
+
+GRANT INSERT, SELECT, DELETE ON TABLE public.packages TO packaging;
+
+GRANT SELECT ON TABLE public.packages TO rsyncer;
+
+GRANT SELECT ON TABLE public.packages TO www;
+
+COMMENT ON TABLE public.packages
+    IS 're https://github.com/FreshPorts/freshports/issues/142';
+-- Index: fki_packages_abi_id_fk
+
+-- DROP INDEX public.fki_packages_abi_id_fk;
+
+CREATE INDEX fki_packages_abi_id_fk
+    ON public.packages USING btree
+    (abi_id ASC NULLS LAST)
+    TABLESPACE pg_default;
+-- Index: fki_packages_port_id_fk
+
+-- DROP INDEX public.fki_packages_port_id_fk;
+
+CREATE INDEX fki_packages_port_id_fk
+    ON public.packages USING btree
+    (port_id ASC NULLS LAST)
+    TABLESPACE pg_default;
+-- Index: packages_all_idx
+
+-- DROP INDEX public.packages_all_idx;
+
+CREATE INDEX packages_all_idx
+    ON public.packages USING btree
+    (abi_id ASC NULLS LAST, package_name COLLATE pg_catalog."default" ASC NULLS LAST, package_set ASC NULLS LAST)
+    INCLUDE(package_version)
+    TABLESPACE pg_default;
+
+COMMENT ON INDEX public.packages_all_idx
+    IS 'This is not a unique index because multiple package names can exist.
+
+See editors/jucipp & devel/jucipp';
+-- Index: packages_package_name_idx
+
+-- DROP INDEX public.packages_package_name_idx;
+
+CREATE INDEX packages_package_name_idx
+    ON public.packages USING btree
+    (package_name COLLATE pg_catalog."default" ASC NULLS LAST)
+    TABLESPACE pg_default;
+
+
+
+
+-- Table: public.package_imports
+
+-- DROP TABLE public.package_imports;
+
+CREATE TABLE public.package_imports
+(
+    id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
+    abi_id integer NOT NULL,
+    package_set package_sets NOT NULL,
+    date time with time zone NOT NULL,
+    inserts integer NOT NULL,
+    updates integer NOT NULL,
+    deletes integer NOT NULL,
+    CONSTRAINT package_imports_pkey PRIMARY KEY (id),
+    CONSTRAINT package_imports_abi_id FOREIGN KEY (abi_id)
+        REFERENCES public.abi (id) MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+        DEFERRABLE INITIALLY DEFERRED
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public.package_imports
+    OWNER to dan;
+
+GRANT SELECT ON TABLE public.package_imports TO rsyncer;
+
+GRANT ALL ON TABLE public.package_imports TO dan;
+
+-- Trigger: package_imports_completed
+
+-- DROP TRIGGER package_imports_completed ON public.package_imports;
+
+CREATE TRIGGER package_imports_completed
+    AFTER INSERT
+    ON public.package_imports
+    FOR EACH ROW
+    EXECUTE PROCEDURE public.package_imports_update();
+
+
+1,FreeBSD:12:amd64,t
+2,FreeBSD:13:aarch64,t
+4,FreeBSD:11:i386,t
+6,FreeBSD:11:amd64,t
+7,FreeBSD:11:aarch64,t
+8,FreeBSD:12:i386,t
+9,FreeBSD:12:aarch64,t
+10,FreeBSD:13:i386,t
+11,FreeBSD:13:amd64,t
+
+-- Table: public.package_imports
+
+-- DROP TABLE public.package_imports;
+
+CREATE TABLE public.package_imports
+(
+    id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
+    abi_id integer NOT NULL,
+    package_set package_sets NOT NULL,
+    date time with time zone NOT NULL,
+    inserts integer NOT NULL,
+    updates integer NOT NULL,
+    deletes integer NOT NULL,
+    CONSTRAINT package_imports_pkey PRIMARY KEY (id),
+    CONSTRAINT package_imports_abi_id FOREIGN KEY (abi_id)
+        REFERENCES public.abi (id) MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+        DEFERRABLE INITIALLY DEFERRED
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public.package_imports
+    OWNER to dan;
+
+GRANT SELECT ON TABLE public.package_imports TO rsyncer;
+
+GRANT ALL ON TABLE public.package_imports TO dan;
+
+-- Trigger: package_imports_completed
+
+-- DROP TRIGGER package_imports_completed ON public.package_imports;
+
+CREATE TRIGGER package_imports_completed
+    AFTER INSERT
+    ON public.package_imports
+    FOR EACH ROW
+    EXECUTE PROCEDURE public.package_imports_update();
+
+
+
+
+
+
+
+
+
+
+
+25 May 2019
+
+Add Quarterly revision
+
+* fixes #115
+* display the port version on the latest quarterly branch
+
+Add sort-by last updated
+
+* fixes #116
+
+
+CREATE OR REPLACE FUNCTION CategoryPortCount(text, text) returns bigint AS $$
+        SELECT count(*)
+          FROM categories C 
+          JOIN ports_categories PC ON C.id         = PC.category_id
+          JOIN ports            P  ON PC.port_id   = P.id
+          JOIN element          E  ON P.element_id = E.id
+          JOIN element_pathname EP on E.id         = EP.element_id
+         WHERE C.name   = $1
+           AND E.status = 'A'
+           AND EP.pathname like '/ports/branches/' || $2 || '%';
+$$ LANGUAGE SQL STABLE;
+
+CREATE OR REPLACE FUNCTION package_version(text, text, text) RETURNS text AS $$
+DECLARE
+    p_PortVersion   ALIAS for $1;
+    p_PortRevision  ALIAS for $2;
+    p_PortEpoch     ALIAS for $3;
+
+    l_PKGNAME       text;
+BEGIN
+    l_PKGNAME := p_PortVersion;
+
+    IF p_PortRevision <> '' AND p_PortRevision != '0' THEN
+        l_PKGNAME := l_PKGNAME || '_' || p_PortRevision;
+    END IF;
+
+    IF p_PortEpoch <> '' AND p_PortEpoch != '0' THEN
+        l_PKGNAME := l_PKGNAME || ',' || p_PortEpoch;
+    END IF;
+
+    RETURN l_PKGNAME;
+END;
+$$ LANGUAGE 'plpgsql' IMMUTABLE;
+
+
+-- added on 2019-05-09 re https://github.com/FreshPorts/freshports/issues/115
+
+CREATE OR REPLACE FUNCTION QuarterPreviousStart() returns date AS $$
+   SELECT CAST(date_trunc('quarter', current_date) - interval '3 months' AS date)
+$$ LANGUAGE SQL STABLE;
+
+
+CREATE OR REPLACE FUNCTION QuarterPreviousFinish() returns date AS $$
+   SELECT CAST(date_trunc('quarter', current_date) - interval '1 day' AS date);
+$$ LANGUAGE SQL STABLE;
+
+CREATE OR REPLACE FUNCTION QuarterCurrent() returns text AS $$
+   --
+   -- returns something like 2019Q2
+   --
+   SELECT date_part('year', current_date) || 'Q' || date_part('quarter', current_date);
+$$ LANGUAGE SQL STABLE;
+
+
+CREATE OR REPLACE FUNCTION QuarterCurrentBranchID() returns integer AS $$
+   --
+   -- return id of the current quarter branch
+   --
+   SELECT id FROM system_branch WHERE branch_name = QuarterCurrent() ;
+$$ LANGUAGE SQL STABLE;
+
+
+-- above based on this:
+
+-- freshports.dev=# SELECT date_trunc('quarter', current_date);
+--        date_trunc       
+-- ------------------------
+--  2019-04-01 00:00:00+00
+-- (1 row)
+--
+-- as taken from https://dba.stackexchange.com/questions/179874/generic-end-date-of-quarter-postgresql
+
+
+
+CREATE OR REPLACE FUNCTION PortVersionLatestBeforeQuarterlyBranch(integer) returns text AS $$
+   -- for a port on head, pass in the id and you'll get the most recent version before the start of the current quarter
+   --- by default, this will be the most recent version on the current quarterly branch, if there have been no commits to that branch for this port
+   SELECT port_version
+     FROM commit_log_ports CLP JOIN commit_log CL ON (CL.commit_date <= QuarterPreviousFinish() 
+                                                  AND CL.id       = CLP.commit_log_id
+                                                  AND CLP.port_id = $1)
+ ORDER BY CL.commit_date DESC
+    LIMIT 1;
+$$ LANGUAGE SQL STABLE;
+
+
+CREATE OR REPLACE FUNCTION PortVersionOnQuarterlyBranch(text) returns text AS $$
+
+-- return pkg version for $1 on current quarterly branch, if any commits
+
+SELECT package_version(port_version, port_revision, port_epoch)
+  FROM commit_log_ports CLP JOIN commit_log CL ON (CL.id       = CLP.commit_log_id
+                                               AND CLP.port_id = (SELECT P.id
+  FROM ports P, element_pathname EP
+ WHERE EP.pathname = '/ports/branches/' || QuarterCurrent() || '/' || $1
+   AND P.element_id = EP.element_id))
+  JOIN commit_log_branches CLB ON (CLP.commit_log_id = CLB.commit_log_id
+                               AND CLB.branch_id = QuarterCurrentBranchID())
+ORDER BY CL.commit_date DESC
+LIMIT 1
+$$ LANGUAGE SQL STABLE;
+
+
+CREATE OR REPLACE FUNCTION PortVersionOnQuarterlyBranch(integer, text) returns text AS $$
+   -- for a given category/port and it's port id, tell me the version on the
+   -- quarterly branch
+   SELECT COALESCE(PortVersionOnQuarterlyBranch($2), PortVersionLatestBeforeQuarterlyBranch($1));
+$$ LANGUAGE SQL STABLE;
+
+
+
+21 October 2018
+
+add $FreshPorts::Config::JailPackageFlavors to /usr/local/etc/freshports/config.pm
+install flavors script to /var/db/freshports/ports-jail (now handled by pkg)
+
+Update FreshPorts-Scripts to install flavors script - DONE
+
+Adjust sudoers to allow:
+
+/usr/sbin/chroot -u freshports /var/db/freshports/ports-jail /make-flavors-package-names.sh /var/db/repos/PORTS-head *
+
+This needs to be added to visudo:
+
+freshports      ALL=(ALL) NOPASSWD:/usr/sbin/chroot -u freshports /var/db/freshports/ports-jail /make-flavors-package-names.sh *
+
+-- SEQUENCE: public.flavors_id_seq
+
+-- DROP SEQUENCE public.flavors_id_seq;
+
+CREATE SEQUENCE public.flavors_id_seq;
+
+ALTER SEQUENCE public.flavors_id_seq
+    OWNER TO dan;
+
+GRANT SELECT, UPDATE ON SEQUENCE public.flavors_id_seq TO commits;
+
+GRANT ALL ON SEQUENCE public.flavors_id_seq TO dan;
+
+
+-- SEQUENCE: public.package_flavors_id_seq
+
+-- DROP SEQUENCE public.package_flavors_id_seq;
+
+CREATE SEQUENCE public.package_flavors_id_seq;
+
+ALTER SEQUENCE public.package_flavors_id_seq
+    OWNER TO dan;
+
+GRANT SELECT, UPDATE ON SEQUENCE public.package_flavors_id_seq TO commits;
+
+GRANT ALL ON SEQUENCE public.package_flavors_id_seq TO dan;
+
+
+-- Table: public.flavors
+
+-- DROP TABLE public.flavors;
+
+CREATE TABLE public.flavors
+(
+    id bigint NOT NULL DEFAULT nextval('flavors_id_seq'::regclass),
+    name text COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT flavors_pkey PRIMARY KEY (id),
+    CONSTRAINT flavors_name_unique UNIQUE (name)
+
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+ALTER TABLE public.flavors
+    OWNER to dan;
+
+GRANT INSERT, SELECT, UPDATE, DELETE ON TABLE public.flavors TO commits;
+
+GRANT ALL ON TABLE public.flavors TO dan;
+
+GRANT SELECT ON TABLE public.flavors TO www;
+
+-- Index: flavors_name_idx
+
+-- DROP INDEX public.flavors_name_idx;
+
+CREATE UNIQUE INDEX flavors_name_idx
+    ON public.flavors USING btree
+    (name COLLATE pg_catalog."default")
+    TABLESPACE pg_default;
+-- Table: public.package_flavors
+
+-- DROP TABLE public.package_flavors;
+
+CREATE TABLE public.package_flavors
+(
+    id bigint NOT NULL DEFAULT nextval('package_flavors_id_seq'::regclass),
+    port_id bigint NOT NULL,
+    flavor_id bigint NOT NULL,
+    name text COLLATE pg_catalog."default" NOT NULL,
+    flavor_number integer NOT NULL,
+    CONSTRAINT package_flavors_flavor_id_fk FOREIGN KEY (flavor_id)
+        REFERENCES public.flavors (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT package_flavors_port_id_fk FOREIGN KEY (port_id)
+        REFERENCES public.ports (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+ALTER TABLE public.package_flavors
+    OWNER to dan;
+
+GRANT INSERT, SELECT, UPDATE, DELETE ON TABLE public.package_flavors TO commits;
+
+GRANT ALL ON TABLE public.package_flavors TO dan;
+
+GRANT SELECT ON TABLE public.package_flavors TO www;
+
+-- Index: fki_package_flavors_flavor_id_fk
+
+-- DROP INDEX public.fki_package_flavors_flavor_id_fk;
+
+CREATE INDEX fki_package_flavors_flavor_id_fk
+    ON public.package_flavors USING btree
+    (flavor_id)
+    TABLESPACE pg_default;
+
+-- Index: fki_package_flavors_port_id_fk
+
+-- DROP INDEX public.fki_package_flavors_port_id_fk;
+
+CREATE INDEX fki_package_flavors_port_id_fk
+    ON public.package_flavors USING btree
+    (port_id)
+    TABLESPACE pg_default;
+
+-- Index: package_flavors_port_id_flavor_id_idx
+
+-- DROP INDEX public.package_flavors_port_id_flavor_id_idx;
+
+CREATE UNIQUE INDEX package_flavors_port_id_flavor_id_idx
+    ON public.package_flavors USING btree
+    (port_id, flavor_id)
+    TABLESPACE pg_default;
+
+CREATE OR REPLACE FUNCTION PackageFlavorsDelete (int4) returns int4 AS $$
+	DECLARE
+		a_port_id ALIAS FOR $1;
+		RowCount	int4;
+
+	BEGIN
+		DELETE FROM package_flavors
+		      WHERE port_id  = a_port_id;
+
+		GET DIAGNOSTICS RowCount = ROW_COUNT;
+
+		RETURN RowCount;
+	END
+$$ LANGUAGE 'plpgsql';
+
+
+
+CREATE OR REPLACE FUNCTION PackageFlavorAdd (int4, text, text, int) returns int4 AS $$
+	DECLARE
+		a_port_id       ALIAS FOR $1;
+		a_flavor        ALIAS FOR $2;
+		a_flavor_name   ALIAS FOR $3;
+		a_flavor_number ALIAS for $4;
+
+		l_flavor_id          BIGINT;
+		l_package_flavors_id BIGINT;
+
+	BEGIN
+		INSERT INTO flavors (name) VALUES (a_flavor)
+		  ON CONFLICT ON CONSTRAINT flavors_name_unique DO NOTHING
+		  RETURNING id
+		  INTO l_flavor_id;
+
+		IF l_flavor_id IS NULL THEN
+			SELECT id
+			  INTO l_flavor_id
+			  FROM flavors
+			 WHERE name = a_flavor;
+		END IF;
+
+		IF NOT FOUND THEN
+			RAISE EXCEPTION 'cannot find id for Flavor = % ', a_flavor;
+			RETURN 0;
+		END IF;
+		
+
+		RAISE NOTICE ' flavor is %', l_flavor_id;
+
+		INSERT INTO package_flavors (port_id, flavor_id, name, flavor_number)
+			VALUES (a_port_id, l_flavor_id, a_flavor_name, a_flavor_number)
+			RETURNING id
+			INTO l_package_flavors_id;
+		
+
+		RETURN l_package_flavors_id;
+	END;
+$$ LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION PackageFlavors(bigint) RETURNS SETOF PackageFlavors_record AS $$
+    DECLARE
+        a_port_id  ALIAS for $1;
+        r          PackageFlavors_record%rowtype;
+
+    BEGIN
+        FOR r IN SELECT PV.id, PV.port_id, PV.flavor_id, F.name as flavor_name, PV.name, PV.flavor_number
+                   FROM package_flavors PV
+                   JOIN flavors         F ON PV.flavor_id = F.id
+                  WHERE port_id = a_port_id
+               ORDER BY flavor_number ASC
+        LOOP
+            RETURN NEXT r;
+        END LOOP;
+    END;$$
+
+LANGUAGE plpgsql;
+
+
+
+
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON flavors                 TO GROUP commits;
+GRANT SELECT, UPDATE                 ON flavors_id_seq          TO GROUP commits;
+GRANT SELECT, INSERT, UPDATE, DELETE ON package_flavors         TO GROUP commits;
+GRANT SELECT, UPDATE                 ON package_flavors_id_seq  TO GROUP commits;
+
+GRANT SELECT                         ON flavors         TO GROUP www;
+GRANT SELECT                         ON package_flavors TO GROUP www;
+
+GRANT SELECT                         ON ALL TABLES    IN SCHEMA pg_catalog TO GROUP rsyncer;
+GRANT SELECT                         ON ALL SEQUENCES IN SCHEMA pg_catalog TO GROUP rsyncer;
+
+10 October 2018
+
+CREATE OR REPLACE FUNCTION CategoryPortCount(text) returns bigint AS $$
+        SELECT count(*)
+          FROM categories C 
+          JOIN ports_categories PC ON C.id         = PC.category_id
+          JOIN ports            P  ON PC.port_id   = P.id
+          JOIN element          E  ON P.element_id = E.id
+          JOIN element_pathname EP on E.id         = EP.element_id
+         WHERE C.name   = $1
+           AND E.status = 'A'
+           AND EP.pathname like '/ports/head/%';
+$$ LANGUAGE SQL STABLE;
+
+
+9 October 2018
+
+  DROP TYPE IF EXISTS GetPortFromPackageName_record CASCADE;
+CREATE TYPE GetPortFromPackageName_record AS (
+	port_id			integer,
+	category		text,
+	port			text,
+	element_pathname	text
+);
+
+CREATE OR REPLACE FUNCTION GetPortFromPackageName(text) RETURNS SETOF GetPortFromPackageName_RECORD AS $$
+DECLARE
+	a_PackageName	ALIAS for $1;
+
+	r		GetPortFromPackageName_RECORD%rowtype;
+
+BEGIN
+	FOR r IN
+		SELECT P.id AS port_id, C.name AS category, packagename(P.id) as port, element_pathname(P.element_id)
+		  FROM ports P JOIN element_pathname EP ON P.element_id  = EP.element_id
+		               JOIN categories       C  ON P.category_id = C.id
+		 WHERE package_name = a_PackageName
+		   AND EP.pathname LIKE '/ports/head/%'
+
+	LOOP
+		RETURN NEXT r;
+	END LOOP;
+END $$ LANGUAGE plpgsql;
+
+GRANT SELECT ON element_pathname TO GROUP reading;
+
+CREATE OR REPLACE FUNCTION Stats_PortCountNewInterval(interval) returns int8 AS $$
+	DECLARE
+		SinceWhen	ALIAS FOR $1;
+		PortCount	int8;
+
+	BEGIN
+		SELECT count(*)
+		  INTO PortCount
+		  FROM ports P
+		  JOIN element_pathname EP ON P.element_id = EP.element_id
+		 WHERE P.date_added > now() - SinceWhen
+		  AND EP.pathname LIKE '/ports/head/%';
+
+		return PortCount;
+	END
+$$ LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION ports_conflicts_set() RETURNS TRIGGER AS $$
+  BEGIN
+    DELETE FROM ports_conflicts WHERE port_id = NEW.id;
+
+    INSERT INTO ports_conflicts(port_id, conflicts_type, item_num, item_value)
+      SELECT NEW.id        AS port_id, 
+             'conflicts'::conflicts AS conflict_type,
+             row_number() OVER (ORDER BY item_value),
+             glob_to_regex(R.item_value)
+        FROM regexp_split_to_table(NEW.conflicts, E'\\s+') AS R(item_value)
+
+      UNION
+
+      SELECT NEW.id              AS port_id, 
+             'conflicts_build'::conflicts AS conflict_type,
+             row_number() OVER (ORDER BY item_value),
+             glob_to_regex(R.item_value)
+        FROM regexp_split_to_table(NEW.conflicts_build, E'\\s+') AS R(item_value)
+
+      UNION
+
+      SELECT NEW.id                AS port_id, 
+             'conflicts_install'::conflicts AS conflict_type,
+             row_number() OVER (ORDER BY item_value),
+             glob_to_regex(R.item_value)
+        FROM regexp_split_to_table(NEW.conflicts_install, E'\\s+') AS R(item_value);
+
+    RETURN NEW;
+  END
+$$ LANGUAGE 'plpgsql';
+
+
+  DROP TRIGGER IF EXISTS ports_conflicts_insert ON ports;
+CREATE TRIGGER ports_conflicts_insert
+    AFTER INSERT on ports
+    FOR EACH ROW
+    EXECUTE PROCEDURE ports_conflicts_set();
+
+  DROP TRIGGER IF EXISTS ports_conflicts_update ON ports;
+CREATE TRIGGER ports_conflicts_update
+    AFTER UPDATE on ports
+    FOR EACH ROW
+    EXECUTE PROCEDURE ports_conflicts_set();
+
+CREATE INDEX commit_log_ports_port_name_revision
+    ON public.commit_log_ports USING btree
+    (port_name_revision COLLATE pg_catalog."default")
+    TABLESPACE pg_default;
+
+
+CREATE OR REPLACE FUNCTION port_conflicts(bigint, text) RETURNS SETOF ports_conflicts_matches AS $$
+  DECLARE
+    a_ports_conflicts_id ALIAS FOR $1;
+    a_regex              ALIAS FOR $2;
+ 
+    l_regex text;
+    r       ports_conflicts_matches%rowtype;
+  BEGIN
+    l_regex := '^(' || a_regex || ')';
+     
+    FOR r in SELECT distinct a_ports_conflicts_id, port_id FROM commit_log_ports WHERE port_name_revision ~ l_regex
+    LOOP
+      RETURN NEXT r;
+    END LOOP;
+  END;
+ 
+$$ LANGUAGE 'plpgsql' STABLE;
+
+insert into ports_conflicts_matches SELECT PC4.*                                                                                
+  FROM ports_conflicts PC, LATERAL (SELECT * FROM port_conflicts(PC.id, '^' || PC.item_value || '$')) PC4;
+
+
+5 September 2018
+
+
+begin;
+
+--ALTER TABLE public.ports
+--    ADD COLUMN conflicts text COLLATE pg_catalog."default";
+--
+--ALTER TABLE public.ports
+--    ADD COLUMN conflicts_build text COLLATE pg_catalog."default";
+--
+--ALTER TABLE public.ports
+--    ADD COLUMN conflicts_install text COLLATE pg_catalog."default";
+
+CREATE OR REPLACE FUNCTION PackageName(integer) RETURNS TEXT AS $$
+  SELECT P.package_name 
+  FROM ports P 
+ WHERE P.id = $1
+$$ LANGUAGE SQL STABLE;
+
+ALTER TABLE commit_log_ports ADD COLUMN port_name_revision TEXT default NULL;
+UPDATE commit_log_ports SET port_name_revision = PackageName(port_id) || '-' || port_revision;
+
+
+CREATE TYPE public.conflicts AS ENUM
+    ('conflicts', 'conflicts_build', 'conflicts_install');
+
+
+-- Table: public.ports_conflicts
+
+-- DROP TABLE public.ports_conflicts;
+
+CREATE TABLE public.ports_conflicts
+(
+    id BIGSERIAL,
+    port_id integer NOT NULL,
+    conflicts_type conflicts NOT NULL,
+    item_num integer NOT NULL,
+    item_value text COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT ports_conflicts_pkey PRIMARY KEY (id),
+    CONSTRAINT ports_conflicts_port_id FOREIGN KEY (port_id)
+        REFERENCES public.ports (id) MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+ALTER TABLE public.ports_conflicts
+    OWNER to dan;
+
+-- Index: fki_ports_conflicts_port_id
+
+-- DROP INDEX public.fki_ports_conflicts_port_id;
+
+CREATE INDEX fki_ports_conflicts_port_id
+    ON public.ports_conflicts USING btree
+    (port_id)
+    TABLESPACE pg_default;
+
+
+
+
+-- Table: public.ports_conflicts_matches
+
+-- DROP TABLE public.ports_conflicts_matches;
+
+CREATE TABLE public.ports_conflicts_matches
+(
+    ports_conflicts_id bigint NOT NULL,
+    port_id integer NOT NULL,
+    CONSTRAINT ports_conflicts_matches_pkey PRIMARY KEY (ports_conflicts_id, port_id),
+    CONSTRAINT ports_conflicts_matches_conflicts_id FOREIGN KEY (ports_conflicts_id)
+        REFERENCES public.ports_conflicts (id) MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    CONSTRAINT ports_conflicts_matches_port_id FOREIGN KEY (port_id)
+        REFERENCES public.ports (id) MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+ALTER TABLE public.ports_conflicts_matches
+    OWNER to dan;
+
+-- Index: fki_ports_conflicts_matches_conflicts_id
+
+-- DROP INDEX public.fki_ports_conflicts_matches_conflicts_id;
+
+CREATE INDEX fki_ports_conflicts_matches_conflicts_id
+    ON public.ports_conflicts_matches USING btree
+    (ports_conflicts_id)
+    TABLESPACE pg_default;
+
+-- Index: fki_ports_conflicts_matches_port_id
+
+-- DROP INDEX public.fki_ports_conflicts_matches_port_id;
+
+CREATE INDEX fki_ports_conflicts_matches_port_id
+    ON public.ports_conflicts_matches USING btree
+    (port_id)
+    TABLESPACE pg_default;
+
+-- Type: conflicts
+
+-- DROP TYPE public.conflicts;
+
+ALTER TYPE public.conflicts
+    OWNER TO dan;
+
+CREATE TRUSTED PROCEDURAL LANGUAGE plperl
+    HANDLER plperl_call_handler
+    INLINE plperl_inline_handler
+    VALIDATOR plperl_validator;
+    
+ALTER LANGUAGE plperl
+    OWNER TO dan;
+
+COMMENT ON LANGUAGE plperl
+    IS 'PL/Perl procedural language';
+
+
+
+-- FUNCTION: public.glob_to_regex(text)
+
+-- DROP FUNCTION public.glob_to_regex(text);
+
+CREATE FUNCTION public.glob_to_regex(text) RETURNS text
+    LANGUAGE plperl
+    AS $_$
+    my $w = quotemeta shift;
+    $w =~ s{\\([*?]|\\(\\?.)|\[(?:\\\!)?(?:\\\])?[^]]*\\\])}
+                   {($1 eq '*' ? '.*' :
+                         $1 eq '?' ? '.'  :
+                         defined($2) ? $2 :
+                         do { my $p = $1; $p =~ s/\\([][^-])/$1/g; $p =~ s/^\[\\!/[^/; $p; })}eg;
+    return $w;
+$_$;
+
+ALTER FUNCTION public.glob_to_regex(text)
+    OWNER TO dan;
+
+
+
+
+-- FUNCTION: public.ports_conflicts_populate(integer)
+
+-- DROP FUNCTION public.ports_conflicts_populate(integer);
+
+CREATE OR REPLACE FUNCTION public.ports_conflicts_populate(
+	integer)
+    RETURNS integer
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+AS $BODY$
+
+  DECLARE
+    a_Port_ID ALIAS FOR $1;
+    l_num_rows bigint;
+
+  BEGIN
+    DELETE FROM ports_conflicts WHERE port_id = a_Port_ID;
+
+    INSERT INTO ports_conflicts(port_id, conflicts_type, item_num, item_value)
+      SELECT P.id        AS port_id, 
+             'conflicts'::conflicts AS conflict_type,
+             row_number() OVER (ORDER BY item_value),
+             glob_to_regex(R.item_value)
+        FROM ports P, regexp_split_to_table(P.conflicts, E'\\s+') AS R(item_value)
+       WHERE P.id = a_Port_ID
+
+      UNION
+
+      SELECT P.id              AS port_id, 
+             'conflicts_build'::conflicts AS conflict_type,
+             row_number() OVER (ORDER BY item_value),
+             glob_to_regex(R.item_value)
+        FROM ports P, regexp_split_to_table(P.conflicts_build, E'\\s+') AS R(item_value)
+       WHERE P.id = a_Port_ID
+
+      UNION
+
+      SELECT P.id                AS port_id, 
+             'conflicts_install'::conflicts AS conflict_type,
+             row_number() OVER (ORDER BY item_value),
+             glob_to_regex(R.item_value)
+        FROM ports P, regexp_split_to_table(P.conflicts_install, E'\\s+') AS R(item_value)
+       WHERE P.id = a_Port_ID;
+
+      IF FOUND THEN
+         GET DIAGNOSTICS l_num_rows = ROW_COUNT;
+      ELSE
+         l_num_rows = 0;
+      END IF;
+
+    RETURN l_num_rows;  
+
+  END
+
+$BODY$;
+
+ALTER FUNCTION public.ports_conflicts_populate(integer)
+    OWNER TO dan;
+
+
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON ports_conflicts         TO GROUP commits;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ports_conflicts_matches TO GROUP commits;
+
+GRANT SELECT, UPDATE                 ON ports_conflicts_id_seq  TO GROUP commits;
+
+GRANT SELECT                         ON ports_conflicts         TO GROUP www;
+GRANT SELECT                         ON ports_conflicts_matches TO GROUP www;
+
+GRANT SELECT                         ON ALL TABLES    IN SCHEMA pg_catalog TO GROUP rsyncer;
+GRANT SELECT                         ON ALL SEQUENCES IN SCHEMA pg_catalog TO GROUP rsyncer;
+GRANT SELECT                         ON ALL TABLES    IN SCHEMA public     TO GROUP rsyncer;
+GRANT SELECT                         ON ALL SEQUENCES IN SCHEMA public     TO GROUP rsyncer;
+
+
+25 September 2017
+
+
+
+CREATE SEQUENCE public.generate_plist_id_seq;
+
+
+CREATE TABLE public.generate_plist
+(                
+    id bigint NOT NULL DEFAULT nextval('generate_plist_id_seq'::regclass),
+    port_id integer NOT NULL,
+    installed_file text COLLATE pg_catalog."default" NOT NULL
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+GRANT ALL ON TABLE public.generate_plist TO dan;
+
+ ALTER TABLE public.generate_plist
+    OWNER to dan;
+
+-- Index: generate_plist_installed_file_gin_idx
+-- DROP INDEX public.generate_plist_installed_file_gin_idx;
+CREATE INDEX generate_plist_installed_file_gin_idx
+    ON public.generate_plist USING gin
+    (to_tsvector('english'::regconfig, installed_file))
+    TABLESPACE pg_default;
+
+
+-- Index: generate_plist_installed_file_idx
+-- DROP INDEX public.generate_plist_installed_file_idx;
+CREATE INDEX generate_plist_installed_file_idx
+    ON public.generate_plist USING btree
+    (installed_file COLLATE pg_catalog."default")
+    TABLESPACE pg_default;
+
+-- Index: generate_plist_pk         
+-- DROP INDEX public.generate_plist_pk;         
+CREATE INDEX generate_plist_pk         
+    ON public.generate_plist USING btree
+    (id)
+    TABLESPACE pg_default;
+
+-- Index: generate_plist_port_id_idx
+-- DROP INDEX public.generate_plist_port_id_idx;
+CREATE INDEX generate_plist_port_id_idx
+    ON public.generate_plist USING btree
+    (port_id)
+    TABLESPACE pg_default;
+
+
+GRANT SELECT ON generate_plist TO GROUP www;
+GRANT SELECT, UPDATE ON SEQUENCE public.generate_plist_id_seq TO commits;
+
+DROP VIEW public.ports_active;
+alter table ports drop column makefile;
+alter table ports drop column pkg_plist;
+
+CREATE OR REPLACE VIEW public.ports_active AS
+ SELECT ports.id,
+    ports.element_id,
+    ports.category_id,
+    ports.short_description,
+    ports.long_description,
+    ports.version,
+    ports.revision,
+    ports.maintainer,
+    ports.homepage,
+    ports.master_sites,
+    ports.extract_suffix,
+    ports.package_exists,
+    ports.depends_build,
+    ports.depends_run,
+    ports.last_commit_id,
+    ports.found_in_index,
+    ports.forbidden,
+    ports.broken,
+    ports.date_added,
+    ports.categories,
+    ports.deprecated,
+    ports.ignore,
+    ports.master_port,
+    ports.latest_link,
+    ports.depends_lib,
+    ports.no_latest_link,
+    ports.no_package,
+    ports.package_name,
+    ports.portepoch,
+    ports.no_cdrom,
+    ports.restricted,
+    ports.expiration_date,
+    ports.is_interactive,
+    ports.only_for_archs,
+    ports.not_for_archs,
+    ports.status,
+    ports.showconfig,
+    ports.license,
+    ports.fetch_depends,
+    ports.extract_depends,
+    ports.patch_depends,
+    ports.uses,
+    ports.pkgmessage,
+    ports.branch_id,
+    ports.distinfo,
+    ports.license_restricted,
+    ports.manual_package_build,
+    ports.license_perms,
+    element.name,
+    categories.name AS category
+   FROM categories,
+    ports,
+    element
+  WHERE element.status = 'A'::bpchar AND categories.id = ports.category_id AND ports.element_id = element.id;
+
+ALTER TABLE public.ports_active
+    OWNER TO dan;
+
+GRANT SELECT ON TABLE public.ports_active TO www;
+GRANT ALL ON TABLE public.ports_active TO dan;
+GRANT SELECT ON TABLE public.ports_active TO commits;
+
+
+
+13 August 2016
+
+
+DROP VIEW ports_all;
+
+create view ports_all as
+select ports.*, element.name as name, categories.name as category
+from categories, ports, element
+where categories.id = ports.category_id
+and ports.element_id = element.id;
+
+grant select on ports_all to group www;
+grant select on ports_all to group commits;
+
+drop view ports_active;
+
+create view ports_active as
+select ports.*, element.name as name, categories.name as category
+from categories, ports, element
+where element.status = 'A'
+and categories.id = ports.category_id
+and ports.element_id = element.id;
+
+grant select on ports_active to group www;
+grant select on ports_active to group commits;
+
+\i datatype.txt
+\i sp.txt
+
+Then decide on commit / rollback;
+
+
+
+
+Not sure of date for below
+
+https://github.com/FreshPorts/freshports/issues/9 - Not all ports have packages
+
+alter table ports add license_restricted   text;
+alter table ports add manual_package_build text;
+alter table ports add license_perms        text;
+
+alter table ports add pkg_plist text;
+alter table ports add makefile  text;
+
+
+
+
+26 June 2016
+
+- Branches
+
+-- nope, don't need this.
+-- ALTER TABLE ports ADD COLUMN branch_id integer NOT NULL REFERENCES system_branch(id) DEFAULT 1;
+
+copy make-port.sh into port jail
+alter table ports add column distinfo text;
+
+
+22 April 2016
+Add pkg_mesage
+
+alter table ports add column pkgmessage text;
+
+
+3 April 2016
+
+Add this entry to: listen_for
+
+"date_updated";"listen_date_updated"
+
+-- Table: cache_clearing_dates
+
+-- DROP TABLE cache_clearing_dates;
+
+CREATE TABLE cache_clearing_dates
+(
+  id serial NOT NULL, -- primary key
+  date_to_clear date, -- The date which should be cleared from the archives
+  date_added time without time zone DEFAULT now() -- The timestamp this entry was added to the table
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE cache_clearing_dates
+  OWNER TO dan;
+COMMENT ON COLUMN cache_clearing_dates.id IS 'primary key';
+COMMENT ON COLUMN cache_clearing_dates.date_to_clear IS 'The date which should be cleared from the archives';
+COMMENT ON COLUMN cache_clearing_dates.date_added IS 'The timestamp this entry was added to the table';
+
+changes to ri.txt as well
+
+
+
+I'm sure there were other update after this one... and before the one above
+
+23 December 2014
+
+FETCH_DEPENDS, EXTRACT_DEPENDS, PATCH_DEPENDS, and USES
+
+begin;
+
+ALTER TABLE ports ADD fetch_depends   text;
+ALTER TABLE ports ADD extract_depends text;
+ALTER TABLE ports ADD patch_depends   text;
+ALTER TABLE ports ADD uses            text;
+
+29 January 2014 - branches
+
+create index on system_branch_element_revision(element_id);
+begin; update system_branch set branch_name = 'head' where branch_name = 'HEAD';
+
+CREATE TABLE commit_log_branch(
+  commit_log_id integer NOT NULL,
+  branch_id     integer NOT NULL,
+  primary key (commit_log_id, branch_id)
+);
+
+alter table commit_log_branch
+    add foreign key (commit_log_id)
+       references commit_log(id) on update cascade on delete cascade;
+
+alter table commit_log_branch
+    add foreign key (branch_id)
+       references system_branch (id) on update cascade on delete cascade;
+
+
+psql freshports.org < session-variables.sql
+psql freshports.org < sp.txt
+
+
+13 February 2013 - speed up searches
+
+create index commit_log_committer_idx on commit_log(committer);
+
+29 December 2012 - jails - not implemented yet
+
+cd scripts/Jail
+./create-jail-directories.sh /wdc/dan/FreshPorts/ports-jail /wdc/dan/PORTS-SVN
+
+cd scripts
+update config.sh & config.pm from their repsective .sample files
+
+add to visudo:
+
+dan      ALL=(ALL) NOPASSWD:/usr/sbin/chroot -u dan /wdc/dan/FreshPorts/ports-jail /make-port.sh *
+dan      ALL=(ALL) NOPASSWD:/usr/sbin/chroot -u dan /wdc/dan/FreshPorts/ports-jail /make-category-comment.sh *
+dan      ALL=(ALL) NOPASSWD:/usr/sbin/chroot -u dan /wdc/dan/FreshPorts/ports-jail /make-master-port-test.sh *
+
+
+8 September 2012 - full paths
+
+drop index commit_log_svn_revision_idx;
+create index commit_log_svn_revision_idx on commit_log(svn_revision)
+where svn_revision is not null;
+
+CREATE TABLE repo(
+   id           serial not null,
+   name         text   not null,
+   description  text   not null,
+   svn_hostname text   not null,
+   path_to_repo text   not null
+);
+
+create unique index repo_id          on repo(id);
+create unique index repo_name        on repo(name);
+create unique index repo_description on repo(description);
+create unique index repo_path_to_repo   on repo(path_to_repo);
+
+INSERT into repo (name, description, svn_hostname, path_to_repo) values ('ports', 'The FreeBSD Ports tree', 'svnweb.freebsd.org', '/ports');
+INSERT into repo (name, description, svn_hostname, path_to_repo) values ('doc',   'The FreeBSD doc tree',   'svnweb.freebsd.org', '/doc');
+INSERT into repo (name, description, svn_hostname, path_to_repo) values ('src',   'The FreeBSD src tree',   'svnweb.freebsd.org', '/base');
+
+ALTER TABLE commit_log add repo_id integer;
+alter table commit_log
+    add foreign key (repo_id)
+       references repo(id) on update cascade on delete restrict;
+
+grant select on repo to group www;
+grant select on repo to group commits;
+
+create index element_pathname_element_id on element_pathname(element_id);
+
+Other things to do:
+
+copy from scripts/: config.pm.sample to config.pm
+
+$FreshPorts::Config::DB_Root_Prefix_DOC
+
+
+
+9 August 2012 - adding revision to commit-log
+
+alter table commit_log add column svn_revision text;
+
+create unique index commit_log_svn_revision_idx on commit_log(svn_revision)
+where svn_revision is not null;
+
+create index commit_log_ports_needs_refresh_idx on
+commit_log_ports(needs_refresh) where needs_refresh <> 0;
+
+
+12 July 2012 - vuxml performance
+
+alter table vuxml add column checksum text;
+create index vuxml_vid_idx on vuxml(vid);
+
+create index commit_log_ports_vuxml_vuxml_id_idx on commit_log_ports_vuxml(vuxml_id);
+
+CREATE OR REPLACE FUNCTION commit_log_ports_vuxml_purge(text) RETURNS SETOF int AS $$
+DELETE FROM commit_log_ports_vuxml CLPV
+ USING vuxml V
+ WHERE V.id  = CLPV.vuxml_id
+   AND V.vid = $1
+RETURNING 1
+$$ LANGUAGE SQL VOLATILE;
+
+CREATE OR REPLACE FUNCTION vuxml_ranges(text) RETURNS SETOF vuxml_record AS $$
+SELECT V.id,
+       V.vid,
+       VN.name      AS package_name,
+       VR.operator1 AS op1,
+       VR.version1  AS v1,
+       VR.operator2 AS op2,
+       VR.version2  AS v2
+  FROM vuxml_ranges VR, vuxml_names VN, vuxml_affected VA, vuxml V
+ WHERE V.id                 = VA.vuxml_id
+   AND VN.vuxml_affected_id = VA.id
+   AND VR.vuxml_affected_id = VA.id
+   AND V.vid                = $1
+ ORDER BY VN.name, V.vid;
+$$ LANGUAGE SQL STABLE;
+
+
+22 June 2012 - performance
+
+create index commit_log_ports_vuxml_port_id on
+commit_log_ports_vuxml(port_id);
+
+
+
+5 February 2011 - port_dependencies
+create table port_dependencies
+(
+    port_id                    integer               not null,
+    port_id_dependent_upon     integer               not null,
+    dependency_type            char(1)               not null,
+    primary key (port_id, port_id_dependent_upon, dependency_type)
+);
+
+alter table port_dependencies
+    add foreign key  (port_id)
+       references ports (id) on update cascade on delete cascade;
+
+alter table port_dependencies
+    add foreign key  (port_id_dependent_upon)
+       references ports (id) on update cascade on delete cascade;
+
+grant select on port_dependencies              to group www;
+grant select, insert, update, delete on port_dependencies              to group commits;
+
+CREATE OR REPLACE FUNCTION PortsDependenciesAdd (text, text, text) returns
+int AS $$
+  DECLARE
+    p_PortName              ALIAS FOR $1;
+    p_PortNameDependentUpon ALIAS FOR $2;
+    p_DependencyType        ALIAS FOR $3;
+
+    l_PortID           int;
+    l_PortIDDependency int;
+    OID                int8;
+
+  BEGIN
+    select GetPort(p_PortName)
+      INTO l_PortID;
+
+    select GetPort(p_PortNameDependentUpon)
+      INTO l_PortIDDependency;
+
+    if l_PortID IS NOT NULL AND l_PortIDDependency IS NOT NULL then
+      INSERT INTO port_dependencies (port_id, port_id_dependent_upon, dependency_type)
+            VALUES (l_PortID, l_PortIDDependency, p_DependencyType);
+      RETURN 1;
+    else
+      if l_PortID IS NULL then
+        RAISE EXCEPTION 'cannot find this port: %', p_PortName;
+      end if;
+      if l_PortIDDependency IS NULL then
+        RAISE EXCEPTION 'cannot find this port: %', p_PortNameDependentUpon;
+      end if;
+    end if;
+
+    RETURN 0;
+  END;
+$$  LANGUAGE 'plpgsql';
+
+
+17 September 2010 - password
+
+create table user_password_reset(
+  user_id        int not null,
+  date_requested timestamp with time zone default ('now'::text)::timestamp(6) with time zone,
+  ip_address     inet not null,
+  token          text not null
+);
+
+alter table user_password_reset
+    add foreign key  (user_id)
+       references users (id) on update cascade on delete cascade;
+
+
+CREATE OR REPLACE FUNCTION user_password_reset_token() RETURNS TRIGGER AS $$
+  BEGIN
+    NEW.token := ENCODE(DIGEST((random() * NEW.user_id )::text || now(), 'sha256'), 'hex');
+    RETURN NEW;
+  END
+$$ LANGUAGE 'plpgsql';
+
+
+--  DROP TRIGGER user_password_reset_token ON user_password_reset;
+CREATE TRIGGER user_password_reset_token
+    BEFORE INSERT on user_password_reset
+    FOR EACH ROW
+    EXECUTE PROCEDURE user_password_reset_token();
+
+
+CREATE OR REPLACE FUNCTION reset_password_token(text, text) RETURNS int AS $$
+DECLARE
+ in_password ALIAS for $1;
+ in_token    ALIAS for $2;
+ RowCount    bigint;
+  
+BEGIN
+  UPDATE users SET password_hash = crypt( in_password, gen_salt('md5'))
+    WHERE id = (SELECT user_id from user_password_reset
+                 WHERE token = in_token);
+  GET DIAGNOSTICS RowCount = ROW_COUNT;
+  IF RowCount = 1 THEN
+    DELETE FROM user_password_reset WHERE token = in_token;
+  END IF;
+  RETURN RowCount;
+END
+$$ LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION user_password_reset_purge() RETURNS int AS $$
+DECLARE
+ RowCount int8;
+  
+BEGIN
+ DELETE FROM user_password_reset WHERE date_requested < now() - interval '2 days';
+ GET DIAGNOSTICS RowCount = ROW_COUNT;
+ RETURN RowCount;
+END
+$$ LANGUAGE 'plpgsql';
+
+grant select, insert, delete on user_password_reset to group www;
+grant select, delete         on user_password_reset to group commits;
+
+19              10      *       *       *       cd $DIR && purge_old_password_tokens.pl    2>&1 > /dev/null
+
+
+15 September 2010 - license
+
+alter table ports add column license text default null;
+svc -d /var/service/freshports/
+cd scripts/Verify && perl set-license.pl  > loading.txt 2>&1
+svc -u /var/service/freshports/
+
+begin;
+drop view ports_active;
+
+create view ports_active as
+select ports.*, element.name as name, categories.name as category
+from categories, ports, element
+where element.status = 'A'
+and categories.id = ports.category_id
+and ports.element_id = element.id;
+
+commit;
+
+
+BEGIN;
+
+DROP VIEW ports_all;
+
+create view ports_all as
+select ports.*, element.name as name, categories.name as category
+from categories, ports, element
+where categories.id = ports.category_id
+and ports.element_id = element.id;
+
+COMMIT;
+
+
+18 January 2008 - makeconfig
+
+ALTER TABLE ports ADD COLUMN showconfig text;
+svc -d /var/service/freshports/
+cd scripts/Verify && perl set-showconfig.pl  > loading.txt 2>&1
+svc -u /var/service/freshports/
+
+6 April 2006 - Announcements
+
+ALTER TABLE announcements add column text_plain text;
+UPDATE announcements SET text_plain = text;
+ALTER TABLE announcements ALTER text_plain SET NOT NULL;
+
+
+1 April 2006 - Voting
+
+
+-- Table: design_results
+
+-- DROP TABLE design_results;
+
+CREATE TABLE design_results
+(
+  id serial NOT NULL,
+  user_id int4 NOT NULL,
+  choice1 char(1) NOT NULL,
+  choice2 char(1) NOT NULL,
+  choice3 char(1) NOT NULL,
+  CONSTRAINT design_results_user_id FOREIGN KEY (user_id)
+      REFERENCES users (id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION,
+  CONSTRAINT user_id UNIQUE (user_id),
+  CONSTRAINT choice_all_different CHECK (choice1 <> choice2 AND choice1 <>
+choice3 AND choice2 <> choice3),
+  CONSTRAINT valid_choices CHECK ((choice1 = ANY (ARRAY['A'::bpchar,
+'B'::bpchar, 'C'::bpchar])) AND (choice2 = ANY (ARRAY['A'::bpchar,
+'B'::bpchar, 'C'::bpchar])) AND (choice3 = ANY (ARRAY['A'::bpchar,
+'B'::bpchar, 'C'::bpchar])))
+) 
+WITHOUT OIDS;
+ALTER TABLE design_results OWNER TO dan;
+
+
+-- Index: fki_design_results_user_id
+
+-- DROP INDEX fki_design_results_user_id;
+
+CREATE INDEX fki_design_results_user_id
+  ON design_results
+  USING btree
+  (user_id);
+
+
+
+grant select, insert on design_results         to group www;
+grant select, update on design_results_id_seq  to group www;
+
+
+
+
+20 February 2006 - Philadelphia
+
+insert into reports (name, description, needs_frequency) values ('Watch List
+Non-Ports', 'Similar to Watch List Notification, but for all of the source
+tree, including non-ports', true);
+
+
+insert into reports (name, description, needs_frequency) values ('Watch List
+Directories', 'Similar to Watch List Notification, but allows you to watch
+directories (e.g. /docs)', true);
+
+
+31 January 2006
+
+for the categories update
+
+insert into listen_for (name, script_name) values ('category_new', 'listen_category_new');
+psql freshports.org < ri.txt
+sudo svc -d /var/service/freshports
+sudo svc -d /var/service/fp-listen
+sudo svc -u /var/service/fp-listen
+sudo svc -u /var/service/freshports
+
+copy values from daemontools/fp-listen/config.py.sample to config.py
+
+
+8 Nov 2006
+
+Change of element_type to include pathname:
+
+BEGIN;
+  DROP TYPE element_type CASCADE;
+CREATE TYPE element_type AS (
+	id               integer,
+	name             text,
+	type             text,
+	status           text,
+	iscategory       boolean,
+	isport           boolean,
+	element_pathname text
+);
+
+CREATE OR REPLACE FUNCTION elementGet (text) RETURNS SETOF element_type AS '
+   SELECT id,
+          name::text,
+          directory_file_flag::text,
+          status::text,
+          case when IsCategory(Pathname_ID($1)) IS NULL THEN FALSE ELSE TRUE END,
+          case when IsPort(    Pathname_ID($1)) IS NULL THEN FALSE ELSE TRUE END,
+          element_pathname(id)
+     FROM element
+    WHERE id = PathName_ID($1);
+' LANGUAGE SQL STABLE;
+
+
+commit;
+
+
+5 Nov 2006
+
+Give more room in daily stats table:
+
+begin;
+alter table daily_stats_data add column newvalues bigint;
+update daily_stats_data set newvalues = value;
+select * from daily_stats_data where newvalues != value;
+alter table daily_stats_data drop column value;
+alter table daily_stats_data rename column newvalues to value;
+select * from daily_stats_data limit 60;
+commit;
+
+
+29 October User specified page size
+
+update users set page_size = 100 where page_size = 25 or page_size is null;
+
+27 October Database size Stats
+
+insert into daily_stats (title, query) values ('Database size', 'select Stats_DatabaseSize()');
+
+insert into graphs (title, query, label, is_clickable)
+   values ('Database size - daily', '
+SELECT to_char(date, \'YYYY-Mon-DD\'), value / 1024.0 / 1024
+  FROM daily_stats, daily_stats_data
+ WHERE daily_stats_data.daily_stats_id = daily_stats.id 
+   AND title = \'Database size\'
+ORDER BY daily_stats_data.date DESC
+LIMIT 90', 'database size (daily) MB', FALSE);
+
+insert into graphs (title, query, label, is_clickable) 
+   values ('Database size - monthly', '
+SELECT to_char(date, \'YYYY-MM\') AS MONTH,
+       max(value) / 1024.0 / 1024
+  FROM daily_stats, daily_stats_data
+ WHERE daily_stats_data.daily_stats_id = daily_stats.id 
+   AND title = \'Database size\'
+GROUP BY to_char(date, \'YYYY-MM\')
+ORDER BY to_char(date, \'YYYY-MM\') DESC
+LIMIT 90', 'database size (monthly) GB', FALSE);
+
+14 October 2006 - Adding Sanity Test Failures
+
+create table sanity_test_failures
+(
+    id                         serial                not null,
+    commit_log_id              integer               not null,
+    message                    text                  not null,
+    primary key (id)
+);
+
+alter table sanity_test_failures
+    add foreign key  (commit_log_id)
+       references commit_log (id) on update restrict on delete restrict;
+
+
+-- get the new SP
+psql freshports.org  < sp.txt
+
+-- set permissions
+psql freshports.org  < POSTGRESQL.sql
+
+
+
+
+30 July 2006
+
+create table category_stats
+(
+    category_id                integer               not null,
+    port_count                 integer               not null,
+    last_update                timestamp without time zone not null,
+    primary key (category_id)
+);
+
+alter table category_stats
+    add foreign key  (category_id)
+       references categories (id) on update cascade on delete cascade;
+
+
+define SPOOLINGDIR in scripts/config.sh
+
+for adding element_pathname:
+
+create table element_pathname(element_id integer not null, pathname
+text not null);
+
+insert into element_pathname (select id, element_pathname(id) from
+element);
+
+alter table element_pathname add foreign key (element_id) references
+element(id) on delete cascade;
+
+create UNIQUE index element_pathname_pathname on element_pathname(pathname);
+
+insert into element_pathname (select id, element_pathname(id) from element);
+
+#####
+
+For adding personal watch lists:
+
+CREATE OR REPLACE FUNCTION Generate_Watch_List_Token() returns text as '
+    SELECT md5((random())::text) || md5((random())::text) as token;
+' LANGUAGE 'sql' VOLATILE;
+
+ALTER TABLE watch_list ADD COLUMN token text;
+ALTER TABLE watch_list ALTER COLUMN token SET DEFAULT generate_watch_list_token();
+update watch_list set token = generate_watch_list_token();
+
+For adding new fields to ports table:
+
+ALTER TABLE ports ADD COLUMN is_interactive text;
+ALTER TABLE ports ADD COLUMN only_for_archs text;
+ALTER TABLE ports ADD COLUMN not_for_archs text;
+
+This file contains notes for upgrading from one database version
+to another.
+
+25 June 2005
+
+alter table ports add column expiration_date date default null;
+
+run scripts/Verify/set-expiration-date.pl
+
+create index ports_ports_expiration_date on ports(expiration_date) where expiration_date is not null;
+
+drop type freshports_commit_record cascade;
+drop type commit_record cascade;
+
+run database-schema/sp.txt
+insert into daily_stats (title, query) values ('Expired Ports', 'select Stats_Expired()');
+insert into daily_stats (title, query) values ('Expiration Ports', 'select Stats_Expiration()');
+
+
+15 February 2005
+
+alter table ports add column no_cdrom   text default null;
+alter table ports add column restricted text default null;
+
+run scripts/Verify/set-restricted-no-cdrom.pl
+
+28 January 2005
+
+add ports_vulnerable
+
+create table ports_vulnerable
+(
+    port_id                    integer               not null,
+    current                    integer               not null
+        default 1,
+    past                       integer               not null
+        default 0,
+    primary key (port_id)
+);
+
+
+alter table ports_vulnerable
+    add foreign key  (port_id)
+       references ports (id) on update restrict on delete cascade;
+
+insert into ports_vulnerable
+SELECT port_id, 0, count(distinct vuxml_id)
+  FROM commit_log_ports_vuxml
+ GROUP BY port_id;
+
+UPDATE ports_vulnerable
+   SET current = temp.current_vuln_count,
+       past    = past - temp.current_vuln_count
+FROM
+
+(select CLPV.port_id, count(distinct vuxml_id) as current_vuln_count
+  from commit_log_ports_vuxml CLPV, commit_log_ports CLP, ports P, ports_vulnerable PV
+ where CLP.commit_log_id = CLPV.commit_log_id
+   and CLPV.port_id      = CLP.port_id
+   and P.id              = CLP.port_id
+   and P.version         = CLP.port_version
+   and P.revision        = CLP.port_revision
+   and CLP.port_epoch    = P.portepoch
+   AND PV.port_id        = P.id
+group by 1
+order by 1, 2) as temp
+
+where ports_vulnerable.port_id = temp.port_id;
+
+
+
+
+
+13 September 2004
+
+Upgrade for:
+  no_latest_link
+  no_package
+  pkgname
+  portepoch
+
+alter table ports add column no_latest_link text;
+alter table ports add column no_package     text;
+alter table ports add column package_name   text;
+alter table ports add column portepoch      text;
+update ports set portepoch = '0' where portepoch is null;
+
+alter table commit_log_ports add column port_epoch text;
+update commit_log_ports set port_epoch = '0' where port_epoch is null;
+
+drop view ports_active;
+
+create view ports_active as
+select ports.*, element.name as name, categories.name as category
+from categories, ports, element
+where element.status = 'A'
+and categories.id = ports.category_id
+and ports.element_id = element.id;
+
+
+drop view ports_all;
+
+create view ports_all as
+select ports.*, element.name as name, categories.name as category, element.status
+from categories, ports, element
+where categories.id = ports.category_id
+and ports.element_id = element.id;
+
+create table commit_log_port_vuxml
+(
+    commit_log_id              integer               not null,
+    port_id                    integer               not null,
+    vuxml_id                   integer               not null,
+    primary key (commit_log_id, port_id)
+);
+
+create table vuxml
+(
+    id                         serial                not null,
+    vid                        text                  not null,
+    topic                      text                  not null,
+    description                text                  not null,
+    date_discovery             text                          ,
+    date_entry                 text                          ,
+    date_modified              text                          ,
+    status                     char(1)               not null,
+    primary key (id)
+);
+
+create table vuxml_affected
+(
+    id                         serial                not null,
+    vuxml_id                   integer               not null,
+    type                       text                  not null,
+    primary key (id)
+);
+
+create table commit_log_ports_vuxml
+(
+    id                         serial                not null,
+    commit_log_id              integer               not null,
+    port_id                    integer               not null,
+    vuxml_id                   integer               not null,
+    primary key (id)
+);
+
+create table vuxml_ranges
+(
+    id                         serial                not null,
+    vuxml_affected_id          integer               not null,
+    operator1                  text                  not null,
+    version1                   text                  not null,
+    operator2                  text                          ,
+    version2                   text                          ,
+    primary key (id)
+);
+
+create table vuxml_references
+(
+    id                         serial                not null,
+    vuxml_id                   integer               not null,
+    type                       text                  not null,
+    reference                  text                  not null,
+    primary key (id)
+);
+
+create table vuxml_names
+(
+    id                         serial                not null,
+    vuxml_affected_id          integer               not null,
+    name                       text                  not null,
+    primary key (id)
+);
+
+alter table vuxml_affected
+    add foreign key  (vuxml_id)
+       references vuxml (id) on update cascade on delete cascade;
+
+alter table commit_log_ports_vuxml
+    add foreign key  (vuxml_id)
+       references vuxml (id) on update cascade on delete cascade;
+
+alter table commit_log_ports_vuxml
+    add foreign key  (port_id)
+       references ports (id) on update cascade on delete cascade;
+
+alter table commit_log_ports_vuxml
+    add foreign key  (commit_log_id)
+       references commit_log (id) on update cascade on delete cascade;
+
+alter table vuxml_ranges
+    add foreign key  (vuxml_affected_id)
+       references vuxml_affected (id) on update cascade on delete cascade;
+
+alter table vuxml_references
+    add foreign key  (vuxml_id)
+       references vuxml (id) on update cascade on delete cascade;
+
+alter table vuxml_names
+    add foreign key  (vuxml_affected_id)
+       references vuxml_affected (id) on update cascade on delete cascade;
+
+drop one of the types.... can't remember what one
+
+< data_types.txt
+< sp.txt
+
+Then run scripts/Verify/set-no_latest_link.no_package.pkgname.portepoch.pl
+
+< MOVED
+< UPDATED
+< vuln.xml
+
+Feb 22 2004
+
+Add deprecated, ignore to ports.
+
+begin;
+
+alter table ports add deprecated text;
+alter table ports add ignore     text;
+
+drop view ports_active cascade;
+
+create view ports_active as
+select ports.*, element.name as name, categories.name as category
+from categories, ports, element
+where element.status = 'A'
+and categories.id = ports.category_id
+and ports.element_id = element.id;
+
+grant select on ports_active to group www;
+
+drop type commit_record cascade;
+\i datatype.txt
+\i sp.txt
+
+commit;
+
+
+
+Feb 13 2004
+
+To upgrade the security_notice and security_notice_table:
+
+begin;
+
+create table security_notice_status
+(
+    id                         char(1)               not null,
+    name                       text                  not null,
+    description                text                  not null,
+    primary key (id)
+);
+
+insert into security_notice_status (id,name,description) 
+values ('A', 'Active', 'A valid security concern');
+
+insert into security_notice_status (id,name,description)
+values ('I', 'Ingore', 'Ingore this notice');
+
+insert into security_notice_status (id,name,description) 
+values ('C', 'Candidate', 'A candidate for becoming a security notice');
+
+alter table security_notice rename status to security_notice_status_id;
+alter table security_notice_audit rename status to security_notice_status_id;
+
+alter table security_notice
+    add foreign key  (security_notice_status_id)
+       references security_notice_status (id) on update restrict on delete restrict;
+
+alter table security_notice_audit
+    add foreign key  (security_notice_status_id)
+       references security_notice_status (id) on update restrict on delete restrict;
+
+alter table security_notice drop constraint security_notice_status;
+alter table security_notice_audit drop constraint security_notice_audit_status;
+
+commit;
+
+Jan 31 2004
+
+begin;
+alter table page_load_summary add column total_tmp int;
+update page_load_summary set total_tmp = non_users;
+update page_load_summary set non_users = users;
+update page_load_summary set users = total_tmp;
+alter table page_load_summary rename users to total;
+alter table page_load_summary rename non_users to users;
+
+Jan 9 2004
+
+alter table page_load_detail add column date date;
+alter table page_load_detail add column time time;
+update page_load_detail set date = timestamp::date, time = timestamp::time;
+
+alter table page_load_detail alter date set not null;
+alter table page_load_detail alter time set not null;
+
+alter table page_load_detail alter date set default current_date;
+alter table page_load_detail alter time set default localtime;
+
+
+December 30 2003
+
+create table ports_moved
+(
+    id            serial                not null,
+    from_port_id  integer               not null,
+    to_port_id    integer                       ,
+    date          date                  not null,
+    reason        text                  not null,
+    primary key (id)
+);
+
+
+alter table ports_moved
+    add foreign key  (from_port_id)
+       references ports (id) on update cascade on delete cascade;
+
+alter table ports_moved
+    add foreign key  (to_port_id)
+       references ports (id) on update cascade on delete cascade;
+
+
+
+
+########
+
+
+14 November 2003
+
+- To add page_load_detail ability:
+
+cd DOCMENT_ROOT/..
+mkdir caching
+mkdir caching/cache
+mkdir caching/tmp
+
+Add this to www/include/common.php
+
+	require_once($_SERVER['DOCUMENT_ROOT'] . '/../classes/page_load_detail.php');
+
+$Statistics = new PageLoadDetail();
+
+
+Add this to configuration/database.php
+
+	$Statistics->DBSet($db);
+
+
+create table page_load_summary
+(
+    id                      serial                not null,
+    date                    date                  not null,
+    name                    text                  not null,
+    users                   integer               not null
+        default 0,
+    non_users               integer               not null
+        default 0,
+    rendering_time_avg      interval              not null,
+    primary key (id)
+);
+
+create unique index page_loads_date_date on page_load_summary (date, name);
+
+create table page_load_detail
+(
+    id                      serial                not null,
+    timestamp               timestamp without time zone not null
+        default current_timestamp,
+    page_name               text                  not null,
+    user_id                 integer                       ,
+    ip_address              inet                  not null,
+    full_url                text                  not null,
+    rendering_time          interval              not null,
+    primary key (id)
+);
+
+create unique index page_loads_date_date2 on page_load_detail (timestamp, page_name);
+
+
+alter table page_load_detail
+    add foreign key  (user_id)
+       references users (id) on update cascade on delete cascade;
+
+Add these permissions:
+
+grant insert                         on page_load_detail               to group www;
+grant update                         on page_load_detail_id_seq        to group www;
+
+
+
+*************************************************
+
+
+2003 September 29
+
+  Add functions: 
+	commit_log_ports_insert
+	LastestCommits
+	IsPort
+	IsCategory
+	elementGet
+    freshports_commit
+	LoginCounts
+
+  Add types:
+	element_type
+	commit_record
+    freshports_commit_record
+	logincounts_record
+
+  Populate commit_log_ports_elements:
+
+
+create table commit_log_ports_elements
+(
+    commit_log_id           integer               not null,
+    element_id              integer               not null,
+    primary key (commit_log_id, element_id)
+);
+
+begin;
+create commit_log_ports_elements;
+
+delete from commit_log_ports_elements;
+
+ insert into commit_log_ports_elements
+ SELECT commit_log_ports.commit_log_id, 
+        ports.element_id
+   FROM commit_log_ports, ports
+  WHERE commit_log_ports.port_id = ports.id;
+
+commit;
+
+ SELECT commit_log_ports.commit_log_id, 
+        ports.element_id,
+        element_pathname(ports.element_id)
+   INTO MASTER
+   FROM commit_log_ports, ports
+  WHERE commit_log_ports.port_id = ports.id;
+
+
+ SELECT commit_log_elements.commit_log_id, 
+        commit_log_elements.element_id,
+        element_pathname(commit_log_elements.element_id)
+   INTO MATCHES
+   FROM commit_log_elements;
+
+
+create index master_commit_log_id  on master (commit_log_id);
+create index matches_commit_log_id on matches(commit_log_id);
+
+create index master_element_pathname  on master (element_pathname);
+create index matches_element_pathname on matches(element_pathname);
+
+
+vacuum analyse master;
+vacuum analyse matches;
+
+begin;
+
+insert into commit_log_ports_elements
+SELECT commit_log_id,
+       element_id
+  FROM matches
+ WHERE NOT EXISTS (
+   SELECT *
+     FROM master
+     WHERE matches.element_pathname LIKE (master.element_pathname || '/%')
+       AND matches.commit_log_id = master.commit_log_id)
+   AND matches.element_pathname LIKE '/ports/%';
+
+commit;

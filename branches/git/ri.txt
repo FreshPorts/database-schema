@@ -1,0 +1,1047 @@
+--
+-- $Id: ri.txt,v 1.47 2012-09-24 15:14:42 dan Exp $
+--
+-- Copyright (c) 1998-2007 DVL Software Limited
+--
+
+CREATE OR REPLACE FUNCTION check_siblings() RETURNS TRIGGER as '
+   declare 
+      ElementCount integer;
+		PortCount		integer;
+		OldParentStatus	text;
+begin
+
+  if new.Parent_ID is null then
+    select count(*) 
+      into ElementCount
+      from element
+     where element.name=new.name
+       and element.Parent_ID is null
+     group by element.name;
+  else
+    select count(*) 
+      into ElementCount
+      from element
+     where element.name=new.name
+       and element.Parent_ID=new.Parent_ID
+     group by element.name;
+  end if;
+
+  if (ElementCount > 1) then
+    RAISE EXCEPTION ''element % cannot be created as it already exists under that parent %'', new.name, new.parent_id;
+  end if;
+
+	-- are we dealing with a Makefile which has a parent?
+
+	if new.name = ''Makefile'' and new.Parent_ID is NOT NULL then
+
+		-- is this Makefile part of a port?
+		SELECT count(*)
+		  INTO PortCount
+		  FROM ports
+		 WHERE element_id = new.Parent_ID;
+
+		IF PortCount > 0 THEN
+
+
+		-- we did a truth table.  The status of a port is
+		-- determined by the status of the Makefile.
+		-- if it is deleted, we delete the port.
+		-- and if the Makefile is put back, we activate the port
+
+			SELECT status
+			  INTO oldParentStatus
+			  FROM element
+			 WHERE id = new.Parent_ID;
+
+			if oldParentStatus != new.status then
+				UPDATE element
+				   SET status = new.status
+				 WHERE id = new.Parent_ID;
+			end if;
+		end if;
+	end if;
+
+  RETURN NEW;
+
+end;
+' LANGUAGE 'plpgsql';
+
+
+  DROP TRIGGER IF EXISTS check_siblings ON element;
+CREATE TRIGGER check_siblings AFTER INSERT OR UPDATE ON element FOR EACH ROW
+EXECUTE PROCEDURE check_siblings();
+
+
+CREATE OR REPLACE FUNCTION on_delete_remove_children() RETURNS TRIGGER as '
+begin
+
+  delete from element 
+   where parent_id=old.id;
+
+  RETURN old;
+end;
+' LANGUAGE 'plpgsql';
+
+  DROP TRIGGER IF EXISTS on_delete_remove_children ON element;
+CREATE TRIGGER on_delete_remove_children BEFORE DELETE ON element FOR EACH ROW
+EXECUTE PROCEDURE on_delete_remove_children();
+
+
+
+CREATE OR REPLACE FUNCTION check_parent() RETURNS TRIGGER as '
+   declare
+      ElementCount int4;
+begin
+   --  message ''check_parent'';
+   if new.parent_id is not null then
+      --    message ''check_parent 2'';
+      select count(*) 
+        into ElementCount
+        from element
+       where element.id = new.parent_id;
+      --    message ''check_parent 3'';
+      if (ElementCount = 0) then
+         -- message ''no such parent '' || NOW(*);
+         RAISE EXCEPTION ''modifications to element % with name=% cannot be completed as the parent % does not exist.'', new.id, new.name, new.parent_id;
+      end if;
+      if new.parent_id = new.id then
+         RAISE EXCEPTION ''modifications to element % with name=% cannot be completed as the element cannot be a child of itself.'', new.id, new.name;
+      end if;
+   end if;
+   --    message ''check_parent 4''
+
+   RETURN NEW;
+end;
+' LANGUAGE 'plpgsql';
+
+  DROP TRIGGER IF EXISTS check_parent ON element;
+CREATE TRIGGER check_parent BEFORE INSERT OR UPDATE ON element FOR EACH ROW
+EXECUTE PROCEDURE check_parent();
+
+
+
+CREATE OR REPLACE FUNCTION parent_must_be_directory() RETURNS TRIGGER as '
+   declare
+      ParentType char(1);
+begin
+   --  message ''parent_must_be_directory'';
+
+   if new.Parent_Id is not null then
+      select directory_file_flag 
+        into ParentType
+       from element
+      where element.id = new.parent_id;
+
+      if (ParentType = ''F'') then
+         -- message ''parent cannot be a file '' || NOW(*);
+         RAISE NOTICE ''modifications to element % with name=% required modifying the the parent % from a file to directory.'', new.id, new.name, new.parent_id;
+		UPDATE element
+		   SET directory_file_flag = ''D''
+		 WHERE element.id          = new.parent_id;
+     end if;
+   end if;
+
+   RETURN NEW;
+end;
+' LANGUAGE 'plpgsql';
+
+  DROP TRIGGER IF EXISTS parent_must_be_directory ON element;
+CREATE TRIGGER parent_must_be_directory BEFORE INSERT OR UPDATE ON element FOR EACH ROW
+EXECUTE PROCEDURE parent_must_be_directory();
+
+
+
+
+-- the procedure
+CREATE OR REPLACE FUNCTION id_change() RETURNS TRIGGER as '
+begin
+   --  message ''check_siblings 4'';
+   if (new.id <> old.id) then
+      -- message ''change of id not allowed '' || NOW(*);
+      RAISE EXCEPTION ''modifications to element % with name=% cannot be completed as you are not allowed to change id (new value was %).'', old.id, old.name, new.id;
+   end if;
+
+   RETURN NEW;
+end;
+' LANGUAGE 'plpgsql';
+
+-- the trigger
+  DROP TRIGGER IF EXISTS id_change ON element;
+CREATE TRIGGER id_change BEFORE UPDATE ON element FOR EACH ROW
+EXECUTE PROCEDURE id_change();
+
+
+-- keep ports.status in sync with element.status
+-- this is a performance boosting exercise
+
+CREATE OR REPLACE FUNCTION element_ports_status() RETURNS TRIGGER AS $$
+   BEGIN
+      IF (NEW.status <> OLD.status) then
+         UPDATE ports
+            SET status = NEW.status
+          WHERE ports.element_id = NEW.id;
+      END IF;
+      RETURN NEW;
+   END
+$$ LANGUAGE 'plpgsql';
+
+  DROP TRIGGER IF EXISTS element_ports_status ON element;
+CREATE TRIGGER element_ports_status
+    AFTER UPDATE ON element
+    FOR EACH ROW
+    EXECUTE PROCEDURE element_ports_status();
+
+CREATE OR REPLACE FUNCTION ports_status() RETURNS TRIGGER AS $$
+   DECLARE
+      l_status    text;
+   BEGIN
+      -- the port status always takes its value
+      -- from the corresponding element
+      SELECT status
+        INTO l_status
+        FROM element
+       WHERE element.id = NEW.element_id;
+       
+      NEW.status := l_status;
+
+      RETURN NEW;
+   END
+$$ LANGUAGE 'plpgsql';
+
+  DROP TRIGGER IF EXISTS ports_status ON ports;
+CREATE TRIGGER ports_status
+    BEFORE UPDATE OR INSERT ON ports
+    FOR EACH ROW
+    EXECUTE PROCEDURE ports_status();
+    
+   
+
+
+CREATE OR REPLACE FUNCTION ports_clear_cache() RETURNS TRIGGER AS $$
+   DECLARE
+      l_port      text;
+      l_category  text;
+   BEGIN
+      IF TG_OP = 'UPDATE' THEN
+            SELECT category, name
+              INTO l_category, l_port
+              FROM ports_all
+             WHERE id = NEW.id;
+
+            INSERT INTO cache_clearing_ports (port_id, category, port)
+                 VALUES (NEW.id, l_category, l_port);
+
+          NOTIFY port_updated;
+      END IF;
+
+      -- when a port changes, add an entry to the cache clearing table
+      RETURN NEW;
+   END
+$$ LANGUAGE 'plpgsql';
+
+  DROP TRIGGER IF EXISTS ports_clear_cache ON ports;
+CREATE TRIGGER ports_clear_cache
+    AFTER UPDATE ON ports
+    FOR EACH ROW
+    EXECUTE PROCEDURE ports_clear_cache();
+
+
+CREATE OR REPLACE FUNCTION port_dependencies_clear_cache() RETURNS TRIGGER AS $$
+   DECLARE
+      l_cache_clearing_ports_id   int8;
+      l_port      text;
+      l_category  text;
+   BEGIN
+      IF TG_OP = 'UPDATE' OR TG_OP = 'INSERT' THEN
+         INSERT INTO cache_clearing_ports (port_id, category, port)
+            SELECT distinct id, category, name
+              FROM port_dependencies PD, ports_all PA
+             WHERE PD.port_id                = NEW.id
+               AND PD.port_id_dependent_upon = PA.id
+               AND NOT EXISTS (SELECT port_id 
+                                 FROM cache_clearing_ports
+                                WHERE port_id = PD.port_id_dependent_upon);
+
+          NOTIFY port_updated;
+      END IF;
+
+      IF TG_OP = 'DELETE' THEN
+         INSERT INTO cache_clearing_ports (port_id, category, port)
+            SELECT distinct id, category, name
+              FROM port_dependencies PD, ports_all PA
+             WHERE PD.port_id                = OLD.id
+               AND PD.port_id_dependent_upon = PA.id
+               AND NOT EXISTS (SELECT port_id 
+                                 FROM cache_clearing_ports
+                                WHERE port_id = PD.port_id_dependent_upon);
+
+          NOTIFY port_updated;
+      END IF;
+
+      -- when a port changes, add an entry to the cache clearing table
+      RETURN NEW;
+   END
+$$ LANGUAGE 'plpgsql';
+
+  DROP TRIGGER IF EXISTS port_dependencies_clear_cache ON ports;
+CREATE TRIGGER port_dependencies_clear_cache
+    AFTER UPDATE OR INSERT OR DELETE ON ports
+    FOR EACH ROW
+    EXECUTE PROCEDURE port_dependencies_clear_cache();
+
+
+CREATE OR REPLACE FUNCTION port_dependencies_insert_clear_cache() RETURNS TRIGGER AS $$
+   DECLARE
+      l_port      text;
+      l_category  text;
+   BEGIN
+      --
+      -- This function handles the addition of a new dependency.
+      -- yes, we need to clear the cache for both port_id and port_id_dependent_upon
+      -- from the cache_clearing_ports.  I figure there is a shorter way to this but
+      -- I cannot think it through right now.
+      --
+      IF TG_OP = 'INSERT' THEN
+            SELECT category, name
+              INTO l_category, l_port
+              FROM ports_all
+             WHERE id = NEW.port_id;
+
+            INSERT INTO cache_clearing_ports (port_id, category, port)
+              VALUES (NEW.port_id, l_category, l_port);
+
+            SELECT category, name
+              INTO l_category, l_port
+              FROM ports_all
+             WHERE id = NEW.port_id_dependent_upon;
+
+            INSERT INTO cache_clearing_ports (port_id, category, port)
+              VALUES (NEW.port_id_dependent_upon, l_category, l_port);
+
+          NOTIFY port_updated;
+      END IF;
+
+      -- when a port changes, add an entry to the cache clearing table
+      RETURN NEW;
+   END
+$$ LANGUAGE 'plpgsql';
+
+  DROP TRIGGER IF EXISTS port_dependencies_insert_clear_cache ON port_dependencies;
+CREATE TRIGGER port_dependencies_insert_clear_cache
+    AFTER INSERT ON port_dependencies
+    FOR EACH ROW
+    EXECUTE PROCEDURE port_dependencies_insert_clear_cache();
+
+
+CREATE OR REPLACE FUNCTION port_dependencies_delete_clear_cache() RETURNS TRIGGER AS $$
+   DECLARE
+      l_port      text;
+      l_category  text;
+   BEGIN
+      --
+      -- This function handles the deletion of a existing dependency.
+      -- yes, we need to clear the cache for both port_id and port_id_dependent_upon
+      -- from the cache_clearing_ports.  I figure there is a shorter way to this but
+      -- I cannot think it through right now.
+      --
+
+      IF TG_OP = 'DELETE' THEN
+            SELECT category, name
+              INTO l_category, l_port
+              FROM ports_all
+             WHERE id = OLD.port_id;
+
+            INSERT INTO cache_clearing_ports (port_id, category, port)
+              VALUES (OLD.port_id, l_category, l_port);
+
+            SELECT category, name
+              INTO l_category, l_port
+              FROM ports_all
+             WHERE id = OLD.port_id_dependent_upon;
+
+            INSERT INTO cache_clearing_ports (port_id, category, port)
+              VALUES (OLD.port_id_dependent_upon, l_category, l_port);
+
+          NOTIFY port_updated;
+      END IF;
+
+      -- when a port changes, add an entry to the cache clearing table
+      RETURN OLD;
+   END
+$$ LANGUAGE 'plpgsql';
+
+  DROP TRIGGER IF EXISTS port_dependencies_delete_clear_cache ON port_dependencies;
+CREATE TRIGGER port_dependencies_delete_clear_cache
+    AFTER DELETE ON port_dependencies
+    FOR EACH ROW
+    EXECUTE PROCEDURE port_dependencies_delete_clear_cache();
+
+
+CREATE OR REPLACE FUNCTION ports_vulnerable_delete_clear_cache() RETURNS TRIGGER AS $$
+   DECLARE
+      l_port      text;
+      l_category  text;
+   BEGIN
+      IF TG_OP = 'DELETE' THEN
+
+        SELECT category, name
+          INTO l_category, l_port
+          FROM ports_all
+         WHERE id = OLD.port_id;
+
+        -- if we are deleting a port, we'll get back null values for this
+        IF l_category IS NOT NULL AND l_port IS NOT NULL THEN
+          INSERT INTO cache_clearing_ports (port_id, category, port)
+            VALUES (OLD.port_id, l_category, l_port);
+
+          NOTIFY port_updated;
+        END IF;
+      END IF;
+
+      -- when a port changes, add an entry to the cache clearing table
+      RETURN OLD;
+   END
+$$ LANGUAGE 'plpgsql';
+
+  DROP TRIGGER IF EXISTS ports_vulnerable_delete_clear_cache ON ports_vulnerable;
+CREATE TRIGGER ports_vulnerable_delete_clear_cache
+    AFTER DELETE ON ports_vulnerable
+    FOR EACH ROW
+    EXECUTE PROCEDURE ports_vulnerable_delete_clear_cache();
+
+
+
+
+CREATE OR REPLACE FUNCTION element_pathname_insert() RETURNS TRIGGER AS $$
+   DECLARE
+     l_pathname  text;
+   BEGIN
+      l_pathname := element_pathname(NEW.id);
+      INSERT INTO element_pathname (element_id, pathname) VALUES (NEW.id, l_pathname);
+      RETURN NEW;
+   END
+$$ LANGUAGE 'plpgsql';
+
+  DROP TRIGGER IF EXISTS element_pathname_insert ON element;
+CREATE TRIGGER element_pathname_insert
+    AFTER INSERT ON element
+    FOR EACH ROW
+    EXECUTE PROCEDURE element_pathname_insert();
+
+CREATE OR REPLACE FUNCTION element_pathname_update() RETURNS TRIGGER AS $$
+   BEGIN
+      if (NEW.name != old.name OR new.parent_id != old.parent_id) THEN
+         UPDATE element_pathname SET pathname = element_pathname(new.id) WHERE element_id = NEW.id;
+         PERFORM ElementPathnameUpdateChildren(new.id);
+      END IF;
+      RETURN NEW;
+   END
+$$ LANGUAGE 'plpgsql';
+
+  DROP TRIGGER IF EXISTS element_pathname_update ON element;
+CREATE TRIGGER element_pathname_update
+    AFTER UPDATE ON element
+    FOR EACH ROW
+    EXECUTE PROCEDURE element_pathname_update();
+
+
+CREATE OR REPLACE FUNCTION version_revision_uniqueness() RETURNS TRIGGER as '
+   declare 
+      ElementID            int4;
+      ExistingRevisionName text;
+begin
+
+   select revision_name
+     into ExistingRevisionName
+     from system_branch_element_revision
+    where system_branch_id = new.system_branch_id
+      and element_id        = new.element_id;
+
+   IF FOUND THEN
+      delete from system_branch_element_revision 
+       where system_branch_id = new.system_branch_id
+         and element_id       = new.element_id;
+   END IF;
+
+   RETURN NEW;
+
+end;
+' LANGUAGE 'plpgsql';
+
+
+
+  DROP TRIGGER IF EXISTS version_revision_uniqueness ON system_branch_element_revision;
+CREATE TRIGGER version_revision_uniqueness BEFORE INSERT OR UPDATE ON system_branch_element_revision FOR EACH ROW
+EXECUTE PROCEDURE version_revision_uniqueness();
+
+
+-- the procedure
+CREATE OR REPLACE FUNCTION element_delete_check() RETURNS TRIGGER as $$
+begin
+
+   -- if we are removing an element, make sure we set the
+   -- element status to deleted.
+
+   if (NEW.change_type = 'R') then
+--      select Element_SetStatus(new.element_id, 'D');
+      UPDATE element
+         SET status = 'D'
+       WHERE id = NEW.element_id;
+   end if;
+
+   --
+   -- * * * * * * * * * * * * * * * *
+   -- use a different return value if you change this
+   -- function to a BEFORE
+   -- * * * * * * * * * * * * * * * *
+   RETURN NEW;
+end;
+$$ LANGUAGE 'plpgsql';
+
+
+-- the trigger
+  DROP TRIGGER IF EXISTS element_delete_check ON commit_log_elements;
+CREATE TRIGGER element_delete_check BEFORE INSERT OR UPDATE ON commit_log_elements FOR EACH ROW
+EXECUTE PROCEDURE element_delete_check();
+
+
+
+
+
+
+CREATE OR REPLACE FUNCTION commit_log_delete_check() RETURNS TRIGGER as '
+begin
+
+	-- if we are removing a commit_log, make sure we remove
+	-- the commit_log_elements as well
+
+	delete
+      from commit_log_elements
+     where commit_log_id = old.id;
+
+   RETURN OLD;
+end;
+' LANGUAGE 'plpgsql';
+
+
+
+  DROP TRIGGER IF EXISTS commit_log_delete_check ON commit_log;
+CREATE TRIGGER commit_log_delete_check BEFORE DELETE ON commit_log FOR EACH ROW
+EXECUTE PROCEDURE commit_log_delete_check();
+
+
+
+
+
+
+
+
+
+CREATE OR REPLACE FUNCTION user_watch_list_create() RETURNS TRIGGER as $$
+begin
+
+	insert into watch_list (user_id, name, in_service) 
+                    values (new.id, 'main', TRUE);
+
+	insert into user_confirmations (user_id, token)
+					values (new.id, ENCODE(DIGEST((random() * 105311100709)::text, 'md5'), 'hex'));
+
+   RETURN OLD;
+end;
+$$ LANGUAGE 'plpgsql';
+
+
+
+-- the trigger
+  DROP TRIGGER IF EXISTS user_watch_list_create ON users; 
+CREATE TRIGGER user_watch_list_create AFTER INSERT ON users FOR EACH ROW
+EXECUTE PROCEDURE user_watch_list_create();
+
+
+
+
+CREATE OR REPLACE FUNCTION user_email_change() RETURNS TRIGGER as '
+begin
+
+	if old.email <> new.email then
+       RAISE NOTICE ''User % is changing email from % to %'', new.name, old.email, new.email;
+    end if;
+
+   -- return values from triggers fired AFTER are ignored.
+   RETURN NULL;
+end;
+' LANGUAGE 'plpgsql';
+
+
+
+-- the trigger
+  DROP TRIGGER IF EXISTS user_email_change ON users; 
+CREATE TRIGGER user_email_change AFTER UPDATE ON users FOR EACH ROW
+EXECUTE PROCEDURE user_email_change();
+
+
+
+CREATE OR REPLACE FUNCTION categories_insert_update() RETURNS TRIGGER AS '
+   BEGIN
+   	IF new.element_id IS NULL AND new.is_primary THEN
+         RAISE EXCEPTION ''if is_primary is set, then element_id must be non-null for a category (name=% description=%'', new.name, new.description;
+      end if;
+
+   	IF new.element_id IS NOT NULL AND NOT new.is_primary THEN
+         RAISE EXCEPTION ''Non primary categories must not have a element_id (name=% description=%'', new.name, new.description;
+      end if;
+
+      RETURN new;
+   END;'
+
+language 'plpgsql';
+
+
+  DROP TRIGGER IF EXISTS categories_insert ON categories;
+CREATE TRIGGER categories_insert AFTER INSERT OR UPDATE ON categories FOR EACH ROW
+EXECUTE PROCEDURE categories_insert_update();
+
+
+CREATE OR REPLACE FUNCTION categories_new() RETURNS TRIGGER AS $$
+   BEGIN
+		NOTIFY category_new;
+
+		RETURN new;
+   END;
+$$ language 'plpgsql';
+
+
+  DROP TRIGGER IF EXISTS categories_new ON categories;
+CREATE TRIGGER categories_new AFTER INSERT ON categories FOR EACH ROW
+EXECUTE PROCEDURE categories_new();
+
+
+
+CREATE OR REPLACE FUNCTION ports_categories_set() RETURNS TRIGGER AS $$
+   DECLARE
+		CategoryCount	integer;
+		CategoryNames	text;
+		Category		text;
+		CategoryID		int8;
+		UpdateNeeded	boolean;
+   BEGIN
+		UpdateNeeded := TRUE;
+
+		IF TG_OP = 'UPDATE' THEN
+			IF old.categories = new.categories THEN
+				UpdateNeeded := FALSE;
+			END IF;
+		END IF;
+
+		IF UpdateNeeded THEN
+
+			DELETE 
+			  FROM ports_categories
+			 WHERE port_id = new.id;
+
+			IF new.categories IS NOT NULL THEN
+
+				CategoryCount := 0;
+				CategoryNames := new.categories;
+	      			LOOP
+        	 			CategoryCount := CategoryCount + 1;
+	        	 		Category := split_part(CategoryNames, ' ', CategoryCount);
+
+					-- let us not get carried away....
+   				      	IF Category = '' OR CategoryCount > 100 THEN
+			      		      EXIT;
+         				END IF;
+
+					SELECT id
+					  INTO CategoryID
+					  FROM categories
+					 WHERE name = Category;
+
+					IF NOT FOUND THEN
+						RAISE NOTICE ' we need to create category % ', Category;
+						CategoryID := CreateCategory(Category, 'no description supplied', FALSE);
+					END IF;
+
+					INSERT INTO ports_categories (port_id, category_id)
+					   SELECT ports.id, CategoryID FROM ports
+					    WHERE ports.id = new.id
+					      AND NOT exists (SELECT * 
+					                        FROM ports_categories
+					                       WHERE port_id     = new.id
+					                         AND category_id = CategoryID);
+
+--					RAISE NOTICE ' category % is % with id %', CategoryCount, Category, CategoryID;
+		      		END LOOP;
+			END IF;
+		END IF;
+
+      RETURN NEW;
+   END
+$$ LANGUAGE 'plpgsql';
+
+  DROP TRIGGER IF EXISTS ports_ports_categories ON ports;
+CREATE TRIGGER ports_ports_categories
+    AFTER INSERT OR UPDATE ON ports
+    FOR EACH ROW
+    EXECUTE PROCEDURE ports_categories_set();
+
+
+--
+-- These routines keep track of the latest commits.
+-- It is a short cut mechanism.
+--
+
+
+
+CREATE OR REPLACE FUNCTION commit_log_insert () RETURNS trigger
+AS '
+BEGIN
+   INSERT INTO latest_commits (commit_log_id, commit_date) values (new.id,  new.commit_date);
+
+   -- see also commit_log_update
+   INSERT INTO cache_clearing_dates (date_to_clear) 
+     SELECT new.commit_date
+     WHERE NOT EXISTS (SELECT date_to_clear FROM cache_clearing_dates WHERE date_to_clear = new.commit_date);
+
+   IF FOUND THEN
+     NOTIFY date_updated;
+   END IF;
+
+   RETURN new;
+END;'
+LANGUAGE plpgsql;
+
+  DROP TRIGGER IF EXISTS commit_log_insert ON commit_log;
+CREATE TRIGGER commit_log_insert
+AFTER INSERT ON commit_log
+FOR EACH ROW
+EXECUTE PROCEDURE commit_log_insert ();
+
+
+
+
+
+CREATE OR REPLACE FUNCTION commit_log_update () RETURNS TRIGGER
+AS '
+BEGIN
+   UPDATE latest_commits_ports
+      SET commit_date = new.commit_date
+    WHERE (latest_commits_ports.commit_log_id = new.id);
+
+   UPDATE latest_commits
+      SET commit_date = new.commit_date
+    WHERE (latest_commits.commit_log_id = new.id);
+
+   -- see also commit_log_insert
+   INSERT INTO cache_clearing_dates (date_to_clear) 
+     SELECT new.commit_date
+     WHERE NOT EXISTS (SELECT date_to_clear FROM cache_clearing_dates WHERE date_to_clear = new.commit_date);
+   IF FOUND THEN
+     NOTIFY date_updated;
+   END IF;
+
+   RETURN new;
+END;'
+LANGUAGE plpgsql;
+
+  DROP TRIGGER IF EXISTS commit_log_update ON commit_log;
+CREATE TRIGGER commit_log_update
+AFTER UPDATE ON commit_log
+FOR EACH ROW
+EXECUTE PROCEDURE commit_log_update ();
+
+
+
+CREATE OR REPLACE FUNCTION commit_log_ports_insert () RETURNS TRIGGER
+AS '
+BEGIN
+   INSERT INTO latest_commits_ports (commit_log_id, commit_date)
+	      SELECT new.commit_log_id,
+            (SELECT commit_log.commit_date
+               FROM commit_log
+              WHERE (commit_log.id = new.commit_log_id)
+            )
+       WHERE (NOT (EXISTS (SELECT commits_latest_ports.commit_log_id
+                             FROM latest_commits_ports commits_latest_ports
+                            WHERE (commits_latest_ports.commit_log_id = new.commit_log_id)
+                           )
+                   )
+             );
+   RETURN new;
+END;'
+LANGUAGE plpgsql;
+
+  DROP TRIGGER IF EXISTS commit_log_ports_insert ON commit_log_ports;
+CREATE TRIGGER commit_log_ports_insert
+AFTER INSERT ON commit_log_ports
+FOR EACH ROW
+EXECUTE PROCEDURE commit_log_ports_insert ();
+
+
+--
+-- watch list count refresh
+--
+CREATE OR REPLACE FUNCTION watch_list_element_insert () RETURNS TRIGGER AS $$
+DECLARE
+	l_port_id	int8;
+	l_port      text;
+	l_category  text;
+BEGIN
+	RAISE NOTICE 'into watch_list_element_insert with %', NEW.element_id;
+	SELECT id, category, name
+	  INTO l_port_id, l_category, l_port
+     FROM ports_all
+    WHERE element_id = NEW.element_id
+      AND NOT EXISTS (SELECT CCP.port_id 
+                        FROM cache_clearing_ports CCP
+                       WHERE CCP.port_id = ports_all.id);
+          
+   IF FOUND THEN
+		RAISE NOTICE 'not found in cache.  will insert %, %, %', l_port_id, l_category, l_port;
+		INSERT INTO cache_clearing_ports (port_id, category, port)
+          VALUES (l_port_id, l_category, l_port);
+		NOTIFY port_updated;
+	ELSE
+		RAISE NOTICE 'found in cache.  will not insert';
+   END IF;
+
+	RETURN new;
+END; $$
+LANGUAGE plpgsql;
+
+  DROP TRIGGER IF EXISTS watch_list_element_insert ON watch_list_element;
+CREATE TRIGGER watch_list_element_insert
+AFTER INSERT ON watch_list_element
+FOR EACH ROW
+EXECUTE PROCEDURE watch_list_element_insert ();
+
+
+CREATE OR REPLACE FUNCTION watch_list_element_delete () RETURNS TRIGGER AS $$
+DECLARE
+	l_port_id	int8;
+	l_port      text;
+	l_category  text;
+BEGIN
+	RAISE NOTICE 'into watch_list_element_delete with %', OLD.element_id;
+	SELECT id, category, name
+	  INTO l_port_id, l_category, l_port
+     FROM ports_all
+    WHERE element_id = OLD.element_id
+      AND NOT EXISTS (SELECT CCP.port_id 
+                        FROM cache_clearing_ports CCP
+                       WHERE CCP.port_id = ports_all.id);
+          
+   IF FOUND THEN
+		RAISE NOTICE 'not found in cache.  will insert %, %, %', l_port_id, l_category, l_port;
+		INSERT INTO cache_clearing_ports (port_id, category, port)
+          VALUES (l_port_id, l_category, l_port);
+		NOTIFY port_updated;
+	ELSE
+		RAISE NOTICE 'found in cache.  will not insert';
+   END IF;
+
+	RETURN OLD;
+END; $$
+LANGUAGE plpgsql;
+
+  DROP TRIGGER IF EXISTS watch_list_element_delete ON watch_list_element;
+CREATE TRIGGER watch_list_element_delete
+BEFORE DELETE ON watch_list_element
+FOR EACH ROW
+EXECUTE PROCEDURE watch_list_element_delete ();
+
+
+ALTER TABLE ports                                                     
+    ADD FOREIGN KEY (last_commit_id)
+       REFERENCES commit_log (id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+CREATE OR REPLACE FUNCTION check_last_commit_id() RETURNS TRIGGER as '
+   declare 
+      l_max_commit_date  timestamp with time zone;
+      l_commit_log_id    integer;
+begin
+
+  if new.last_commit_id is null then
+    SELECT max(CL.commit_date)
+      INTO l_max_commit_date
+      FROM commit_log CL, commit_log_ports CLP
+     WHERE CLP.port_id = NEW.id
+       AND CL.id       = CLP.commit_log_id;
+
+    IF FOUND THEN
+      SELECT CL.id
+        INTO l_commit_log_id
+        FROM commit_log CL, commit_log_ports CLP
+       WHERE CLP.port_id    = NEW.id
+         AND CL.id          = CLP.commit_log_id
+         AND CL.commit_date = l_max_commit_date;
+
+      IF FOUND THEN
+        NEW.last_commit_id := l_commit_log_id;
+      END IF;
+    END IF;
+
+  end if;
+
+  RETURN NEW;
+
+end;
+' LANGUAGE 'plpgsql';
+
+
+  DROP TRIGGER IF EXISTS check_last_commit_id ON ports;
+CREATE TRIGGER check_last_commit_id
+BEFORE UPDATE ON ports
+FOR EACH ROW
+EXECUTE PROCEDURE check_last_commit_id();
+
+CREATE OR REPLACE FUNCTION ports_conflicts_set() RETURNS TRIGGER AS $$
+  BEGIN
+    DELETE FROM ports_conflicts WHERE port_id = NEW.id;
+
+    INSERT INTO ports_conflicts(port_id, conflicts_type, item_num, item_value)
+      SELECT NEW.id        AS port_id, 
+             'conflicts'::conflicts AS conflict_type,
+             row_number() OVER (ORDER BY item_value),
+             glob_to_regex(R.item_value)
+        FROM regexp_split_to_table(NEW.conflicts, E'\\s+') AS R(item_value)
+
+      UNION
+
+      SELECT NEW.id              AS port_id, 
+             'conflicts_build'::conflicts AS conflict_type,
+             row_number() OVER (ORDER BY item_value),
+             glob_to_regex(R.item_value)
+        FROM regexp_split_to_table(NEW.conflicts_build, E'\\s+') AS R(item_value)
+
+      UNION
+
+      SELECT NEW.id                AS port_id, 
+             'conflicts_install'::conflicts AS conflict_type,
+             row_number() OVER (ORDER BY item_value),
+             glob_to_regex(R.item_value)
+        FROM regexp_split_to_table(NEW.conflicts_install, E'\\s+') AS R(item_value);
+
+    RETURN NEW;
+  END
+$$ LANGUAGE 'plpgsql';
+
+
+  DROP TRIGGER IF EXISTS ports_conflicts_insert ON ports;
+CREATE TRIGGER ports_conflicts_insert
+    AFTER INSERT ON ports
+    FOR EACH ROW
+    EXECUTE PROCEDURE ports_conflicts_set();
+
+  DROP TRIGGER IF EXISTS ports_conflicts_update ON ports;
+CREATE TRIGGER ports_conflicts_update
+    AFTER UPDATE ON ports
+    FOR EACH ROW
+    EXECUTE PROCEDURE ports_conflicts_set();
+
+
+
+CREATE OR REPLACE FUNCTION commit_log_ports_vuxml_clear_cache() RETURNS TRIGGER AS $$
+   BEGIN
+      IF TG_OP = 'INSERT' OR TG_OP = 'UPDATE' THEN
+         INSERT INTO cache_clearing_ports(port_id, category, port)
+             SELECT PA.id, PA.category, PA.name
+               FROM ports_all PA
+              WHERE PA.id = NEW.port_id;
+
+         NOTIFY port_updated;
+      END IF;
+
+      IF TG_OP = 'DELETE' THEN
+         INSERT INTO cache_clearing_ports(port_id, category, port)
+            SELECT PA.id, PA.category, PA.name
+              FROM ports_all PA
+             WHERE PA.id = OLD.port_id;
+
+         NOTIFY port_updated;
+      END IF;
+      RETURN NEW;
+   END
+$$ LANGUAGE 'plpgsql';
+
+
+  DROP TRIGGER IF EXISTS commit_log_ports_vuxml_clear_cache ON commit_log_ports_vuxml;
+CREATE TRIGGER commit_log_ports_vuxml_clear_cache
+    AFTER UPDATE OR INSERT OR DELETE ON commit_log_ports_vuxml
+    FOR EACH ROW
+    EXECUTE PROCEDURE commit_log_ports_vuxml_clear_cache();
+
+
+
+-- packages related
+
+CREATE OR REPLACE FUNCTION package_imports_update() RETURNS TRIGGER AS $$
+BEGIN
+   IF TG_OP = 'INSERT' THEN
+      UPDATE packages_last_checked
+         SET processed_date = CURRENT_TIMESTAMP
+       WHERE abi_id      = NEW.abi_id
+         AND package_set = NEW.package_set;
+   END IF;
+   RETURN NEW;
+END
+$$ LANGUAGE 'plpgsql';
+
+  DROP TRIGGER IF EXISTS package_imports_completed ON package_imports;
+CREATE TRIGGER package_imports_completed
+    AFTER INSERT ON package_imports
+    FOR EACH ROW
+    EXECUTE PROCEDURE package_imports_update();
+
+
+
+CREATE OR REPLACE FUNCTION ports_origin_maintain() RETURNS TRIGGER AS $$
+DECLARE
+  l_port_origin text;
+BEGIN
+   -- grab the origin for this port
+   SELECT categoryport(NEW.id)
+     INTO l_port_origin;
+
+   IF TG_OP = 'INSERT' THEN
+      INSERT INTO ports_origin(port_id, port_origin)
+      SELECT NEW.id, l_port_origin;
+   END IF;
+   IF TG_OP = 'UPDATE' THEN
+      -- only update if different
+      UPDATE ports_origin po 
+         SET port_origin = l_port_origin
+       WHERE po.port_id = NEW.id
+         AND po.port_origin IS DISTINCT FROM l_port_origin;
+   END IF;
+
+   RETURN NEW;
+END
+$$ LANGUAGE 'plpgsql';
+
+
+  DROP TRIGGER IF EXISTS ports_origin_maintain ON ports;
+CREATE TRIGGER ports_origin_maintain
+    AFTER UPDATE OR INSERT ON ports
+    FOR EACH ROW
+    EXECUTE PROCEDURE ports_origin_maintain();
+
+CREATE OR REPLACE FUNCTION packages_last_checked_maintain() RETURNS TRIGGER AS $$
+BEGIN
+   IF TG_OP = 'INSERT' THEN
+      INSERT INTO packages_last_checked(abi_id, package_set)
+            VALUES (NEW.id, 'latest'),
+                   (NEW.id, 'quarterly');
+   END IF;
+
+   RETURN NEW;
+END
+$$ LANGUAGE 'plpgsql';
+
+
+  DROP TRIGGER IF EXISTS packages_last_checked_maintain ON abi;
+CREATE TRIGGER packages_last_checked_maintain
+    AFTER INSERT ON abi
+    FOR EACH ROW
+    EXECUTE PROCEDURE packages_last_checked_maintain();
