@@ -41,7 +41,7 @@ CREATE TYPE commit_record AS (
     not_for_archs        text,
 	repo_name            text,
 	svn_revision         text,
-	svn_hostname         text,
+	repo_hostname        text,
 	path_to_repo         text,
 	watch                bigint,
 	element_pathname     text
@@ -97,7 +97,7 @@ CREATE TYPE freshports_commit_record AS (
 	only_for_archs     text,
 	not_for_archs      text,
 	svn_revision       text,
-	svn_hostname       text,
+	repo_hostname      text,
 	path_to_repo       text,
 	repo_name          text,
 	onwatchlist        bigint
