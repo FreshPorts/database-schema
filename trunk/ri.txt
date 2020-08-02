@@ -338,6 +338,7 @@ CREATE OR REPLACE FUNCTION port_dependencies_delete_clear_cache() RETURNS TRIGGE
    DECLARE
       l_port      text;
       l_category  text;
+      l_inserted  boolean;
    BEGIN
       --
       -- This function handles the deletion of a existing dependency.
@@ -347,23 +348,33 @@ CREATE OR REPLACE FUNCTION port_dependencies_delete_clear_cache() RETURNS TRIGGE
       --
 
       IF TG_OP = 'DELETE' THEN
+            l_inserted = FALSE;
+
             SELECT category, name
               INTO l_category, l_port
               FROM ports_all
              WHERE id = OLD.port_id;
 
-            INSERT INTO cache_clearing_ports (port_id, category, port)
-              VALUES (OLD.port_id, l_category, l_port);
+            IF FOUND THEN
+              INSERT INTO cache_clearing_ports (port_id, category, port)
+                VALUES (OLD.port_id, l_category, l_port);
+              l_inserted = TRUE;
+            END IF;
 
             SELECT category, name
               INTO l_category, l_port
               FROM ports_all
              WHERE id = OLD.port_id_dependent_upon;
 
-            INSERT INTO cache_clearing_ports (port_id, category, port)
-              VALUES (OLD.port_id_dependent_upon, l_category, l_port);
+            IF FOUND THEN
+              INSERT INTO cache_clearing_ports (port_id, category, port)
+                VALUES (OLD.port_id_dependent_upon, l_category, l_port);
+              l_inserted = TRUE;
+            END IF;
 
-          NOTIFY port_updated;
+            IF l_inserted THEN
+              NOTIFY port_updated;
+            END IF;
       END IF;
 
       -- when a port changes, add an entry to the cache clearing table
