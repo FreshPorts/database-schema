@@ -1095,7 +1095,7 @@ CREATE OR REPLACE FUNCTION DailySummaryDateRemove(date) returns int8 AS $$
 	DECLARE
         DateToDelete	ALIAS for $1;
 
-		RowCount    	int8;
+	RowCount    	int8;
 
 	BEGIN
 		DELETE FROM Daily_Refreshes
@@ -3883,3 +3883,21 @@ package_set text, last_checked text, repo_date text, import_date text, processed
      FROM packages_last_checked PLC join abi on PLC.abi_id = abi.id
  ORDER BY abi.name, PLC.package_set;
 $$ LANGUAGE SQL STABLE;
+
+
+CREATE OR REPLACE FUNCTION GetPort(integer) returns text AS $$
+	DECLARE
+        a_port_id ALIAS for $1;
+
+	l_element_pathname text;
+
+	BEGIN
+		SELECT element_pathname(element_id)
+		  INTO l_element_pathname
+		  FROM ports
+		 WHERE id = a_port_id;
+
+		RETURN l_element_pathname;
+	END
+$$ LANGUAGE 'plpgsql';
+
