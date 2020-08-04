@@ -645,6 +645,8 @@ CREATE OR REPLACE FUNCTION ports_categories_set() RETURNS TRIGGER AS $$
 			END IF;
 		END IF;
 
+                RAISE NOTICE 'ports_categories_set() invoked for % ', element_pathname(new.element_id);
+                RAISE NOTICE 'categories is % ', new.categories;
 		IF UpdateNeeded THEN
 
 			DELETE 
@@ -674,6 +676,7 @@ CREATE OR REPLACE FUNCTION ports_categories_set() RETURNS TRIGGER AS $$
 						CategoryID := CreateCategory(Category, 'no description supplied', FALSE);
 					END IF;
 
+			                RAISE NOTICE 'adding entry for % ', Category;
 					INSERT INTO ports_categories (port_id, category_id)
 					   SELECT ports.id, CategoryID FROM ports
 					    WHERE ports.id = new.id
@@ -682,7 +685,7 @@ CREATE OR REPLACE FUNCTION ports_categories_set() RETURNS TRIGGER AS $$
 					                       WHERE port_id     = new.id
 					                         AND category_id = CategoryID);
 
---					RAISE NOTICE ' category % is % with id %', CategoryCount, Category, CategoryID;
+					RAISE NOTICE ' category % is % with id % for port id %', CategoryCount, Category, CategoryID, new.id;
 		      		END LOOP;
 			END IF;
 		END IF;
