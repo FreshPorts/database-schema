@@ -2212,6 +2212,20 @@ CREATE OR REPLACE FUNCTION elementGet (text) RETURNS SETOF element_type AS $$
     WHERE id = PathName_ID($1);
 $$ LANGUAGE SQL STABLE;
 
+CREATE OR REPLACE FUNCTION elementGetCaseInsensitive (text) RETURNS SETOF element_type AS $$
+   SELECT E.id,
+          E.name::text,
+          E.directory_file_flag::text,
+          E.status::text,
+          case when IsCategory(E.id) IS NULL THEN FALSE ELSE TRUE END,
+          case when IsPort(    E.id) IS NULL THEN FALSE ELSE TRUE END,
+          EP.pathname
+     FROM element E JOIN element_pathname EP ON E.id = EP.element_id AND lower(EP.pathname) = lower($1)
+    ORDER BY EP.pathname
+    LIMIT 1;
+    -- we only return the first one we find
+$$ LANGUAGE SQL STABLE;
+
 CREATE OR REPLACE FUNCTION freshports_commit_count_elements(text) RETURNS bigint AS $$
  SELECT count(*)
    FROM commit_log CL JOIN commit_log_ports_elements CLPE ON CL.id = CLPE.commit_log_id
