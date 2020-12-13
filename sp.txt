@@ -3844,6 +3844,66 @@ UNION
 ORDER BY name, package_set;
 $BODY$;
 
+CREATE OR REPLACE FUNCTION public.GetQuarterlyBranchName() RETURNS text AS $$
+  SELECT EXTRACT(YEAR FROM CURRENT_TIMESTAMP) || 'Q' || (floor((EXTRACT(MONTH FROM CURRENT_TIMESTAMP) - 1) / 3) + 1);
+$$ LANGUAGE SQL STABLE;
+
+CREATE OR REPLACE FUNCTION NormalizeBranch(a_branch_name text) RETURNS text AS $$
+  DECLARE
+    l_branch_name  text;
+
+  BEGIN
+    CASE a_branch_name
+      WHEN 'latest' THEN
+        l_branch_name = 'head';
+
+      WHEN 'quarterly' THEN
+        l_branch_name = GetQuarterlyBranchName();
+
+      ELSE
+        l_branch_name = a_branch_name;
+      END CASE;
+
+    RETURN l_branch_name;
+  END;
+$$ LANGUAGE 'plpgsql' STABLE;
+
+CREATE OR REPLACE FUNCTION DenormalizeBranchName(a_branch_name text) RETURNS text AS $$
+  DECLARE
+    l_branch_name  text;
+
+  BEGIN
+    CASE a_branch_name
+      WHEN 'head' THEN
+        l_branch_name = 'latest';
+
+      ELSE
+        l_branch_name = 'quarterly';
+      END CASE;
+
+    RETURN l_branch_name;
+  END;
+$$ LANGUAGE 'plpgsql' STABLE;
+
+CREATE OR REPLACE FUNCTION AddNewABIToPackagesLastChecked() RETURNS void AS
+$$
+-- invoke this function after adding a new row to the ABI table
+INSERT INTO packages_last_checked(abi_id, branch_id)
+SELECT ABI_HEAD.id, GetBranchId('head')
+  FROM ABI ABI_HEAD
+ WHERE NOT EXISTS (SELECT *
+                     FROM packages_last_checked PLC
+                    WHERE PLC.abi_id    = ABI_HEAD.id
+                      AND PLC.branch_id = GetBranchId('head'))
+UNION
+SELECT ABI_QTR.id, GetBranchId(GetQuarterlyBranchName())
+  FROM ABI ABI_QTR
+ WHERE NOT EXISTS (SELECT *
+                     FROM packages_last_checked PLC
+                    WHERE PLC.abi_id    = ABI_QTR.id
+                      AND PLC.branch_id = GetBranchId(GetQuarterlyBranchName()));
+$$ LANGUAGE SQL;
+
 CREATE OR REPLACE FUNCTION PackagesLastCheckedSetRepoDate(a_abi_name text, a_package_set package_sets, a_RepoDate timestamp) returns boolean AS
 $$
   DECLARE
