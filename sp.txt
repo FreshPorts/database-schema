@@ -2980,6 +2980,10 @@ CREATE OR REPLACE FUNCTION Port_ID(text, text) returns integer AS $$
 $$ LANGUAGE SQL STABLE;
 
 
+#
+# this works only on head
+# we need one for branches, for use on commit.php
+#
 CREATE OR REPLACE FUNCTION Element_ID(text, text) returns integer AS $$
 	SELECT E.id
 	  FROM element E, ports P, categories C, ports_categories PC
@@ -2990,6 +2994,9 @@ CREATE OR REPLACE FUNCTION Element_ID(text, text) returns integer AS $$
 	  AND PC.category_id = C.id
 	  AND P.category_id  = C.id;
 $$ LANGUAGE SQL STABLE;
+
+
+
 
 
 -- This function returns the latest commit date
