@@ -1691,10 +1691,10 @@ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION LatestCommitsLarge(int, text) RETURNS SETOF commit_record AS $$
 DECLARE
-	UserID		ALIAS for $1;
-    Branch      ALIAS for $2;
+    UserID ALIAS for $1;
+    Branch ALIAS for $2;
 
-	r 	commit_record%rowtype;
+    r      commit_record%rowtype;
 
 BEGIN
     FOR r IN
@@ -1733,6 +1733,7 @@ SELECT SECURITY.commit_log_id,
        SECURITY.not_for_archs,
        SECURITY.repo_name,
        SECURITY.svn_revision,
+       SECURITY.repository,
        SECURITY.repo_hostname,
        SECURITY.path_to_repo,
        W.watch,
@@ -1799,6 +1800,7 @@ SELECT CLPE.*,
            encoding_losses,
            svn_revision,
            repo.name AS repo_name,
+           repo.repository,
            repo.repo_hostname,
            repo.path_to_repo
      FROM commit_log CL LEFT OUTER JOIN repo ON CL.repo_id = repo.id JOIN 
@@ -1843,10 +1845,10 @@ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION LatestCommitsLargeFiltered(int, text) RETURNS SETOF commit_record AS $$
 DECLARE
-	UserID		ALIAS for $1;
-	Filter		ALIAS for $2;
+	UserID ALIAS for $1;
+	Filter ALIAS for $2;
 
-	r 	commit_record%rowtype;
+	r      commit_record%rowtype;
 
 BEGIN
     FOR r IN
@@ -1884,6 +1886,7 @@ SELECT SECURITY.commit_log_id,
        SECURITY.only_for_archs,
        SECURITY.not_for_archs,
        SECURITY.svn_revision,
+       SECURITY.repository,
        SECURITY.repo_hostname,
        SECURITY.path_to_repo,
        W.watch,
@@ -1948,7 +1951,8 @@ SELECT CLPE.*,
            to_char(CL.commit_date - SystemTimeAdjust(), 'DD Mon YYYY')  AS commit_date,
            to_char(CL.commit_date - SystemTimeAdjust(), 'HH24:MI')      AS commit_time,
            encoding_losses,
-            svn_revision,
+           svn_revision,
+           repo.repository,
            repo.repo_hostname,
            repo.path_to_repo
     FROM commit_log CL LEFT OUTER JOIN repo ON CL.repo_id = repo.id JOIN
@@ -2011,10 +2015,10 @@ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION LatestCommitsSmall(int, text) RETURNS SETOF commit_record AS $$
 DECLARE
-	UserID		ALIAS for $1;
-	Branch      ALIAS for $2;
+	UserID  ALIAS for $1;
+	Branch  ALIAS for $2;
 
-	r 	commit_record%rowtype;
+	r       commit_record%rowtype;
 
 BEGIN
     FOR r IN
@@ -2053,6 +2057,7 @@ SELECT SECURITY.commit_log_id,
        SECURITY.not_for_archs,
        SECURITY.repo_name,
        SECURITY.svn_revision,
+       SECURITY.repository,
        SECURITY.repo_hostname,
        SECURITY.path_to_repo,
        W.watch,
@@ -2119,6 +2124,7 @@ SELECT CLPE.*,
            encoding_losses,
            svn_revision,
            repo.name AS repo_name,
+           repo.repository,
            repo.repo_hostname,
            repo.path_to_repo
      FROM commit_log CL LEFT OUTER JOIN repo ON CL.repo_id = repo.id JOIN
@@ -2715,6 +2721,25 @@ BEGIN
 END;
 $$ LANGUAGE 'plpgsql' IMMUTABLE;
 
+CREATE FUNCTION public.packageadd(a_abi text, a_origin text, a_package_name text, a_version text) RETURNS bigint
+    LANGUAGE plpgsql
+    AS $$
+  DECLARE
+    l_id   bigint;
+  BEGIN
+    INSERT INTO packages(id, abi_id, port_id, package_name, package_version) VALUES (
+      DEFAULT,
+      ABIGetID(a_ABI),
+      GetPort(a_origin),
+      a_package_name,
+      a_version)
+    RETURNING id
+    INTO l_id;
+
+    RETURN l_id;
+  END;
+$$;
+
 CREATE OR REPLACE FUNCTION commit_log_ports_vuxml_purge(text) RETURNS SETOF int AS $$
 DELETE FROM commit_log_ports_vuxml CLPV
  USING vuxml V
@@ -3114,6 +3139,7 @@ SELECT CL.id           AS commit_log_id,
        P.not_for_archs,
        repo.name,
        CL.svn_revision,
+       repo.repository,
        repo.repo_hostname,
        repo.path_to_repo,
        0 AS watch,
@@ -3673,6 +3699,17 @@ CREATE OR REPLACE FUNCTION PackagesGetReposNeedingImports() RETURNS TABLE(abi_na
  ORDER BY ABI.NAME, package_set;
 $$ LANGUAGE SQL STABLE;
 
+CREATE FUNCTION packagesgetreposneedingupdates() RETURNS TABLE(abi_name text, package_set public.package_sets)
+    LANGUAGE sql STABLE
+    AS $$
+  SELECT ABI.NAME,
+         package_set
+    FROM packages_last_checked PLC JOIN abi ABI ON PLC.abi_id    = ABI.id
+   WHERE PLC.repo_date > PLC.import_date
+      OR (repo_date IS NOT NULL AND import_date IS NULL);
+$$;
+
+
 CREATE OR REPLACE FUNCTION iso_date(a_date timestamp with time zone) RETURNS text AS $$
     SELECT to_char(a_date, 'YYYY-MM-DD" "HH24:MI');
 $$  LANGUAGE SQL STABLE; 
@@ -3712,6 +3749,75 @@ RETURNS TABLE(package_name text, abi text, package_version_latest text, package_
      GROUP BY pn.package_name, abi.name
      ORDER BY pn.package_name, abi.name;
 $$;
+
+
+CREATE FUNCTION public.ports_categories_set() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+   DECLARE
+		CategoryCount	integer;
+		CategoryNames	text;
+		Category		text;
+		CategoryID		int8;
+		UpdateNeeded	boolean;
+   BEGIN
+		UpdateNeeded := TRUE;
+
+		IF TG_OP = 'UPDATE' THEN
+			IF old.categories = new.categories THEN
+				UpdateNeeded := FALSE;
+			END IF;
+		END IF;
+
+                RAISE NOTICE 'ports_categories_set() invoked for % ', element_pathname(new.element_id);
+                RAISE NOTICE 'categories is % ', new.categories;
+		IF UpdateNeeded THEN
+
+			DELETE 
+			  FROM ports_categories
+			 WHERE port_id = new.id;
+
+			IF new.categories IS NOT NULL THEN
+
+				CategoryCount := 0;
+				CategoryNames := new.categories;
+	      			LOOP
+        	 			CategoryCount := CategoryCount + 1;
+	        	 		Category := split_part(CategoryNames, ' ', CategoryCount);
+
+					-- let us not get carried away....
+   				      	IF Category = '' OR CategoryCount > 100 THEN
+			      		      EXIT;
+         				END IF;
+
+					SELECT id
+					  INTO CategoryID
+					  FROM categories
+					 WHERE name = Category;
+
+					IF NOT FOUND THEN
+						RAISE NOTICE ' we need to create category % ', Category;
+						CategoryID := CreateCategory(Category, 'no description supplied', FALSE);
+					END IF;
+
+			                RAISE NOTICE 'adding entry for % ', Category;
+					INSERT INTO ports_categories (port_id, category_id)
+					   SELECT ports.id, CategoryID FROM ports
+					    WHERE ports.id = new.id
+					      AND NOT exists (SELECT * 
+					                        FROM ports_categories
+					                       WHERE port_id     = new.id
+					                         AND category_id = CategoryID);
+
+					RAISE NOTICE ' category % is % with id % for port id %', CategoryCount, Category, CategoryID, new.id;
+		      		END LOOP;
+			END IF;
+		END IF;
+
+      RETURN NEW;
+   END
+$$;
+
 
 
 
@@ -3945,6 +4051,16 @@ CREATE OR REPLACE FUNCTION PackagesGetImportedReposNeedingProcessing() RETURNS T
       OR (PLC.import_date IS NOT NULL AND PLC.processed_date IS NULL)
 ORDER BY ABI.NAME, package_set;
 $$ LANGUAGE SQL STABLE;
+
+CREATE FUNCTION packagesgetpackagenamesforport(a_port_id integer) RETURNS TABLE(package_name text)
+    LANGUAGE sql STABLE
+    AS $$
+  SELECT DISTINCT package_name
+    FROM packages
+   WHERE port_id = a_port_id;
+$$;
+
+
 
 
 CREATE OR REPLACE FUNCTION GetPackageStatus() RETURNS TABLE (abi_name text,
