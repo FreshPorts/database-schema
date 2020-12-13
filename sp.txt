@@ -1095,7 +1095,7 @@ CREATE OR REPLACE FUNCTION DailySummaryDateRemove(date) returns int8 AS $$
 	DECLARE
         DateToDelete	ALIAS for $1;
 
-		RowCount    	int8;
+	RowCount    	int8;
 
 	BEGIN
 		DELETE FROM Daily_Refreshes
