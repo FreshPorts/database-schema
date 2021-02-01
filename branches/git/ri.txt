@@ -222,6 +222,7 @@ CREATE OR REPLACE FUNCTION ports_clear_cache() RETURNS TRIGGER AS $$
    DECLARE
       l_port      text;
       l_category  text;
+      l_row_count bigint;
    BEGIN
       IF TG_OP = 'UPDATE' THEN
             SELECT category, name
@@ -230,9 +231,13 @@ CREATE OR REPLACE FUNCTION ports_clear_cache() RETURNS TRIGGER AS $$
              WHERE id = NEW.id;
 
             INSERT INTO cache_clearing_ports (port_id, category, port)
-                 VALUES (NEW.id, l_category, l_port);
+                 VALUES (NEW.id, l_category, l_port)
+            ON CONFLICT ON CONSTRAINT cache_clearing_ports_port_id_idx DO NOTHING;
 
-          NOTIFY port_updated;
+            GET DIAGNOSTICS l_row_count = ROW_COUNT;
+            IF l_row_count > 0 THEN
+                  NOTIFY port_updated;
+            END IF;
       END IF;
 
       -- when a port changes, add an entry to the cache clearing table
@@ -252,8 +257,10 @@ CREATE OR REPLACE FUNCTION port_dependencies_clear_cache() RETURNS TRIGGER AS $$
       l_cache_clearing_ports_id   int8;
       l_port      text;
       l_category  text;
+      l_row_count bigint;
    BEGIN
       IF TG_OP = 'UPDATE' OR TG_OP = 'INSERT' THEN
+
          INSERT INTO cache_clearing_ports (port_id, category, port)
             SELECT distinct id, category, name
               FROM port_dependencies PD, ports_all PA
@@ -261,12 +268,17 @@ CREATE OR REPLACE FUNCTION port_dependencies_clear_cache() RETURNS TRIGGER AS $$
                AND PD.port_id_dependent_upon = PA.id
                AND NOT EXISTS (SELECT port_id 
                                  FROM cache_clearing_ports
-                                WHERE port_id = PD.port_id_dependent_upon);
+                                WHERE port_id = PD.port_id_dependent_upon)
+         ON CONFLICT ON CONSTRAINT cache_clearing_ports_port_id_idx DO NOTHING;
 
-          NOTIFY port_updated;
+         GET DIAGNOSTICS l_row_count = ROW_COUNT;
+         IF l_row_count > 0 THEN
+               NOTIFY port_updated;
+         END IF;
       END IF;
 
       IF TG_OP = 'DELETE' THEN
+
          INSERT INTO cache_clearing_ports (port_id, category, port)
             SELECT distinct id, category, name
               FROM port_dependencies PD, ports_all PA
@@ -274,9 +286,14 @@ CREATE OR REPLACE FUNCTION port_dependencies_clear_cache() RETURNS TRIGGER AS $$
                AND PD.port_id_dependent_upon = PA.id
                AND NOT EXISTS (SELECT port_id 
                                  FROM cache_clearing_ports
-                                WHERE port_id = PD.port_id_dependent_upon);
+                                WHERE port_id = PD.port_id_dependent_upon)
+         ON CONFLICT ON CONSTRAINT cache_clearing_ports_port_id_idx DO NOTHING;
 
-          NOTIFY port_updated;
+         GET DIAGNOSTICS l_row_count = ROW_COUNT;
+         IF l_row_count > 0 THEN
+               NOTIFY port_updated;
+         END IF;
+
       END IF;
 
       -- when a port changes, add an entry to the cache clearing table
@@ -295,6 +312,8 @@ CREATE OR REPLACE FUNCTION port_dependencies_insert_clear_cache() RETURNS TRIGGE
    DECLARE
       l_port      text;
       l_category  text;
+      l_row_count bigint;
+      l_notified  boolean;
    BEGIN
       --
       -- This function handles the addition of a new dependency.
@@ -302,6 +321,8 @@ CREATE OR REPLACE FUNCTION port_dependencies_insert_clear_cache() RETURNS TRIGGE
       -- from the cache_clearing_ports.  I figure there is a shorter way to this but
       -- I cannot think it through right now.
       --
+      l_notified := false;
+
       IF TG_OP = 'INSERT' THEN
             SELECT category, name
               INTO l_category, l_port
@@ -309,7 +330,14 @@ CREATE OR REPLACE FUNCTION port_dependencies_insert_clear_cache() RETURNS TRIGGE
              WHERE id = NEW.port_id;
 
             INSERT INTO cache_clearing_ports (port_id, category, port)
-              VALUES (NEW.port_id, l_category, l_port);
+              VALUES (NEW.port_id, l_category, l_port)
+            ON CONFLICT ON CONSTRAINT cache_clearing_ports_port_id_idx DO NOTHING;
+
+            GET DIAGNOSTICS l_row_count = ROW_COUNT;
+            IF l_row_count > 0 THEN
+                  l_notified := true;
+                  NOTIFY port_updated;
+            END IF;
 
             SELECT category, name
               INTO l_category, l_port
@@ -317,9 +345,13 @@ CREATE OR REPLACE FUNCTION port_dependencies_insert_clear_cache() RETURNS TRIGGE
              WHERE id = NEW.port_id_dependent_upon;
 
             INSERT INTO cache_clearing_ports (port_id, category, port)
-              VALUES (NEW.port_id_dependent_upon, l_category, l_port);
+              VALUES (NEW.port_id_dependent_upon, l_category, l_port)
+            ON CONFLICT ON CONSTRAINT cache_clearing_ports_port_id_idx DO NOTHING;
 
-          NOTIFY port_updated;
+            GET DIAGNOSTICS l_row_count = ROW_COUNT;
+            IF l_row_count > 0 AND NOT l_notified THEN
+                  NOTIFY port_updated;
+            END IF;
       END IF;
 
       -- when a port changes, add an entry to the cache clearing table
@@ -338,6 +370,8 @@ CREATE OR REPLACE FUNCTION port_dependencies_delete_clear_cache() RETURNS TRIGGE
    DECLARE
       l_port      text;
       l_category  text;
+      l_row_count bigint;
+      l_notified  boolean;
    BEGIN
       --
       -- This function handles the deletion of a existing dependency.
@@ -347,23 +381,38 @@ CREATE OR REPLACE FUNCTION port_dependencies_delete_clear_cache() RETURNS TRIGGE
       --
 
       IF TG_OP = 'DELETE' THEN
+            l_notified = FALSE;
+
             SELECT category, name
               INTO l_category, l_port
               FROM ports_all
              WHERE id = OLD.port_id;
 
-            INSERT INTO cache_clearing_ports (port_id, category, port)
-              VALUES (OLD.port_id, l_category, l_port);
+            IF FOUND ZTHEN
+              INSERT INTO cache_clearing_ports (port_id, category, port)
+                VALUES (OLD.port_id, l_category, l_port)
+              ON CONFLICT ON CONSTRAINT cache_clearing_ports_port_id_idx DO NOTHING;
+              GET DIAGNOSTICS l_row_count = ROW_COUNT;
+              IF l_row_count > 0 THEN
+                 l_notified := TRUE;
+                 NOTIFY port_updated;
+            END IF;
+
 
             SELECT category, name
               INTO l_category, l_port
               FROM ports_all
              WHERE id = OLD.port_id_dependent_upon;
 
-            INSERT INTO cache_clearing_ports (port_id, category, port)
-              VALUES (OLD.port_id_dependent_upon, l_category, l_port);
+            IF FOUND THEN
+              INSERT INTO cache_clearing_ports (port_id, category, port)
+                VALUES (OLD.port_id_dependent_upon, l_category, l_port);
+              ON CONFLICT ON CONSTRAINT cache_clearing_ports_port_id_idx DO NOTHING;
+              IF l_row_count > 0 AND NOT l_notified THEN
+                 NOTIFY port_updated;
+              END IF;
+            END IF;
 
-          NOTIFY port_updated;
       END IF;
 
       -- when a port changes, add an entry to the cache clearing table
@@ -382,6 +431,7 @@ CREATE OR REPLACE FUNCTION ports_vulnerable_delete_clear_cache() RETURNS TRIGGER
    DECLARE
       l_port      text;
       l_category  text;
+      l_row_count bigint;
    BEGIN
       IF TG_OP = 'DELETE' THEN
 
@@ -392,10 +442,15 @@ CREATE OR REPLACE FUNCTION ports_vulnerable_delete_clear_cache() RETURNS TRIGGER
 
         -- if we are deleting a port, we'll get back null values for this
         IF l_category IS NOT NULL AND l_port IS NOT NULL THEN
-          INSERT INTO cache_clearing_ports (port_id, category, port)
-            VALUES (OLD.port_id, l_category, l_port);
 
-          NOTIFY port_updated;
+            INSERT INTO cache_clearing_ports (port_id, category, port)
+               VALUES (OLD.port_id, l_category, l_port)
+            ON CONFLICT ON CONSTRAINT cache_clearing_ports_port_id_idx DO NOTHING;
+
+            GET DIAGNOSTICS l_row_count = ROW_COUNT;
+            IF l_row_count > 0 THEN
+                  NOTIFY port_updated;
+            END IF;
         END IF;
       END IF;
 
@@ -784,13 +839,14 @@ EXECUTE PROCEDURE commit_log_ports_insert ();
 --
 CREATE OR REPLACE FUNCTION watch_list_element_insert () RETURNS TRIGGER AS $$
 DECLARE
-	l_port_id	int8;
+	l_port_id   int8;
 	l_port      text;
 	l_category  text;
+        l_row_count bigint;
 BEGIN
-	RAISE NOTICE 'into watch_list_element_insert with %', NEW.element_id;
-	SELECT id, category, name
-	  INTO l_port_id, l_category, l_port
+   RAISE NOTICE 'into watch_list_element_insert with %', NEW.element_id;
+   SELECT id, category, name
+     INTO l_port_id, l_category, l_port
      FROM ports_all
     WHERE element_id = NEW.element_id
       AND NOT EXISTS (SELECT CCP.port_id 
@@ -798,15 +854,22 @@ BEGIN
                        WHERE CCP.port_id = ports_all.id);
           
    IF FOUND THEN
-		RAISE NOTICE 'not found in cache.  will insert %, %, %', l_port_id, l_category, l_port;
-		INSERT INTO cache_clearing_ports (port_id, category, port)
-          VALUES (l_port_id, l_category, l_port);
-		NOTIFY port_updated;
-	ELSE
-		RAISE NOTICE 'found in cache.  will not insert';
+
+      RAISE NOTICE 'not found in cache.  will insert %, %, %', l_port_id, l_category, l_port;
+
+      INSERT INTO cache_clearing_ports (port_id, category, port)
+         VALUES (l_port_id, l_category, l_port)
+      ON CONFLICT ON CONSTRAINT cache_clearing_ports_port_id_idx DO NOTHING;
+
+      GET DIAGNOSTICS l_row_count = ROW_COUNT;
+      IF l_row_count > 0 THEN
+            NOTIFY port_updated;
+      END IF;
+   ELSE
+      RAISE NOTICE 'found in cache.  will not insert';
    END IF;
 
-	RETURN new;
+   RETURN new;
 END; $$
 LANGUAGE plpgsql;
 
@@ -819,12 +882,13 @@ EXECUTE PROCEDURE watch_list_element_insert ();
 
 CREATE OR REPLACE FUNCTION watch_list_element_delete () RETURNS TRIGGER AS $$
 DECLARE
-	l_port_id	int8;
-	l_port      text;
-	l_category  text;
+   l_port_id   int8;
+   l_port      text;
+   l_category  text;
+   l_row_count bigint;
 BEGIN
-	RAISE NOTICE 'into watch_list_element_delete with %', OLD.element_id;
-	SELECT id, category, name
+   RAISE NOTICE 'into watch_list_element_delete with %', OLD.element_id;
+   SELECT id, category, name
 	  INTO l_port_id, l_category, l_port
      FROM ports_all
     WHERE element_id = OLD.element_id
@@ -833,15 +897,22 @@ BEGIN
                        WHERE CCP.port_id = ports_all.id);
           
    IF FOUND THEN
-		RAISE NOTICE 'not found in cache.  will insert %, %, %', l_port_id, l_category, l_port;
-		INSERT INTO cache_clearing_ports (port_id, category, port)
-          VALUES (l_port_id, l_category, l_port);
-		NOTIFY port_updated;
-	ELSE
-		RAISE NOTICE 'found in cache.  will not insert';
+
+      RAISE NOTICE 'not found in cache.  will insert %, %, %', l_port_id, l_category, l_port;
+
+      INSERT INTO cache_clearing_ports (port_id, category, port)
+         VALUES (l_port_id, l_category, l_port)
+      ON CONFLICT ON CONSTRAINT cache_clearing_ports_port_id_idx DO NOTHING;
+
+      GET DIAGNOSTICS l_row_count = ROW_COUNT;
+      IF l_row_count > 0 THEN
+            NOTIFY port_updated;
+      END IF;
+   ELSE
+      RAISE NOTICE 'found in cache.  will not insert';
    END IF;
 
-	RETURN OLD;
+   RETURN OLD;
 END; $$
 LANGUAGE plpgsql;
 
@@ -943,23 +1014,40 @@ CREATE TRIGGER ports_conflicts_update
 
 
 CREATE OR REPLACE FUNCTION commit_log_ports_vuxml_clear_cache() RETURNS TRIGGER AS $$
+   DECLARE
+      l_row_count bigint;
+      l_inserted  boolean;
    BEGIN
+      l_inserted := false;
+
       IF TG_OP = 'INSERT' OR TG_OP = 'UPDATE' THEN
          INSERT INTO cache_clearing_ports(port_id, category, port)
              SELECT PA.id, PA.category, PA.name
                FROM ports_all PA
-              WHERE PA.id = NEW.port_id;
+              WHERE PA.id = NEW.port_id
+         ON CONFLICT ON CONSTRAINT cache_clearing_ports_port_id_idx DO NOTHING;
 
-         NOTIFY port_updated;
+         GET DIAGNOSTICS l_row_count = ROW_COUNT;
+         IF l_row_count > 0 THEN
+               l_inserted := true;
+         END IF;
       END IF;
 
       IF TG_OP = 'DELETE' THEN
          INSERT INTO cache_clearing_ports(port_id, category, port)
             SELECT PA.id, PA.category, PA.name
               FROM ports_all PA
-             WHERE PA.id = OLD.port_id;
+             WHERE PA.id = OLD.port_id
+         ON CONFLICT ON CONSTRAINT cache_clearing_ports_port_id_idx DO NOTHING;
 
-         NOTIFY port_updated;
+         GET DIAGNOSTICS l_row_count = ROW_COUNT;
+         IF l_row_count > 0 THEN
+            l_inserted := true;
+         END IF;
+
+         IF l_inserted THEN
+               NOTIFY port_updated;
+         END IF;
       END IF;
       RETURN NEW;
    END
