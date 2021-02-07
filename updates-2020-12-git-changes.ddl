@@ -21,7 +21,7 @@ CREATE INDEX commit_log_commit_hash_short
 
 
 
-CREATE INDEX "commit_log_ branches_branch_id_idx"
+CREATE INDEX "commit_log_branches_branch_id_idx"
     ON public.commit_log_branches USING btree
     (branch_id ASC NULLS LAST)
     TABLESPACE pg_default;
