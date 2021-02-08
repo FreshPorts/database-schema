@@ -396,6 +396,7 @@ CREATE OR REPLACE FUNCTION port_dependencies_delete_clear_cache() RETURNS TRIGGE
               IF l_row_count > 0 THEN
                  l_notified := TRUE;
                  NOTIFY port_updated;
+              END IF;
             END IF;
 
 
