@@ -2724,7 +2724,7 @@ BEGIN
 END;
 $$ LANGUAGE 'plpgsql' IMMUTABLE;
 
-CREATE FUNCTION public.packageadd(a_abi text, a_origin text, a_package_name text, a_version text) RETURNS bigint
+CREATE OR REPLACE FUNCTION public.packageadd(a_abi text, a_origin text, a_package_name text, a_version text) RETURNS bigint
     LANGUAGE plpgsql
     AS $$
   DECLARE
@@ -3702,7 +3702,7 @@ CREATE OR REPLACE FUNCTION PackagesGetReposNeedingImports() RETURNS TABLE(abi_na
  ORDER BY ABI.NAME, package_set;
 $$ LANGUAGE SQL STABLE;
 
-CREATE FUNCTION packagesgetreposneedingupdates() RETURNS TABLE(abi_name text, package_set public.package_sets)
+CREATE OR REPLACE FUNCTION packagesgetreposneedingupdates() RETURNS TABLE(abi_name text, package_set public.package_sets)
     LANGUAGE sql STABLE
     AS $$
   SELECT ABI.NAME,
