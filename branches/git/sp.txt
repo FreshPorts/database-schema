@@ -4076,3 +4076,14 @@ CREATE OR REPLACE FUNCTION GetPort(integer) returns text AS $$
 	END
 $$ LANGUAGE 'plpgsql';
 
+
+-- to convert the generate_plist table, multiple rows per port, into a
+-- single row of JSON. Mostly used for Dependency line:
+--
+-- re https://github.com/FreshPorts/freshports/issues/216
+--
+CREATE OR REPLACE FUNCTION pkg_plist(bigint) returns json as $$
+  SELECT array_to_json(regexp_match(installed_file, 'lib/[[:alpha:]]*?\.so'))
+    FROM generate_plist
+   WHERE generate_plist.port_id = $1;
+$$ LANGUAGE SQL STABLE;
