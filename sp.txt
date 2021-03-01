@@ -4083,7 +4083,10 @@ $$ LANGUAGE 'plpgsql';
 -- re https://github.com/FreshPorts/freshports/issues/216
 --
 CREATE OR REPLACE FUNCTION pkg_plist(bigint) returns json as $$
-  SELECT array_to_json(regexp_match(installed_file, 'lib/[[:alpha:]]*?\.so'))
-    FROM generate_plist
-   WHERE generate_plist.port_id = $1;
+   WITH tmp AS (
+       select regexp_match(installed_file, 'lib/[[:alnum:]]*?\.so') as lib 
+         from generate_plist
+        where generate_plist.port_id = $1
+   )
+   select json_agg(distinct lib) from tmp where lib is not null;
 $$ LANGUAGE SQL STABLE;
