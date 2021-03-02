@@ -11,3 +11,20 @@ CREATE OR REPLACE FUNCTION pkg_plist(bigint) returns json as $$
    )
    select json_agg(distinct lib[1]) from tmp where lib is not null
 $$ LANGUAGE SQL STABLE;
+
+
+-- committer name and email
+
+ALTER TABLE public.commit_log
+    ADD COLUMN commiter_name text;
+
+ALTER TABLE public.commit_log
+    ADD COLUMN commiter_email text;
+
+-- author name and email
+
+ALTER TABLE public.commit_log
+    ADD COLUMN author_name text;
+
+ALTER TABLE public.commit_log
+    ADD COLUMN author_email text;
