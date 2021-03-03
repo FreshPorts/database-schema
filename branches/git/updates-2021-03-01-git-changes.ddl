@@ -16,10 +16,10 @@ $$ LANGUAGE SQL STABLE;
 -- committer name and email
 
 ALTER TABLE public.commit_log
-    ADD COLUMN commiter_name text;
+    ADD COLUMN committer_name text;
 
 ALTER TABLE public.commit_log
-    ADD COLUMN commiter_email text;
+    ADD COLUMN committer_email text;
 
 -- author name and email
 
