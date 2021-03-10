@@ -5,7 +5,7 @@
 --
 CREATE OR REPLACE FUNCTION pkg_plist(bigint) returns json as $$
    WITH tmp AS (
-       select regexp_match(installed_file, 'lib/[[:alnum:]]*?\.so') as lib 
+       select regexp_match(installed_file, 'lib/[^/]*?\.so') as lib 
          from generate_plist
         where generate_plist.port_id = $1
    )
