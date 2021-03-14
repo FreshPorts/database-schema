@@ -1,0 +1,23 @@
+ALTER TABLE public.generate_plist
+    ADD COLUMN textsearchable_index_col tsvector GENERATED ALWAYS AS (to_tsvector('english'::regconfig, installed_file)) STORED;
+ 
+CREATE INDEX generate_plist_textsearch_idx
+    ON public.generate_plist USING gin
+    (textsearchable_index_col)
+    TABLESPACE pg_default;
+
+ALTER TABLE public.generate_plist
+    ADD COLUMN textsearchable_index_col2 tsvector GENERATED ALWAYS AS (to_tsvector('english'::regconfig, translate(installed_file, '/'::text, ' '::text))) STORED;
+ 
+CREATE INDEX generate_plist_textsearch_idx2
+    ON public.generate_plist USING gin
+    (textsearchable_index_col2)
+    TABLESPACE pg_default;
+
+ALTER TABLE public.generate_plist
+    ADD COLUMN textsearchable_index_col3 tsvector GENERATED ALWAYS AS (to_tsvector('english'::regconfig, translate(installed_file, '/.'::text, '  '::text))) STORED;
+
+CREATE INDEX generate_plist_textsearch_idx3
+    ON public.generate_plist USING gin
+    (textsearchable_index_col3)
+    TABLESPACE pg_default;
