@@ -2251,7 +2251,7 @@ CREATE OR REPLACE FUNCTION elementGetCaseInsensitive (text) RETURNS SETOF elemen
             case when IsCategory(id) IS NULL THEN FALSE ELSE TRUE END,
             case when IsPort(    id) IS NULL THEN FALSE ELSE TRUE END
        FROM element
-      WHERE id = (SELECT element_id
+      WHERE id IN (SELECT element_id
        FROM element_pathname
       WHERE lower(pathname) = lower($1))
     ) AS tmp JOIN element_pathname EP on tmp.id = EP.element_id;
@@ -3812,8 +3812,8 @@ CREATE OR REPLACE FUNCTION public.ports_categories_set() RETURNS trigger
 			END IF;
 		END IF;
 
-                RAISE NOTICE 'ports_categories_set() invoked for % ', element_pathname(new.element_id);
-                RAISE NOTICE 'categories is % ', new.categories;
+--                RAISE NOTICE 'ports_categories_set() invoked for % ', element_pathname(new.element_id);
+--                RAISE NOTICE 'categories is % ', new.categories;
 		IF UpdateNeeded THEN
 
 			DELETE 

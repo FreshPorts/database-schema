@@ -122,17 +122,18 @@ GRANT UPDATE, SELECT, DELETE, INSERT ON TABLE public.ports TO commits;
 GRANT INSERT, SELECT, DELETE ON TABLE public.ports TO packaging;
 
 
-ALTER TABLE public.ports
-    ADD CONSTRAINT ports_last_commit_id_fkey5 FOREIGN KEY (last_commit_id)
-    REFERENCES public.commit_log (id) MATCH SIMPLE
-    ON UPDATE CASCADE
-    ON DELETE SET NULL;
-
-ALTER TABLE public.ports
-    ADD CONSTRAINT ports_last_commit_id_fkey6 FOREIGN KEY (last_commit_id)
-    REFERENCES public.commit_log (id) MATCH SIMPLE
-    ON UPDATE CASCADE
-    ON DELETE SET NULL;
+-- these seem to be duplicates
+-- ALTER TABLE public.ports
+--    ADD CONSTRAINT ports_last_commit_id_fkey5 FOREIGN KEY (last_commit_id)
+--    REFERENCES public.commit_log (id) MATCH SIMPLE
+--    ON UPDATE CASCADE
+--    ON DELETE SET NULL;
+--
+--ALTER TABLE public.ports
+--    ADD CONSTRAINT ports_last_commit_id_fkey6 FOREIGN KEY (last_commit_id)
+--    REFERENCES public.commit_log (id) MATCH SIMPLE
+--    ON UPDATE CASCADE
+--    ON DELETE SET NULL;
 CREATE INDEX ports_last_commit_id_idx
     ON public.ports USING btree
     (last_commit_id ASC NULLS LAST)
