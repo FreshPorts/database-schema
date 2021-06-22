@@ -567,14 +567,24 @@ EXECUTE PROCEDURE element_delete_check();
 
 
 CREATE OR REPLACE FUNCTION commit_log_delete_check() RETURNS TRIGGER as '
+   DECLARE
+      l_row_count bigint;
 begin
 
-	-- if we are removing a commit_log, make sure we remove
-	-- the commit_log_elements as well
+    -- if we are removing a commit_log, make sure we remove
+    -- the commit_log_elements as well
 
-	delete
+    delete
       from commit_log_elements
      where commit_log_id = old.id;
+
+   INSERT INTO cache_clearing_commits (commit_to_clear) VALUES (old.message_id)
+      ON CONFLICT ON CONSTRAINT cache_clearing_commits_idx DO NOTHING;
+
+   GET DIAGNOSTICS l_row_count = ROW_COUNT;
+   IF l_row_count > 0 THEN
+      NOTIFY commit_updated;
+   END IF;
 
    RETURN OLD;
 end;
@@ -752,6 +762,8 @@ CREATE TRIGGER ports_ports_categories
 
 CREATE OR REPLACE FUNCTION commit_log_insert () RETURNS trigger
 AS '
+   DECLARE
+      l_row_count bigint;
 BEGIN
    INSERT INTO latest_commits (commit_log_id, commit_date) values (new.id,  new.commit_date);
 
@@ -762,6 +774,14 @@ BEGIN
 
    IF FOUND THEN
      NOTIFY date_updated;
+   END IF;
+
+   INSERT INTO cache_clearing_commits (commit_to_clear) VALUES (new.message_id)
+      ON CONFLICT ON CONSTRAINT cache_clearing_commits_idx DO NOTHING;
+
+   GET DIAGNOSTICS l_row_count = ROW_COUNT;
+   IF l_row_count > 0 THEN
+      NOTIFY commit_updated;
    END IF;
 
    RETURN new;
@@ -780,6 +800,8 @@ EXECUTE PROCEDURE commit_log_insert ();
 
 CREATE OR REPLACE FUNCTION commit_log_update () RETURNS TRIGGER
 AS '
+   DECLARE
+      l_row_count bigint;
 BEGIN
    UPDATE latest_commits_ports
       SET commit_date = new.commit_date
@@ -793,8 +815,17 @@ BEGIN
    INSERT INTO cache_clearing_dates (date_to_clear) 
      SELECT new.commit_date
      WHERE NOT EXISTS (SELECT date_to_clear FROM cache_clearing_dates WHERE date_to_clear = new.commit_date);
+
    IF FOUND THEN
      NOTIFY date_updated;
+   END IF;
+
+   INSERT INTO cache_clearing_commits (commit_to_clear) VALUES (OLD.message_id)
+      ON CONFLICT ON CONSTRAINT cache_clearing_commits_idx DO NOTHING;
+
+   GET DIAGNOSTICS l_row_count = ROW_COUNT;
+   IF l_row_count > 0 THEN
+      NOTIFY commit_updated;
    END IF;
 
    RETURN new;
