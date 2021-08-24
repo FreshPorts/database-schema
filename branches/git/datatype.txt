@@ -112,7 +112,8 @@ CREATE TYPE public.freshports_commit_record AS (
 	repo_hostname text,
 	path_to_repo text,
 	repo_name text,
-	onwatchlist bigint
+	onwatchlist bigint,
+	branch text
 );
 
 
