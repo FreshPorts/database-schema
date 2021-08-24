@@ -2347,7 +2347,8 @@ SELECT 0 AS port_id,
        R.repo_hostname,
        R.path_to_repo,
        R.name AS repo_name,
-       OnWatchList($4, CLE.element_id) AS watch
+       OnWatchList($4, CLE.element_id) AS watch,
+       'head' AS branch
   FROM commit_log CL LEFT OUTER JOIN repo R ON CL.repo_id = R.id LEFT OUTER JOIN commit_log_elements CLE ON (CL.id = CLE.commit_log_id)
        LEFT OUTER JOIN element E ON (CLE.element_id = E.id)
  WHERE CL.message_id  = $1
@@ -2406,7 +2407,8 @@ SELECT FOURTH1.port_id,
        FOURTH1.repo_hostname,
        FOURTH1.path_to_repo,
        FOURTH1.repo_name,
-       OnWatchList($4, FOURTH1.element_id) as watch
+       OnWatchList($4, FOURTH1.element_id) as watch,
+       FOURTH1.branch
 FROM
 (SELECT THIRD1b.*,
         ports_vulnerable.current AS vulnerable_current,
@@ -2455,8 +2457,11 @@ FROM
         R.repository,
 	R.repo_hostname,
 	R.path_to_repo,
-	R.name as repo_name
-   FROM commit_log CL LEFT OUTER JOIN repo R ON CL.repo_id = R.id 
+	R.name as repo_name,
+	SB.branch_name as branch
+   FROM commit_log CL JOIN commit_log_branches CLB ON CL.id = CLB.commit_log_id
+                      JOIN system_branch SB ON SB.id = CLB.branch_id
+   LEFT OUTER JOIN repo R ON CL.repo_id = R.id 
 JOIN commit_log_ports_elements CLPE ON CL.id = CLPE.commit_log_id
   WHERE CL.message_id = $1) AS FIRST1
        LEFT OUTER JOIN ports P ON P.element_id = FIRST1.element_id) AS SECOND1
