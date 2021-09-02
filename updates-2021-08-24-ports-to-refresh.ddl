@@ -25,7 +25,7 @@ GRANT DELETE, SELECT ON TABLE public.ports_to_refresh TO commits;
 GRANT ALL ON TABLE public.ports_to_refresh TO postgres;
 
 COMMENT ON TABLE public.ports_to_refresh
-    IS 'This table lists ports which are to be refreshed. Before processing begins, run ''check checkout main'' first, to be sure we aren''t scrolled to some non-current commit.
+    IS 'This table lists ports which are to be refreshed. Before processing begins, run ''check checkout main'' first, to be sure we aren''t scrolled to some non-current commit.';
 
 
 grant select, delete on ports_to_refresh to commits;
