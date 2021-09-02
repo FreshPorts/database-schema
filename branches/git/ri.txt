@@ -266,9 +266,6 @@ CREATE OR REPLACE FUNCTION port_dependencies_clear_cache() RETURNS TRIGGER AS $$
               FROM port_dependencies PD, ports_all PA
              WHERE PD.port_id                = NEW.id
                AND PD.port_id_dependent_upon = PA.id
-               AND NOT EXISTS (SELECT port_id 
-                                 FROM cache_clearing_ports
-                                WHERE port_id = PD.port_id_dependent_upon)
          ON CONFLICT ON CONSTRAINT cache_clearing_ports_port_id_idx DO NOTHING;
 
          GET DIAGNOSTICS l_row_count = ROW_COUNT;
@@ -284,9 +281,6 @@ CREATE OR REPLACE FUNCTION port_dependencies_clear_cache() RETURNS TRIGGER AS $$
               FROM port_dependencies PD, ports_all PA
              WHERE PD.port_id                = OLD.id
                AND PD.port_id_dependent_upon = PA.id
-               AND NOT EXISTS (SELECT port_id 
-                                 FROM cache_clearing_ports
-                                WHERE port_id = PD.port_id_dependent_upon)
          ON CONFLICT ON CONSTRAINT cache_clearing_ports_port_id_idx DO NOTHING;
 
          GET DIAGNOSTICS l_row_count = ROW_COUNT;
