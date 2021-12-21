@@ -76,6 +76,8 @@ begin
          END IF;
       END IF;
     END LOOP;
+  ELSE
+    RAISE NOTICE 'Could not find % in the table', element_id;
   END IF;
 
   return pathname;
@@ -92,39 +94,6 @@ BEGIN
 END;
 $$
     LANGUAGE plpgsql STABLE;
-
-
-
-CREATE OR REPLACE FUNCTION Element_Pathname(int4) returns text AS $$
-   DECLARE
-      element_id   ALIAS FOR $1;
-      my_parent_id int4;
-      element_name text;
-      pathname     text;
-
-begin
-  pathname = '';
-  select name, parent_id
-    into element_name, my_parent_id 
-    from element
-   where id = element_id;
-
-  IF FOUND THEN
-    pathname := '/' || element_name || pathname;
-    WHILE FOUND LOOP
-      select name, parent_id 
-        into element_name, my_parent_id
-        from element
-       where id = my_parent_id;
-
-      IF FOUND THEN
-        pathname = '/' || element_name || pathname;
-      END IF;
-    END LOOP;
-  END IF;
-  return pathname;
-END;
-$$  LANGUAGE 'plpgsql' IMMUTABLE;
 
 
 
