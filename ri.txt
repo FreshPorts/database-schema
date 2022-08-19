@@ -468,7 +468,7 @@ CREATE OR REPLACE FUNCTION element_pathname_insert() RETURNS TRIGGER AS $$
      l_pathname  text;
    BEGIN
       l_pathname := element_pathname(NEW.id);
-      RAISE NOTICE 'for NEW.id = "%", I am inserting "%" into element_pathname', NEW.id, l_pathname;
+--      RAISE NOTICE 'for NEW.id = "%", I am inserting "%" into element_pathname', NEW.id, l_pathname;
       INSERT INTO element_pathname (element_id, pathname) VALUES (NEW.id, l_pathname);
       RETURN NEW;
    END
