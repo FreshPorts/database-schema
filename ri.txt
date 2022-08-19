@@ -687,54 +687,42 @@ CREATE OR REPLACE FUNCTION ports_categories_set() RETURNS TRIGGER AS $$
 		CategoryID		int8;
 		UpdateNeeded	boolean;
    BEGIN
-		UpdateNeeded := TRUE;
+		DELETE 
+		  FROM ports_categories
+		 WHERE port_id = new.id;
 
-		IF TG_OP = 'UPDATE' THEN
-			IF old.categories = new.categories THEN
-				UpdateNeeded := FALSE;
-			END IF;
-		END IF;
+		IF new.categories IS NOT NULL THEN
 
-		IF UpdateNeeded THEN
+			CategoryCount := 0;
+			CategoryNames := new.categories;
+	     			LOOP
+         			CategoryCount := CategoryCount + 1;
+	       	 		Category := split_part(CategoryNames, ' ', CategoryCount);
 
-			DELETE 
-			  FROM ports_categories
-			 WHERE port_id = new.id;
+				-- let us not get carried away....
+   			      	IF Category = '' OR CategoryCount > 100 THEN
+		      		      EXIT;
+        			END IF;
 
-			IF new.categories IS NOT NULL THEN
+				SELECT id
+				  INTO CategoryID
+				  FROM categories
+				 WHERE name = Category;
 
-				CategoryCount := 0;
-				CategoryNames := new.categories;
-	      			LOOP
-        	 			CategoryCount := CategoryCount + 1;
-	        	 		Category := split_part(CategoryNames, ' ', CategoryCount);
+				IF NOT FOUND THEN
+					RAISE NOTICE ' we need to create category % ', Category;
+					CategoryID := CreateCategory(Category, 'no description supplied', FALSE);
+				END IF;
 
-					-- let us not get carried away....
-   				      	IF Category = '' OR CategoryCount > 100 THEN
-			      		      EXIT;
-         				END IF;
+				INSERT INTO ports_categories (port_id, category_id)
+				   SELECT ports.id, CategoryID FROM ports
+				    WHERE ports.id = new.id
+				      AND NOT exists (SELECT * 
+				                        FROM ports_categories
+				                       WHERE port_id     = new.id
+				                         AND category_id = CategoryID);
 
-					SELECT id
-					  INTO CategoryID
-					  FROM categories
-					 WHERE name = Category;
-
-					IF NOT FOUND THEN
-						RAISE NOTICE ' we need to create category % ', Category;
-						CategoryID := CreateCategory(Category, 'no description supplied', FALSE);
-					END IF;
-
-					INSERT INTO ports_categories (port_id, category_id)
-					   SELECT ports.id, CategoryID FROM ports
-					    WHERE ports.id = new.id
-					      AND NOT exists (SELECT * 
-					                        FROM ports_categories
-					                       WHERE port_id     = new.id
-					                         AND category_id = CategoryID);
-
---					RAISE NOTICE ' category % is % with id %', CategoryCount, Category, CategoryID;
-		      		END LOOP;
-			END IF;
+	      		END LOOP;
 		END IF;
 
       RETURN NEW;
