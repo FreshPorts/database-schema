@@ -1,4 +1,4 @@
-CREATE VIEW public.ports_active WITH (security_barrier='false') AS
+CREATE OR REPLACE VIEW public.ports_active WITH (security_barrier='false') AS
  SELECT ports.id,
     ports.element_id,
     ports.category_id,
@@ -46,19 +46,22 @@ CREATE VIEW public.ports_active WITH (security_barrier='false') AS
     ports.license_restricted,
     ports.manual_package_build,
     ports.license_perms,
-    element.name,
-    categories.name AS category,
     ports.pkg_plist,
     ports.makefile,
     ports.conflicts,
     ports.conflicts_build,
-    ports.conflicts_install
-   FROM public.categories,
-    public.ports,
-    public.element
-  WHERE ((element.status = 'A'::bpchar) AND (categories.id = ports.category_id) AND (ports.element_id = element.id));
+    ports.conflicts_install,
+    ports.options_name,
+    element.name,
+    categories.name AS category,
+    element_pathname.pathname as pathname
+   FROM categories,
+    ports,
+    element,
+    element_pathname
+  WHERE element.status = 'A'::bpchar AND categories.id = ports.category_id AND ports.element_id = element.id and element.id = element_pathname.element_id and element_pathname.pathname like '/ports/head/%';
 
-CREATE VIEW public.ports_all AS
+CREATE OR REPLACE VIEW public.ports_all AS
  SELECT ports.id,
     ports.element_id,
     ports.category_id,
@@ -106,17 +109,20 @@ CREATE VIEW public.ports_all AS
     ports.license_restricted,
     ports.manual_package_build,
     ports.license_perms,
-    element.name,
-    categories.name AS category,
     ports.pkg_plist,
     ports.makefile,
     ports.conflicts,
     ports.conflicts_build,
-    ports.conflicts_install
+    ports.conflicts_install,
+    ports.options_name,
+    element.name,
+    categories.name AS category,
+    element_pathname.pathname as pathname
    FROM public.categories,
     public.ports,
-    public.element
-  WHERE ((categories.id = ports.category_id) AND (ports.element_id = element.id));
+    public.element,
+    public.element_pathname
+  WHERE ((categories.id = ports.category_id) AND (ports.element_id = element.id) and element.id = element_pathname.element_id and element_pathname.pathname like '/ports/head/%');
 
 
 
