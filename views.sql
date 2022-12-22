@@ -52,6 +52,7 @@ CREATE OR REPLACE VIEW public.ports_active WITH (security_barrier='false') AS
     ports.conflicts_build,
     ports.conflicts_install,
     ports.options_name,
+    ports.test_depends,
     element.name,
     categories.name AS category,
     element_pathname.pathname as pathname
@@ -115,6 +116,7 @@ CREATE OR REPLACE VIEW public.ports_all AS
     ports.conflicts_build,
     ports.conflicts_install,
     ports.options_name,
+    ports.test_depends,
     element.name,
     categories.name AS category,
     element_pathname.pathname as pathname
