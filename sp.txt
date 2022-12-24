@@ -3392,6 +3392,7 @@ $$  LANGUAGE 'plpgsql';
 -- It returns the id of the new port.
 --
 CREATE OR REPLACE FUNCTION CreatePort(text, text, text) returns int4 AS $$
+-- this function creates port on a branch based on the same port on head
 DECLARE
   a_category_name ALIAS for $1;
   a_port_name     ALIAS for $2;
@@ -3410,9 +3411,9 @@ DECLARE
     SELECT createport(l_element_id_of_new_port, getcategory(a_category_name))
       INTO l_port_id_branch;
 
-    SELECT PA.id
-      FROM ports_active PA
-     WHERE PA.element_id = l_element_id_of_new_port
+    SELECT id
+      FROM ports
+     WHERE element_id = l_element_id_of_new_port
       INTO l_port_id_branch;
 
     -- we need to set up the port_categories table first...
