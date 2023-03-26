@@ -1110,9 +1110,7 @@ CREATE OR REPLACE FUNCTION Stats_PortCount() returns int8 AS $$
 	BEGIN
 		SELECT count(*)
 		  INTO PortCount
-		  FROM ports, element
-		 WHERE element.status = 'A'
-		   AND ports.element_id = element.id;
+		  FROM ports_active;
 
 		return PortCount;
 	END
@@ -1141,13 +1139,8 @@ CREATE OR REPLACE FUNCTION Stats_PortCountBroken() returns int8 AS $$
 	BEGIN
              SELECT COUNT(*)
 	       INTO PortCount
-               FROM (
-                SELECT element_pathname(NP.element_id)
-                  FROM (
-                SELECT P.element_id
-                  FROM ports P JOIN element E ON P.element_id = E.id AND E.status = 'A' AND P.broken <> '') AS NP
-                GROUP BY NP.element_id
-                HAVING element_pathname(NP.element_id) ilike '/ports/head/%') AS paths;
+               FROM ports_active 
+              WHERE broken <> '';
 
 		return PortCount;
 	END
@@ -1160,13 +1153,8 @@ CREATE OR REPLACE FUNCTION Stats_PortCountDeprecated() returns int8 AS $$
 	BEGIN
              SELECT COUNT(*)
 	       INTO PortCount
-               FROM (
-                SELECT element_pathname(NP.element_id)
-                  FROM (
-                SELECT P.element_id
-                  FROM ports P JOIN element E ON P.element_id = E.id AND E.status = 'A' AND P.deprecated <> '') AS NP
-                GROUP BY NP.element_id
-                HAVING element_pathname(NP.element_id) ilike '/ports/head/%') AS paths;
+               FROM ports_active
+	      WHERE deprecated <> '';
 
 		return PortCount;
 	END
@@ -1179,13 +1167,8 @@ CREATE OR REPLACE FUNCTION Stats_PortCountRestricted() returns int8 AS $$
 	BEGIN
              SELECT COUNT(*)
 	       INTO PortCount
-               FROM (
-                SELECT element_pathname(NP.element_id)
-                  FROM (
-                SELECT P.element_id
-                  FROM ports P JOIN element E ON P.element_id = E.id AND E.status = 'A' AND P.restricted <> '') AS NP
-                GROUP BY NP.element_id
-                HAVING element_pathname(NP.element_id) ilike '/ports/head/%') AS paths;
+               FROM ports_active
+	      WHERE restricted <> '';
 
 		return PortCount;
 	END
@@ -1197,14 +1180,9 @@ CREATE OR REPLACE FUNCTION Stats_PortCountNoCDROM() returns int8 AS $$
 
 	BEGIN
              SELECT COUNT(*)
-               INTO PortCount
-               FROM (
-                SELECT element_pathname(NP.element_id)
-                  FROM (
-                SELECT P.element_id
-                  FROM ports P JOIN element E ON P.element_id = E.id AND E.status = 'A' AND P.no_cdrom <> '') AS NP
-                GROUP BY NP.element_id
-                HAVING element_pathname(NP.element_id) ilike '/ports/head/%') AS paths;
+	       INTO PortCount
+               FROM ports_active
+	      WHERE no_cdrom <> '';
 
 		return PortCount;
 	END
@@ -1217,10 +1195,8 @@ CREATE OR REPLACE FUNCTION Stats_PortCountVulnerable() returns int8 AS $$
 	BEGIN
                 SELECT count(*)
 		  INTO PortCount
-                  FROM ports            P
-		  JOIN ports_vulnerable PV ON PV.current    > 0            AND PV.port_id = P.id
-                  JOIN element_pathname EP ON EP.element_id = P.element_id AND EP.pathname like '/ports/head/%'
-                  JOIN element          E  ON P.element_id  = E.id         AND E.status = 'A';
+                  FROM ports_active     P
+		  JOIN ports_vulnerable PV ON PV.current > 0 AND PV.port_id = P.id;
 
 		return PortCount;
 	END
@@ -1234,13 +1210,8 @@ CREATE OR REPLACE FUNCTION Stats_PortCountIgnore() returns int8 AS $$
 
              SELECT COUNT(*)
 	       INTO PortCount
-               FROM (
-                SELECT element_pathname(NP.element_id)
-                  FROM (
-                SELECT P.element_id
-                  FROM ports P JOIN element E ON P.element_id = E.id AND E.status = 'A' AND P.ignore <> '') AS NP
-                GROUP BY NP.element_id
-                HAVING element_pathname(NP.element_id) ilike '/ports/head/%') AS paths;
+               FROM ports_active
+	      WHERE ignore <> '';
 
 		return PortCount;
 	END
@@ -1253,10 +1224,8 @@ CREATE OR REPLACE FUNCTION Stats_PortCountForbidden() returns int8 AS $$
 	BEGIN
 		SELECT count(*)
 		  INTO PortCount
-		  FROM ports, element
-		 WHERE element.status   = 'A'
-		   AND ports.element_id = element.id
-		   AND ports.forbidden <> '';
+		  FROM ports_active
+		 WHERE forbidden <> '';
 
 		return PortCount;
 	END
@@ -1449,14 +1418,8 @@ CREATE OR REPLACE FUNCTION Stats_Expiration() returns int8 AS $$
 	BEGIN
              SELECT COUNT(*)
 	       INTO ExpirationCount
-               FROM (
-                SELECT element_pathname(NP.element_id)
-                  FROM (
-                SELECT P.id, P.last_commit_id, P.element_id,  P.expiration_date
-                  FROM ports P JOIN element E ON P.expiration_date IS NOT NULL and P.element_id = E.id and E.status = 'A') AS NP
-                GROUP BY NP.element_id
-                HAVING element_pathname(NP.element_id) ilike '/ports/head/%') AS paths;
-		-- adding the HAVING was faster than doing the regular stuff (seeStats_Expired()).
+               FROM ports_active
+	      WHERE expiration_date IS NOT NULL;
 
 		return ExpirationCount;
 	END
@@ -1494,7 +1457,7 @@ CREATE OR REPLACE FUNCTION Stats_Interactive() returns int8 AS $$
 		SELECT count(*)
 		  INTO InteractiveCount
 		  FROM ports_active
-		 WHERE ports_active.is_interactive != '';
+		 WHERE is_interactive != '';
 
 		return InteractiveCount;
 	END
@@ -1570,12 +1533,8 @@ CREATE OR REPLACE FUNCTION CategoryPortCount(text) returns bigint AS $$
         SELECT count(*)
           FROM categories C 
           JOIN ports_categories PC ON C.id         = PC.category_id
-          JOIN ports            P  ON PC.port_id   = P.id
-          JOIN element          E  ON P.element_id = E.id
-          JOIN element_pathname EP on E.id         = EP.element_id
-         WHERE C.name   = $1
-           AND E.status = 'A'
-           AND EP.pathname like '/ports/head/%';
+          JOIN ports_active     P  ON PC.port_id   = P.id
+         WHERE C.name   = $1;
 $$ LANGUAGE SQL STABLE;
 
 
@@ -1583,12 +1542,8 @@ CREATE OR REPLACE FUNCTION CategoryPortCount(text, text) returns bigint AS $$
         SELECT count(*)
           FROM categories C 
           JOIN ports_categories PC ON C.id         = PC.category_id
-          JOIN ports            P  ON PC.port_id   = P.id
-          JOIN element          E  ON P.element_id = E.id
-          JOIN element_pathname EP on E.id         = EP.element_id
-         WHERE C.name   = $1
-           AND E.status = 'A'
-           AND EP.pathname like '/ports/branches/' || $2 || '%';
+          JOIN ports_active     P  ON PC.port_id   = P.id
+         WHERE C.name   = $1;
 $$ LANGUAGE SQL STABLE;
 
 
@@ -2682,8 +2637,8 @@ CREATE OR REPLACE FUNCTION GetCategoryPortFromPackageName(text) RETURNS TEXT AS 
    BEGIN
       SELECT count(*)
         INTO l_Count
-        FROM ports_active P
-       WHERE P.package_name = p_PackageName;
+        FROM ports_active
+       WHERE package_name = p_PackageName;
 
       IF l_Count = 1 THEN
          -- same query again, but expanded to pull in category and port
