@@ -932,14 +932,9 @@ EXECUTE PROCEDURE watch_list_element_insert ();
 
 CREATE OR REPLACE FUNCTION watch_list_element_delete () RETURNS TRIGGER AS $$
 DECLARE
-   l_port_id   int8;
-   l_port      text;
-   l_category  text;
    l_row_count bigint;
 BEGIN
    RAISE NOTICE 'into watch_list_element_delete with %', OLD.element_id;
-
-   RAISE NOTICE 'not found in cache.  will insert %, %, %', l_port_id, l_category, l_port;
 
    INSERT INTO cache_clearing_ports (port_id, category, port)
 
