@@ -819,6 +819,7 @@ EXECUTE PROCEDURE commit_log_insert ();
 
 
 
+-- see also DoneProcessingCommit() in sp.txt
 CREATE OR REPLACE FUNCTION commit_log_update () RETURNS TRIGGER
 AS '
    DECLARE

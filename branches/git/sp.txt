@@ -1542,7 +1542,8 @@ CREATE OR REPLACE FUNCTION CategoryPortCount(text, text) returns bigint AS $$
         SELECT count(*)
           FROM categories C 
           JOIN ports_categories PC ON C.id         = PC.category_id
-          JOIN ports_active     P  ON PC.port_id   = P.id
+          JOIN ports            P  ON PC.port_id   = P.id
+          JOIN element_pathname EP ON P.element_id = EP.element_id AND (EP.pathname LIKE '/ports/branches/' || $2 || '/%')
          WHERE C.name   = $1;
 $$ LANGUAGE SQL STABLE;
 
@@ -4061,3 +4062,55 @@ CREATE OR REPLACE FUNCTION pkg_plist(bigint) returns json as $$
    )
    select json_agg(distinct lib[1]) from tmp where lib is not null
 $$ LANGUAGE SQL STABLE;
+
+
+--
+-- see commit_log_update() in ri.txt
+-- After a commit is finished processing, and all the ports have been
+-- updated, we need to clear the cache for that commit - someone may have
+-- viewed it and it's sitting there in the cache.
+--
+-- 2023-09-30 - I vaguely recall a reason for writing this function but
+-- I can't find it in the code.
+--
+CREATE OR REPLACE FUNCTION DoneProcessingCommit(text) returns text AS $$
+	DECLARE
+        a_message_id ALIAS for $1;
+
+	l_commit_date	timestamp with time zone;
+	l_commit_log_id integer;
+	l_row_count bigint;
+
+	BEGIN
+		SELECT commit_date, id
+		  into l_commit_date, l_commit_log_id
+		  from commit_log where message_id = a_message_id;
+
+		UPDATE latest_commits_ports LCP
+		   SET commit_date = l_commit_date
+		 WHERE commit_log_id = l_commit_log_id;
+
+		UPDATE latest_commits
+		   SET commit_date = l_commit_date
+		 WHERE latest_commits.commit_log_id = l_commit_log_id;
+
+		INSERT INTO cache_clearing_dates (date_to_clear) 
+		SELECT l_commit_date
+		 WHERE NOT EXISTS (SELECT date_to_clear FROM cache_clearing_dates WHERE date_to_clear = l_commit_date);
+
+		IF FOUND THEN
+			NOTIFY date_updated;
+		END IF;
+
+		INSERT INTO cache_clearing_commits (commit_to_clear) VALUES (a_message_id)
+			ON CONFLICT ON CONSTRAINT cache_clearing_commits_idx DO NOTHING;
+
+		GET DIAGNOSTICS l_row_count = ROW_COUNT;
+		IF l_row_count > 0 THEN
+			NOTIFY commit_updated;
+		END IF;
+
+		-- returns this, because we can.
+		RETURN a_message_id;
+	END
+$$ LANGUAGE 'plpgsql';
