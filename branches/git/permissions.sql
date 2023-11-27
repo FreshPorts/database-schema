@@ -341,3 +341,4 @@ GRANT SELECT                 ON abi                   TO www;
 GRANT SELECT                 ON packages_last_checked TO www;
 GRANT SELECT, INSERT, UPDATE ON ports_origin          TO commits;
 
+GRANT SELECT                 ON categories            TO reading;
