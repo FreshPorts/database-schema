@@ -3805,6 +3805,12 @@ $$ LANGUAGE SQL VOLATILE;
 
 
 CREATE OR REPLACE FUNCTION UpdatePackagesFromRawPackages( IN a_abi_name text, IN a_package_set package_sets)
+
+-- this function takes data from the Raw Packages table and populates the
+-- packages table.
+--
+-- See https://github.com/FreshPorts/freshports/issues/449
+--
     RETURNS TABLE(inserts integer, updates integer, deletes integer)
     LANGUAGE plpgsql VOLATILE
     AS $$
@@ -3849,6 +3855,17 @@ CREATE OR REPLACE FUNCTION UpdatePackagesFromRawPackages( IN a_abi_name text, IN
 
     GET DIAGNOSTICS l_updates = ROW_COUNT;
 
+    -- populate the packages table.
+    -- this should be rather snappy now that all the values are set.
+    --
+    -- 2023-09-30 - See that WHERE NOT EXISTS? It seems like I was trying to
+    -- avoid overwriting existing data. I now believe that's the wrong approach
+    -- The data in pacakges_raw reflects what is now available from the
+    -- packages server. It completely supercedes any existing information for
+    -- this ABI
+    -- 
+    -- some background: https://news.freshports.org/2020/04/17/1325/
+    -- 
     INSERT INTO packages (abi_id, port_id, package_version, package_name, package_set)
     SELECT abi_id, port_id, package_version, package_name, package_set
       FROM packages_raw PR
