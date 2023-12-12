@@ -3909,6 +3909,13 @@ CREATE OR REPLACE FUNCTION UpdatePackagesFromRawPackages( IN a_abi_name text, IN
      WHERE PLC.abi_id      = l_abi_id
        AND PLC.package_set = a_package_set;
 
+    --
+    -- delete what we just imported - let's not leave it hanging around
+    -- because a future import of this ABI may never occur
+    -- re https://github.com/FreshPorts/freshports/issues/511
+    --
+    PERFORM PackagesRawDeleteForABIPackageSet( a_abi_name, a_package_set);
+
     RETURN QUERY (SELECT l_inserts, l_updates, l_deletes);
 
   END;
