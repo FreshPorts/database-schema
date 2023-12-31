@@ -3984,8 +3984,15 @@ CREATE OR REPLACE FUNCTION DenormalizeBranchName(a_branch_name text) RETURNS tex
 $$ LANGUAGE 'plpgsql' STABLE;
 
 
-CREATE OR REPLACE FUNCTION PackagesLastCheckedSetRepoDate(a_abi_name text, a_package_set package_sets, a_RepoDate timestamp) returns boolean AS
-$$
+CREATE OR REPLACE FUNCTION PackagesLastCheckedSetRepoDate(
+	a_abi_name text,
+	a_package_set package_sets,
+	a_repodate timestamp without time zone)
+    RETURNS boolean
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE PARALLEL UNSAFE
+AS $BODY$
   DECLARE
     l_repo_date  timestamp;
   BEGIN
@@ -3998,6 +4005,9 @@ $$
        FOR UPDATE OF PLC;
 
     -- last_checked must always be updated
+    -- we set the other fields to null when we have a new repo date
+    -- because we haven't imported that repo and we haven't processed it yet.
+    -- That assumes import_date and processed_date reflect the repo_date.
     UPDATE packages_last_checked PLC
        SET last_checked   = CURRENT_TIMESTAMP,
            repo_date      = CASE WHEN repo_date = a_RepoDate THEN repo_date      ELSE a_RepoDate END,
@@ -4009,9 +4019,9 @@ $$
        AND package_set = a_package_set;
 
     -- we compare against the value before the update
-    RETURN l_repo_date IS DISTINCT FROM a_RepoDate; 
+    RETURN a_RepoDate IS NOT NULL AND l_repo_date IS DISTINCT FROM a_RepoDate; 
   END;
-$$ LANGUAGE 'plpgsql' VOLATILE;
+$BODY$;
 
 
 CREATE OR REPLACE FUNCTION PackagesLastCheckedSetImportDate(a_abi_name text, a_package_set package_sets) returns void AS
