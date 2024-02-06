@@ -1193,3 +1193,68 @@ CREATE TRIGGER packages_last_checked_maintain
     AFTER INSERT ON abi
     FOR EACH ROW
     EXECUTE PROCEDURE packages_last_checked_maintain();
+
+--
+-- for package_notifications
+--
+
+-- UPDATE
+CREATE OR REPLACE FUNCTION package_notifications_update() RETURNS TRIGGER AS $$
+   BEGIN
+        -- by definition, this is an update
+
+        insert into package_notifications(abi_id, package_set, port_id, action, version_previous, version_current)
+        values (NEW.abi_id, NEW.package_set, NEW.port_id, 'update', OLD.package_version, NEW.package_version);
+        ON CONFLICT ON CONSTRAINT packages_abi_id_fk  DO NOTHING
+        ON CONFLICT ON CONSTRAINT packages_port_id_fk DO NOTHING;
+
+        RETURN NEW;
+   END
+$$ LANGUAGE 'plpgsql';
+
+  DROP TRIGGER IF EXISTS package_notifications_update ON packages;
+CREATE TRIGGER package_notifications_update
+    AFTER UPDATE ON packages
+    FOR EACH ROW
+    EXECUTE PROCEDURE package_notifications_update();
+
+-- INSERT (and delete are next to each other for easier comparison)
+CREATE OR REPLACE FUNCTION package_notifications_insert() RETURNS TRIGGER AS $$
+   BEGIN
+        -- by definition, this is an insert
+
+        insert into package_notifications(abi_id, package_set, port_id, action, version_current)
+        values (NEW.abi_id, NEW.package_set, NEW.port_id, 'insert', NEW.package_version);
+        ON CONFLICT ON CONSTRAINT packages_abi_id_fk  DO NOTHING
+        ON CONFLICT ON CONSTRAINT packages_port_id_fk DO NOTHING;
+
+        RETURN NEW;
+   END
+$$ LANGUAGE 'plpgsql';
+
+  DROP TRIGGER IF EXISTS package_notifications_insert ON packages;
+CREATE TRIGGER package_notifications_insert
+    AFTER UPDATE ON packages
+    FOR EACH ROW
+    EXECUTE PROCEDURE package_notifications_insert();
+
+-- DELETE (and delete are next to each other for easier comparison)
+CREATE OR REPLACE FUNCTION package_notifications_delete() RETURNS TRIGGER AS $$
+   BEGIN
+        -- by definition, this is a delete
+
+        insert into package_notifications(abi_id, package_set, port_id, action, version_previous)
+        values (OLD.abi_id, OLD.package_set, OLD.port_id, 'delete', OLD.package_version);
+        ON CONFLICT ON CONSTRAINT packages_abi_id_fk  DO NOTHING
+        ON CONFLICT ON CONSTRAINT packages_port_id_fk DO NOTHING;
+
+        RETURN OLD;
+   END
+$$ LANGUAGE 'plpgsql';
+
+  DROP TRIGGER IF EXISTS package_notifications_delete ON packages;
+CREATE TRIGGER package_notifications_delete
+    AFTER UPDATE ON packages
+    FOR EACH ROW
+    EXECUTE PROCEDURE package_notifications_delete();
+
