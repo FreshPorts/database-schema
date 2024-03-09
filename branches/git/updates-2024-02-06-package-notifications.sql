@@ -125,14 +125,17 @@ CREATE TRIGGER package_notifications_delete
 grant insert, select, update, delete on package_notifications to packaging;
 
 
---DROP TABLE IF EXISTS public.report_subscriptions_abi;
+-- Table: public.report_subscriptions_abi
+
+-- DROP TABLE IF EXISTS public.report_subscriptions_abi;
 
 CREATE TABLE IF NOT EXISTS public.report_subscriptions_abi
 (
     user_id integer NOT NULL,
-    abi_id integer NOT NULL,
     watch_list_id integer NOT NULL,
-    CONSTRAINT report_subscriptions_abi_user_abi_watch_pk UNIQUE NULLS NOT DISTINCT (user_id, abi_id, watch_list_id),
+    abi_id integer NOT NULL,
+    package_set package_sets NOT NULL,
+    CONSTRAINT report_subscriptions_abi_user_abi_watch_pk UNIQUE NULLS NOT DISTINCT (user_id, watch_list_id, abi_id, package_set),
     CONSTRAINT report_subscriptions_abi_abi_id FOREIGN KEY (abi_id)
         REFERENCES public.abi (id) MATCH SIMPLE
         ON UPDATE CASCADE
@@ -143,14 +146,23 @@ CREATE TABLE IF NOT EXISTS public.report_subscriptions_abi
         ON DELETE CASCADE,
     CONSTRAINT report_subscriptions_abi_watch_list_id FOREIGN KEY (watch_list_id)
         REFERENCES public.watch_list (id) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
 )
 
 TABLESPACE pg_default;
 
 ALTER TABLE IF EXISTS public.report_subscriptions_abi
     OWNER to postgres;
+
+REVOKE ALL ON TABLE public.report_subscriptions_abi FROM reading;
+REVOKE ALL ON TABLE public.report_subscriptions_abi FROM www;
+
+GRANT ALL ON TABLE public.report_subscriptions_abi TO postgres;
+
+GRANT SELECT ON TABLE public.report_subscriptions_abi TO reading;
+
+GRANT SELECT, INSERT, DELETE ON TABLE public.report_subscriptions_abi TO www;
 
 COMMENT ON TABLE public.report_subscriptions_abi
     IS 'Records the ABI a given user follows - relates to package_notifications table
@@ -161,8 +173,58 @@ COMMENT ON COLUMN public.report_subscriptions_abi.watch_list_id
     IS 'We don''t need user_id, because watch_list_id will find us the user_id. We duplicate that information here because I think it''ll be useful in queries.';
 
 COMMENT ON CONSTRAINT report_subscriptions_abi_user_abi_watch_pk ON public.report_subscriptions_abi
-    IS 'For a given user_id, abi_id, and watch_list_id must be unique.';
-    
-INSERT INTO public.reports(
+    IS 'For a given user_id, abi_id, and watch_list_id must be unique.';INSERT INTO public.reports(
 	name, description, needs_frequency)
 	VALUES ('New Package Notification', 'Notification when a new package is available for something on your watch list.', false);
+	
+	
+	-- Table: public.report_log_package_notifications
+
+-- DROP TABLE IF EXISTS public.report_log_package_notifications;
+
+CREATE TABLE IF NOT EXISTS public.report_log_package_notifications
+(
+    id integer NOT NULL DEFAULT nextval('report_log_package_notifications_id_seq'::regclass),
+    abi_id integer NOT NULL,
+    package_set package_sets NOT NULL,
+    report_date timestamp with time zone NOT NULL DEFAULT ('now'::text)::timestamp(6) with time zone,
+    num_emails integer NOT NULL,
+    num_ports integer NOT NULL,
+    num_users integer NOT NULL,
+    num_watch_lists integer NOT NULL,
+    CONSTRAINT report_log_package_notifications_pkey PRIMARY KEY (id),
+    CONSTRAINT report_log_package_notifications_abi_id_fk FOREIGN KEY (abi_id)
+        REFERENCES public.abi (id) MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+        NOT VALID
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.report_log_package_notifications
+    OWNER to postgres;
+
+REVOKE ALL ON TABLE public.report_log_package_notifications FROM reading;
+
+GRANT ALL ON TABLE public.report_log_package_notifications TO postgres;
+
+GRANT INSERT ON TABLE public.report_log_package_notifications TO reading;
+-- Index: fki_a
+
+-- DROP INDEX IF EXISTS public.fki_a;
+
+CREATE INDEX IF NOT EXISTS fki_a
+    ON public.report_log_package_notifications USING btree
+    (abi_id ASC NULLS LAST)
+    TABLESPACE pg_default;
+    
+
+# for sending out package notifications
+GRANT SELECT                 ON announcements            to reading;
+GRANT SELECT                 ON package_notifications    to reading;
+GRANT SELECT                 ON report_subscriptions_abi to reading;
+GRANT SELECT                 ON abi                      to reading;
+GRANT TRUNCATE               ON package_notifications    to packaging;
+GRANT INSERT                 ON report_log_package_notifications to reading;
+GRANT SELECT, UPDATE         ON report_log_package_notifications_id_seq TO reading;
