@@ -38,6 +38,15 @@ TABLESPACE pg_default;
 ALTER TABLE IF EXISTS public.package_notifications
     OWNER to postgres;
 
+REVOKE ALL ON TABLE public.package_notifications FROM packaging;
+REVOKE ALL ON TABLE public.package_notifications FROM reading;
+
+GRANT INSERT, SELECT, TRUNCATE, UPDATE ON TABLE public.package_notifications TO packaging;
+
+GRANT ALL ON TABLE public.package_notifications TO postgres;
+
+GRANT SELECT ON TABLE public.package_notifications TO reading;
+
 COMMENT ON TABLE public.package_notifications
     IS 'when a new repo is imported, we need to notify users. This table lets us build a list of what has change in this repo.
 
@@ -49,18 +58,24 @@ COMMENT ON COLUMN public.package_notifications.action
 COMMENT ON CONSTRAINT package_notifications_action_check ON public.package_notifications
     IS 'read the constraint as:
 
-		(action = ''insert''::action AND version_previous IS NULL AND version_current IS NOT NULL)
-		OR (action = ''update''::action AND version_previous IS NOT NULL AND version_current IS NOT NULL)
-		OR (action = ''delete''::action AND version_previous IS NOT NULL AND version_current IS NULL))
+                (action = ''insert''::action AND version_previous IS NULL AND version_current IS NOT NULL)
+                OR (action = ''update''::action AND version_previous IS NOT NULL AND version_current IS NOT NULL)
+                OR (action = ''delete''::action AND version_previous IS NOT NULL AND version_current IS NULL))
 ';
 
 
---
--- for package_notifications
---
 
 -- UPDATE
-CREATE OR REPLACE FUNCTION package_notifications_update() RETURNS TRIGGER AS $$
+-- FUNCTION: public.package_notifications_update()
+
+-- DROP FUNCTION IF EXISTS public.package_notifications_update();
+
+CREATE OR REPLACE FUNCTION public.package_notifications_update()
+    RETURNS trigger
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE NOT LEAKPROOF
+AS $BODY$
    BEGIN
         -- by definition, this is an update
 
@@ -74,7 +89,10 @@ CREATE OR REPLACE FUNCTION package_notifications_update() RETURNS TRIGGER AS $$
 
         RETURN NEW;
    END
-$$ LANGUAGE 'plpgsql';
+$BODY$;
+
+ALTER FUNCTION public.package_notifications_update()
+    OWNER TO postgress;
 
   DROP TRIGGER IF EXISTS package_notifications_update ON packages;
 CREATE TRIGGER package_notifications_update
@@ -83,7 +101,16 @@ CREATE TRIGGER package_notifications_update
     EXECUTE PROCEDURE package_notifications_update();
 
 -- INSERT (and delete are next to each other for easier comparison)
-CREATE OR REPLACE FUNCTION package_notifications_insert() RETURNS TRIGGER AS $$
+-- FUNCTION: public.package_notifications_insert()
+
+-- DROP FUNCTION IF EXISTS public.package_notifications_insert();
+
+CREATE OR REPLACE FUNCTION public.package_notifications_insert()
+    RETURNS trigger
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE NOT LEAKPROOF
+AS $BODY$
    BEGIN
         -- by definition, this is an insert
 
@@ -93,7 +120,10 @@ CREATE OR REPLACE FUNCTION package_notifications_insert() RETURNS TRIGGER AS $$
 
         RETURN NEW;
    END
-$$ LANGUAGE 'plpgsql';
+$BODY$;
+
+ALTER FUNCTION public.package_notifications_insert()
+    OWNER TO postgres;
 
   DROP TRIGGER IF EXISTS package_notifications_insert ON packages;
 CREATE TRIGGER package_notifications_insert
@@ -101,8 +131,17 @@ CREATE TRIGGER package_notifications_insert
     FOR EACH ROW
     EXECUTE PROCEDURE package_notifications_insert();
 
--- DELETE (and delete are next to each other for easier comparison)
-CREATE OR REPLACE FUNCTION package_notifications_delete() RETURNS TRIGGER AS $$
+-- DELETE (and insert are next to each other for easier comparison)
+-- FUNCTION: public.package_notifications_delete()
+
+-- DROP FUNCTION IF EXISTS public.package_notifications_delete();
+
+CREATE OR REPLACE FUNCTION public.package_notifications_delete()
+    RETURNS trigger
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE NOT LEAKPROOF
+AS $BODY$
    BEGIN
         -- by definition, this is a delete
 
@@ -112,7 +151,10 @@ CREATE OR REPLACE FUNCTION package_notifications_delete() RETURNS TRIGGER AS $$
 
         RETURN OLD;
    END
-$$ LANGUAGE 'plpgsql';
+$BODY$;
+
+ALTER FUNCTION public.package_notifications_delete()
+    OWNER TO postgres;
 
   DROP TRIGGER IF EXISTS package_notifications_delete ON packages;
 CREATE TRIGGER package_notifications_delete
@@ -121,8 +163,6 @@ CREATE TRIGGER package_notifications_delete
     EXECUTE PROCEDURE package_notifications_delete();
 
 
-
-grant insert, select, update, delete on package_notifications to packaging;
 
 
 -- Table: public.report_subscriptions_abi
@@ -162,7 +202,7 @@ GRANT ALL ON TABLE public.report_subscriptions_abi TO postgres;
 
 GRANT SELECT ON TABLE public.report_subscriptions_abi TO reading;
 
-GRANT SELECT, INSERT, DELETE ON TABLE public.report_subscriptions_abi TO www;
+GRANT DELETE, INSERT, SELECT ON TABLE public.report_subscriptions_abi TO www;
 
 COMMENT ON TABLE public.report_subscriptions_abi
     IS 'Records the ABI a given user follows - relates to package_notifications table
@@ -173,12 +213,11 @@ COMMENT ON COLUMN public.report_subscriptions_abi.watch_list_id
     IS 'We don''t need user_id, because watch_list_id will find us the user_id. We duplicate that information here because I think it''ll be useful in queries.';
 
 COMMENT ON CONSTRAINT report_subscriptions_abi_user_abi_watch_pk ON public.report_subscriptions_abi
-    IS 'For a given user_id, abi_id, and watch_list_id must be unique.';INSERT INTO public.reports(
-	name, description, needs_frequency)
-	VALUES ('New Package Notification', 'Notification when a new package is available for something on your watch list.', false);
+    IS 'For a given row: user_id, watch_list_id, abi_id, & package_set must be unique.';
+    
+
 	
-	
-	-- Table: public.report_log_package_notifications
+-- Table: public.report_log_package_notifications
 
 -- DROP TABLE IF EXISTS public.report_log_package_notifications;
 
@@ -221,6 +260,8 @@ CREATE INDEX IF NOT EXISTS fki_a
     
 
 # for sending out package notifications
+grant insert, select, update, delete on package_notifications to packaging;
+
 GRANT SELECT                 ON announcements            to reading;
 GRANT SELECT                 ON package_notifications    to reading;
 GRANT SELECT                 ON report_subscriptions_abi to reading;
