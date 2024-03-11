@@ -3,7 +3,7 @@
 -- DROP TYPE IF EXISTS public.action;
 
 -- CREATE TYPE public.action AS ENUM
---     ('insert', 'update', 'delete');
+--    ('insert', 'update', 'delete');
 
 ALTER TYPE public.action
     OWNER TO postgres;
@@ -92,7 +92,7 @@ AS $BODY$
 $BODY$;
 
 ALTER FUNCTION public.package_notifications_update()
-    OWNER TO postgress;
+    OWNER TO postgres;
 
   DROP TRIGGER IF EXISTS package_notifications_update ON packages;
 CREATE TRIGGER package_notifications_update
@@ -223,7 +223,7 @@ COMMENT ON CONSTRAINT report_subscriptions_abi_user_abi_watch_pk ON public.repor
 
 CREATE TABLE IF NOT EXISTS public.report_log_package_notifications
 (
-    id integer NOT NULL DEFAULT nextval('report_log_package_notifications_id_seq'::regclass),
+    id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
     abi_id integer NOT NULL,
     package_set package_sets NOT NULL,
     report_date timestamp with time zone NOT NULL DEFAULT ('now'::text)::timestamp(6) with time zone,
@@ -258,8 +258,9 @@ CREATE INDEX IF NOT EXISTS fki_a
     (abi_id ASC NULLS LAST)
     TABLESPACE pg_default;
     
+    
 
-# for sending out package notifications
+-- for sending out package notifications
 grant insert, select, update, delete on package_notifications to packaging;
 
 GRANT SELECT                 ON announcements            to reading;
@@ -269,3 +270,7 @@ GRANT SELECT                 ON abi                      to reading;
 GRANT TRUNCATE               ON package_notifications    to packaging;
 GRANT INSERT                 ON report_log_package_notifications to reading;
 GRANT SELECT, UPDATE         ON report_log_package_notifications_id_seq TO reading;
+
+INSERT INTO public.reports(
+	name, description, needs_frequency)
+	VALUES ('New Package Notification', 'Notification when a new package is available for something on your watch list', false);
