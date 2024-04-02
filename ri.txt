@@ -1204,9 +1204,8 @@ CREATE OR REPLACE FUNCTION package_notifications_update() RETURNS TRIGGER AS $$
         -- by definition, this is an update
 
         insert into package_notifications(abi_id, package_set, port_id, action, version_previous, version_current)
-        values (NEW.abi_id, NEW.package_set, NEW.port_id, 'update', OLD.package_version, NEW.package_version);
-        ON CONFLICT ON CONSTRAINT packages_abi_id_fk  DO NOTHING
-        ON CONFLICT ON CONSTRAINT packages_port_id_fk DO NOTHING;
+        values (NEW.abi_id, NEW.package_set, NEW.port_id, 'update', OLD.package_version, NEW.package_version)
+        ON CONFLICT ON CONSTRAINT package_notifications_abi_set_port_idx DO NOTHING;
 
         RETURN NEW;
    END
@@ -1224,9 +1223,8 @@ CREATE OR REPLACE FUNCTION package_notifications_insert() RETURNS TRIGGER AS $$
         -- by definition, this is an insert
 
         insert into package_notifications(abi_id, package_set, port_id, action, version_current)
-        values (NEW.abi_id, NEW.package_set, NEW.port_id, 'insert', NEW.package_version);
-        ON CONFLICT ON CONSTRAINT packages_abi_id_fk  DO NOTHING
-        ON CONFLICT ON CONSTRAINT packages_port_id_fk DO NOTHING;
+        values (NEW.abi_id, NEW.package_set, NEW.port_id, 'insert', NEW.package_version)
+        ON CONFLICT ON CONSTRAINT package_notifications_abi_set_port_idx DO NOTHING;
 
         RETURN NEW;
    END
@@ -1244,9 +1242,8 @@ CREATE OR REPLACE FUNCTION package_notifications_delete() RETURNS TRIGGER AS $$
         -- by definition, this is a delete
 
         insert into package_notifications(abi_id, package_set, port_id, action, version_previous)
-        values (OLD.abi_id, OLD.package_set, OLD.port_id, 'delete', OLD.package_version);
-        ON CONFLICT ON CONSTRAINT packages_abi_id_fk  DO NOTHING
-        ON CONFLICT ON CONSTRAINT packages_port_id_fk DO NOTHING;
+        values (OLD.abi_id, OLD.package_set, OLD.port_id, 'delete', OLD.package_version)
+        ON CONFLICT ON CONSTRAINT package_notifications_abi_set_port_idx DO NOTHING;
 
         RETURN OLD;
    END
