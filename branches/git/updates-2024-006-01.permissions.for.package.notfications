@@ -1,0 +1,3 @@
+-- re https://github.com/FreshPorts/freshports/issues/550
+
+GRANT SELECT                 ON watch_list_element       to reading;
