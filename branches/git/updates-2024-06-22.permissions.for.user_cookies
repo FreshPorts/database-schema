@@ -1,0 +1,10 @@
+-- re https://github.com/FreshPorts/freshports/issues/574
+--
+-- select for login
+-- insert for new user
+-- update for each time we see that cooke, we boost the date - not yet implemented
+-- delete for www/delete-account.php
+--
+GRANT SELECT, INSERT, UPDATE, DELETE                 ON user_cookie       to www;
+
+grant select on user_cookie to rsyncer;

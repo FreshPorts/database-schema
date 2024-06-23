@@ -185,3 +185,26 @@ CREATE TYPE PackageFlavors_record AS (
 	name          text,
         flavor_number integer
 );
+
+  DROP TYPE IF EXISTS Users_record CASCADE;	
+CREATE TYPE Users_record AS (
+	id                     integer,
+	name                   text,
+	firstlogin             timestamp with time zone,
+	lastlogin              timestamp with time zone,
+	email                  text,
+	watch_notice_id        integer,
+	emailsitenotices_yn    boolean,
+	emailbouncecount       smallint,
+	type                   character(1),
+	status                 character(1),
+	ip_address             text,
+	number_of_commits      smallint,
+	number_of_days         smallint,
+	watch_list_add_remove  text,
+	max_number_watch_lists integer,
+	last_watch_list_chosen integer,
+	page_size              smallint,
+	password_hash          text,
+	set_focus_search       boolean
+);

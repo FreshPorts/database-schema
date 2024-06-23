@@ -3648,6 +3648,7 @@ CREATE OR REPLACE FUNCTION DeleteUser(int) returns void AS $$
     END IF;
   END
 $$ LANGUAGE 'plpgsql' VOLATILE
+
     SECURITY DEFINER
     -- Set a secure search_path: trusted schema(s), then 'pg_temp'.
     SET search_path = public, pg_temp;;
@@ -3840,7 +3841,7 @@ CREATE OR REPLACE FUNCTION UpdatePackagesFromRawPackages( IN a_abi_name text, IN
        AND P.element_id   = EP.element_id;
 
     -- this is required to allow the DELETE to properly plan the operation
-    analyze packages_raw;
+--    analyze packages_raw;
 
     UPDATE packages p
        SET package_version = PR.package_version

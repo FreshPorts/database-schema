@@ -351,7 +351,25 @@ GRANT SELECT                 ON package_notifications    to reading;
 GRANT SELECT                 ON report_subscriptions_abi to reading;
 GRANT SELECT                 ON abi                      to reading;
 GRANT SELECT                 ON watch_list_element       to reading;
+GRANT SELECT                 ON watch_list               to reading;
 GRANT TRUNCATE               ON package_notifications    to packaging;
 GRANT INSERT                 ON report_log_package_notifications        TO reading;
 GRANT SELECT, UPDATE         ON report_log_package_notifications_id_seq TO reading;
 GRANT INSERT                 ON packages_last_checked TO abi_maintenance;
+
+-- for ABI maintenance
+-- create role abi_maintenance;
+-- create role abi_maintainer in role abi_maintenance login password 'foo';
+grant insert, delete, select, update on abi to abi_maintenance;
+
+
+-- for user_cookie
+
+-- re https://github.com/FreshPorts/freshports/issues/574
+--
+-- select for login
+-- insert for new user
+-- update for each time we see that cooke, we boost the date - not yet implemented
+-- delete for www/delete-account.php
+--
+GRANT SELECT, INSERT, UPDATE, DELETE                 ON user_cookie       to www;
