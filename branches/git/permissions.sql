@@ -310,8 +310,8 @@ grant select on watch_list_element  to freshsource_ro;
 grant select on watch_list          to freshsource_ro;
 grant select on watch_list          to freshsource_ro;
 
-grant update (cookie)    on users   to freshsource_ro;
-grant update (lastlogin) on users   to freshsource_ro;
+-- grant update (cookie)    on users   to freshsource_ro;
+-- grant update (lastlogin) on users   to freshsource_ro;
 
 -- For monitoring, e.g. nagios
 
