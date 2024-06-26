@@ -1,0 +1,9 @@
+-- To upgrade the FreshPorts database to user_cookie table:
+
+begin;
+\i datatype.txt 
+\i updates-2024-06-22.ddl
+\i updates-2024-06-22.permissions.for.user_cookies
+\i updates-2024-06-22.sql
+\i sp.txt
+\i ri.txt

@@ -12,7 +12,7 @@ CREATE OR REPLACE FUNCTION user_fetch_by_cookie( a_cookie text) RETURNS SETOF Us
 -- by design. Next idea, never implemented, was UPDATE first, then SELECT. That should work.
 
      UPDATE user_cookie
-        SET last_used_timestamp = localtimestamp
+        SET expiry_timestamp = localtimestamp
        FROM users
       WHERE users.id           =  user_cookie.user_id
         AND user_cookie.cookie = a_cookie
