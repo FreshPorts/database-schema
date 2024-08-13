@@ -1232,7 +1232,7 @@ $$ LANGUAGE 'plpgsql';
 
   DROP TRIGGER IF EXISTS package_notifications_insert ON packages;
 CREATE TRIGGER package_notifications_insert
-    AFTER UPDATE ON packages
+    AFTER INSERT ON packages
     FOR EACH ROW
     EXECUTE PROCEDURE package_notifications_insert();
 
@@ -1251,7 +1251,7 @@ $$ LANGUAGE 'plpgsql';
 
   DROP TRIGGER IF EXISTS package_notifications_delete ON packages;
 CREATE TRIGGER package_notifications_delete
-    AFTER UPDATE ON packages
+    AFTER DELETE ON packages
     FOR EACH ROW
     EXECUTE PROCEDURE package_notifications_delete();
 
