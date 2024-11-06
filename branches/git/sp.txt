@@ -3731,11 +3731,11 @@ CREATE OR REPLACE FUNCTION public.ports_categories_set() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
    DECLARE
-		CategoryCount	integer;
-		CategoryNames	text;
-		Category		text;
-		CategoryID		int8;
-		UpdateNeeded	boolean;
+		CategoryCount  integer;
+		CategoryNames  text;
+		Category       text;
+		CategoryID     int8;
+		UpdateNeeded   boolean;
    BEGIN
 		UpdateNeeded := TRUE;
 
