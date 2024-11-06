@@ -719,11 +719,11 @@ EXECUTE PROCEDURE categories_new();
 
 CREATE OR REPLACE FUNCTION ports_categories_set() RETURNS TRIGGER AS $$
    DECLARE
-		CategoryCount	integer;
-		CategoryNames	text;
-		Category		text;
-		CategoryID		int8;
-		UpdateNeeded	boolean;
+		CategoryCount integer;
+		CategoryNames text;
+		Category      text;
+		CategoryID    int8;
+		UpdateNeeded  boolean;
    BEGIN
 		DELETE 
 		  FROM ports_categories
@@ -733,7 +733,7 @@ CREATE OR REPLACE FUNCTION ports_categories_set() RETURNS TRIGGER AS $$
 
 			CategoryCount := 0;
 			CategoryNames := new.categories;
-	     			LOOP
+	     		LOOP
          			CategoryCount := CategoryCount + 1;
 	       	 		Category := split_part(CategoryNames, ' ', CategoryCount);
 
