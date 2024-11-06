@@ -332,13 +332,14 @@ GRANT SELECT, UPDATE, INSERT, DELETE ON packages      TO packaging;
 GRANT SELECT, INSERT, DELETE ON ports                 TO packaging;
 GRANT SELECT                 ON ports_origin          TO packaging;
 GRANT SELECT                 ON system_branch         TO packaging;
-GRANT SELECT, UPDATE, INSERT, DELETE ON packages_raw  TO packaging;
+GRANT SELECT, UPDATE, INSERT, DELETE, TRUNCATE ON packages_raw  TO packaging;
 
 GRANT SELECT, UPDATE         ON packages_last_checked TO packaging;
 
 GRANT SELECT                 ON packages              TO www;
 GRANT SELECT                 ON abi                   TO www;
-GRANT SELECT                 ON packages_last_checked TO www;
+GRANT SELECT                 ON abi                   TO www;
+GRANT SELECT                 ON packages_last_checked TO reporting;
 GRANT SELECT, INSERT, UPDATE ON ports_origin          TO commits;
 
 GRANT SELECT                 ON categories            TO reading;
