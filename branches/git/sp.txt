@@ -302,7 +302,7 @@ CREATE OR REPLACE FUNCTION CreateCategory(text, text, bool) returns int4 AS $$
     category_id := nextval('categories_id_seq');
 
     IF category_is_primary THEN
-        pathname            := 'ports/' || category_name;
+        pathname            := 'ports/head/' || category_name;
         category_element_id := Pathname_ID(pathname);
 
         IF category_element_id is NULL THEN
@@ -2812,13 +2812,13 @@ $$ LANGUAGE SQL STABLE;
 
 CREATE OR REPLACE function PortsVulnerabilityCountAdjust(int) returns bigint as $$
 DECLARE
-	p_PortID		ALIAS for $1;
+	p_PortID ALIAS for $1;
 
-	l_VulnCurrent	int;
-	l_VulnCount		int;
-	l_VulnPast		int;
+	l_VulnCurrent  int;
+	l_VulnCount    int;
+	l_VulnPast     int;
 
-	l_RowsModified	int;
+	l_RowsModified int;
 
 BEGIN
 
@@ -3924,10 +3924,11 @@ CREATE OR REPLACE FUNCTION PackagesLastCheckedSetRepoDate(
     VOLATILE PARALLEL UNSAFE
 AS $BODY$
   DECLARE
-    l_repo_date  timestamp;
+    l_repo_date   timestamp;
+    l_import_date timestamp;
   BEGIN
-    SELECT repo_date
-      INTO l_repo_date
+    SELECT repo_date, import_date
+      INTO l_repo_date, l_import_date
       FROM packages_last_checked PLC, abi
      WHERE PLC.abi_id  = abi.id
        AND abi.name    = a_abi_name
@@ -3949,7 +3950,7 @@ AS $BODY$
        AND package_set = a_package_set;
 
     -- we compare against the value before the update
-    RETURN a_RepoDate IS NOT NULL AND l_repo_date IS DISTINCT FROM a_RepoDate; 
+    RETURN a_RepoDate IS NOT NULL AND l_repo_date IS DISTINCT FROM a_RepoDate or (l_repo_date is not null and l_import_date is null);
   END;
 $BODY$;
 
