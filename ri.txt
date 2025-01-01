@@ -1180,7 +1180,8 @@ BEGIN
    IF TG_OP = 'INSERT' THEN
       INSERT INTO packages_last_checked(abi_id, package_set)
             VALUES (NEW.id, 'latest'),
-                   (NEW.id, 'quarterly');
+                   (NEW.id, 'quarterly'),
+                   (NEW.id, 'kmod');
    END IF;
 
    RETURN NEW;
