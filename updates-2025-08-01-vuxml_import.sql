@@ -1,8 +1,3 @@
--- for the COPY from files
-
-grant truncate on vuxml_import to commits;
-
-
 -- re https://news.freshports.org/2025/07/30/how-freshports-processes-vuxml-entries/
 --    https://github.com/FreshPorts/freshports/issues/633
 --
@@ -25,7 +20,7 @@ ALTER TABLE IF EXISTS public.vuxml_import
 REVOKE ALL ON TABLE public.vuxml_import FROM commits;
 REVOKE ALL ON TABLE public.vuxml_import FROM rsyncer;
 
-GRANT INSERT, DELETE, SELECT, UPDATE ON TABLE public.vuxml_import TO commits;
+GRANT INSERT, DELETE, SELECT, UPDATE, TRUNCATE ON TABLE public.vuxml_import TO commits;
 
 GRANT ALL ON TABLE public.vuxml_import TO postgres;
 
