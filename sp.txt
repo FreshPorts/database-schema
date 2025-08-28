@@ -1038,44 +1038,6 @@ CREATE OR REPLACE FUNCTION SystemTimeAdjust() returns interval AS $$
 $$ LANGUAGE 'sql' immutable;
 
 
-CREATE OR REPLACE FUNCTION DailySummaryDateAdd(date) returns int8 AS $$
-	DECLARE
-	        DateToAdd	ALIAS for $1;
-
-		RC		int8;
-
-	BEGIN
-		INSERT INTO daily_refreshes
-		SELECT DateToAdd as refresh_date
-		 WHERE NOT EXISTS (
-		           SELECT refresh_date
-		             FROM daily_refreshes
-		            WHERE refresh_date = DateToAdd);
-
-		GET DIAGNOSTICS RC = ROW_COUNT;
-
-		RETURN RC;
-	END
-$$ LANGUAGE 'plpgsql';
-
-
-
-CREATE OR REPLACE FUNCTION DailySummaryDateRemove(date) returns int8 AS $$
-	DECLARE
-        DateToDelete	ALIAS for $1;
-
-	RowCount    	int8;
-
-	BEGIN
-		DELETE FROM Daily_Refreshes
-		 WHERE Refresh_Date = DateToDelete;
-
-		GET DIAGNOSTICS RowCount = ROW_COUNT;
-
-		RETURN RowCount;
-	END
-$$ LANGUAGE 'plpgsql';
-
 
 CREATE OR REPLACE FUNCTION DailyStatsCaculate() returns int8 AS $$
 	DECLARE
