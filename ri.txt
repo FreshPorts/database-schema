@@ -1242,9 +1242,17 @@ CREATE OR REPLACE FUNCTION package_notifications_delete() RETURNS TRIGGER AS $$
    BEGIN
         -- by definition, this is a delete
 
-        insert into package_notifications(abi_id, package_set, port_id, action, version_previous)
-        values (OLD.abi_id, OLD.package_set, OLD.port_id, 'delete', OLD.package_version)
-        ON CONFLICT ON CONSTRAINT package_notifications_abi_set_port_idx DO NOTHING;
+	if ( new.abi_id is NOT null) then
+		--
+		-- if new.abi_id is null, the ABI has been deleted and
+		-- inserting into package_notifications will result in an
+		-- error, such as: Key (abi_id)=(24) is not present in table "abi".
+		-- see https://github.com/FreshPorts/freshports/issues/642
+		--
+	        insert into package_notifications(abi_id, package_set, port_id, action, version_previous)
+        	values (OLD.abi_id, OLD.package_set, OLD.port_id, 'delete', OLD.package_version)
+	        ON CONFLICT ON CONSTRAINT package_notifications_abi_set_port_idx DO NOTHING;
+	end if;
 
         RETURN OLD;
    END
