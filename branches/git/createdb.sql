@@ -60,12 +60,6 @@ create table ports_check
 
 create index ports_check_category_id on ports_check (category_id);
 
-create table daily_refreshes
-(
-    refresh_date               date                  not null,
-    primary key (refresh_date)
-);
-
 create table graphs
 (
     id                         serial                not null,
