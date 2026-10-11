@@ -29,7 +29,8 @@
 --    ORDER BY origin;
 --
 -- and confirm each one with make -V PATCH_DEPENDS -V EXTRACT_DEPENDS before
--- acting.  Fix them by refreshing (insert into ports_to_refresh), not with SQL.
+-- acting.  Fix them by refreshing, not with SQL: list them one category/port
+-- per line and pass that to refresh-listed-ports.pl on the ingress host.
 --
 -- The guard below makes psql -f stop here instead of doing anything.
 
