@@ -114,6 +114,7 @@ grant select                         on watch_notice                   to group 
 grant select                         on graphs                         to group www;
 grant select                         on daily_stats                    to group www;
 grant select                         on daily_stats_data               to group www;
+grant select                         on watchers_also_watched          to group www;
 
 grant select                         on report_frequency               to group www;
 grant select                         on reports                        to group www;
@@ -193,6 +194,9 @@ grant select, insert, update, delete on system_branch_element_revision to group 
 grant select on users              to group commits;
 grant select on watch_list         to group commits;
 grant select on watch_list_element to group commits;
+grant select, insert, update, delete on watchers_also_watched                to group commits;
+grant select, insert, update, delete on watchers_also_watched_excluded_lists to group commits;
+grant select, insert, update, delete on watchers_also_watched_queue          to group commits;
 
 grant select, insert, update on watch_notice_log to group commits;
 grant select, insert, update on watch_notice     to group commits;
@@ -350,6 +354,7 @@ GRANT SELECT                 ON package_notifications    to reading;
 GRANT SELECT                 ON report_subscriptions_abi to reading;
 GRANT SELECT                 ON abi                      to reading;
 GRANT SELECT                 ON watch_list_element       to reading;
+GRANT SELECT                 ON watchers_also_watched    to reading;
 GRANT SELECT                 ON watch_list               to reading;
 GRANT TRUNCATE               ON package_notifications    to packaging;
 GRANT INSERT                 ON report_log_package_notifications        TO reading;
