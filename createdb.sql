@@ -845,6 +845,8 @@ create table sanity_test_failures
     primary key (id)
 );
 
+create index sanity_test_failures_commit_log_id on sanity_test_failures (commit_log_id);
+
 create table commit_group_contents
 (
     commit_group_id            integer               not null,
