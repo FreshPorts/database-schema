@@ -1,1252 +1,2660 @@
 --
--- $Id: createdb.sql,v 1.95 2012-01-23 16:51:16 dan Exp $
+-- FreshPorts database schema: extensions, enum types, tables, sequences,
+-- defaults, constraints, indexes, foreign keys and views.
 --
--- The following options should be used to create the database schema
+-- Generated from pg_dump --schema-only --no-owner --no-privileges of
+-- freshports.dvl on 2026-10-20.  Ordering is: extensions, enums, free-standing
+-- sequences, then each table (alphabetical) with its sequences, defaults,
+-- constraints, indexes and comments, then all foreign keys, then views.
 --
--- Under tables:
---  For Create Table
---   uncheck the following
---    - Alternate Key
---    - Physical Options
---    - Comment
---    - Drop table
+-- Not in this file:
+--   composite types       datatype.txt
+--   functions             sp.txt
+--   triggers              ri.txt, sp.txt
+--   session_variables     session-variables.sql
+--   roles and grants      roles-users-groups.sql, permissions.sql
 --
---  For Create Index
---   uncheck the following
---    - Primary Key
---    - Foreign Key
---    - Drop Index
+
+
 --
--- Under Views check this::
---  Check the following:
---    - Create view
+-- Extensions
 --
--- Under columns check this:
---    - Default value
---    - Check
 
-create table watch_list_staging_log
-(
-    id                         serial                not null,
-    date_added                 timestamp without time zone not null
-        default currenttimestamputc(),
-    user_id                    integer                       ,
-    action                     char(1)               not null
-        check (action in ('U','W','C','D')),
-    count_total                integer               not null
-        default 0,
-    count_matches              integer               not null
-        default 0,
-    count_missing              integer               not null
-        default 0,
-    count_duplicates           integer               not null
-        default 0,
-    count_categories           integer               not null
-        default 0,
-    primary key (id)
+CREATE EXTENSION IF NOT EXISTS plperl WITH SCHEMA pg_catalog;
+
+CREATE EXTENSION IF NOT EXISTS fuzzystrmatch WITH SCHEMA public;
+
+CREATE EXTENSION IF NOT EXISTS pg_stat_statements WITH SCHEMA public;
+
+CREATE EXTENSION IF NOT EXISTS pg_trgm WITH SCHEMA public;
+
+CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;
+
+--
+-- Enum types
+--
+
+CREATE TYPE action AS ENUM (
+    'insert',
+    'update',
+    'delete'
 );
 
-create table ports_check
-(
-    id                         serial                not null,
-    category_name              text                  not null,
-    port_name                  text                  not null,
-    category_id                integer                       ,
-    port_id                    integer                       ,
-    add_to_ports_table         boolean               not null
-        default 'Y',
-    primary key (id)
+CREATE TYPE conflicts AS ENUM (
+    'conflicts',
+    'conflicts_build',
+    'conflicts_install'
 );
 
-create index ports_check_category_id on ports_check (category_id);
-
-create table graphs
-(
-    id                         serial                not null,
-    title                      text                  not null,
-    query                      text                  not null,
-    label                      text                          ,
-    is_clickable               boolean                       
-        default FALSE,
-    primary key (id)
+CREATE TYPE package_sets AS ENUM (
+    'latest',
+    'quarterly'
 );
 
-create table commits_latest
-(
-    commit_log_id              integer                       ,
-    commit_date_raw            timestamp without time zone         ,
-    message_subject            text                          ,
-    message_id                 text                          ,
-    committer                  text                          ,
-    commit_description         text                          ,
-    commit_date                text                          ,
-    commit_time                text                          ,
-    element_id                 integer                       ,
-    element_name               text                          ,
-    revision_name              text                          ,
-    status                     char(1)                       ,
-    encoding_losses            boolean                       
+COMMENT ON TYPE package_sets IS 'The name is derived from https://wiki.freebsd.org/Ports/QuarterlyBranch
+
+"Quarterly is the name for Ports branches cut from HEAD at the beginning of every (yearly) quarter in January, April, July, and October, and the name for the binary package sets that are produced from these branches."';
+
+--
+-- Sequences not owned by a table column
+--
+
+CREATE SEQUENCE daily_stats_data_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+CREATE SEQUENCE daily_stats_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+CREATE SEQUENCE flavors_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+CREATE SEQUENCE generate_plist_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+CREATE SEQUENCE package_flavors_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+--
+-- abi
+--
+
+CREATE TABLE abi (
+    id integer NOT NULL,
+    name text NOT NULL,
+    active boolean DEFAULT true NOT NULL
 );
 
-create table announcements
-(
-    id                         serial                not null,
-    text                       text                  not null,
-    start_date                 timestamp without time zone         ,
-    end_date                   timestamp without time zone         ,
-    primary key (id)
+ALTER TABLE abi ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME abi_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
 );
 
-create table page_load_summary
-(
-    id                         serial                not null,
-    date                       date                  not null,
-    page_name                  text                  not null,
-    total                      integer               not null
-        default 0,
-    users                      integer               not null
-        default 0,
-    rendering_time_min         interval                      ,
-    rendering_time_max         interval                      ,
-    rendering_time_avg         interval              not null,
-    primary key (id)
+ALTER TABLE ONLY abi
+    ADD CONSTRAINT abi_pkey PRIMARY KEY (id);
+
+CREATE UNIQUE INDEX abi_name_idx ON abi USING btree (name);
+
+COMMENT ON TABLE abi IS 'list of ABI - e.g. FreeBSD:12:amd64';
+
+COMMENT ON COLUMN abi.active IS 'Do we still fetch packages for this ABI';
+
+--
+-- announcements
+--
+
+CREATE TABLE announcements (
+    id integer NOT NULL,
+    text text NOT NULL,
+    start_date timestamp with time zone,
+    end_date timestamp with time zone,
+    text_plain text NOT NULL
 );
 
-create unique index page_loads_date_date on page_load_summary (date, page_name);
+CREATE SEQUENCE announcements_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
 
-create table commits_latest_ports
-(
-    commit_log_id              integer               not null,
-    commit_date                timestamp without time zone not null
+ALTER SEQUENCE announcements_id_seq OWNED BY announcements.id;
+
+ALTER TABLE ONLY announcements ALTER COLUMN id SET DEFAULT nextval('announcements_id_seq'::regclass);
+
+ALTER TABLE ONLY announcements
+    ADD CONSTRAINT announcements_pkey PRIMARY KEY (id);
+
+--
+-- cache_clearing_commits
+--
+
+CREATE TABLE cache_clearing_commits (
+    commit_to_clear text NOT NULL,
+    date_added timestamp without time zone DEFAULT now()
 );
 
-create table listen_for
-(
-    id                         serial                not null,
-    name                       text                  not null,
-    script_name                text                  not null,
-    primary key (id)
+ALTER TABLE ONLY cache_clearing_commits
+    ADD CONSTRAINT cache_clearing_commits_idx PRIMARY KEY (commit_to_clear);
+
+COMMENT ON COLUMN cache_clearing_commits.commit_to_clear IS 'The commit which should be cleared from the archives';
+
+COMMENT ON COLUMN cache_clearing_commits.date_added IS 'The timestamp this entry was added to the table';
+
+--
+-- cache_clearing_dates
+--
+
+CREATE TABLE cache_clearing_dates (
+    id integer NOT NULL,
+    date_to_clear date,
+    date_added timestamp without time zone DEFAULT now()
 );
 
-insert into listen_for (name, script_name) values ('port_updated', 'listen_port');
-insert into listen_for (name, script_name) values ('ports_moved', 'listen_ports_moved');
-insert into listen_for (name, script_name) values ('ports_updating', 'listen_ports_updating');
-insert into listen_for (name, script_name) values ('vuxml', 'listen_vuxml');
-insert into listen_for (name, script_name) values ('category_new', 'listen_category_new');
+CREATE SEQUENCE cache_clearing_dates_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
 
-create unique index listen_for_name_idx on listen_for (name);
+ALTER SEQUENCE cache_clearing_dates_id_seq OWNED BY cache_clearing_dates.id;
 
-create table element
-(
-    id                         serial                not null,
-    name                       text                  not null,
-    parent_id                  integer                       ,
-    status                     char(1)               not null
-        check (status in ('A','D')),
-    primary key (id)
+ALTER TABLE ONLY cache_clearing_dates ALTER COLUMN id SET DEFAULT nextval('cache_clearing_dates_id_seq'::regclass);
+
+COMMENT ON COLUMN cache_clearing_dates.id IS 'primary key';
+
+COMMENT ON COLUMN cache_clearing_dates.date_to_clear IS 'The date which should be cleared from the archives';
+
+COMMENT ON COLUMN cache_clearing_dates.date_added IS 'The timestamp this entry was added to the table';
+
+--
+-- cache_clearing_files
+--
+
+CREATE TABLE cache_clearing_files (
+    id integer NOT NULL,
+    pathname text NOT NULL,
+    date_added timestamp without time zone DEFAULT now() NOT NULL
 );
 
-create index element_name on element (name);
-
-create table watch_notice
-(
-    id                         serial                not null,
-    frequency                  char(1)               not null
-        check (frequency in ('Z','D','W','F','M')),
-    description                text                  not null,
-    last_sent                  timestamp without time zone         ,
-    primary key (id)
+ALTER TABLE cache_clearing_files ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
+    SEQUENCE NAME cache_clearing_files_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
 );
 
-INSERT INTO "watch_notice" (id, frequency, description) VALUES (1,'Z','Don''t notify me');
-INSERT INTO "watch_notice" (id, frequency, description) VALUES (3,'W','Week (on Tuesdays)');
-INSERT INTO "watch_notice" (id, frequency, description) VALUES (4,'F','Fortnightly  (9th and 23rd)');
-INSERT INTO "watch_notice" (id, frequency, description) VALUES (5,'M','Month (23rd)');
-INSERT INTO "watch_notice" (id, frequency, description) VALUES (2,'D','Day');
+ALTER TABLE ONLY cache_clearing_files
+    ADD CONSTRAINT cache_clearing_files_pathname UNIQUE (pathname);
 
-create index watch_notice_frequency on watch_notice (frequency);
+CREATE UNIQUE INDEX cache_clearing_files_id_idx ON cache_clearing_files USING btree (id);
 
-create table system
-(
-    id                         serial                not null,
-    name                       text                  not null,
-    time_adjust                interval              not null
-        default '0 seconds',
-    primary key (id)
+--
+-- cache_clearing_ports
+--
+
+CREATE TABLE cache_clearing_ports (
+    id integer NOT NULL,
+    port_id integer NOT NULL,
+    category text NOT NULL,
+    port text NOT NULL,
+    date_added timestamp without time zone DEFAULT now() NOT NULL
 );
 
-INSERT INTO "system" VALUES (1,'FreeBSD','-03:00');
+CREATE SEQUENCE cache_clearing_ports_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
 
-create table daily_stats
-(
-    id                         serial                not null,
-    title                      text                  not null,
-    query                      text                  not null,
-    primary key (id)
+ALTER SEQUENCE cache_clearing_ports_id_seq OWNED BY cache_clearing_ports.id;
+
+ALTER TABLE ONLY cache_clearing_ports ALTER COLUMN id SET DEFAULT nextval('cache_clearing_ports_id_seq'::regclass);
+
+ALTER TABLE ONLY cache_clearing_ports
+    ADD CONSTRAINT cache_clearing_ports_category_port_idx UNIQUE (category, port);
+
+ALTER TABLE ONLY cache_clearing_ports
+    ADD CONSTRAINT cache_clearing_ports_pkey PRIMARY KEY (id);
+
+COMMENT ON CONSTRAINT cache_clearing_ports_category_port_idx ON cache_clearing_ports IS 'Unique constraint on category/port because there''s no need to clear something multiple times.';
+
+--
+-- categories
+--
+
+CREATE TABLE categories (
+    id integer NOT NULL,
+    is_primary boolean NOT NULL,
+    element_id integer,
+    name text NOT NULL,
+    description text
 );
 
-create table reports
-(
-    id                         serial                not null,
-    name                       text                  not null,
-    description                text                  not null,
-    needs_frequency            boolean               not null,
-    primary key (id)
+CREATE SEQUENCE categories_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE categories_id_seq OWNED BY categories.id;
+
+ALTER TABLE ONLY categories ALTER COLUMN id SET DEFAULT nextval('categories_id_seq'::regclass);
+
+ALTER TABLE ONLY categories
+    ADD CONSTRAINT categories_pkey PRIMARY KEY (id);
+
+--
+-- category_stats
+--
+
+CREATE TABLE category_stats (
+    category_id integer NOT NULL,
+    port_count integer NOT NULL,
+    last_update timestamp without time zone NOT NULL
 );
 
-insert into reports(id, name, description, needs_frequency) values (1, 'Watch List Notification', 'Details of any changes to any items on your watch list', TRUE);
+ALTER TABLE ONLY category_stats
+    ADD CONSTRAINT category_stats_pkey PRIMARY KEY (category_id);
 
-insert into reports(id, name, description, needs_frequency) values (2, 'New Ports', 'Lists the new ports which have been added to the ports tree', TRUE);
+--
+-- commit_log
+--
 
-insert into reports(id, name, description, needs_frequency) values (3, 'Maintainer notification', 'Port maintainers are notified when their port fails to build (for maintainers only).', FALSE);
-
-insert into reports(id, name, description, needs_frequency) values (4, 'Announcements', 'Very low frequency notices about important changes to the website (highly recommended)', FALSE);
-
-insert into reports(id, name, description, needs_frequency) values (5, 'Security Notices', 'Notification of any security commits related to ports on your watch list.', FALSE);
-
-create table report_frequency
-(
-    id                         serial                not null,
-    frequency                  char(1)               not null,
-    description                text                  not null,
-    primary key (id)
+CREATE TABLE commit_log (
+    id integer NOT NULL,
+    message_id text NOT NULL,
+    message_date timestamp with time zone NOT NULL,
+    message_subject text,
+    date_added timestamp with time zone NOT NULL,
+    commit_date timestamp with time zone NOT NULL,
+    committer text NOT NULL,
+    description text NOT NULL,
+    system_id integer NOT NULL,
+    encoding_losses boolean DEFAULT false NOT NULL,
+    svn_revision text,
+    repo_id integer,
+    commit_hash_short text,
+    committer_name text,
+    committer_email text,
+    author_name text,
+    author_email text
 );
 
-INSERT INTO report_frequency (id, frequency, description) VALUES (1,'Z','Don''t notify me');
-INSERT INTO report_frequency (id, frequency, description) VALUES (2,'D','Day');
-INSERT INTO report_frequency (id, frequency, description) VALUES (3,'W','Week (on Tuesdays)');
-INSERT INTO report_frequency (id, frequency, description) VALUES (4,'F','Fortnightly  (9th and 23rd)');
-INSERT INTO report_frequency (id, frequency, description) VALUES (5,'M','Month (23rd)');
+CREATE SEQUENCE commit_log_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
 
-create table tasks
-(
-    id                         serial                not null,
-    name                       text                  not null,
-    description                text                  not null,
-    primary key (id)
+ALTER SEQUENCE commit_log_id_seq OWNED BY commit_log.id;
+
+ALTER TABLE ONLY commit_log ALTER COLUMN id SET DEFAULT nextval('commit_log_id_seq'::regclass);
+
+ALTER TABLE ONLY commit_log
+    ADD CONSTRAINT commit_log_message_id UNIQUE (message_id);
+
+ALTER TABLE ONLY commit_log
+    ADD CONSTRAINT commit_log_pkey PRIMARY KEY (id);
+
+CREATE INDEX commit_log_commit_date ON commit_log USING btree (commit_date);
+
+CREATE INDEX commit_log_commit_hash_short ON commit_log USING btree (commit_hash_short);
+
+CREATE INDEX commit_log_committer_idx ON commit_log USING btree (committer);
+
+CREATE INDEX commit_log_svn_revision_idx ON commit_log USING btree (svn_revision) WHERE (svn_revision IS NOT NULL);
+
+COMMENT ON COLUMN commit_log.commit_hash_short IS 'This is the short version of the git hash stored in
+ svn_revision.
+ 
+If null/empty, it is not a git hash.';
+
+--
+-- commit_log_branches
+--
+
+CREATE TABLE commit_log_branches (
+    commit_log_id integer NOT NULL,
+    branch_id integer NOT NULL
 );
 
-insert into tasks (name,description) values ('SecurityNoticeAdd', 'Ability to designate a given commit as security related');
+CREATE INDEX commit_log_branches_branch_id_idx ON commit_log_branches USING btree (branch_id);
 
-insert into tasks (name,description) values ('CategoryVirtualDescriptionSet', 'Ability to set the description for a virtual category');
+CREATE UNIQUE INDEX commit_log_branches_pk ON commit_log_branches USING btree (commit_log_id, branch_id);
 
-insert into tasks (name,description) values ('AnnouncementsUpdate', 'Ability to maintain the announcements table');
+--
+-- commit_log_elements
+--
 
-create unique index tasks_idx on tasks (name);
-
-create table security_notice_status
-(
-    id                         char(1)               not null,
-    name                       text                  not null,
-    description                text                  not null,
-    primary key (id)
+CREATE TABLE commit_log_elements (
+    id integer NOT NULL,
+    commit_log_id integer NOT NULL,
+    element_id integer NOT NULL,
+    revision_name text,
+    change_type character(1) NOT NULL,
+    CONSTRAINT commit_log_elements_change_type CHECK (((change_type = 'A'::bpchar) OR (change_type = 'M'::bpchar) OR (change_type = 'R'::bpchar) OR (change_type = 'r'::bpchar)))
 );
 
-insert into security_notice_status (id,name,description) values ('A', 'Active', 'A valid security concern');
+CREATE SEQUENCE commit_log_elements_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
 
-insert into security_notice_status (id,name,description) values ('I', 'Ingore', 'Ingore this notice');
+ALTER SEQUENCE commit_log_elements_id_seq OWNED BY commit_log_elements.id;
 
-insert into security_notice_status (id,name,description) values ('C', 'Candidate', 'A candidate for becoming a security notice');
+ALTER TABLE ONLY commit_log_elements ALTER COLUMN id SET DEFAULT nextval('commit_log_elements_id_seq'::regclass);
 
-create table ports_updating
-(
-    id                         serial                not null,
-    date                       date                  not null,
-    affects                    text                  not null,
-    author                     text                          ,
-    reason                     text                  not null,
-    primary key (id)
+ALTER TABLE ONLY commit_log_elements
+    ADD CONSTRAINT commit_log_elements_pkey PRIMARY KEY (id);
+
+CREATE INDEX commit_log_elements_clid ON commit_log_elements USING btree (commit_log_id);
+
+CREATE INDEX commit_log_elements_ei ON commit_log_elements USING btree (element_id);
+
+COMMENT ON CONSTRAINT commit_log_elements_change_type ON commit_log_elements IS '
+A - add
+M - modify
+R - remove for subersion, delete for git
+r - rename (added for git)';
+
+--
+-- commit_log_port_elements
+--
+
+CREATE TABLE commit_log_port_elements (
+    commit_log_id integer NOT NULL,
+    port_id integer NOT NULL,
+    commit_log_element_id integer NOT NULL
 );
 
-create table vuxml
-(
-    id                         serial                not null,
-    vid                        text                  not null,
-    topic                      text                  not null,
-    description                text                  not null,
-    date_discovery             text                          ,
-    date_entry                 text                          ,
-    date_modified              text                          ,
-    status                     char(1)               not null,
-    primary key (id)
+ALTER TABLE ONLY commit_log_port_elements
+    ADD CONSTRAINT commit_log_port_elements_pkey PRIMARY KEY (commit_log_id, port_id, commit_log_element_id);
+
+--
+-- commit_log_ports
+--
+
+CREATE TABLE commit_log_ports (
+    commit_log_id integer NOT NULL,
+    port_id integer NOT NULL,
+    needs_refresh smallint NOT NULL,
+    port_version text,
+    port_revision text,
+    port_epoch text,
+    port_name_revision text
 );
 
-create table releases
-(
-    id                         serial                not null,
-    name                       text                  not null,
-    revision                   text                  not null,
-    primary key (id)
+ALTER TABLE ONLY commit_log_ports
+    ADD CONSTRAINT commit_log_ports_pkey PRIMARY KEY (commit_log_id, port_id);
+
+CREATE INDEX commit_log_ports_needs_refresh_idx ON commit_log_ports USING btree (needs_refresh) WHERE (needs_refresh <> 0);
+
+CREATE INDEX commit_log_ports_port_id ON commit_log_ports USING btree (port_id);
+
+CREATE INDEX commit_log_ports_port_name_revision ON commit_log_ports USING btree (port_name_revision);
+
+CREATE INDEX needs_refresh ON commit_log_ports USING btree (needs_refresh);
+
+--
+-- commit_log_ports_elements
+--
+
+CREATE TABLE commit_log_ports_elements (
+    commit_log_id integer NOT NULL,
+    element_id integer NOT NULL
 );
 
-create unique index release_name_idx on releases (name);
+ALTER TABLE ONLY commit_log_ports_elements
+    ADD CONSTRAINT commit_log_ports_elements_pkey PRIMARY KEY (commit_log_id, element_id);
 
-create table archs
-(
-    id                         serial                not null,
-    name                       text                  not null,
-    primary key (id)
+CREATE INDEX commit_log_ports_elements_clid ON commit_log_ports_elements USING btree (commit_log_id);
+
+--
+-- commit_log_ports_ignore
+--
+
+CREATE TABLE commit_log_ports_ignore (
+    commit_log_id integer NOT NULL,
+    port_id integer NOT NULL,
+    date_ignored timestamp with time zone DEFAULT ('now'::text)::timestamp(6) with time zone NOT NULL,
+    reason text NOT NULL
 );
 
-insert into archs (name) values ('alpha');
-insert into archs (name) values ('amd64');
-insert into archs (name) values ('i386');
-insert into archs (name) values ('ia64');
-insert into archs (name) values ('pc98');
-insert into archs (name) values ('ppc');
-insert into archs (name) values ('sparc64');
+ALTER TABLE ONLY commit_log_ports_ignore
+    ADD CONSTRAINT commit_log_ports_ignore_pkey PRIMARY KEY (commit_log_id, port_id);
 
-create unique index archs_name_idx on archs (name);
+--
+-- commit_log_ports_vuxml
+--
 
-create table port_status
-(
-    id                         serial                not null,
-    name                       text                  not null,
-    description                text                  not null,
-    primary key (id)
+CREATE TABLE commit_log_ports_vuxml (
+    id integer NOT NULL,
+    commit_log_id integer NOT NULL,
+    port_id integer NOT NULL,
+    vuxml_id integer NOT NULL
+);
+ALTER TABLE ONLY commit_log_ports_vuxml ALTER COLUMN port_id SET STATISTICS 1000;
+ALTER TABLE ONLY commit_log_ports_vuxml ALTER COLUMN vuxml_id SET STATISTICS 1000;
+
+CREATE SEQUENCE commit_log_ports_vuxml_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE commit_log_ports_vuxml_id_seq OWNED BY commit_log_ports_vuxml.id;
+
+ALTER TABLE ONLY commit_log_ports_vuxml ALTER COLUMN id SET DEFAULT nextval('commit_log_ports_vuxml_id_seq'::regclass);
+
+ALTER TABLE ONLY commit_log_ports_vuxml
+    ADD CONSTRAINT commit_log_ports_vuxml_pkey PRIMARY KEY (id);
+
+CREATE INDEX commit_log_ports_vuxml_port_id ON commit_log_ports_vuxml USING btree (port_id);
+
+CREATE INDEX commit_log_ports_vuxml_vuxml_id_idx ON commit_log_ports_vuxml USING btree (vuxml_id);
+
+--
+-- commits_flagged
+--
+
+CREATE TABLE commits_flagged (
+    user_id integer NOT NULL,
+    commit_log_id integer NOT NULL
 );
 
-insert into port_status (name, description) values ('BROKEN', 'port is broken on this ARCH/RELEASE');
-insert into port_status (name, description) values ('ONLY_FOR_ARCHS', 'port works only on these ARCHS');
-insert into port_status (name, description) values ('NOT_FOR_ARCHS', 'port does not work on these ARCHS');
+ALTER TABLE ONLY commits_flagged
+    ADD CONSTRAINT commits_flagged_pkey PRIMARY KEY (user_id, commit_log_id);
 
-create unique index port_status_name_idx on port_status (name);
+--
+-- commits_latest
+--
 
-create table top_questions
-(
-    id                         serial                not null,
-    question                   text                  not null,
-    number_of_answers          smallint              not null
-        default 1
-        check (number_of_answers >= 1),
-    primary key (id)
-);
-
-create table event_types
-(
-    id                         serial                not null,
-    name                       text                  not null,
-    description                text                  not null,
-    primary key (id)
-);
-
-insert into event_types(name, description) values ('port_updated', 'a port has changed and the cache entry needs to be removed');
-insert into event_types(name, description) values ('ports_moved', 'A commit has been performed on /usr/ports/MOVED');
-insert into event_types(name, description) values ('ports_updating',  'A commit has been performed on /usr/ports/UPDATING');
-insert into event_types(name, description) values ('vuxml',  'A commit has been performed on /usr/ports/security/vuxml/vuln.xml');
-
-create table element_revision
-(
-    element_id                 integer               not null,
-    revision_name              text                  not null,
-    primary key (element_id, revision_name)
-);
-
-create table categories
-(
-    id                         serial                not null,
-    is_primary                 boolean               not null,
-    element_id                 integer                       ,
-    name                       text                  not null,
-    description                text                          ,
-    primary key (id)
-);
-
-create table ports
-(
-    id                         serial                not null,
-    element_id                 integer               not null,
-    category_id                integer               not null,
-    short_description          text                          ,
-    long_description           text                          ,
-    version                    text                          ,
-    revision                   text                          ,
-    maintainer                 text                          ,
-    homepage                   text                          ,
-    master_sites               text                          ,
-    extract_suffix             text                          ,
-    package_exists             boolean                       ,
-    depends_build              text                          ,
-    depends_run                text                          ,
-    last_commit_id             integer                       ,
-    found_in_index             boolean                       ,
-    forbidden                  text                          ,
-    broken                     text                          ,
-    date_added                 timestamp without time zone         
-        default currenttimestamputc(),
-    categories                 text                          ,
-    deprecated                 text                          ,
-    ignore                     text                          ,
-    master_port                text                          ,
-    latest_link                text                          ,
-    depends_lib                text                          ,
-    no_latest_link             text                          ,
-    no_package                 text                          ,
-    package_name               text                          ,
-    portepoch                  text                          ,
-    restricted                 text                          ,
-    no_cdrom                   text                          ,
-    expiration_date            date                          ,
-    is_interactive             text                          ,
-    only_for_archs             text                          ,
-    not_for_archs              text                          ,
-    status                     char(1)               not null
-        check (status in ('A','D')),
-    showconfig                 text                          ,
-    license                    text                          ,
-    primary key (id)
-);
-
-create index ports_ignore on ports(ignore) where ignore <> '';
-create index ports_broken on ports(broken) where broken <> '';
-
-create index ports_expiration_date on ports(expiration_date) where expiration_date is not null;
-
-create table users
-(
-    id                         serial                not null,
-    name                       text                  not null,
-    password                   text                  not null,
-    cookie                     text                  not null,
-    firstlogin                 timestamp without time zone         
-        default currenttimestamputc(),
-    lastlogin                  timestamp without time zone         
-        default currenttimestamputc(),
-    email                      text                          ,
-    watch_notice_id            integer               not null,
-    emailsitenotices_yn        boolean                       ,
-    emailbouncecount           smallint                      
-        default 0,
-    type                       char(1)               not null
-        default 'U'
-        check (type in ('U','S')),
-    status                     char(1)               not null
-        default 'U'
-        check (status in ('U','A','D')),
-    ip_address                 text                  not null,
-    number_of_commits          smallint                      
-        default 100,
-    number_of_days             smallint                      
-        default 9,
-    watch_list_add_remove      text                  not null
-        default 'default'
-        check (watch_list_add_remove in ('ask','default')),
-    max_number_watch_lists     integer               not null
-        default 5
-        check (max_number_watch_lists >= 1),
-    last_watch_list_chosen     integer                       ,
-    page_size                  smallint              not null
-        default 25,
-    primary key (id)
-);
-
-create index users_cookie on users (cookie);
-
-create index users_email on users (email);
-
-create unique index users_name on users (name);
-
-create table watch_list
-(
-    id                         serial                not null,
-    user_id                    integer               not null,
-    name                       text                  not null,
-    awaiting_staging           boolean               not null
-        default FALSE,
-    in_service                 boolean               not null
-        default FALSE,
-    token                      text                  not null
-        default generate_watch_list_token(),
-    primary key (id)
-);
-
-create unique index watch_list_token on watch_list (token);
-
-create table security_notice
-(
-    id                         serial                not null,
-    user_id                    integer               not null,
-    date_added                 timestamp without time zone not null
-        default currenttimestamputc(),
-    ip_address                 inet                  not null,
-    description                text                  not null,
-    commit_log_id              integer               not null,
-    security_notice_status_id  char(1)               not null
-        default 'C',
-    primary key (id)
-);
-
-create table commit_group
-(
-    id                         serial                not null,
-    user_id                    integer               not null,
-    name                       text                  not null,
-    primary key (id)
-);
-
-create table system_branch
-(
-    id                         serial                not null,
-    system_id                  integer               not null,
-    branch_name                text                  not null,
-    primary key (id)
-);
-
-create table commit_log
-(
-    id                         serial                not null,
-    message_id                 text                  not null,
-    message_date               timestamp without time zone not null,
-    message_subject            text                          ,
-    date_added                 timestamp without time zone not null,
-    commit_date                timestamp without time zone not null,
-    committer                  text                  not null,
-    description                text                  not null,
-    system_id                  integer               not null,
-    encoding_losses            boolean               not null
-        default FALSE,
-    primary key (id)
-);
-
-create index commit_log_commit_date on commit_log (commit_date);
-
-create unique index commit_log_message_id on commit_log (message_id);
-
-create table vuxml_affected
-(
-    id                         serial                not null,
-    vuxml_id                   integer               not null,
-    type                       text                  not null,
-    primary key (id)
-);
-
-create table commit_log_elements
-(
-    id                         serial                not null,
-    commit_log_id              integer               not null,
-    element_id                 integer               not null,
-    revision_name              text                  not null,
-    change_type                char(1)               not null
-        check (change_type in ('A','M','R')),
-    primary key (id)
-);
-
-create table watch_list_element
-(
-    watch_list_id              integer               not null,
-    element_id                 integer               not null,
-    primary key (watch_list_id, element_id)
-);
-
-create table watch_notice_log
-(
-    id                         serial                not null,
-    notice_date                timestamp without time zone not null
-        default currenttimestamputc(),
-    frequency_id               integer               not null,
-    watch_notice_count         integer               not null,
-    commit_count               integer               not null,
-    primary key (id)
-);
-
-create table system_branch_element_revision
-(
-    system_branch_id           integer               not null,
-    element_id                 integer               not null,
-    revision_name              text                  not null,
-    primary key (system_branch_id, element_id, revision_name)
-);
-
-create table user_confirmations
-(
-    user_id                    integer               not null,
-    token                      text                  not null,
-    primary key (user_id, token)
-);
-
-create table commit_log_ports
-(
-    commit_log_id              integer               not null,
-    port_id                    integer               not null,
-    needs_refresh              smallint              not null,
-    port_version               text                          ,
-    port_revision              text                          ,
-    port_epoch                 text                          ,
-    primary key (commit_log_id, port_id)
-);
-
-create index needs_refresh on commit_log_ports (needs_refresh);
-
-create table watch_list_staging
-(
-    id                         serial                not null,
-    user_id                    integer               not null,
-    category                   text                  not null,
-    port                       text                  not null,
-    item_count                 integer               not null,
-    from_pkg_info              boolean               not null,
-    from_watch_list            boolean               not null,
-    element_id                 serial                        ,
-    primary key (id)
-);
-
-create table daily_stats_data
-(
-    id                         serial                not null,
-    daily_stats_id             integer               not null,
-    date                       date                  not null,
-    value                      bigint                not null,
-    primary key (id)
-);
-
-create unique index daily_stats_data_unique on daily_stats_data (daily_stats_id, date);
-
-create table report_log
-(
-    id                         serial                not null,
-    report_id                  integer               not null,
-    frequency_id               integer               not null,
-    report_date                timestamp without time zone not null
-        default currenttimestamputc(),
-    email_count                integer               not null,
-    commit_count               integer               not null,
-    port_count                 integer               not null,
-    primary key (id)
-);
-
-create table report_subscriptions
-(
-    report_id                  integer               not null,
-    user_id                    integer               not null,
-    report_frequency_id        integer               not null,
-    primary key (report_id, user_id)
-);
-
-create table committer_notify
-(
-    user_id                    integer               not null,
-    committer                  text                  not null,
-    status                     char(1)               not null
-        default 'A'
-        check (status in ('A','D')),
-    primary key (user_id)
-);
-
-create table element_pathnames
-(
-    element_id                 integer               not null,
-    pathname                   text                  not null,
-    primary key (element_id)
+CREATE TABLE commits_latest (
+    commit_log_id integer,
+    commit_date_raw timestamp with time zone,
+    message_subject text,
+    message_id text,
+    committer text,
+    commit_description text,
+    commit_date text,
+    commit_time text,
+    element_id integer,
+    element_name text,
+    revision_name text,
+    status character(1),
+    encoding_losses boolean,
+    element_pathname text
 );
 
 --
---
--- This may be useful in populating this table:
---    insert into element_pathnames select id, element_pathname(id) from element;
---
+-- commits_latest_ports
 --
 
-create unique index element_pathnames_pathname on element_pathnames (pathname);
-
-create table user_tasks
-(
-    user_id                    integer               not null,
-    task_id                    integer               not null,
-    primary key (user_id, task_id)
+CREATE TABLE commits_latest_ports (
+    commit_log_id integer NOT NULL,
+    commit_date timestamp without time zone NOT NULL
 );
 
-create table commit_log_ports_ignore
-(
-    commit_log_id              integer               not null,
-    port_id                    integer               not null,
-    date_ignored               timestamp without time zone not null
-        default currenttimestamputc(),
-    reason                     text                  not null,
-    primary key (commit_log_id, port_id)
+ALTER TABLE ONLY commits_latest_ports
+    ADD CONSTRAINT commits_latest_ports_pkey PRIMARY KEY (commit_log_id);
+
+--
+-- committer_notify
+--
+
+CREATE TABLE committer_notify (
+    user_id integer NOT NULL,
+    committer text NOT NULL,
+    status character(1) NOT NULL
 );
 
-create table latest_commits_ports
-(
-    commit_log_id              integer               not null,
-    commit_date                timestamp without time zone not null,
-    primary key (commit_log_id)
+ALTER TABLE ONLY committer_notify
+    ADD CONSTRAINT committer_notify_pkey PRIMARY KEY (user_id);
+
+--
+-- daily_stats
+--
+
+CREATE TABLE daily_stats (
+    id integer DEFAULT nextval(('daily_stats_seq'::text)::regclass) NOT NULL,
+    title text,
+    query text
 );
 
-create table ports_categories
-(
-    port_id                    integer               not null,
-    category_id                integer               not null,
-    primary key (port_id, category_id)
+ALTER TABLE ONLY daily_stats
+    ADD CONSTRAINT daily_stats_pkey PRIMARY KEY (id);
+
+--
+-- daily_stats_data
+--
+
+CREATE TABLE daily_stats_data (
+    id integer DEFAULT nextval(('daily_stats_data_seq'::text)::regclass) NOT NULL,
+    daily_stats_id integer NOT NULL,
+    date date NOT NULL,
+    value bigint
 );
 
-create table security_notice_audit
-(
-    id                         serial                not null,
-    security_notice_id         integer               not null,
-    user_id                    integer               not null,
-    date_added                 timestamp without time zone not null
-        default currenttimestamputc(),
-    ip_address                 inet                  not null,
-    description                text                  not null,
-    commit_log_id              integer               not null,
-    security_notice_status_id  char(1)               not null,
-    primary key (id)
+ALTER TABLE ONLY daily_stats_data
+    ADD CONSTRAINT daily_stats_data_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY daily_stats_data
+    ADD CONSTRAINT daily_stats_data_unique UNIQUE (daily_stats_id, date);
+
+--
+-- delete_me_daily_refreshes
+--
+
+CREATE TABLE delete_me_daily_refreshes (
+    refresh_date date NOT NULL
 );
 
-create table latest_commits
-(
-    commit_log_id              integer               not null,
-    commit_date                timestamp without time zone not null,
-    primary key (commit_log_id)
+ALTER TABLE ONLY delete_me_daily_refreshes
+    ADD CONSTRAINT daily_refreshes_pkey PRIMARY KEY (refresh_date);
+
+--
+-- design_results
+--
+
+CREATE TABLE design_results (
+    id integer NOT NULL,
+    user_id integer NOT NULL,
+    choice1 character(1) NOT NULL,
+    choice2 character(1) NOT NULL,
+    choice3 character(1) NOT NULL,
+    CONSTRAINT choice_all_different CHECK (((choice1 <> choice2) AND (choice1 <> choice3) AND (choice2 <> choice3))),
+    CONSTRAINT valid_choices CHECK (((choice1 = ANY (ARRAY['A'::bpchar, 'B'::bpchar, 'C'::bpchar])) AND (choice2 = ANY (ARRAY['A'::bpchar, 'B'::bpchar, 'C'::bpchar])) AND (choice3 = ANY (ARRAY['A'::bpchar, 'B'::bpchar, 'C'::bpchar]))))
 );
 
-create table commit_log_ports_elements
-(
-    commit_log_id              integer               not null,
-    element_id                 integer               not null,
-    primary key (commit_log_id, element_id)
+CREATE SEQUENCE design_results_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE design_results_id_seq OWNED BY design_results.id;
+
+ALTER TABLE ONLY design_results ALTER COLUMN id SET DEFAULT nextval('design_results_id_seq'::regclass);
+
+ALTER TABLE ONLY design_results
+    ADD CONSTRAINT user_id UNIQUE (user_id);
+
+CREATE INDEX fki_design_results_user_id ON design_results USING btree (user_id);
+
+--
+-- element
+--
+
+CREATE TABLE element (
+    id integer NOT NULL,
+    name text NOT NULL,
+    parent_id integer,
+    directory_file_flag character(1) NOT NULL,
+    status character(1) NOT NULL,
+    CONSTRAINT element_directory_file_flag CHECK (((directory_file_flag = 'F'::bpchar) OR (directory_file_flag = 'D'::bpchar))),
+    CONSTRAINT element_status CHECK (((status = 'A'::bpchar) OR (status = 'D'::bpchar)))
 );
 
-create table ports_moved
-(
-    id                         serial                not null,
-    from_port_id               integer               not null,
-    to_port_id                 integer                       ,
-    date                       date                  not null,
-    reason                     text                  not null,
-    primary key (id)
+CREATE SEQUENCE element_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE element_id_seq OWNED BY element.id;
+
+ALTER TABLE ONLY element ALTER COLUMN id SET DEFAULT nextval('element_id_seq'::regclass);
+
+ALTER TABLE ONLY element
+    ADD CONSTRAINT element_pkey PRIMARY KEY (id);
+
+CREATE INDEX element_delete ON element USING btree (status) WHERE (status = 'D'::bpchar);
+
+CREATE INDEX element_name ON element USING btree (name);
+
+CREATE INDEX element_name_trgm_idx ON element USING gin (name gin_trgm_ops);
+
+CREATE INDEX element_parent_id ON element USING btree (parent_id);
+
+--
+-- element_pathname
+--
+
+CREATE TABLE element_pathname (
+    element_id integer NOT NULL,
+    pathname text NOT NULL
 );
 
-create table page_load_detail
-(
-    id                         serial                not null,
-    date                       date                  not null
-        default CURRENT_DATE,
-    time                       time                  not null
-        default LOCALTIME,
-    page_name                  text                  not null,
-    user_id                    integer               not null,
-    ip_address                 inet                  not null,
-    full_url                   text                  not null,
-    rendering_time             interval              not null,
-    primary key (id)
+CREATE INDEX element_pathname_element_id ON element_pathname USING btree (element_id);
+
+CREATE UNIQUE INDEX element_pathname_pathname ON element_pathname USING btree (pathname);
+
+CREATE INDEX element_pathname_pathname_lc ON element_pathname USING btree (lower(pathname));
+
+--
+-- element_revision
+--
+
+CREATE TABLE element_revision (
+    element_id integer NOT NULL,
+    revision_name text NOT NULL
 );
 
-create index page_load_detail_date on page_load_detail (date);
+ALTER TABLE ONLY element_revision
+    ADD CONSTRAINT element_revision_pkey PRIMARY KEY (element_id, revision_name);
 
-create index page_load_ip_address on page_load_detail (ip_address);
+--
+-- flavors
+--
 
-create table ports_updating_ports_xref
-(
-    ports_updating_id          integer               not null,
-    port_id                    integer               not null,
-    primary key (ports_updating_id, port_id)
+CREATE TABLE flavors (
+    id bigint DEFAULT nextval('flavors_id_seq'::regclass) NOT NULL,
+    name text NOT NULL
 );
 
-create table commit_log_ports_vuxml
-(
-    id                         serial                not null,
-    commit_log_id              integer               not null,
-    port_id                    integer               not null,
-    vuxml_id                   integer               not null,
-    primary key (id)
+ALTER TABLE ONLY flavors
+    ADD CONSTRAINT flavors_name_unique UNIQUE (name);
+
+ALTER TABLE ONLY flavors
+    ADD CONSTRAINT flavors_pkey PRIMARY KEY (id);
+
+CREATE UNIQUE INDEX flavors_name_idx ON flavors USING btree (name);
+
+--
+-- generate_plist
+--
+
+CREATE TABLE generate_plist (
+    id bigint DEFAULT nextval('generate_plist_id_seq'::regclass) NOT NULL,
+    port_id integer NOT NULL,
+    installed_file text NOT NULL,
+    textsearchable_index_col tsvector GENERATED ALWAYS AS (to_tsvector('english'::regconfig, installed_file)) STORED,
+    textsearchable_index_col2 tsvector GENERATED ALWAYS AS (to_tsvector('english'::regconfig, translate(installed_file, '/'::text, ' '::text))) STORED,
+    textsearchable_index_col3 tsvector GENERATED ALWAYS AS (to_tsvector('english'::regconfig, translate(installed_file, '/.'::text, '  '::text))) STORED
 );
 
-create table vuxml_ranges
-(
-    id                         serial                not null,
-    vuxml_affected_id          integer               not null,
-    operator1                  text                  not null,
-    version1                   text                  not null,
-    operator2                  text                          ,
-    version2                   text                          ,
-    primary key (id)
+CREATE INDEX generate_plist_installed_file_gin_idx ON generate_plist USING gin (to_tsvector('english'::regconfig, installed_file));
+
+CREATE INDEX generate_plist_installed_file_idx ON generate_plist USING btree (installed_file);
+
+CREATE INDEX generate_plist_pk ON generate_plist USING btree (id);
+
+CREATE INDEX generate_plist_port_id_idx ON generate_plist USING btree (port_id);
+
+CREATE INDEX generate_plist_port_id_libs_idx ON generate_plist USING btree (port_id) INCLUDE (installed_file) WHERE (installed_file ~ 'lib/[^/]*?\.so'::text);
+
+CREATE INDEX generate_plist_textsearch_idx ON generate_plist USING gin (textsearchable_index_col);
+
+CREATE INDEX generate_plist_textsearch_idx2 ON generate_plist USING gin (textsearchable_index_col2);
+
+CREATE INDEX generate_plist_textsearch_idx3 ON generate_plist USING gin (textsearchable_index_col3);
+
+--
+-- graphs
+--
+
+CREATE TABLE graphs (
+    id integer NOT NULL,
+    title text NOT NULL,
+    query text NOT NULL,
+    label text,
+    is_clickable boolean,
+    "json" boolean DEFAULT false
 );
 
-create table vuxml_references
-(
-    id                         serial                not null,
-    vuxml_id                   integer               not null,
-    type                       text                  not null,
-    reference                  text                  not null,
-    primary key (id)
+CREATE SEQUENCE graphs_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE graphs_id_seq OWNED BY graphs.id;
+
+ALTER TABLE ONLY graphs ALTER COLUMN id SET DEFAULT nextval('graphs_id_seq'::regclass);
+
+ALTER TABLE ONLY graphs
+    ADD CONSTRAINT graphs_pkey PRIMARY KEY (id);
+
+--
+-- latest_commits
+--
+
+CREATE TABLE latest_commits (
+    commit_log_id integer NOT NULL,
+    commit_date timestamp with time zone NOT NULL
 );
 
-create table vuxml_names
-(
-    id                         serial                not null,
-    vuxml_affected_id          integer               not null,
-    name                       text                  not null,
-    primary key (id)
+ALTER TABLE ONLY latest_commits
+    ADD CONSTRAINT latest_commits_pkey PRIMARY KEY (commit_log_id);
+
+--
+-- latest_commits_ports
+--
+
+CREATE TABLE latest_commits_ports (
+    commit_log_id integer NOT NULL,
+    commit_date timestamp with time zone NOT NULL
 );
 
-create index vuxml_names_name on vuxml_names (name);
+ALTER TABLE ONLY latest_commits_ports
+    ADD CONSTRAINT latest_commits_ports_pkey PRIMARY KEY (commit_log_id);
 
-create table ports_vulnerable
-(
-    port_id                    integer               not null,
-    current                    integer               not null
-        default 1,
-    past                       integer               not null
-        default 0,
-    primary key (port_id)
+--
+-- listen_for
+--
+
+CREATE TABLE listen_for (
+    id integer NOT NULL,
+    name text NOT NULL,
+    script_name text NOT NULL
 );
 
-create table arch_release_port_status
-(
-    port_id                    integer               not null,
-    arch_id                    integer               not null,
-    release_id                 integer               not null,
-    status_id                  integer               not null,
-    message                    text                  not null,
-    primary key (port_id, arch_id, release_id, status_id)
+CREATE SEQUENCE listen_for_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE listen_for_id_seq OWNED BY listen_for.id;
+
+ALTER TABLE ONLY listen_for ALTER COLUMN id SET DEFAULT nextval('listen_for_id_seq'::regclass);
+
+ALTER TABLE ONLY listen_for
+    ADD CONSTRAINT listen_for_pkey PRIMARY KEY (id);
+
+CREATE UNIQUE INDEX listen_for_name_idx ON listen_for USING btree (name);
+
+--
+-- maxcommitid
+--
+
+CREATE TABLE maxcommitid (
+    max integer
 );
 
-create table element_pathname
-(
-    element_id                 integer               not null,
-    pathname                   text                  not null,
-    primary key (element_id)
+--
+-- package_flavors
+--
+
+CREATE TABLE package_flavors (
+    id bigint DEFAULT nextval('package_flavors_id_seq'::regclass) NOT NULL,
+    port_id bigint NOT NULL,
+    flavor_id bigint NOT NULL,
+    name text NOT NULL,
+    flavor_number integer NOT NULL
 );
 
-create table top_answers
-(
-    user_id                    integer               not null,
-    top_question_id            integer               not null,
-    seq                        smallint              not null,
-    port_id                    integer               not null,
-    primary key (user_id, top_question_id, seq)
+CREATE INDEX fki_package_flavors_flavor_id_fk ON package_flavors USING btree (flavor_id);
+
+CREATE INDEX fki_package_flavors_port_id_fk ON package_flavors USING btree (port_id);
+
+CREATE UNIQUE INDEX package_flavors_port_id_flavor_id_idx ON package_flavors USING btree (port_id, flavor_id);
+
+--
+-- package_imports
+--
+
+CREATE TABLE package_imports (
+    id integer NOT NULL,
+    abi_id integer NOT NULL,
+    package_set package_sets NOT NULL,
+    date timestamp with time zone NOT NULL,
+    inserts integer NOT NULL,
+    updates integer NOT NULL,
+    deletes integer NOT NULL,
+    last_checked timestamp with time zone,
+    repo_date timestamp with time zone,
+    import_date timestamp with time zone,
+    processed_date timestamp with time zone
 );
 
-create table events
-(
-    id                         serial                not null,
-    event_type_id              integer               not null,
-    date_added                 timestamp without time zone not null,
-    primary key (id)
+ALTER TABLE package_imports ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME package_imports_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
 );
 
-create table cache_clearing_ports
-(
-    id                         serial                not null,
-    port_id                    integer               not null,
-    category                   text                  not null,
-    port                       text                  not null,
-    date_added                 timestamp without time zone not null
-        default CURRENT_TIMESTAMP,
-    primary key (id)
+ALTER TABLE ONLY package_imports
+    ADD CONSTRAINT package_imports_pkey PRIMARY KEY (id);
+
+--
+-- package_notifications
+--
+
+CREATE TABLE package_notifications (
+    abi_id integer NOT NULL,
+    package_set package_sets NOT NULL,
+    port_id integer NOT NULL,
+    action action NOT NULL,
+    version_previous text,
+    version_current text,
+    CONSTRAINT package_notifications_action_check CHECK ((((action = 'insert'::action) AND (version_previous IS NULL) AND (version_current IS NOT NULL)) OR ((action = 'update'::action) AND (version_previous IS NOT NULL) AND (version_current IS NOT NULL)) OR ((action = 'delete'::action) AND (version_previous IS NOT NULL) AND (version_current IS NULL))))
 );
 
-create table sanity_test_failures
-(
-    id                         serial                not null,
-    commit_log_id              integer               not null,
-    message                    text                  not null,
-    primary key (id)
+ALTER TABLE ONLY package_notifications
+    ADD CONSTRAINT package_notifications_abi_set_port_idx UNIQUE (abi_id, package_set, port_id);
+
+COMMENT ON TABLE package_notifications IS 'when a new repo is imported, we need to notify users. This table lets us build a list of what has change in this repo.
+
+re: https://github.com/FreshPorts/freshports/issues/542';
+
+COMMENT ON COLUMN package_notifications.action IS 'Was this row the result of an insert, update, or a delete on the packages table?';
+
+COMMENT ON CONSTRAINT package_notifications_action_check ON package_notifications IS 'read the constraint as:
+
+                (action = ''insert''::action AND version_previous IS NULL AND version_current IS NOT NULL)
+                OR (action = ''update''::action AND version_previous IS NOT NULL AND version_current IS NOT NULL)
+                OR (action = ''delete''::action AND version_previous IS NOT NULL AND version_current IS NULL))
+';
+
+--
+-- packages
+--
+
+CREATE TABLE packages (
+    id bigint NOT NULL,
+    abi_id integer NOT NULL,
+    package_set package_sets,
+    package_name text NOT NULL,
+    package_version text NOT NULL,
+    port_id integer NOT NULL
 );
 
-create index sanity_test_failures_commit_log_id on sanity_test_failures (commit_log_id);
-
-create table commit_group_contents
-(
-    commit_group_id            integer               not null,
-    commit_log_id              integer               not null,
-    date                       date                          ,
-    comment                    text                          ,
-    primary key (commit_group_id, commit_log_id)
+ALTER TABLE packages ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME packages_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
 );
 
-create table master_slave
-(
-    master_port_id             integer               not null,
-    slave_port_id              integer               not null,
-    primary key (master_port_id, slave_port_id)
+ALTER TABLE ONLY packages
+    ADD CONSTRAINT packages_pkey PRIMARY KEY (id);
+
+CREATE INDEX fki_packages_abi_id_fk ON packages USING btree (abi_id);
+
+CREATE INDEX fki_packages_port_id_fk ON packages USING btree (port_id);
+
+CREATE INDEX packages_all_idx ON packages USING btree (abi_id, package_name, package_set) INCLUDE (package_version);
+
+CREATE INDEX packages_package_name_idx ON packages USING btree (package_name);
+
+COMMENT ON TABLE packages IS 're https://github.com/FreshPorts/freshports/issues/142';
+
+COMMENT ON INDEX packages_all_idx IS 'This is not a unique index because multiple package names can exist.
+
+See editors/jucipp & devel/jucipp';
+
+--
+-- packages_last_checked
+--
+
+CREATE TABLE packages_last_checked (
+    abi_id integer NOT NULL,
+    package_set package_sets,
+    last_checked timestamp with time zone,
+    repo_date timestamp with time zone,
+    import_date timestamp with time zone,
+    processed_date timestamp with time zone
 );
 
-create table port_dependencies
-(
-    port_id                    integer               not null,
-    port_id_dependent_upon     integer               not null,
-    dependency_type            char(1)               not null,
-    primary key (port_id, port_id_dependent_upon, dependency_type)
+COMMENT ON COLUMN packages_last_checked.processed_date IS 'The timestamp of the last processing of data, for a given ABI/branch, from packages_raw into packages.';
+
+--
+-- packages_raw
+--
+
+CREATE TABLE packages_raw (
+    id bigint NOT NULL,
+    package_origin text NOT NULL,
+    package_name text NOT NULL,
+    package_version text NOT NULL,
+    abi text NOT NULL,
+    abi_id integer,
+    port_id integer,
+    package_set package_sets
 );
 
-create view commits_recent as
-select distinct commit_log.id, commit_log.message_id, commit_log.message_date,
-commit_log.message_subject, commit_log.date_added, commit_log.commit_date,
-commit_log.committer, commit_log.description, commit_log.system_id, commit_log.encoding_losses
-from commit_log
-where exists
-(select * from commit_log_ports where commit_log_ports.commit_log_id = commit_log.id)
-order by commit_log.commit_date desc, commit_log.id limit 100;;
-
-create view ports_active as
-select ports.*, element.name as name, categories.name as category
-from categories, ports, element
-where element.status = 'A'
-and categories.id = ports.category_id
-and ports.element_id = element.id;
-
-create view ports_all as
-select ports.*, element.name as name, categories.name as category, element.status
-from categories, ports, element
-where categories.id = ports.category_id
-and ports.element_id = element.id;
-
-create view report_log_latest as
-select report_log.report_id, report_log.frequency_id, report_frequency.frequency, 
-max(report_log.report_date) AS last_sent
-from report_log, report_frequency
-where ( report_log.frequency_id = report_frequency.id )
-group by report_log.report_id, report_log.frequency_id, report_frequency.frequency;;
-
-alter table element
-    add foreign key  (parent_id)
-       references element (id) on update cascade on delete cascade;
-
-alter table element_revision
-    add foreign key  (element_id)
-       references element (id) on update cascade on delete cascade;
-
-alter table categories
-    add foreign key  (element_id)
-       references element (id) on update cascade on delete cascade;
-
-alter table ports
-    add foreign key  (element_id)
-       references element (id) on update cascade on delete cascade;
-
-alter table ports
-    add foreign key  (category_id)
-       references categories (id) on update cascade on delete cascade;
-
-alter table users
-    add foreign key  (watch_notice_id)
-       references watch_notice (id) on update cascade on delete cascade;
-
-alter table users
-    add foreign key  (last_watch_list_chosen)
-       references watch_list (id) on update cascade on delete set null;
-
-alter table watch_list
-    add foreign key  (user_id)
-       references users (id) on update cascade on delete cascade;
-
-alter table security_notice
-    add foreign key  (user_id)
-       references users (id) on update cascade on delete cascade;
-
-alter table security_notice
-    add foreign key  (commit_log_id)
-       references commit_log (id) on update cascade on delete cascade;
-
-alter table security_notice
-    add foreign key  (security_notice_status_id)
-       references security_notice_status (id) on update restrict on delete restrict;
-
-alter table commit_group
-    add foreign key  (user_id)
-       references users (id) on update cascade on delete cascade;
-
-alter table system_branch
-    add foreign key  (system_id)
-       references system (id) on update cascade on delete cascade;
-
-alter table commit_log
-    add foreign key  (system_id)
-       references system (id) on update cascade on delete cascade;
-
-alter table vuxml_affected
-    add foreign key  (vuxml_id)
-       references vuxml (id) on update cascade on delete cascade;
-
-alter table commit_log_elements
-    add foreign key  (commit_log_id)
-       references commit_log (id) on update cascade on delete cascade;
-
-alter table commit_log_elements
-    add foreign key  (element_id, revision_name)
-       references element_revision (element_id, revision_name) on update cascade on delete cascade;
-
-alter table watch_list_element
-    add foreign key  (element_id)
-       references element (id) on update cascade on delete cascade;
-
-alter table watch_list_element
-    add foreign key  (watch_list_id)
-       references watch_list (id) on update cascade on delete cascade;
-
-alter table watch_notice_log
-    add foreign key  (frequency_id)
-       references watch_notice (id) on update cascade on delete cascade;
-
-alter table system_branch_element_revision
-    add foreign key  (system_branch_id)
-       references system_branch (id) on update cascade on delete cascade;
-
-alter table system_branch_element_revision
-    add foreign key  (element_id, revision_name)
-       references element_revision (element_id, revision_name) on update cascade on delete cascade;
-
-alter table user_confirmations
-    add foreign key  (user_id)
-       references users (id) on update cascade on delete cascade;
-
-alter table commit_log_ports
-    add foreign key  (commit_log_id)
-       references commit_log (id) on update cascade on delete cascade;
-
-alter table commit_log_ports
-    add foreign key  (port_id)
-       references ports (id) on update cascade on delete cascade;
-
-alter table watch_list_staging
-    add foreign key  (element_id)
-       references element (id) on update cascade on delete set null;
-
-alter table watch_list_staging
-    add foreign key  (user_id)
-       references users (id) on update cascade on delete cascade;
-
-alter table daily_stats_data
-    add foreign key  (daily_stats_id)
-       references daily_stats (id) on update cascade on delete cascade;
-
-alter table daily_stats_data
-    add foreign key  (daily_stats_id)
-       references daily_stats (id) on update cascade on delete cascade;
-
-alter table report_log
-    add foreign key  (report_id)
-       references reports (id) on update cascade on delete cascade;
-
-alter table report_log
-    add foreign key  (frequency_id)
-       references report_frequency (id) on update cascade on delete cascade;
-
-alter table report_log
-    add foreign key  (report_id)
-       references reports (id) on update restrict on delete restrict;
-
-alter table report_log
-    add foreign key  (frequency_id)
-       references report_frequency (id) on update restrict on delete restrict;
-
-alter table report_subscriptions
-    add foreign key  (report_id)
-       references reports (id) on update cascade on delete cascade;
-
-alter table report_subscriptions
-    add foreign key  (user_id)
-       references users (id) on update cascade on delete cascade;
-
-alter table report_subscriptions
-    add foreign key  (report_frequency_id)
-       references report_frequency (id) on update cascade on delete cascade;
-
-alter table report_subscriptions
-    add foreign key  (report_id)
-       references reports (id) on update restrict on delete restrict;
-
-alter table report_subscriptions
-    add foreign key  (report_frequency_id)
-       references report_frequency (id) on update restrict on delete restrict;
-
-alter table committer_notify
-    add foreign key  (user_id)
-       references users (id) on update cascade on delete cascade;
-
-alter table element_pathnames
-    add foreign key  (element_id)
-       references element (id) on update cascade on delete cascade;
-
-alter table user_tasks
-    add foreign key  (user_id)
-       references users (id) on update cascade on delete cascade;
-
-alter table user_tasks
-    add foreign key  (task_id)
-       references tasks (id) on update cascade on delete cascade;
-
-alter table commit_log_ports_ignore
-    add foreign key  (port_id)
-       references ports (id) on update cascade on delete cascade;
-
-alter table commit_log_ports_ignore
-    add foreign key  (commit_log_id)
-       references commit_log (id) on update cascade on delete cascade;
-
-alter table latest_commits_ports
-    add foreign key  (commit_log_id)
-       references commit_log (id) on update cascade on delete cascade;
-
-alter table ports_categories
-    add foreign key  (port_id)
-       references ports (id) on update cascade on delete cascade;
-
-alter table ports_categories
-    add foreign key  (category_id)
-       references categories (id) on update cascade on delete cascade;
-
-alter table security_notice_audit
-    add foreign key  (security_notice_id)
-       references security_notice (id) on update cascade on delete cascade;
-
-alter table security_notice_audit
-    add foreign key  (security_notice_status_id)
-       references security_notice_status (id) on update restrict on delete restrict;
-
-alter table latest_commits
-    add foreign key  (commit_log_id)
-       references commit_log (id) on update cascade on delete cascade;
-
-alter table commit_log_ports_elements
-    add foreign key  (commit_log_id)
-       references commit_log (id) on update cascade on delete cascade;
-
-alter table commit_log_ports_elements
-    add foreign key  (element_id)
-       references element (id) on update cascade on delete cascade;
-
-alter table ports_moved
-    add foreign key  (from_port_id)
-       references ports (id) on update cascade on delete cascade;
-
-alter table ports_moved
-    add foreign key  (to_port_id)
-       references ports (id) on update cascade on delete cascade;
-
-alter table page_load_detail
-    add foreign key  (user_id)
-       references users (id) on update cascade on delete cascade;
-
-alter table ports_updating_ports_xref
-    add foreign key  (port_id)
-       references ports (id) on update cascade on delete cascade;
-
-alter table ports_updating_ports_xref
-    add foreign key  (ports_updating_id)
-       references ports_updating (id) on update cascade on delete cascade;
-
-alter table commit_log_ports_vuxml
-    add foreign key  (vuxml_id)
-       references vuxml (id) on update cascade on delete cascade;
-
-alter table commit_log_ports_vuxml
-    add foreign key  (port_id)
-       references ports (id) on update cascade on delete cascade;
-
-alter table commit_log_ports_vuxml
-    add foreign key  (commit_log_id)
-       references commit_log (id) on update cascade on delete cascade;
-
-alter table vuxml_ranges
-    add foreign key  (vuxml_affected_id)
-       references vuxml_affected (id) on update cascade on delete cascade;
-
-alter table vuxml_references
-    add foreign key  (vuxml_id)
-       references vuxml (id) on update cascade on delete cascade;
-
-alter table vuxml_names
-    add foreign key  (vuxml_affected_id)
-       references vuxml_affected (id) on update cascade on delete cascade;
-
-alter table ports_vulnerable
-    add foreign key  (port_id)
-       references ports (id) on update restrict on delete cascade;
-
-alter table arch_release_port_status
-    add foreign key  (release_id)
-       references releases (id) on update cascade on delete cascade;
-
-alter table arch_release_port_status
-    add foreign key  (arch_id)
-       references archs (id) on update cascade on delete cascade;
-
-alter table arch_release_port_status
-    add foreign key  (port_id)
-       references ports (id) on update cascade on delete cascade;
-
-alter table arch_release_port_status
-    add foreign key  (status_id)
-       references port_status (id) on update cascade on delete cascade;
-
-alter table element_pathname
-    add foreign key  (element_id)
-       references element (id) on update cascade on delete cascade;
-
-alter table top_answers
-    add foreign key  (top_question_id)
-       references top_questions (id) on update cascade on delete cascade;
-
-alter table top_answers
-    add foreign key  (user_id)
-       references users (id) on update cascade on delete cascade;
-
-alter table top_answers
-    add foreign key  (port_id)
-       references ports (id) on update cascade on delete cascade;
-
-alter table events
-    add foreign key  (event_type_id)
-       references event_types (id) on update restrict on delete restrict;
-
-alter table cache_clearing_ports
-    add foreign key  (port_id)
-       references ports (id) on update cascade on delete cascade;
-
-alter table sanity_test_failures
-    add foreign key  (commit_log_id)
-       references commit_log (id) on update restrict on delete cascade;
-
-alter table commit_group_contents
-    add foreign key  (commit_group_id)
-       references commit_group (id) on update cascade on delete cascade;
-
-alter table commit_group_contents
-    add foreign key  (commit_log_id)
-       references commit_log (id) on update cascade on delete cascade;
-
-alter table master_slave
-    add foreign key  (master_port_id)
-       references ports (id) on update cascade on delete cascade;
-
-alter table master_slave
-    add foreign key  (slave_port_id)
-       references ports (id) on update cascade on delete cascade;
-
-alter table port_dependencies
-    add foreign key  (port_id)
-       references ports (id) on update cascade on delete cascade;
-
-alter table port_dependencies
-    add foreign key  (port_id_dependent_upon)
-       references ports (id) on update cascade on delete cascade;
-
-alter table commit_log_ports_elements
-    add foreign key (element_id)
-       references element(id) on update cascade on delete cascade;
-
-alter table commit_log_ports_elements
-    add foreign key (commit_log_id)
-       references commit_log(id) on update cascade on delete cascade;
-
-create index on system_branch_element_revision(element_id);
-
-
-CREATE TABLE commit_log_branch(
-  commit_log_id integer NOT NULL,
-  branch_id     integer NOT NULL,
-  primary key (commit_log_id, branch_id)
+ALTER TABLE packages_raw ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME packages_raw_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
 );
 
-alter table commit_log_branch
-    add foreign key (commit_log_id)
-       references commit_log(id) on update cascade on delete cascade;
+ALTER TABLE ONLY packages_raw
+    ADD CONSTRAINT packages_raw_alt_pkey PRIMARY KEY (id);
 
-alter table commit_log_branch
-    add foreign key (branch_id)
-       references system_branch (id) on update cascade on delete cascade;
+CREATE INDEX packages_raw_abi_id_idx ON packages_raw USING btree (abi_id);
 
+CREATE INDEX packages_raw_abi_idx ON packages_raw USING btree (abi);
 
+CREATE INDEX packages_raw_abi_package_set_idx ON packages_raw USING btree (abi, package_set);
+
+CREATE INDEX packages_raw_all ON packages_raw USING btree (abi_id, package_name, package_set) INCLUDE (package_version);
+
+CREATE INDEX packages_raw_alt_package_name_idx ON packages_raw USING btree (package_name);
+
+CREATE INDEX packages_raw_package_origin_idx ON packages_raw USING btree (package_origin);
+
+CREATE INDEX packages_raw_port_id_idx ON packages_raw USING btree (port_id);
+
+--
+-- page_load_detail
+--
+
+CREATE TABLE page_load_detail (
+    id integer NOT NULL,
+    date date DEFAULT ('now'::text)::date NOT NULL,
+    "time" time without time zone DEFAULT ('now'::text)::time(6) without time zone NOT NULL,
+    page_name text NOT NULL,
+    user_id integer,
+    ip_address inet NOT NULL,
+    full_url text NOT NULL,
+    rendering_time interval NOT NULL
+);
+ALTER TABLE ONLY page_load_detail ALTER COLUMN date SET STATISTICS 1000;
+
+CREATE SEQUENCE page_load_detail_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE page_load_detail_id_seq OWNED BY page_load_detail.id;
+
+ALTER TABLE ONLY page_load_detail ALTER COLUMN id SET DEFAULT nextval('page_load_detail_id_seq'::regclass);
+
+ALTER TABLE ONLY page_load_detail
+    ADD CONSTRAINT page_load_detail_test_pkey PRIMARY KEY (id);
+
+CREATE INDEX page_load_detail_date ON page_load_detail USING btree (date);
+
+CREATE INDEX page_load_ip_address ON page_load_detail USING btree (ip_address);
+
+--
+-- page_load_summary
+--
+
+CREATE TABLE page_load_summary (
+    id integer NOT NULL,
+    date date NOT NULL,
+    page_name text NOT NULL,
+    total integer NOT NULL,
+    users integer NOT NULL,
+    rendering_time_min interval NOT NULL,
+    rendering_time_max interval NOT NULL,
+    rendering_time_avg interval NOT NULL
+);
+
+CREATE SEQUENCE page_load_summary_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE page_load_summary_id_seq OWNED BY page_load_summary.id;
+
+ALTER TABLE ONLY page_load_summary ALTER COLUMN id SET DEFAULT nextval('page_load_summary_id_seq'::regclass);
+
+ALTER TABLE ONLY page_load_summary
+    ADD CONSTRAINT page_load_summary_pkey PRIMARY KEY (id);
+
+CREATE UNIQUE INDEX page_loads_date_date ON page_load_summary USING btree (date, page_name);
+
+--
+-- port_dependencies
+--
+
+CREATE TABLE port_dependencies (
+    port_id integer NOT NULL,
+    port_id_dependent_upon integer NOT NULL,
+    dependency_type character(1) NOT NULL
+);
+
+ALTER TABLE ONLY port_dependencies
+    ADD CONSTRAINT port_dependencies_pkey PRIMARY KEY (port_id, port_id_dependent_upon, dependency_type);
+
+CREATE INDEX port_dependencies_upon_type_idx ON port_dependencies USING btree (port_id_dependent_upon, dependency_type, port_id);
+
+--
+-- portcount
+--
+
+CREATE TABLE portcount (
+    count bigint
+);
+
+--
+-- ports
+--
+
+CREATE TABLE ports (
+    id integer NOT NULL,
+    element_id integer NOT NULL,
+    category_id integer NOT NULL,
+    short_description text,
+    long_description text,
+    version text,
+    revision text,
+    maintainer text,
+    homepage text,
+    master_sites text,
+    extract_suffix text,
+    package_exists boolean,
+    depends_build text,
+    depends_run text,
+    last_commit_id integer,
+    found_in_index boolean,
+    forbidden text,
+    broken text,
+    date_added timestamp with time zone DEFAULT ('now'::text)::timestamp(6) with time zone,
+    categories text,
+    deprecated text,
+    ignore text,
+    master_port text,
+    latest_link text,
+    depends_lib text,
+    no_latest_link text,
+    no_package text,
+    package_name text,
+    portepoch text,
+    no_cdrom text,
+    restricted text,
+    expiration_date date,
+    is_interactive text,
+    only_for_archs text,
+    not_for_archs text,
+    status character(1) NOT NULL,
+    showconfig text,
+    license text,
+    fetch_depends text,
+    extract_depends text,
+    patch_depends text,
+    uses text,
+    pkgmessage text,
+    distinfo text,
+    license_restricted text,
+    manual_package_build text,
+    license_perms text,
+    pkg_plist text,
+    makefile text,
+    conflicts text,
+    conflicts_build text,
+    conflicts_install text,
+    options_name text,
+    test_depends text,
+    use_rc_subr text,
+    build_run_depends text,
+    pkgversion text
+);
+
+CREATE SEQUENCE ports_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ports_id_seq OWNED BY ports.id;
+
+ALTER TABLE ONLY ports ALTER COLUMN id SET DEFAULT nextval('ports_id_seq'::regclass);
+
+ALTER TABLE ONLY ports
+    ADD CONSTRAINT ports_pkey PRIMARY KEY (id);
+
+CREATE INDEX ports_active_idx ON ports USING btree (status) WHERE (status = 'A'::bpchar);
+
+CREATE INDEX ports_broken ON ports USING btree (broken) WHERE (broken <> ''::text);
+
+CREATE INDEX ports_category_id_idx ON ports USING btree (category_id);
+
+CREATE INDEX ports_date_added_idx ON ports USING btree (date_added);
+
+CREATE INDEX ports_deleted ON ports USING btree (status) WHERE (status = 'D'::bpchar);
+
+CREATE INDEX ports_depends_build_trgm_idx ON ports USING gin (depends_build gin_trgm_ops);
+
+CREATE INDEX ports_depends_lib_trgm_idx ON ports USING gin (depends_lib gin_trgm_ops);
+
+CREATE INDEX ports_depends_run_trgm_idx ON ports USING gin (depends_run gin_trgm_ops);
+
+CREATE INDEX ports_element_id ON ports USING btree (element_id);
+
+CREATE INDEX ports_expiration_date ON ports USING btree (expiration_date) WHERE (expiration_date IS NOT NULL);
+
+CREATE INDEX ports_ignore ON ports USING btree (ignore) WHERE (ignore <> ''::text);
+
+CREATE INDEX ports_is_interactive ON ports USING btree (is_interactive) WHERE (is_interactive IS NOT NULL);
+
+CREATE INDEX ports_last_commit_id_idx ON ports USING btree (last_commit_id);
+
+CREATE INDEX ports_maintainer_idx ON ports USING btree (lower(maintainer));
+
+CREATE INDEX ports_master_port_idx ON ports USING btree (master_port);
+
+CREATE INDEX ports_package_name ON ports USING btree (package_name);
+
+CREATE INDEX ports_pkgmessage_english_idx ON ports USING gin (to_tsvector('english'::regconfig, pkgmessage));
+
+CREATE INDEX ports_pkgmessage_simple_idx ON ports USING gin (to_tsvector('simple'::regconfig, pkgmessage));
+
+CREATE INDEX ports_ports_expiration_date ON ports USING btree (expiration_date) WHERE (expiration_date IS NOT NULL);
+
+CREATE INDEX ports_uses_simple_idx ON ports USING gin (to_tsvector('simple'::regconfig, uses));
+
+COMMENT ON COLUMN ports.options_name IS 'make -V OPTIONS_NAME - used in make.conf for setting Configuration Options on a port by port basis';
+
+COMMENT ON COLUMN ports.pkgversion IS 'make -V PKGVERSION: version, revision and epoch as the ports
+ framework composes them.  Not always version || _revision || ,portepoch --
+ see audio/oss, where the kmod framework adds OSVERSION.
+
+-- NULL until the port has been refreshed since this column was added.';
+
+--
+-- ports_categories
+--
+
+CREATE TABLE ports_categories (
+    port_id integer NOT NULL,
+    category_id integer NOT NULL
+);
+
+ALTER TABLE ONLY ports_categories
+    ADD CONSTRAINT ports_categories_pkey PRIMARY KEY (port_id, category_id);
+
+CREATE INDEX ports_categories_categories_idx ON ports_categories USING btree (category_id);
+
+CREATE INDEX ports_categories_ports_idx ON ports_categories USING btree (port_id);
+
+--
+-- ports_check
+--
+
+CREATE TABLE ports_check (
+    id integer NOT NULL,
+    category_name text NOT NULL,
+    port_name text NOT NULL,
+    category_id integer,
+    port_id integer,
+    add_to_ports_table boolean DEFAULT true NOT NULL
+);
+
+CREATE SEQUENCE ports_check_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ports_check_id_seq OWNED BY ports_check.id;
+
+ALTER TABLE ONLY ports_check ALTER COLUMN id SET DEFAULT nextval('ports_check_id_seq'::regclass);
+
+ALTER TABLE ONLY ports_check
+    ADD CONSTRAINT ports_check_pkey PRIMARY KEY (id);
+
+CREATE INDEX ports_check_category_id ON ports_check USING btree (category_id);
+
+--
+-- ports_conflicts
+--
+
+CREATE TABLE ports_conflicts (
+    id bigint NOT NULL,
+    port_id integer NOT NULL,
+    conflicts_type conflicts NOT NULL,
+    item_num integer NOT NULL,
+    item_value text NOT NULL
+);
+
+CREATE SEQUENCE ports_conflicts_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ports_conflicts_id_seq OWNED BY ports_conflicts.id;
+
+ALTER TABLE ONLY ports_conflicts ALTER COLUMN id SET DEFAULT nextval('ports_conflicts_id_seq'::regclass);
+
+ALTER TABLE ONLY ports_conflicts
+    ADD CONSTRAINT ports_conflicts_pkey PRIMARY KEY (id);
+
+CREATE INDEX fki_ports_conflicts_port_id ON ports_conflicts USING btree (port_id);
+
+--
+-- ports_conflicts_matches
+--
+
+CREATE TABLE ports_conflicts_matches (
+    ports_conflicts_id bigint NOT NULL,
+    port_id integer NOT NULL
+);
+
+ALTER TABLE ONLY ports_conflicts_matches
+    ADD CONSTRAINT ports_conflicts_matches_pkey PRIMARY KEY (ports_conflicts_id, port_id);
+
+CREATE INDEX fki_ports_conflicts_matches_conflicts_id ON ports_conflicts_matches USING btree (ports_conflicts_id);
+
+CREATE INDEX fki_ports_conflicts_matches_port_id ON ports_conflicts_matches USING btree (port_id);
+
+--
+-- ports_moved
+--
+
+CREATE TABLE ports_moved (
+    id integer NOT NULL,
+    from_port_id integer NOT NULL,
+    to_port_id integer,
+    date date NOT NULL,
+    reason text NOT NULL
+);
+
+CREATE SEQUENCE ports_moved_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ports_moved_id_seq OWNED BY ports_moved.id;
+
+ALTER TABLE ONLY ports_moved ALTER COLUMN id SET DEFAULT nextval('ports_moved_id_seq'::regclass);
+
+ALTER TABLE ONLY ports_moved
+    ADD CONSTRAINT ports_moved_pkey PRIMARY KEY (id);
+
+--
+-- ports_origin
+--
+
+CREATE TABLE ports_origin (
+    port_id integer NOT NULL,
+    port_origin text NOT NULL
+);
+
+ALTER TABLE ONLY ports_origin
+    ADD CONSTRAINT port_origin_pkey PRIMARY KEY (port_id);
+
+CREATE INDEX ports_origin_port_id_idx ON ports_origin USING btree (port_id);
+
+CREATE INDEX ports_origin_port_origin_idx ON ports_origin USING btree (port_origin);
+
+COMMENT ON TABLE ports_origin IS 'This table is only for ports on head.
+
+can be pre-populated via:
+
+insert into ports_origin select id, categoryport(id) from ports_active;';
+
+COMMENT ON COLUMN ports_origin.port_origin IS 'The category/port for this port';
+
+--
+-- ports_updating
+--
+
+CREATE TABLE ports_updating (
+    id integer NOT NULL,
+    date date NOT NULL,
+    affects text NOT NULL,
+    author text,
+    reason text NOT NULL
+);
+
+CREATE SEQUENCE ports_updating_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ports_updating_id_seq OWNED BY ports_updating.id;
+
+ALTER TABLE ONLY ports_updating ALTER COLUMN id SET DEFAULT nextval('ports_updating_id_seq'::regclass);
+
+ALTER TABLE ONLY ports_updating
+    ADD CONSTRAINT ports_updating_pkey PRIMARY KEY (id);
+
+--
+-- ports_updating_ports_xref
+--
+
+CREATE TABLE ports_updating_ports_xref (
+    ports_updating_id integer NOT NULL,
+    port_id integer NOT NULL
+);
+
+--
+-- ports_vulnerable
+--
+
+CREATE TABLE ports_vulnerable (
+    port_id integer NOT NULL,
+    current integer DEFAULT 1 NOT NULL,
+    past integer DEFAULT 0 NOT NULL
+);
+
+ALTER TABLE ONLY ports_vulnerable
+    ADD CONSTRAINT ports_vulnerable_pkey PRIMARY KEY (port_id);
+
+--
+-- repo
+--
+
+CREATE TABLE repo (
+    id integer NOT NULL,
+    name text NOT NULL,
+    description text NOT NULL,
+    repo_hostname text NOT NULL,
+    path_to_repo text NOT NULL,
+    repository text DEFAULT 'subversion'::text NOT NULL,
+    db_root_prefix text
+);
+
+CREATE SEQUENCE repo_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE repo_id_seq OWNED BY repo.id;
+
+ALTER TABLE ONLY repo ALTER COLUMN id SET DEFAULT nextval('repo_id_seq'::regclass);
+
+CREATE UNIQUE INDEX repo_id ON repo USING btree (id);
+
+COMMENT ON COLUMN repo.repository IS 'subversion? git? cvs?';
+
+COMMENT ON COLUMN repo.db_root_prefix IS 'appended to repo path names before they are inserted into the database';
+
+--
+-- report_frequency
+--
+
+CREATE TABLE report_frequency (
+    id integer NOT NULL,
+    frequency character(1) NOT NULL,
+    description text NOT NULL
+);
+
+CREATE SEQUENCE report_frequency_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE report_frequency_id_seq OWNED BY report_frequency.id;
+
+ALTER TABLE ONLY report_frequency ALTER COLUMN id SET DEFAULT nextval('report_frequency_id_seq'::regclass);
+
+ALTER TABLE ONLY report_frequency
+    ADD CONSTRAINT report_frequency_pkey PRIMARY KEY (id);
+
+--
+-- report_log
+--
+
+CREATE TABLE report_log (
+    id integer NOT NULL,
+    report_id integer NOT NULL,
+    frequency_id integer,
+    report_date timestamp with time zone DEFAULT ('now'::text)::timestamp(6) with time zone NOT NULL,
+    email_count integer NOT NULL,
+    commit_count integer NOT NULL,
+    port_count integer NOT NULL
+);
+
+CREATE SEQUENCE report_log_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE report_log_id_seq OWNED BY report_log.id;
+
+ALTER TABLE ONLY report_log ALTER COLUMN id SET DEFAULT nextval('report_log_id_seq'::regclass);
+
+ALTER TABLE ONLY report_log
+    ADD CONSTRAINT report_log_pkey PRIMARY KEY (id);
+
+--
+-- report_log_package_notifications
+--
+
+CREATE TABLE report_log_package_notifications (
+    id integer NOT NULL,
+    abi_id integer NOT NULL,
+    package_set package_sets NOT NULL,
+    report_date timestamp with time zone DEFAULT ('now'::text)::timestamp(6) with time zone NOT NULL,
+    num_emails integer NOT NULL,
+    num_ports integer NOT NULL,
+    num_users integer NOT NULL,
+    num_watch_lists integer NOT NULL
+);
+
+ALTER TABLE report_log_package_notifications ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME report_log_package_notifications_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+ALTER TABLE ONLY report_log_package_notifications
+    ADD CONSTRAINT report_log_package_notifications_pkey PRIMARY KEY (id);
+
+CREATE INDEX fki_a ON report_log_package_notifications USING btree (abi_id);
+
+--
+-- report_subscriptions
+--
+
+CREATE TABLE report_subscriptions (
+    report_id integer NOT NULL,
+    user_id integer NOT NULL,
+    report_frequency_id integer
+);
+
+ALTER TABLE ONLY report_subscriptions
+    ADD CONSTRAINT report_subscriptions_pkey PRIMARY KEY (report_id, user_id);
+
+--
+-- report_subscriptions_abi
+--
+
+CREATE TABLE report_subscriptions_abi (
+    user_id integer NOT NULL,
+    watch_list_id integer NOT NULL,
+    abi_id integer NOT NULL,
+    package_set package_sets NOT NULL
+);
+
+ALTER TABLE ONLY report_subscriptions_abi
+    ADD CONSTRAINT report_subscriptions_abi_user_abi_watch_pk UNIQUE (user_id, watch_list_id, abi_id, package_set);
+
+COMMENT ON TABLE report_subscriptions_abi IS 'Records the ABI a given user follows - relates to package_notifications table
+
+You can associate a given watch list with one or more ABI.';
+
+COMMENT ON COLUMN report_subscriptions_abi.watch_list_id IS 'We don''t need user_id, because watch_list_id will find us the user_id. We duplicate that information here because I think it''ll be useful in queries.';
+
+COMMENT ON CONSTRAINT report_subscriptions_abi_user_abi_watch_pk ON report_subscriptions_abi IS 'For a given row: user_id, watch_list_id, abi_id, & package_set must be unique.';
+
+--
+-- reports
+--
+
+CREATE TABLE reports (
+    id integer NOT NULL,
+    name text NOT NULL,
+    description text NOT NULL,
+    needs_frequency boolean,
+    CONSTRAINT needs_frequency CHECK ((needs_frequency IS NOT NULL))
+);
+
+CREATE SEQUENCE reports_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE reports_id_seq OWNED BY reports.id;
+
+ALTER TABLE ONLY reports ALTER COLUMN id SET DEFAULT nextval('reports_id_seq'::regclass);
+
+ALTER TABLE ONLY reports
+    ADD CONSTRAINT reports_pkey PRIMARY KEY (id);
+
+--
+-- sanity_test_failures
+--
+
+CREATE TABLE sanity_test_failures (
+    id integer NOT NULL,
+    commit_log_id integer NOT NULL,
+    message text NOT NULL
+);
+
+CREATE SEQUENCE sanity_test_failures_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE sanity_test_failures_id_seq OWNED BY sanity_test_failures.id;
+
+ALTER TABLE ONLY sanity_test_failures ALTER COLUMN id SET DEFAULT nextval('sanity_test_failures_id_seq'::regclass);
+
+ALTER TABLE ONLY sanity_test_failures
+    ADD CONSTRAINT sanity_test_failures_pkey PRIMARY KEY (id);
+
+CREATE INDEX sanity_test_failures_commit_log_id ON sanity_test_failures USING btree (commit_log_id);
+
+--
+-- security_notice
+--
+
+CREATE TABLE security_notice (
+    id integer NOT NULL,
+    user_id integer NOT NULL,
+    date_added timestamp with time zone DEFAULT ('now'::text)::timestamp(6) with time zone NOT NULL,
+    ip_address inet NOT NULL,
+    description text NOT NULL,
+    commit_log_id integer NOT NULL,
+    security_notice_status_id character(1) DEFAULT 'A'::bpchar NOT NULL
+);
+
+CREATE SEQUENCE security_notice_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE security_notice_id_seq OWNED BY security_notice.id;
+
+ALTER TABLE ONLY security_notice ALTER COLUMN id SET DEFAULT nextval('security_notice_id_seq'::regclass);
+
+ALTER TABLE ONLY security_notice
+    ADD CONSTRAINT security_notice_pkey PRIMARY KEY (id);
+
+CREATE UNIQUE INDEX security_notice_clid_idx ON security_notice USING btree (commit_log_id);
+
+--
+-- security_notice_audit
+--
+
+CREATE TABLE security_notice_audit (
+    id integer NOT NULL,
+    security_notice_id integer NOT NULL,
+    user_id integer NOT NULL,
+    date_added timestamp with time zone DEFAULT ('now'::text)::timestamp(6) with time zone NOT NULL,
+    ip_address inet NOT NULL,
+    description text NOT NULL,
+    commit_log_id integer NOT NULL,
+    security_notice_status_id character(1) DEFAULT 'A'::bpchar NOT NULL
+);
+
+CREATE SEQUENCE security_notice_audit_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE security_notice_audit_id_seq OWNED BY security_notice_audit.id;
+
+ALTER TABLE ONLY security_notice_audit ALTER COLUMN id SET DEFAULT nextval('security_notice_audit_id_seq'::regclass);
+
+ALTER TABLE ONLY security_notice_audit
+    ADD CONSTRAINT security_notice_audit_pkey PRIMARY KEY (id);
+
+--
+-- security_notice_status
+--
+
+CREATE TABLE security_notice_status (
+    id character(1) NOT NULL,
+    name text NOT NULL,
+    description text NOT NULL
+);
+
+ALTER TABLE ONLY security_notice_status
+    ADD CONSTRAINT security_notice_status_pkey PRIMARY KEY (id);
+
+--
+-- system
+--
+
+CREATE TABLE system (
+    id integer NOT NULL,
+    name text NOT NULL,
+    time_adjust interval DEFAULT '00:00:00'::interval NOT NULL
+);
+
+CREATE SEQUENCE system_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE system_id_seq OWNED BY system.id;
+
+ALTER TABLE ONLY system ALTER COLUMN id SET DEFAULT nextval('system_id_seq'::regclass);
+
+ALTER TABLE ONLY system
+    ADD CONSTRAINT system_pkey PRIMARY KEY (id);
+
+--
+-- system_branch
+--
+
+CREATE TABLE system_branch (
+    id integer NOT NULL,
+    system_id integer NOT NULL,
+    branch_name text
+);
+
+CREATE SEQUENCE system_branch_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE system_branch_id_seq OWNED BY system_branch.id;
+
+ALTER TABLE ONLY system_branch ALTER COLUMN id SET DEFAULT nextval('system_branch_id_seq'::regclass);
+
+ALTER TABLE ONLY system_branch
+    ADD CONSTRAINT system_branch_pkey PRIMARY KEY (id);
+
+--
+-- system_branch_element_revision
+--
+
+CREATE TABLE system_branch_element_revision (
+    system_branch_id integer NOT NULL,
+    element_id integer NOT NULL,
+    revision_name text NOT NULL
+);
+
+ALTER TABLE ONLY system_branch_element_revision
+    ADD CONSTRAINT system_branch_element_revi_pkey PRIMARY KEY (system_branch_id, element_id, revision_name);
+
+CREATE INDEX system_branch_element_revision_element_id_idx ON system_branch_element_revision USING btree (element_id);
+
+--
+-- tasks
+--
+
+CREATE TABLE tasks (
+    id integer NOT NULL,
+    name text NOT NULL,
+    description text NOT NULL
+);
+
+CREATE SEQUENCE tasks_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE tasks_id_seq OWNED BY tasks.id;
+
+ALTER TABLE ONLY tasks ALTER COLUMN id SET DEFAULT nextval('tasks_id_seq'::regclass);
+
+ALTER TABLE ONLY tasks
+    ADD CONSTRAINT tasks_pkey PRIMARY KEY (id);
+
+CREATE UNIQUE INDEX tasks_idx ON tasks USING btree (name);
+
+--
+-- user_confirmations
+--
+
+CREATE TABLE user_confirmations (
+    user_id integer NOT NULL,
+    token text NOT NULL
+);
+
+ALTER TABLE ONLY user_confirmations
+    ADD CONSTRAINT user_confirmations_pkey PRIMARY KEY (user_id, token);
+
+--
+-- user_cookie
+--
+
+CREATE TABLE user_cookie (
+    user_id integer NOT NULL,
+    cookie text NOT NULL,
+    expiry_timestamp timestamp without time zone NOT NULL
+);
+
+ALTER TABLE ONLY user_cookie
+    ADD CONSTRAINT user_cookie_pkey PRIMARY KEY (user_id, cookie);
+
+COMMENT ON TABLE user_cookie IS 'Holds user cookies - need to create a procedure to delete expiried cookies.';
+
+COMMENT ON COLUMN user_cookie.expiry_timestamp IS 'After this date, this row can be deleted';
+
+--
+-- user_password_reset
+--
+
+CREATE TABLE user_password_reset (
+    user_id integer NOT NULL,
+    date_requested timestamp with time zone DEFAULT ('now'::text)::timestamp(6) with time zone,
+    ip_address inet NOT NULL,
+    token text NOT NULL
+);
+
+--
+-- user_tasks
+--
+
+CREATE TABLE user_tasks (
+    user_id integer NOT NULL,
+    task_id integer NOT NULL
+);
+
+ALTER TABLE ONLY user_tasks
+    ADD CONSTRAINT user_tasks_pkey PRIMARY KEY (task_id, user_id);
+
+--
+-- users
+--
+
+CREATE TABLE users (
+    id integer NOT NULL,
+    name text NOT NULL,
+    firstlogin timestamp with time zone DEFAULT ('now'::text)::timestamp(6) with time zone,
+    lastlogin timestamp with time zone DEFAULT ('now'::text)::timestamp(6) with time zone,
+    email text,
+    watch_notice_id integer NOT NULL,
+    emailsitenotices_yn boolean,
+    emailbouncecount smallint DEFAULT 0,
+    type character(1) DEFAULT 'U'::bpchar NOT NULL,
+    status character(1) DEFAULT 'U'::bpchar NOT NULL,
+    ip_address text NOT NULL,
+    number_of_commits smallint,
+    number_of_days smallint,
+    watch_list_add_remove text DEFAULT 'default'::text,
+    max_number_watch_lists integer DEFAULT 5,
+    last_watch_list_chosen integer,
+    page_size smallint DEFAULT 25,
+    password_hash text NOT NULL,
+    set_focus_search boolean DEFAULT false NOT NULL,
+    CONSTRAINT u_max_number_watch_lists CHECK (((max_number_watch_lists IS NOT NULL) AND (max_number_watch_lists >= 1))),
+    CONSTRAINT u_watch_list_add_remove CHECK (((watch_list_add_remove = 'ask'::text) OR (watch_list_add_remove = 'default'::text))),
+    CONSTRAINT users_status CHECK (((status = 'U'::bpchar) OR (status = 'A'::bpchar) OR (status = 'D'::bpchar))),
+    CONSTRAINT users_type CHECK (((type = 'U'::bpchar) OR (type = 'S'::bpchar)))
+);
+
+CREATE SEQUENCE users_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE users_id_seq OWNED BY users.id;
+
+ALTER TABLE ONLY users ALTER COLUMN id SET DEFAULT nextval('users_id_seq'::regclass);
+
+ALTER TABLE ONLY users
+    ADD CONSTRAINT users_name UNIQUE (name);
+
+ALTER TABLE ONLY users
+    ADD CONSTRAINT users_pkey PRIMARY KEY (id);
+
+CREATE INDEX users_email ON users USING btree (email);
+
+COMMENT ON COLUMN users.set_focus_search IS 'When there is a search field on the page, set the focus to that field when the page is loaded.';
+
+--
+-- vuxml
+--
+
+CREATE TABLE vuxml (
+    id integer NOT NULL,
+    vid text NOT NULL,
+    topic text NOT NULL,
+    description text NOT NULL,
+    date_discovery text,
+    date_entry text,
+    date_modified text,
+    status character(1) NOT NULL,
+    checksum text
+);
+
+CREATE SEQUENCE vuxml_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE vuxml_id_seq OWNED BY vuxml.id;
+
+ALTER TABLE ONLY vuxml ALTER COLUMN id SET DEFAULT nextval('vuxml_id_seq'::regclass);
+
+ALTER TABLE ONLY vuxml
+    ADD CONSTRAINT vuxml_pkey PRIMARY KEY (id);
+
+CREATE INDEX vuxml_vid_idx ON vuxml USING btree (vid);
+
+--
+-- vuxml_affected
+--
+
+CREATE TABLE vuxml_affected (
+    id integer NOT NULL,
+    vuxml_id integer NOT NULL,
+    type text NOT NULL
+);
+
+CREATE SEQUENCE vuxml_affected_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE vuxml_affected_id_seq OWNED BY vuxml_affected.id;
+
+ALTER TABLE ONLY vuxml_affected ALTER COLUMN id SET DEFAULT nextval('vuxml_affected_id_seq'::regclass);
+
+ALTER TABLE ONLY vuxml_affected
+    ADD CONSTRAINT vuxml_affected_pkey PRIMARY KEY (id);
+
+--
+-- vuxml_import
+--
+
+CREATE TABLE vuxml_import (
+    vid text NOT NULL,
+    checksum text NOT NULL
+);
+
+ALTER TABLE ONLY vuxml_import
+    ADD CONSTRAINT vuxml_import_vid PRIMARY KEY (vid);
+
+--
+-- vuxml_names
+--
+
+CREATE TABLE vuxml_names (
+    id integer NOT NULL,
+    vuxml_affected_id integer NOT NULL,
+    name text NOT NULL
+);
+
+CREATE SEQUENCE vuxml_names_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE vuxml_names_id_seq OWNED BY vuxml_names.id;
+
+ALTER TABLE ONLY vuxml_names ALTER COLUMN id SET DEFAULT nextval('vuxml_names_id_seq'::regclass);
+
+ALTER TABLE ONLY vuxml_names
+    ADD CONSTRAINT vuxml_names_pkey PRIMARY KEY (id);
+
+CREATE INDEX vuxml_names_name ON vuxml_names USING btree (name);
+
+--
+-- vuxml_ranges
+--
+
+CREATE TABLE vuxml_ranges (
+    id integer NOT NULL,
+    vuxml_affected_id integer NOT NULL,
+    operator1 text NOT NULL,
+    version1 text NOT NULL,
+    operator2 text,
+    version2 text
+);
+
+CREATE SEQUENCE vuxml_ranges_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE vuxml_ranges_id_seq OWNED BY vuxml_ranges.id;
+
+ALTER TABLE ONLY vuxml_ranges ALTER COLUMN id SET DEFAULT nextval('vuxml_ranges_id_seq'::regclass);
+
+ALTER TABLE ONLY vuxml_ranges
+    ADD CONSTRAINT vuxml_ranges_pkey PRIMARY KEY (id);
+
+--
+-- vuxml_references
+--
+
+CREATE TABLE vuxml_references (
+    id integer NOT NULL,
+    vuxml_id integer NOT NULL,
+    type text NOT NULL,
+    reference text NOT NULL
+);
+
+CREATE SEQUENCE vuxml_references_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE vuxml_references_id_seq OWNED BY vuxml_references.id;
+
+ALTER TABLE ONLY vuxml_references ALTER COLUMN id SET DEFAULT nextval('vuxml_references_id_seq'::regclass);
+
+ALTER TABLE ONLY vuxml_references
+    ADD CONSTRAINT vuxml_references_pkey PRIMARY KEY (id);
+
+--
+-- watch_list
+--
+
+CREATE TABLE watch_list (
+    id integer NOT NULL,
+    user_id integer NOT NULL,
+    name text NOT NULL,
+    awaiting_staging boolean DEFAULT false NOT NULL,
+    in_service boolean DEFAULT false,
+    token text DEFAULT generate_watch_list_token(),
+    CONSTRAINT watch_list_awaiting_staging CHECK (((awaiting_staging = true) OR (awaiting_staging = false))),
+    CONSTRAINT wl_in_service_not_null CHECK ((in_service IS NOT NULL))
+);
+
+CREATE SEQUENCE watch_list_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE watch_list_id_seq OWNED BY watch_list.id;
+
+ALTER TABLE ONLY watch_list ALTER COLUMN id SET DEFAULT nextval('watch_list_id_seq'::regclass);
+
+ALTER TABLE ONLY watch_list
+    ADD CONSTRAINT watch_list_pkey PRIMARY KEY (id);
+
+CREATE UNIQUE INDEX watch_list_token ON watch_list USING btree (token);
+
+CREATE INDEX watch_list_user_id ON watch_list USING btree (user_id);
+
+--
+-- watch_list_element
+--
+
+CREATE TABLE watch_list_element (
+    watch_list_id integer NOT NULL,
+    element_id integer NOT NULL
+);
+ALTER TABLE ONLY watch_list_element ALTER COLUMN watch_list_id SET STATISTICS 1000;
+ALTER TABLE ONLY watch_list_element ALTER COLUMN element_id SET STATISTICS 1000;
+
+ALTER TABLE ONLY watch_list_element
+    ADD CONSTRAINT watch_list_element_pkey PRIMARY KEY (watch_list_id, element_id);
+
+CREATE INDEX watch_list_element_element_id ON watch_list_element USING btree (element_id);
+
+CREATE INDEX watch_list_element_watch_list_id ON watch_list_element USING btree (watch_list_id);
+
+--
+-- watch_list_staging
+--
+
+CREATE TABLE watch_list_staging (
+    id integer NOT NULL,
+    user_id integer NOT NULL,
+    category text NOT NULL,
+    port text NOT NULL,
+    item_count integer NOT NULL,
+    from_pkg_info boolean NOT NULL,
+    from_watch_list boolean NOT NULL,
+    element_id integer,
+    CONSTRAINT watch_list_stag_from_watch_list CHECK (((from_watch_list = true) OR (from_watch_list = false))),
+    CONSTRAINT watch_list_stagin_from_pkg_info CHECK (((from_pkg_info = true) OR (from_pkg_info = false)))
+);
+
+CREATE SEQUENCE watch_list_staging_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE watch_list_staging_id_seq OWNED BY watch_list_staging.id;
+
+ALTER TABLE ONLY watch_list_staging ALTER COLUMN id SET DEFAULT nextval('watch_list_staging_id_seq'::regclass);
+
+ALTER TABLE ONLY watch_list_staging
+    ADD CONSTRAINT watch_list_staging_pkey PRIMARY KEY (id);
+
+--
+-- watch_list_staging_log
+--
+
+CREATE TABLE watch_list_staging_log (
+    id integer NOT NULL,
+    date_added timestamp with time zone DEFAULT ('now'::text)::timestamp(6) with time zone NOT NULL,
+    user_id integer NOT NULL,
+    action character(1) NOT NULL,
+    count_total integer DEFAULT 0 NOT NULL,
+    count_matches integer DEFAULT 0 NOT NULL,
+    count_missing integer DEFAULT 0 NOT NULL,
+    count_duplicates integer DEFAULT 0 NOT NULL,
+    count_categories integer DEFAULT 0 NOT NULL,
+    CONSTRAINT watch_list_staging_log_action CHECK (((action = 'U'::bpchar) OR (action = 'W'::bpchar) OR (action = 'C'::bpchar) OR (action = 'D'::bpchar)))
+);
+
+CREATE SEQUENCE watch_list_staging_log_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE watch_list_staging_log_id_seq OWNED BY watch_list_staging_log.id;
+
+ALTER TABLE ONLY watch_list_staging_log ALTER COLUMN id SET DEFAULT nextval('watch_list_staging_log_id_seq'::regclass);
+
+ALTER TABLE ONLY watch_list_staging_log
+    ADD CONSTRAINT watch_list_staging_log_pkey PRIMARY KEY (id);
+
+--
+-- watch_notice
+--
+
+CREATE TABLE watch_notice (
+    id integer NOT NULL,
+    frequency character(1) NOT NULL,
+    description text NOT NULL,
+    last_sent timestamp with time zone,
+    CONSTRAINT watch_notice_frequency CHECK (((frequency = 'Z'::bpchar) OR (frequency = 'D'::bpchar) OR (frequency = 'W'::bpchar) OR (frequency = 'F'::bpchar) OR (frequency = 'M'::bpchar)))
+);
+
+CREATE SEQUENCE watch_notice_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE watch_notice_id_seq OWNED BY watch_notice.id;
+
+ALTER TABLE ONLY watch_notice ALTER COLUMN id SET DEFAULT nextval('watch_notice_id_seq'::regclass);
+
+ALTER TABLE ONLY watch_notice
+    ADD CONSTRAINT watch_notice_pkey PRIMARY KEY (id);
+
+CREATE INDEX watch_notice_frequency ON watch_notice USING btree (frequency);
+
+--
+-- watch_notice_log
+--
+
+CREATE TABLE watch_notice_log (
+    id integer NOT NULL,
+    notice_date timestamp with time zone DEFAULT ('now'::text)::timestamp(6) with time zone NOT NULL,
+    frequency_id integer NOT NULL,
+    msg_count integer NOT NULL,
+    commit_count integer NOT NULL
+);
+
+CREATE SEQUENCE watch_notice_log_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE watch_notice_log_id_seq OWNED BY watch_notice_log.id;
+
+ALTER TABLE ONLY watch_notice_log ALTER COLUMN id SET DEFAULT nextval('watch_notice_log_id_seq'::regclass);
+
+ALTER TABLE ONLY watch_notice_log
+    ADD CONSTRAINT watch_notice_log_pkey PRIMARY KEY (id);
+
+--
+-- watchers_also_watched
+--
+
+CREATE TABLE watchers_also_watched (
+    element_id integer NOT NULL,
+    rank smallint NOT NULL,
+    also_element_id integer NOT NULL,
+    watch_list_count integer NOT NULL,
+    CONSTRAINT watchers_also_watched_rank_check CHECK (((rank >= 1) AND (rank <= 5)))
+);
+
+ALTER TABLE ONLY watchers_also_watched
+    ADD CONSTRAINT watchers_also_watched_pkey PRIMARY KEY (element_id, rank);
+
+--
+-- watchers_also_watched_excluded_lists
+--
+
+CREATE TABLE watchers_also_watched_excluded_lists (
+    watch_list_id integer NOT NULL,
+    elements integer NOT NULL
+);
+
+ALTER TABLE ONLY watchers_also_watched_excluded_lists
+    ADD CONSTRAINT watchers_also_watched_excluded_lists_pkey PRIMARY KEY (watch_list_id);
+
+--
+-- watchers_also_watched_queue
+--
+
+CREATE TABLE watchers_also_watched_queue (
+    element_id integer NOT NULL
+);
+
+ALTER TABLE ONLY watchers_also_watched_queue
+    ADD CONSTRAINT watchers_also_watched_queue_pkey PRIMARY KEY (element_id);
+
+--
+-- wlc
+--
+
+CREATE TABLE wlc (
+    name text,
+    category text,
+    wlc bigint
+);
+
+--
+-- Foreign keys
+--
+
+ALTER TABLE ONLY categories
+    ADD CONSTRAINT "$1" FOREIGN KEY (element_id) REFERENCES element(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY commit_log
+    ADD CONSTRAINT "$1" FOREIGN KEY (system_id) REFERENCES system(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY commit_log_elements
+    ADD CONSTRAINT "$1" FOREIGN KEY (commit_log_id) REFERENCES commit_log(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY commit_log_port_elements
+    ADD CONSTRAINT "$1" FOREIGN KEY (commit_log_id) REFERENCES commit_log(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY commit_log_ports
+    ADD CONSTRAINT "$1" FOREIGN KEY (commit_log_id) REFERENCES commit_log(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY commit_log_ports_ignore
+    ADD CONSTRAINT "$1" FOREIGN KEY (port_id) REFERENCES ports(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY commit_log_ports_vuxml
+    ADD CONSTRAINT "$1" FOREIGN KEY (vuxml_id) REFERENCES vuxml(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY commits_latest_ports
+    ADD CONSTRAINT "$1" FOREIGN KEY (commit_log_id) REFERENCES commit_log(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY committer_notify
+    ADD CONSTRAINT "$1" FOREIGN KEY (user_id) REFERENCES users(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY element
+    ADD CONSTRAINT "$1" FOREIGN KEY (parent_id) REFERENCES element(id) ON UPDATE RESTRICT ON DELETE CASCADE;
+
+ALTER TABLE ONLY element_revision
+    ADD CONSTRAINT "$1" FOREIGN KEY (element_id) REFERENCES element(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY latest_commits
+    ADD CONSTRAINT "$1" FOREIGN KEY (commit_log_id) REFERENCES commit_log(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY latest_commits_ports
+    ADD CONSTRAINT "$1" FOREIGN KEY (commit_log_id) REFERENCES commit_log(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ports
+    ADD CONSTRAINT "$1" FOREIGN KEY (category_id) REFERENCES categories(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ports_categories
+    ADD CONSTRAINT "$1" FOREIGN KEY (port_id) REFERENCES ports(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ports_moved
+    ADD CONSTRAINT "$1" FOREIGN KEY (from_port_id) REFERENCES ports(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ports_updating_ports_xref
+    ADD CONSTRAINT "$1" FOREIGN KEY (port_id) REFERENCES ports(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ports_vulnerable
+    ADD CONSTRAINT "$1" FOREIGN KEY (port_id) REFERENCES ports(id) ON UPDATE RESTRICT ON DELETE CASCADE;
+
+ALTER TABLE ONLY report_log
+    ADD CONSTRAINT "$1" FOREIGN KEY (frequency_id) REFERENCES report_frequency(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY report_subscriptions
+    ADD CONSTRAINT "$1" FOREIGN KEY (report_frequency_id) REFERENCES report_frequency(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY security_notice
+    ADD CONSTRAINT "$1" FOREIGN KEY (user_id) REFERENCES users(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY security_notice_audit
+    ADD CONSTRAINT "$1" FOREIGN KEY (security_notice_id) REFERENCES security_notice(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY system_branch
+    ADD CONSTRAINT "$1" FOREIGN KEY (system_id) REFERENCES system(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY system_branch_element_revision
+    ADD CONSTRAINT "$1" FOREIGN KEY (element_id, revision_name) REFERENCES element_revision(element_id, revision_name) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY user_confirmations
+    ADD CONSTRAINT "$1" FOREIGN KEY (user_id) REFERENCES users(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY user_tasks
+    ADD CONSTRAINT "$1" FOREIGN KEY (user_id) REFERENCES users(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY users
+    ADD CONSTRAINT "$1" FOREIGN KEY (watch_notice_id) REFERENCES watch_notice(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY vuxml_affected
+    ADD CONSTRAINT "$1" FOREIGN KEY (vuxml_id) REFERENCES vuxml(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY vuxml_names
+    ADD CONSTRAINT "$1" FOREIGN KEY (vuxml_affected_id) REFERENCES vuxml_affected(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY vuxml_ranges
+    ADD CONSTRAINT "$1" FOREIGN KEY (vuxml_affected_id) REFERENCES vuxml_affected(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY vuxml_references
+    ADD CONSTRAINT "$1" FOREIGN KEY (vuxml_id) REFERENCES vuxml(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY watch_list
+    ADD CONSTRAINT "$1" FOREIGN KEY (user_id) REFERENCES users(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY watch_list_element
+    ADD CONSTRAINT "$1" FOREIGN KEY (element_id) REFERENCES element(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY watch_list_staging
+    ADD CONSTRAINT "$1" FOREIGN KEY (element_id) REFERENCES element(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+ALTER TABLE ONLY commit_log_elements
+    ADD CONSTRAINT "$2" FOREIGN KEY (element_id, revision_name) REFERENCES element_revision(element_id, revision_name) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY commit_log_port_elements
+    ADD CONSTRAINT "$2" FOREIGN KEY (commit_log_element_id) REFERENCES commit_log_elements(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY commit_log_ports
+    ADD CONSTRAINT "$2" FOREIGN KEY (port_id) REFERENCES ports(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY commit_log_ports_ignore
+    ADD CONSTRAINT "$2" FOREIGN KEY (commit_log_id) REFERENCES commit_log(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY commit_log_ports_vuxml
+    ADD CONSTRAINT "$2" FOREIGN KEY (port_id) REFERENCES ports(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ports
+    ADD CONSTRAINT "$2" FOREIGN KEY (element_id) REFERENCES element(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ports_categories
+    ADD CONSTRAINT "$2" FOREIGN KEY (category_id) REFERENCES categories(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ports_moved
+    ADD CONSTRAINT "$2" FOREIGN KEY (to_port_id) REFERENCES ports(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ports_updating_ports_xref
+    ADD CONSTRAINT "$2" FOREIGN KEY (ports_updating_id) REFERENCES ports_updating(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY report_log
+    ADD CONSTRAINT "$2" FOREIGN KEY (report_id) REFERENCES reports(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY report_subscriptions
+    ADD CONSTRAINT "$2" FOREIGN KEY (report_id) REFERENCES reports(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY security_notice
+    ADD CONSTRAINT "$2" FOREIGN KEY (commit_log_id) REFERENCES commit_log(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY security_notice_audit
+    ADD CONSTRAINT "$2" FOREIGN KEY (security_notice_status_id) REFERENCES security_notice_status(id) ON UPDATE RESTRICT ON DELETE RESTRICT;
+
+ALTER TABLE ONLY system_branch_element_revision
+    ADD CONSTRAINT "$2" FOREIGN KEY (system_branch_id) REFERENCES system_branch(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY user_tasks
+    ADD CONSTRAINT "$2" FOREIGN KEY (task_id) REFERENCES tasks(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY users
+    ADD CONSTRAINT "$2" FOREIGN KEY (last_watch_list_chosen) REFERENCES watch_list(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+ALTER TABLE ONLY watch_list_element
+    ADD CONSTRAINT "$2" FOREIGN KEY (watch_list_id) REFERENCES watch_list(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY commit_log_port_elements
+    ADD CONSTRAINT "$3" FOREIGN KEY (port_id) REFERENCES ports(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY commit_log_ports_vuxml
+    ADD CONSTRAINT "$3" FOREIGN KEY (commit_log_id) REFERENCES commit_log(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY report_subscriptions
+    ADD CONSTRAINT "$3" FOREIGN KEY (user_id) REFERENCES users(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY security_notice
+    ADD CONSTRAINT "$3" FOREIGN KEY (security_notice_status_id) REFERENCES security_notice_status(id) ON UPDATE RESTRICT ON DELETE RESTRICT;
+
+ALTER TABLE ONLY cache_clearing_ports
+    ADD CONSTRAINT cache_clearing_ports_port_id_fkey FOREIGN KEY (port_id) REFERENCES ports(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY category_stats
+    ADD CONSTRAINT category_stats_category_id_fkey FOREIGN KEY (category_id) REFERENCES categories(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY commit_log_branches
+    ADD CONSTRAINT commit_log_branch_branch_id_fkey FOREIGN KEY (branch_id) REFERENCES system_branch(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY commit_log_branches
+    ADD CONSTRAINT commit_log_branch_commit_log_id_fkey FOREIGN KEY (commit_log_id) REFERENCES commit_log(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY commit_log_ports_elements
+    ADD CONSTRAINT commit_log_ports_elements_commit_log_id_fkey FOREIGN KEY (commit_log_id) REFERENCES commit_log(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY commit_log_ports_elements
+    ADD CONSTRAINT commit_log_ports_elements_element_id_fkey FOREIGN KEY (element_id) REFERENCES element(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY commit_log
+    ADD CONSTRAINT commit_log_repo_id_fkey FOREIGN KEY (repo_id) REFERENCES repo(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+
+ALTER TABLE ONLY commits_flagged
+    ADD CONSTRAINT commits_flagged_commit_log_id_fkey FOREIGN KEY (commit_log_id) REFERENCES commit_log(id);
+
+ALTER TABLE ONLY commits_flagged
+    ADD CONSTRAINT commits_flagged_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id);
+
+ALTER TABLE ONLY design_results
+    ADD CONSTRAINT design_results_user_id FOREIGN KEY (user_id) REFERENCES users(id);
+
+ALTER TABLE ONLY element_pathname
+    ADD CONSTRAINT element_pathname_element_id_fkey FOREIGN KEY (element_id) REFERENCES element(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY package_flavors
+    ADD CONSTRAINT package_flavors_flavor_id_fk FOREIGN KEY (flavor_id) REFERENCES flavors(id);
+
+ALTER TABLE ONLY package_flavors
+    ADD CONSTRAINT package_flavors_port_id_fk FOREIGN KEY (port_id) REFERENCES ports(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY package_imports
+    ADD CONSTRAINT package_imports_abi_id FOREIGN KEY (abi_id) REFERENCES abi(id) ON UPDATE CASCADE ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+
+ALTER TABLE ONLY package_notifications
+    ADD CONSTRAINT package_notifications_abi_id FOREIGN KEY (abi_id) REFERENCES abi(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY package_notifications
+    ADD CONSTRAINT package_notifications_port_id_fk FOREIGN KEY (port_id) REFERENCES ports(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY packages
+    ADD CONSTRAINT packages_abi_id_fk FOREIGN KEY (abi_id) REFERENCES abi(id) ON UPDATE CASCADE ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+
+ALTER TABLE ONLY packages_last_checked
+    ADD CONSTRAINT packages_last_checked_abi_id_fk FOREIGN KEY (abi_id) REFERENCES abi(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY packages
+    ADD CONSTRAINT packages_port_id_fk FOREIGN KEY (port_id) REFERENCES ports(id) ON UPDATE CASCADE ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+
+ALTER TABLE ONLY packages_raw
+    ADD CONSTRAINT packages_raw_abi_id_fk FOREIGN KEY (abi_id) REFERENCES abi(id) ON UPDATE CASCADE ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+
+ALTER TABLE ONLY packages_raw
+    ADD CONSTRAINT packages_raw_port_id_fk FOREIGN KEY (port_id) REFERENCES ports(id) ON UPDATE CASCADE ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+
+ALTER TABLE ONLY port_dependencies
+    ADD CONSTRAINT port_dependencies_port_id_dependent_upon_fkey FOREIGN KEY (port_id_dependent_upon) REFERENCES ports(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY port_dependencies
+    ADD CONSTRAINT port_dependencies_port_id_fkey FOREIGN KEY (port_id) REFERENCES ports(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ports_conflicts_matches
+    ADD CONSTRAINT ports_conflicts_matches_conflicts_id FOREIGN KEY (ports_conflicts_id) REFERENCES ports_conflicts(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ports_conflicts_matches
+    ADD CONSTRAINT ports_conflicts_matches_port_id FOREIGN KEY (port_id) REFERENCES ports(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ports_conflicts
+    ADD CONSTRAINT ports_conflicts_port_id FOREIGN KEY (port_id) REFERENCES ports(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY ports
+    ADD CONSTRAINT ports_last_commit_id_fkey FOREIGN KEY (last_commit_id) REFERENCES commit_log(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+ALTER TABLE ONLY ports_origin
+    ADD CONSTRAINT ports_origin_port_id_fk FOREIGN KEY (port_id) REFERENCES ports(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY report_log_package_notifications
+    ADD CONSTRAINT report_log_package_notifications_abi_id_fk FOREIGN KEY (abi_id) REFERENCES abi(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY report_subscriptions_abi
+    ADD CONSTRAINT report_subscriptions_abi_abi_id FOREIGN KEY (abi_id) REFERENCES abi(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY report_subscriptions_abi
+    ADD CONSTRAINT report_subscriptions_abi_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY report_subscriptions_abi
+    ADD CONSTRAINT report_subscriptions_abi_watch_list_id FOREIGN KEY (watch_list_id) REFERENCES watch_list(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY sanity_test_failures
+    ADD CONSTRAINT sanity_test_failures_commit_log_id_fkey FOREIGN KEY (commit_log_id) REFERENCES commit_log(id) ON UPDATE RESTRICT ON DELETE CASCADE;
+
+ALTER TABLE ONLY user_cookie
+    ADD CONSTRAINT user_cookies_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY user_password_reset
+    ADD CONSTRAINT user_password_reset_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY watch_list_staging
+    ADD CONSTRAINT wls_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+
+--
+-- Views
+--
+
+CREATE VIEW commits_recent AS
+ SELECT id,
+    message_id,
+    message_date,
+    message_subject,
+    date_added,
+    commit_date,
+    committer,
+    description,
+    system_id,
+    encoding_losses
+   FROM commit_log
+  ORDER BY commit_date DESC, id
+ LIMIT 100;
+
+CREATE VIEW commits_recent_ports AS
+ SELECT DISTINCT id,
+    message_id,
+    message_date,
+    message_subject,
+    date_added,
+    commit_date,
+    committer,
+    description,
+    system_id,
+    encoding_losses
+   FROM commit_log
+  WHERE (EXISTS ( SELECT commit_log_ports.commit_log_id,
+            commit_log_ports.port_id,
+            commit_log_ports.needs_refresh,
+            commit_log_ports.port_version,
+            commit_log_ports.port_revision
+           FROM commit_log_ports
+          WHERE (commit_log_ports.commit_log_id = commit_log.id)))
+  ORDER BY commit_date DESC, id, message_id, message_date, message_subject, date_added, committer, description, system_id, encoding_losses
+ LIMIT 100;
+
+CREATE VIEW ports_active WITH (security_barrier='false') AS
+ SELECT ports.id,
+    ports.element_id,
+    ports.category_id,
+    ports.short_description,
+    ports.long_description,
+    ports.version,
+    ports.revision,
+    ports.maintainer,
+    ports.homepage,
+    ports.master_sites,
+    ports.extract_suffix,
+    ports.package_exists,
+    ports.depends_build,
+    ports.depends_run,
+    ports.last_commit_id,
+    ports.found_in_index,
+    ports.forbidden,
+    ports.broken,
+    ports.date_added,
+    ports.categories,
+    ports.deprecated,
+    ports.ignore,
+    ports.master_port,
+    ports.depends_lib,
+    ports.no_package,
+    ports.package_name,
+    ports.portepoch,
+    ports.no_cdrom,
+    ports.restricted,
+    ports.expiration_date,
+    ports.is_interactive,
+    ports.only_for_archs,
+    ports.not_for_archs,
+    ports.status,
+    ports.showconfig,
+    ports.license,
+    ports.fetch_depends,
+    ports.extract_depends,
+    ports.patch_depends,
+    ports.uses,
+    ports.pkgmessage,
+    ports.distinfo,
+    ports.license_restricted,
+    ports.manual_package_build,
+    ports.license_perms,
+    ports.pkg_plist,
+    ports.makefile,
+    ports.conflicts,
+    ports.conflicts_build,
+    ports.conflicts_install,
+    ports.options_name,
+    ports.test_depends,
+    element.name,
+    categories.name AS category,
+    element_pathname.pathname
+   FROM categories,
+    ports,
+    element,
+    element_pathname
+  WHERE ((element.status = 'A'::bpchar) AND (categories.id = ports.category_id) AND (ports.element_id = element.id) AND (element.id = element_pathname.element_id) AND (element_pathname.pathname ~~ '/ports/head/%'::text));
+
+CREATE VIEW ports_all AS
+ SELECT ports.id,
+    ports.element_id,
+    ports.category_id,
+    ports.short_description,
+    ports.long_description,
+    ports.version,
+    ports.revision,
+    ports.maintainer,
+    ports.homepage,
+    ports.master_sites,
+    ports.extract_suffix,
+    ports.package_exists,
+    ports.depends_build,
+    ports.depends_run,
+    ports.last_commit_id,
+    ports.found_in_index,
+    ports.forbidden,
+    ports.broken,
+    ports.date_added,
+    ports.categories,
+    ports.deprecated,
+    ports.ignore,
+    ports.master_port,
+    ports.depends_lib,
+    ports.no_package,
+    ports.package_name,
+    ports.portepoch,
+    ports.no_cdrom,
+    ports.restricted,
+    ports.expiration_date,
+    ports.is_interactive,
+    ports.only_for_archs,
+    ports.not_for_archs,
+    ports.status,
+    ports.showconfig,
+    ports.license,
+    ports.fetch_depends,
+    ports.extract_depends,
+    ports.patch_depends,
+    ports.uses,
+    ports.pkgmessage,
+    ports.distinfo,
+    ports.license_restricted,
+    ports.manual_package_build,
+    ports.license_perms,
+    ports.pkg_plist,
+    ports.makefile,
+    ports.conflicts,
+    ports.conflicts_build,
+    ports.conflicts_install,
+    ports.options_name,
+    ports.test_depends,
+    element.name,
+    categories.name AS category,
+    element_pathname.pathname
+   FROM categories,
+    ports,
+    element,
+    element_pathname
+  WHERE ((categories.id = ports.category_id) AND (ports.element_id = element.id) AND (element.id = element_pathname.element_id) AND (element_pathname.pathname ~~ '/ports/head/%'::text));
+
+CREATE VIEW report_log_latest AS
+ SELECT report_log.report_id,
+    report_log.frequency_id,
+    report_frequency.frequency,
+    max(report_log.report_date) AS last_sent
+   FROM report_log,
+    report_frequency
+  WHERE (report_log.frequency_id = report_frequency.id)
+  GROUP BY report_log.report_id, report_log.frequency_id, report_frequency.frequency;
