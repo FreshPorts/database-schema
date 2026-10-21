@@ -3,9 +3,10 @@
 -- defaults, constraints, indexes, foreign keys and views.
 --
 -- Generated from pg_dump --schema-only --no-owner --no-privileges of
--- freshports.dvl on 2026-10-20.  Ordering is: extensions, enums, free-standing
--- sequences, then each table (alphabetical) with its sequences, defaults,
--- constraints, indexes and comments, then all foreign keys, then views.
+-- freshports.org (production, on RDS) on 2026-10-20.  Ordering is:
+-- extensions, enums, free-standing sequences, then each table
+-- (alphabetical) with its sequences, defaults, constraints, indexes and
+-- comments, then all foreign keys, then views.
 --
 -- Not in this file:
 --   composite types       datatype.txt
@@ -307,7 +308,8 @@ CREATE TABLE commit_log (
     committer_email text,
     author_name text,
     author_email text
-);
+)
+WITH (autovacuum_analyze_scale_factor='0', autovacuum_analyze_threshold='500');
 
 CREATE SEQUENCE commit_log_id_seq
     START WITH 1
@@ -346,7 +348,8 @@ If null/empty, it is not a git hash.';
 CREATE TABLE commit_log_branches (
     commit_log_id integer NOT NULL,
     branch_id integer NOT NULL
-);
+)
+WITH (autovacuum_analyze_scale_factor='0', autovacuum_analyze_threshold='500');
 
 CREATE INDEX commit_log_branches_branch_id_idx ON commit_log_branches USING btree (branch_id);
 
@@ -414,7 +417,8 @@ CREATE TABLE commit_log_ports (
     port_revision text,
     port_epoch text,
     port_name_revision text
-);
+)
+WITH (autovacuum_analyze_scale_factor='0', autovacuum_analyze_threshold='1000');
 
 ALTER TABLE ONLY commit_log_ports
     ADD CONSTRAINT commit_log_ports_pkey PRIMARY KEY (commit_log_id, port_id);
@@ -573,17 +577,6 @@ ALTER TABLE ONLY daily_stats_data
 
 ALTER TABLE ONLY daily_stats_data
     ADD CONSTRAINT daily_stats_data_unique UNIQUE (daily_stats_id, date);
-
---
--- delete_me_daily_refreshes
---
-
-CREATE TABLE delete_me_daily_refreshes (
-    refresh_date date NOT NULL
-);
-
-ALTER TABLE ONLY delete_me_daily_refreshes
-    ADD CONSTRAINT daily_refreshes_pkey PRIMARY KEY (refresh_date);
 
 --
 -- design_results
@@ -1185,6 +1178,8 @@ CREATE INDEX ports_pkgmessage_english_idx ON ports USING gin (to_tsvector('engli
 CREATE INDEX ports_pkgmessage_simple_idx ON ports USING gin (to_tsvector('simple'::regconfig, pkgmessage));
 
 CREATE INDEX ports_ports_expiration_date ON ports USING btree (expiration_date) WHERE (expiration_date IS NOT NULL);
+
+CREATE INDEX ports_short_description_trgm_idx ON ports USING gin (short_description gin_trgm_ops);
 
 CREATE INDEX ports_uses_simple_idx ON ports USING gin (to_tsvector('simple'::regconfig, uses));
 
@@ -1814,7 +1809,7 @@ CREATE TABLE users (
     number_of_commits smallint,
     number_of_days smallint,
     watch_list_add_remove text DEFAULT 'default'::text,
-    max_number_watch_lists integer DEFAULT 5,
+    max_number_watch_lists integer DEFAULT 10,
     last_watch_list_chosen integer,
     page_size smallint DEFAULT 25,
     password_hash text NOT NULL,

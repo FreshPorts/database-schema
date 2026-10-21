@@ -208,3 +208,10 @@ CREATE TYPE Users_record AS (
 	password_hash          text,
 	set_focus_search       boolean
 );
+
+-- copied from pg_dump --schema-only of freshports.dvl on 2026-10-20
+-- used by mylogincounts() in sp.txt
+CREATE TYPE mylogincounts_record AS (
+	date date,
+	count integer
+);

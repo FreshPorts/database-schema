@@ -302,7 +302,7 @@ CREATE OR REPLACE FUNCTION CreateCategory(text, text, bool) returns int4 AS $$
     category_id := nextval('categories_id_seq');
 
     IF category_is_primary THEN
-        pathname            := 'ports/head/' || category_name;
+        pathname            := 'ports/' || category_name;
         category_element_id := Pathname_ID(pathname);
 
         IF category_element_id is NULL THEN
@@ -3985,11 +3985,10 @@ CREATE OR REPLACE FUNCTION PackagesLastCheckedSetRepoDate(
     VOLATILE PARALLEL UNSAFE
 AS $BODY$
   DECLARE
-    l_repo_date   timestamp;
-    l_import_date timestamp;
+    l_repo_date  timestamp;
   BEGIN
-    SELECT repo_date, import_date
-      INTO l_repo_date, l_import_date
+    SELECT repo_date
+      INTO l_repo_date
       FROM packages_last_checked PLC, abi
      WHERE PLC.abi_id  = abi.id
        AND abi.name    = a_abi_name
@@ -4011,7 +4010,7 @@ AS $BODY$
        AND package_set = a_package_set;
 
     -- we compare against the value before the update
-    RETURN a_RepoDate IS NOT NULL AND l_repo_date IS DISTINCT FROM a_RepoDate or (l_repo_date is not null and l_import_date is null);
+    RETURN a_RepoDate IS NOT NULL AND l_repo_date IS DISTINCT FROM a_RepoDate;
   END;
 $BODY$;
 
@@ -4085,6 +4084,7 @@ CREATE OR REPLACE FUNCTION pkg_plist(bigint) returns json as $$
        select regexp_match(installed_file, 'lib/[^/]*?\.so') as lib 
          from generate_plist
         where generate_plist.port_id = $1
+          and installed_file ~ 'lib/[^/]*?\.so'
    )
    select json_agg(distinct lib[1]) from tmp where lib is not null
 $$ LANGUAGE SQL STABLE;
@@ -4140,3 +4140,456 @@ CREATE OR REPLACE FUNCTION DoneProcessingCommit(text) returns text AS $$
 		RETURN a_message_id;
 	END
 $$ LANGUAGE 'plpgsql';
+
+
+--
+-- The functions below were in the database but not in this file.
+-- Copied from pg_dump --schema-only of freshports.dvl on 2026-10-20.
+--
+-- In use:
+--   user_fetch_by_cookie, user_set_cookie, user_logout, user_clear_bouncecount
+--     website login (see also updates-2024-06-22.sql)
+--   deletemissingvuxml, getlistofvulnsforupdate
+--     scripts/process_vuxml.pl (see also updates-2025-08-01-vuxml_import.sql)
+--
+-- Not referenced by the website or ingress code on 2026-10-20:
+--   clearslaveport, getcategoryportfromlatestlink, mylogincounts,
+--   port_conflicts, ports_clear_cache_testing, replace,
+--   revisionfortagget(int, int), securitynoticecreate
+--
+
+CREATE OR REPLACE FUNCTION clearslaveport(text) RETURNS integer
+    LANGUAGE plpgsql
+    AS $_$
+	DECLARE
+		p_SlaveCategoryPort	ALIAS FOR $1;
+	
+		position			int;
+		l_SlavePortCategory	text;
+		l_SlavePortName		text;
+		l_SlavePortID		int4;
+
+	BEGIN
+		position := strpos(p_SlaveCategoryPort, '/');
+		l_SlavePortCategory := substr(p_SlaveCategoryPort, 1, position - 1);
+		l_SlavePortName     := substr(p_SlaveCategoryPort, position + 1);
+
+		l_SlavePortID := GetPort(l_SlavePortCategory, l_SlavePortName);
+		
+		DELETE FROM master_slave_ports
+		WHERE  slave_port_id = l_SlavePortID;
+
+		UPDATE ports
+		   SET is_slave_port = FALSE
+		 WHERE id            = l_SlavePortID;
+
+		return l_SlavePortID;
+	END
+$_$;
+
+
+CREATE OR REPLACE FUNCTION deletemissingvuxml() RETURNS integer
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+    RowCount    int8;
+
+BEGIN
+
+    -- if it's not in vuxml_import, remove it from vuxml
+
+    WITH deleted_vids AS (
+    SELECT V.vid, V.checksum
+      FROM vuxml V
+    LEFT OUTER JOIN vuxml_import vi
+    ON V.vid = vi.vid
+    WHERE vi.vid IS NULL
+    )
+    DELETE from vuxml V
+     USING deleted_vids as DV
+     WHERE V.vid = DV.vid;
+
+    GET DIAGNOSTICS RowCount = ROW_COUNT;
+    
+    RETURN RowCount;
+END
+$$;
+
+
+CREATE OR REPLACE FUNCTION getcategoryportfromlatestlink(text) RETURNS text
+    LANGUAGE plpgsql STABLE
+    AS $_$
+--
+-- This function takes a package name, as taken from LATEST_LINK
+-- and returns the CATEGORY/PORT for that package.
+-- this operates only on HEAD (as of 2020-05-30).
+-- It returns "0" if nothing found.
+-- It returns "-1" if more than one match found. 
+--
+   DECLARE
+      p_PackageName ALIAS FOR $1;
+
+      l_Count       int;
+      l_Category    TEXT;
+      l_Port        TEXT;
+      l_Result      TEXT;
+
+   BEGIN
+      SELECT count(*)
+        INTO l_Count
+        FROM ports_active P JOIN element_pathname EP on P.element_id = EP.element_id AND EP.pathname like '/ports/head/%'
+       WHERE P.package_name = p_PackageName;
+
+      IF l_Count = 1 THEN
+         -- same query again, but expanded to pull in category and port
+         SELECT C.name as category, E.name as port
+           INTO l_Category, l_Port
+           FROM ports_active P JOIN element_pathname EP on P.element_id = EP.element_id AND EP.pathname like '/ports/head/%'
+           JOIN categories C ON P.category_id = C.id
+           JOIN element    E ON P.element_id  = E.id
+       WHERE P.package_name = p_PackageName;
+
+         l_Result := l_Category || '/' || l_Port;
+
+      ELSE
+         IF l_Count = 0 THEN
+            l_Result := '0';
+         ELSE
+            IF l_Count > 1 THEN
+               l_Result := '-1';
+            END IF;
+        END IF;
+      END IF;
+
+      return l_Result;
+
+   END;
+$_$;
+
+
+CREATE OR REPLACE FUNCTION getlistofvulnsforupdate() RETURNS SETOF text
+    LANGUAGE sql STABLE
+    AS $$
+
+-- return a list of vid for updating
+
+SELECT vi.vid
+  FROM vuxml_import vi
+LEFT OUTER JOIN vuxml
+ON vuxml.vid = vi.vid
+WHERE vuxml.checksum <> vi.checksum
+union
+SELECT vi.vid
+  FROM vuxml_import vi
+LEFT OUTER JOIN vuxml
+ON vuxml.vid = vi.vid
+WHERE vuxml.vid IS NULL;
+
+$$;
+
+
+CREATE OR REPLACE FUNCTION mylogincounts() RETURNS SETOF mylogincounts_record
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+
+    r   mylogincounts_record%rowtype;
+
+BEGIN
+        SELECT current_date,
+               1234
+          INTO r;
+        RETURN NEXT r;
+    RETURN;
+END
+$$;
+
+
+CREATE OR REPLACE FUNCTION mylogincounts(integer) RETURNS SETOF mylogincounts_record
+    LANGUAGE plpgsql
+    AS $_$
+DECLARE
+    MaxDays ALIAS for $1;
+
+    r   logincounts_record%rowtype;
+
+BEGIN
+        SELECT current_date,
+               1234
+          INTO r;
+        RETURN NEXT r;
+    RETURN;
+END
+$_$;
+
+
+CREATE OR REPLACE FUNCTION port_conflicts(bigint, text) RETURNS SETOF ports_conflicts_matches
+    LANGUAGE plpgsql STABLE
+    AS $_$
+  DECLARE
+    a_ports_conflicts_id ALIAS FOR $1;
+    a_regex              ALIAS FOR $2;
+ 
+    l_regex text;
+    r       ports_conflicts_matches%rowtype;
+  BEGIN
+    l_regex := '^(' || a_regex || ')';
+     
+    FOR r in SELECT distinct a_ports_conflicts_id, port_id FROM commit_log_ports WHERE port_name_revision ~ l_regex
+    LOOP
+      RETURN NEXT r;
+    END LOOP;
+  END;
+ 
+$_$;
+
+
+CREATE OR REPLACE FUNCTION ports_clear_cache_testing() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+   RAISE NOTICE 'ports_clear_cache_testing() has been invoked with %', TG_OP;
+   IF TG_OP = 'UPDATE' THEN
+      RAISE NOTICE 'ports_clear_cache_testing() is updating %', NEW.id;
+   END IF;
+
+   return NEW;
+END
+$$;
+
+
+CREATE OR REPLACE FUNCTION revisionfortagget(integer, integer) RETURNS text
+    LANGUAGE plpgsql
+    AS $_$
+   DECLARE
+      SystemBranchID   ALIAS for $1;
+      ElementID        ALIAS for $2;
+      TempRevisionName text;
+
+-- for a given Element and TagName (System version id)
+-- return the revision name assocated with it.
+                            
+   BEGIN
+      select revision_name
+        into TempRevisionName
+        from system_branch_element_revision
+       where system_branch_id = SystemBranchID
+         and element_id       = ElementID;
+
+      return TempRevisionName;
+   END;
+$_$;
+
+
+CREATE OR REPLACE FUNCTION securitynoticecreate(integer, inet, text, text) RETURNS bigint
+    LANGUAGE plpgsql
+    AS $_$
+   DECLARE
+      UserID       ALIAS for $1;
+      IPAddress    ALIAS for $2;
+      NoticeMsg    ALIAS for $3;
+      MessageID    ALIAS for $4;
+
+      CommitLogID       int8;
+      SecurityNoticeID  int8;
+
+   BEGIN
+      SELECT id, commit_log_id
+        INTO SecurityNoticeID, CommitLogID
+        FROM security_notice
+       WHERE commit_log_id =
+                (SELECT id
+                   FROM commit_log
+                  WHERE message_id = MessageID
+                 );
+
+      IF FOUND THEN
+			RAISE NOTICE ' Updating security notice for % MessageID User % from % said %', MessageID, UserId, IPAddress, NoticeMsg;
+         UPDATE security_notice
+            SET user_id       = UserID,
+                ip_address    = IPAddress,
+                description   = NoticeMsg
+          WHERE id            = SecurityNoticeID;
+      ELSE
+         SELECT id
+           INTO CommitLogID
+           FROM commit_log
+          WHERE message_id = MessageID;
+
+         IF FOUND THEN
+            -- obtain the next number in the sequence
+            SecurityNoticeID := nextval('security_notice_id_seq');
+
+   			RAISE NOTICE ' Creating security notice % for % MessageID User % from % said %', SecurityNoticeID, MessageID, UserId, IPAddress, NoticeMsg;
+
+            INSERT INTO security_notice
+                   (id,
+                    user_id,
+                    ip_address,
+                    description,
+                    commit_log_id)
+            VALUES (SecurityNoticeID,
+                    UserID,
+                    IPAddress,
+                    NoticeMsg,
+                    CommitLogID);
+         ELSE
+            RAISE NOTICE 'attempt to insert security notice for unknown message % by User % from % message %', MessageID, UserID, IPAddress, NoticeMsg;
+         END IF;
+      END IF;
+
+      return SecurityNoticeID;
+
+   END
+$_$;
+
+
+CREATE OR REPLACE FUNCTION securitynoticecreate(integer, inet, text, text, text) RETURNS bigint
+    LANGUAGE plpgsql
+    AS $_$
+   DECLARE
+      UserID       ALIAS for $1;
+      IPAddress    ALIAS for $2;
+      NoticeMsg    ALIAS for $3;
+      MessageID    ALIAS for $4;
+      p_Status     ALIAS for $5;
+      CommitLogID       int8;
+      SecurityNoticeID  int8;
+
+   BEGIN
+      SELECT id, commit_log_id
+        INTO SecurityNoticeID, CommitLogID
+        FROM security_notice
+       WHERE commit_log_id =
+                (SELECT id
+                   FROM commit_log
+                  WHERE message_id = MessageID
+                 );
+
+      IF FOUND THEN
+			RAISE NOTICE ' Updating security notice for % MessageID User % from % said %', MessageID, UserId, IPAddress, NoticeMsg;
+         UPDATE security_notice
+            SET user_id                   = UserID,
+                ip_address                = IPAddress,
+                description               = NoticeMsg,
+                security_notice_status_id = p_Status
+          WHERE id                        = SecurityNoticeID;
+      ELSE
+         SELECT id
+           INTO CommitLogID
+           FROM commit_log
+          WHERE message_id = MessageID;
+
+         IF FOUND THEN
+            -- obtain the next number in the sequence
+            SecurityNoticeID := nextval('security_notice_id_seq');
+
+   			RAISE NOTICE ' Creating security notice % for % MessageID User % from % said %', SecurityNoticeID, MessageID, UserId, IPAddress, NoticeMsg;
+
+            INSERT INTO security_notice
+                   (id,
+                    user_id,
+                    ip_address,
+                    description,
+                    commit_log_id,
+                    security_notice_status_id)
+            VALUES (SecurityNoticeID,
+                    UserID,
+                    IPAddress,
+                    NoticeMsg,
+                    CommitLogID,
+                    p_Status);
+         ELSE
+            RAISE NOTICE 'attempt to insert security notice for unknown message % by User % from % message %', MessageID, UserID, IPAddress, NoticeMsg;
+         END IF;
+      END IF;
+
+      return SecurityNoticeID;
+
+   END
+$_$;
+
+
+CREATE OR REPLACE FUNCTION user_clear_bouncecount(a_cookie text) RETURNS void
+    LANGUAGE sql
+    AS $$
+
+     UPDATE users
+        SET emailbouncecount = 0
+      FROM user_cookie
+     WHERE user_cookie.cookie  = a_cookie
+       AND user_cookie.user_id = users.id;
+
+$$;
+
+
+CREATE OR REPLACE FUNCTION user_fetch_by_cookie(a_cookie text) RETURNS SETOF users_record
+    LANGUAGE sql
+    AS $$
+
+
+-- if the cookie is valid, return the user details while saying: we just used this cookie.
+-- Originally, we tried a SELECT followed by an UPDATE, but that didn't return data
+-- by design. Next idea, never implemented, was UPDATE first, then SELECT. That should work.
+
+     UPDATE user_cookie
+        SET expiry_timestamp = localtimestamp
+       FROM users
+      WHERE users.id           =  user_cookie.user_id
+        AND user_cookie.cookie = a_cookie
+  RETURNING users.*;
+
+$$;
+
+
+CREATE OR REPLACE FUNCTION user_logout(a_cookie text) RETURNS void
+    LANGUAGE sql
+    AS $$
+
+     DELETE FROM user_cookie
+           WHERE user_cookie.cookie = a_cookie;
+
+$$;
+
+
+CREATE OR REPLACE FUNCTION user_set_cookie(a_user_id integer, a_cookie text, a_expires timestamp without time zone) RETURNS void
+    LANGUAGE sql
+    AS $$
+   INSERT INTO user_cookie(user_id, cookie, expiry_timestamp)
+   VALUES (a_user_id, a_cookie, a_expires);
+$$;
+
+
+CREATE OR REPLACE FUNCTION replace(character varying, character varying, character varying) RETURNS character varying
+    LANGUAGE plpgsql
+    AS $_$
+DECLARE
+subject ALIAS for $1;
+match ALIAS for $2;
+replace ALIAS for $3;
+r varchar;
+matchpos int;
+remain varchar;
+rempos int;
+BEGIN
+
+if (char_length(match) = 0) then
+raise exception 'replace function was called with null match string. This is not permitted.';
+end if;
+
+remain := subject;
+r := '';
+matchpos := strpos(subject,match);
+WHILE (matchpos > 0 ) LOOP
+r := r || substring(remain, 0,matchpos) || replace;
+rempos := matchpos + char_length(match);
+remain := substring(remain,rempos); 
+matchpos := strpos(remain,match);
+END LOOP;
+
+r := r || remain;
+return r;
+
+END;
+
+$_$;
