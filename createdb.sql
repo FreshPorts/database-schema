@@ -1839,6 +1839,8 @@ ALTER TABLE ONLY users
 
 CREATE INDEX users_email ON users USING btree (email);
 
+CREATE INDEX users_lower_name_idx ON users USING btree (lower(name));
+
 COMMENT ON COLUMN users.set_focus_search IS 'When there is a search field on the page, set the focus to that field when the page is loaded.';
 
 --
