@@ -3237,7 +3237,7 @@ DECLARE
  RowCount    bigint;
   
 BEGIN
-  UPDATE users SET password_hash = crypt( in_password, gen_salt('md5'))
+  UPDATE users SET password_hash = crypt( in_password, gen_salt('bf', 14))
     WHERE id = (SELECT user_id from user_password_reset
                  WHERE token = in_token);
   GET DIAGNOSTICS RowCount = ROW_COUNT;
