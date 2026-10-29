@@ -55,6 +55,7 @@ grant select on user_tasks                     to group www;
 grant select on commit_log_ports_vuxml         to group www;
 grant select on vuxml                          to group www;
 grant select on vuxml_affected                 to group www;
+grant select on vuxml_import                   to group www;
 grant select on vuxml_names                    to group www;
 grant select on vuxml_ranges                   to group www;
 grant select on vuxml_references               to group www;
