@@ -274,6 +274,22 @@ ALTER TABLE ONLY categories
     ADD CONSTRAINT categories_pkey PRIMARY KEY (id);
 
 --
+-- category_history
+--
+
+CREATE TABLE category_history (
+    commit_hash text NOT NULL,
+    commit_date timestamp with time zone NOT NULL,
+    physical text[] NOT NULL,
+    virtual text[]
+);
+
+ALTER TABLE ONLY category_history
+    ADD CONSTRAINT category_history_pkey PRIMARY KEY (commit_hash);
+
+CREATE INDEX category_history_commit_date ON category_history USING btree (commit_date);
+
+--
 -- category_stats
 --
 
