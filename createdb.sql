@@ -1072,6 +1072,23 @@ ALTER TABLE ONLY port_dependencies
 CREATE INDEX port_dependencies_upon_type_idx ON port_dependencies USING btree (port_id_dependent_upon, dependency_type, port_id);
 
 --
+-- port_upstream
+--
+
+CREATE TABLE port_upstream (
+    port_id integer NOT NULL,
+    port_version text NOT NULL,
+    newver text NOT NULL,
+    newurl text,
+    maintainer text NOT NULL,
+    discovered timestamp with time zone,
+    checked timestamp with time zone NOT NULL
+);
+
+ALTER TABLE ONLY port_upstream
+    ADD CONSTRAINT port_upstream_pkey PRIMARY KEY (port_id);
+
+--
 -- portcount
 --
 
@@ -2241,6 +2258,9 @@ ALTER TABLE ONLY commit_log_ports
 
 ALTER TABLE ONLY commit_log_ports_ignore
     ADD CONSTRAINT "$1" FOREIGN KEY (port_id) REFERENCES ports(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE ONLY port_upstream
+    ADD CONSTRAINT port_upstream_port_id_fkey FOREIGN KEY (port_id) REFERENCES ports(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY commit_log_ports_vuxml
     ADD CONSTRAINT "$1" FOREIGN KEY (vuxml_id) REFERENCES vuxml(id) ON UPDATE CASCADE ON DELETE CASCADE;
