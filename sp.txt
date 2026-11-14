@@ -3125,27 +3125,30 @@ GROUP BY categories.id, categories.name, categories.description, is_primary, cat
 END;
 $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION MigrateStagingAreaToWatchList(bigint)
+
+\set ON_ERROR_STOP on
+
+BEGIN;
+
 CREATE OR REPLACE FUNCTION MigrateStagingAreaToWatchList(bigint) returns int as $$
 DECLARE
 	p_Watch_List_ID ALIAS FOR $1;
 BEGIN
--- take everything from the staging area (for this user) and put it on the 
--- indicated watch list.
--- ignore items on the watch list which do not relate to a port
--- also ignore items in the staging area that are already on the watch list
+-- take everything from the staging area of the watch list's owner and put
+-- it on that watch list, skipping items which do not relate to a port and
+-- items already on the watch list
 
-   INSERT INTO watch_list_element
-   SELECT p_Watch_List_ID, WLS.element_id
+   INSERT INTO watch_list_element (watch_list_id, element_id)
+   SELECT DISTINCT p_Watch_List_ID, WLS.element_id
      FROM watch_list_staging WLS
- WHERE WLS.element_id IS NOT NULL
-   AND WLS.user_id = (SELECT user_id FROM watch_list WHERE id = 4656 ) 
-   AND NOT EXISTS ( SELECT WLE.element_id
-                      FROM watch_list_element WLE, watch_list_staging WLS
-                     WHERE WLE.watch_list_id = p_Watch_List_ID
-                       AND WLE.element_id    = WLS.element_id
-                       AND WLS.user_id       = (SELECT user_id 
-                                                  FROM watch_list
-                                                 WHERE id = p_Watch_List_ID));
+          JOIN watch_list WL ON WL.id      = p_Watch_List_ID
+                            AND WL.user_id = WLS.user_id
+    WHERE WLS.element_id IS NOT NULL
+      AND NOT EXISTS (SELECT 1
+                        FROM watch_list_element WLE
+                       WHERE WLE.watch_list_id = p_Watch_List_ID
+                         AND WLE.element_id    = WLS.element_id);
 	return 1;
 END;
 $$ LANGUAGE plpgsql;
