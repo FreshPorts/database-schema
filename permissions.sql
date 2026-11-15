@@ -295,6 +295,15 @@ grant update                         on page_load_summary_id_seq       to group 
 GRANT select ON listen_for           TO GROUP listening;
 GRANT select, delete ON cache_clearing_ports TO GROUP listening;
 GRANT select, delete ON cache_clearing_dates TO GROUP listening;
+GRANT select, delete ON cache_clearing_files TO GROUP listening;
+GRANT select, delete ON cache_clearing_commits TO GROUP listening;
+
+-- fp-listen 2.1.0 takes a row off the queue before removing the cached files,
+-- and puts it back when they could not all be removed
+GRANT insert ON cache_clearing_ports, cache_clearing_files,
+                cache_clearing_dates, cache_clearing_commits TO GROUP listening;
+GRANT usage ON SEQUENCE cache_clearing_ports_id_seq,
+                        cache_clearing_dates_id_seq TO GROUP listening;
 
 -- for the session schema
 
