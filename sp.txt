@@ -2752,13 +2752,6 @@ CREATE OR REPLACE FUNCTION currenttimestamputc() RETURNS timestamp without time 
     AS $$ select current_timestamp at time zone 'UTC'; $$
     LANGUAGE sql STABLE;
 
--- "People watching this port, also watch:" reads the top 5 per element
--- precomputed in watchers_also_watched, rebuilt nightly.
--- See updates-2026-10-17-watchers-also-watched.ddl.
-CREATE OR REPLACE FUNCTION WatchersAlsoWatched(int) RETURNS SETOF also_watched_record AS $$
-SELECT * FROM WatchersAlsoWatched_stored($1);
-$$ LANGUAGE SQL STABLE;
-
 -- The new reader: same output as the original, from the stored rows. The
 -- url is built here, at read time, so description/package_name changes show
 -- immediately, and a port that became inactive since the last rebuild drops
@@ -2771,6 +2764,13 @@ SELECT W.also_element_id AS element_id,
   FROM watchers_also_watched W JOIN ports_active P ON P.element_id = W.also_element_id
  WHERE W.element_id = $1
  ORDER BY W.rank;
+$$ LANGUAGE SQL STABLE;
+
+-- "People watching this port, also watch:" reads the top 5 per element
+-- precomputed in watchers_also_watched, rebuilt nightly.
+-- See updates-2026-10-17-watchers-also-watched.ddl.
+CREATE OR REPLACE FUNCTION WatchersAlsoWatched(int) RETURNS SETOF also_watched_record AS $$
+SELECT * FROM WatchersAlsoWatched_stored($1);
 $$ LANGUAGE SQL STABLE;
 
 -- The original function, kept for verification and for rollback.
@@ -3124,12 +3124,6 @@ GROUP BY categories.id, categories.name, categories.description, is_primary, cat
 	return 1;
 END;
 $$ LANGUAGE plpgsql;
-
-CREATE OR REPLACE FUNCTION MigrateStagingAreaToWatchList(bigint)
-
-\set ON_ERROR_STOP on
-
-BEGIN;
 
 CREATE OR REPLACE FUNCTION MigrateStagingAreaToWatchList(bigint) returns int as $$
 DECLARE
