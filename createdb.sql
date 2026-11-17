@@ -558,11 +558,19 @@ ALTER TABLE ONLY commits_latest_ports
 CREATE TABLE committer_notify (
     user_id integer NOT NULL,
     committer text NOT NULL,
-    status character(1) NOT NULL
+    status character(1) NOT NULL,
+    token text DEFAULT encode(gen_random_bytes(32), 'hex'::text) NOT NULL,
+    token_created timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT committer_notify_status CHECK (((status = 'P'::bpchar) OR (status = 'A'::bpchar)))
 );
+
+COMMENT ON COLUMN committer_notify.status IS 'P: pending, waiting for the committer to confirm by the link mailed to <committer>@FreeBSD.org; A: active, sanity-test mail is sent';
+COMMENT ON COLUMN committer_notify.token IS 'secret in the confirm and opt-out links; also identifies the row on committer-notify.php';
 
 ALTER TABLE ONLY committer_notify
     ADD CONSTRAINT committer_notify_pkey PRIMARY KEY (user_id);
+
+CREATE UNIQUE INDEX committer_notify_token ON committer_notify USING btree (token);
 
 --
 -- daily_stats
