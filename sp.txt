@@ -2506,8 +2506,26 @@ CREATE OR REPLACE FUNCTION PageLoadSummaryUpdate(date) returns int AS $$
              avg(rendering_time) AS avg
         FROM page_load_detail
        WHERE date = $1
-    GROUP BY 1, 2;
-    
+    GROUP BY 1, 2
+    -- Running this twice for the same date (a rerun of the daily periodic,
+    -- or a manual run) used to fail with a duplicate key on
+    -- page_loads_date_date (date, page_name).  Now a rerun recomputes that
+    -- date's totals from page_load_detail and overwrites them.
+    --
+    -- Dates older than 7 days: after calling this function,
+    -- daily_rendering_times.pl deletes page_load_detail rows dated more
+    -- than 7 days before the date it just summarized.  For such a date the SELECT above finds no rows, so
+    -- nothing is inserted or updated, the existing page_load_summary rows
+    -- for that date are kept, and the function returns 0.  This is why
+    -- this is an upsert and not DELETE then INSERT: that would delete the
+    -- summary for an old date and have no detail left to rebuild it from.
+    ON CONFLICT (date, page_name) DO UPDATE
+       SET total              = EXCLUDED.total,
+           users              = EXCLUDED.users,
+           rendering_time_min = EXCLUDED.rendering_time_min,
+           rendering_time_max = EXCLUDED.rendering_time_max,
+           rendering_time_avg = EXCLUDED.rendering_time_avg;
+
     GET DIAGNOSTICS l_RowCount = ROW_COUNT;
 
     return l_RowCount;
