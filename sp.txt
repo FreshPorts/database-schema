@@ -2514,11 +2514,12 @@ CREATE OR REPLACE FUNCTION PageLoadSummaryUpdate(date) returns int AS $$
     --
     -- Dates older than 7 days: after calling this function,
     -- daily_rendering_times.pl deletes page_load_detail rows dated more
-    -- than 7 days before the date it just summarized.  For such a date the SELECT above finds no rows, so
-    -- nothing is inserted or updated, the existing page_load_summary rows
-    -- for that date are kept, and the function returns 0.  This is why
-    -- this is an upsert and not DELETE then INSERT: that would delete the
-    -- summary for an old date and have no detail left to rebuild it from.
+    -- than 7 days before the date it just summarized.  For such a date the
+    -- SELECT above finds no rows, so nothing is inserted or updated, the
+    -- existing page_load_summary rows for that date are kept, and the
+    -- function returns 0.  This is why this is an upsert and not DELETE
+    -- then INSERT: that would delete the summary for an old date and have
+    -- no detail left to rebuild it from.
     ON CONFLICT (date, page_name) DO UPDATE
        SET total              = EXCLUDED.total,
            users              = EXCLUDED.users,
