@@ -502,6 +502,10 @@ ALTER TABLE ONLY commit_log_ports_vuxml ALTER COLUMN id SET DEFAULT nextval('com
 ALTER TABLE ONLY commit_log_ports_vuxml
     ADD CONSTRAINT commit_log_ports_vuxml_pkey PRIMARY KEY (id);
 
+-- one mark per commit, port and vuln; see ingress-modules issue #3
+ALTER TABLE ONLY commit_log_ports_vuxml
+    ADD CONSTRAINT commit_log_ports_vuxml_commit_port_vuxml_key UNIQUE (commit_log_id, port_id, vuxml_id);
+
 CREATE INDEX commit_log_ports_vuxml_port_id ON commit_log_ports_vuxml USING btree (port_id);
 
 CREATE INDEX commit_log_ports_vuxml_vuxml_id_idx ON commit_log_ports_vuxml USING btree (vuxml_id);
