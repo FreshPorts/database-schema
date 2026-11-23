@@ -1,0 +1,30 @@
+--
+-- PageLoadSummaryUpdate(): let group commits run the upsert
+--
+-- updates-2026-11-22-pageloadsummaryupdate-upsert.ddl changed
+-- PageLoadSummaryUpdate(date) from a plain INSERT into page_load_summary
+-- to INSERT ... ON CONFLICT (date, page_name) DO UPDATE.  The function is
+-- not SECURITY DEFINER, so it runs with the privileges of the caller:
+-- daily_rendering_times.pl, connecting as a member of group commits.
+--
+-- group commits had only INSERT on page_load_summary.  ON CONFLICT DO
+-- UPDATE also needs UPDATE on the table, and SELECT on the conflict
+-- target columns (date, page_name).  Without them the daily periodic
+-- 220.fp_daily_rendering_times fails with:
+--
+--   ERROR:  permission denied for table page_load_summary
+--
+-- First seen on prod for 2026-11-22.  The script dies before its DELETE
+-- from page_load_detail and the transaction rolls back, so no detail is
+-- lost and no summary row is written for that date.  After this grant,
+-- rerun it for each missed date (as the user the periodic runs as):
+--
+--   /usr/local/libexec/freshports/daily_rendering_times.pl 2026-11-22
+--
+-- Nothing anyone sees on the website changes; page_load_summary just gets
+-- its daily rows again.
+--
+-- Run as postgres on every database.  permissions.sql has the same grant.
+--
+
+GRANT SELECT, INSERT, UPDATE ON page_load_summary TO GROUP commits;

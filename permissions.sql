@@ -282,7 +282,8 @@ grant update                         on page_load_detail_id_seq        to group 
 
 grant select, delete                 on page_load_detail               to group commits;
 
-grant insert                         on page_load_summary              to group commits;
+-- select + update: PageLoadSummaryUpdate() does INSERT ... ON CONFLICT DO UPDATE
+grant select, insert, update         on page_load_summary              to group commits;
 grant update                         on page_load_summary_id_seq       to group commits;
 
 
