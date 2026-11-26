@@ -33,16 +33,37 @@ repair, as a user that can update these tables. Each repair file opens a
 transaction and leaves it open: read the counts it prints, then type `COMMIT;`
 or `ROLLBACK;` before running the next file.
 
-| File | What it does |
-|------|--------------|
-| `00-helpers.sql` | Session setup and helper functions, all in `pg_temp`, so they disappear when psql exits. Changes no table. |
-| `01-report.sql` | Before and after report: for each column the repair touches, how many values are double-encoded, raw Latin-1, or still contain mojibake. Run it first and last. |
-| `10-commit-log.sql` | Part 1: `commit_log.description` for commits from before the move to git (no `commit_hash_short`). Undoes the double encoding, whole values first, then run by run for values only partly double-encoded. Lists the leftovers it could not fix. Git-era messages are left alone: their mojibake is in the freebsd-ports repository itself. |
-| `11-commit-log-leftovers.sql` | Part 1b: six pre-git messages Part 1 could not finish. Four were double-encoded twice and get one more pass; two (Krüger, Gábor) have their exact bytes replaced. Keyed on `message_id`, because `commit_log.id` differs between databases. |
-| `12-commit-log-eucjp.sql` | Part 1c: one 2005 commit whose message is a whole Japanese Handbook chapter in EUC-JP. It is replaced with the original message from FreeBSD doc commit 537770631a, held in the file as EUC-JP hex. It is replaced only if the stored row and the replacement have the same ASCII text, byte for byte. |
-| `20-ports.sql` | Part 2: `ports.long_description`, `makefile`, `pkgmessage` and `distinfo`; also converts raw Latin-1 in `makefile` and `pkg_plist`. Ends with a check that should return no rows. Run it only on a host whose ingress-modules has 25c4124 (2.3.8 or later), or the next refresh of each port damages it again. |
-| `30-generate-plist.sql` | Part 3: `generate_plist.installed_file`, and queues the affected port pages for cache clearing (that table has no trigger). |
-| `40-users-OPTIONAL.sql` | Part 4, commented out and **not run anywhere**: one `users.name` in raw Latin-1. Converting it changes the bytes of that login name. |
+- **`00-helpers.sql`**
+
+  Session setup and helper functions, all in `pg_temp`, so they disappear when psql exits. Changes no table.
+
+- **`01-report.sql`**
+
+  Before and after report: for each column the repair touches, how many values are double-encoded, raw Latin-1, or still contain mojibake. Run it first and last.
+
+- **`10-commit-log.sql`**
+
+  Part 1: `commit_log.description` for commits from before the move to git (no `commit_hash_short`). Undoes the double encoding, whole values first, then run by run for values only partly double-encoded. Lists the leftovers it could not fix. Git-era messages are left alone: their mojibake is in the freebsd-ports repository itself.
+
+- **`11-commit-log-leftovers.sql`**
+
+  Part 1b: six pre-git messages Part 1 could not finish. Four were double-encoded twice and get one more pass; two (Krüger, Gábor) have their exact bytes replaced. Keyed on `message_id`, because `commit_log.id` differs between databases.
+
+- **`12-commit-log-eucjp.sql`**
+
+  Part 1c: one 2005 commit whose message is a whole Japanese Handbook chapter in EUC-JP. It is replaced with the original message from FreeBSD doc commit 537770631a, held in the file as EUC-JP hex. It is replaced only if the stored row and the replacement have the same ASCII text, byte for byte.
+
+- **`20-ports.sql`**
+
+  Part 2: `ports.long_description`, `makefile`, `pkgmessage` and `distinfo`; also converts raw Latin-1 in `makefile` and `pkg_plist`. Ends with a check that should return no rows. Run it only on a host whose ingress-modules has 25c4124 (2.3.8 or later), or the next refresh of each port damages it again.
+
+- **`30-generate-plist.sql`**
+
+  Part 3: `generate_plist.installed_file`, and queues the affected port pages for cache clearing (that table has no trigger).
+
+- **`40-users-OPTIONAL.sql`**
+
+  Part 4, commented out and **not run anywhere**: one `users.name` in raw Latin-1. Converting it changes the bytes of that login name.
 
 Triggers on `commit_log` and `ports` queue their own cache clearing. The scripts
 queue the port pages that list a repaired commit.
