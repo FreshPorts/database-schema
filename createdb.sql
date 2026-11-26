@@ -1723,6 +1723,34 @@ ALTER TABLE ONLY security_notice_status
     ADD CONSTRAINT security_notice_status_pkey PRIMARY KEY (id);
 
 --
+-- supported_releases
+--
+
+CREATE TABLE supported_releases (
+    branch text NOT NULL,
+    major integer NOT NULL,
+    minor integer,
+    added timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT supported_releases_branch_check CHECK ((branch ~ '^(main|stable/[0-9]+|releng/[0-9]+\.[0-9]+)$'::text)),
+    CONSTRAINT supported_releases_check CHECK (((branch ~~ 'releng/%'::text) = (minor IS NOT NULL))),
+    CONSTRAINT supported_releases_major_check CHECK ((major > 0)),
+    CONSTRAINT supported_releases_minor_check CHECK ((minor >= 0))
+);
+
+COMMENT ON TABLE supported_releases IS 'The FreeBSD branches supported right now: main (CURRENT), stable/N and releng/N.M. Kept up to date daily by supported_releases_update.pl from https://www.freebsd.org/security/#sup and freebsd-src sys/conf/newvers.sh. See https://github.com/FreshPorts/periodics/issues/2';
+
+COMMENT ON COLUMN supported_releases.branch IS 'main for CURRENT, otherwise the branch name as the security page gives it: stable/15, releng/15.1';
+
+COMMENT ON COLUMN supported_releases.major IS 'The major version: 15 for stable/15 and releng/15.1; for main, the version of CURRENT, e.g. 16';
+
+COMMENT ON COLUMN supported_releases.minor IS 'The minor version for releng/N.M; NULL for main and stable/N. ORDER BY major DESC, minor DESC NULLS FIRST gives the security page''s order';
+
+COMMENT ON COLUMN supported_releases.added IS 'When supported_releases_update.pl first saw this branch listed';
+
+ALTER TABLE ONLY supported_releases
+    ADD CONSTRAINT supported_releases_pkey PRIMARY KEY (branch);
+
+--
 -- system
 --
 
