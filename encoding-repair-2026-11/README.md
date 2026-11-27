@@ -6,10 +6,12 @@ ingress-modules commit 25c4124 (released in 2.3.8) stopped ingest from creating
 new damage. They are kept as a record, and so the repair can be repeated on a
 database restored from an older backup.
 
-The background, the tests and the results are in two posts on news.freshports.org:
+The background, the tests, the results and one complete run are in three posts
+on news.freshports.org:
 
 - [GalÃ¨ne: fixing double-encoded port files](https://news.freshports.org/2026/11/21/galene-fixing-double-encoded-port-files/)
 - [GalÃ¨ne, part 2: tests passed, old data repaired](https://news.freshports.org/2026/11/26/galene-part-2-tests-passed-old-data-repaired/)
+- [GalÃ¨ne, part 3: one database repair, start to finish](https://news.freshports.org/2026/11/26/galene-part-3-one-database-repair/)
 
 ## What was wrong
 
