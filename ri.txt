@@ -1244,18 +1244,24 @@ CREATE TRIGGER package_notifications_insert
 CREATE OR REPLACE FUNCTION package_notifications_delete() RETURNS TRIGGER AS $$
    BEGIN
         -- by definition, this is a delete
-
-	if ( new.abi_id is NOT null) then
-		--
-		-- if new.abi_id is null, the ABI has been deleted and
-		-- inserting into package_notifications will result in an
-		-- error, such as: Key (abi_id)=(24) is not present in table "abi".
-		-- see https://github.com/FreshPorts/freshports/issues/642
-		--
-	        insert into package_notifications(abi_id, package_set, port_id, action, version_previous)
-        	values (OLD.abi_id, OLD.package_set, OLD.port_id, 'delete', OLD.package_version)
-	        ON CONFLICT ON CONSTRAINT package_notifications_abi_set_port_idx DO NOTHING;
-	end if;
+        --
+        -- Skip the row when its ABI or port is gone: deleting an ABI (see
+        -- refresh-abi.sh) or a port cascades to packages, and the insert
+        -- would fail the foreign keys on package_notifications, e.g.
+        -- Key (abi_id)=(24) is not present in table "abi".
+        -- re https://github.com/FreshPorts/freshports/issues/642
+        --
+        -- This used to test NEW.abi_id.  NEW is always NULL in a DELETE
+        -- trigger, so no delete was ever recorded and subscribers never
+        -- saw "delete" in their package notifications.
+        -- re https://github.com/FreshPorts/freshports/issues/449
+        --
+        IF EXISTS (SELECT 1 FROM abi   WHERE id = OLD.abi_id)
+       AND EXISTS (SELECT 1 FROM ports WHERE id = OLD.port_id) THEN
+                insert into package_notifications(abi_id, package_set, port_id, action, version_previous)
+                values (OLD.abi_id, OLD.package_set, OLD.port_id, 'delete', OLD.package_version)
+                ON CONFLICT ON CONSTRAINT package_notifications_abi_set_port_idx DO NOTHING;
+        END IF;
 
         RETURN OLD;
    END
