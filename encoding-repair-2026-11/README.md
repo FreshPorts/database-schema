@@ -65,7 +65,7 @@ or `ROLLBACK;` before running the next file.
 
 - **`40-users-OPTIONAL.sql`**
 
-  Part 4, commented out and **not run anywhere**: one `users.name` in raw Latin-1. Converting it changes the bytes of that login name.
+  Part 4: one `users.name` in raw Latin-1, converted to UTF-8. Optional because it changes a login name rather than port data. Run on every database on 2026-11-26. The pages send login names as UTF-8 and the database compares bytes, so that user could not log in with the Latin-1 name; after the conversion they can. Everything else about a user is keyed on `users.id`. Starts with a read-only check, which needs no helpers.
 
 Triggers on `commit_log` and `ports` queue their own cache clearing. The scripts
 queue the port pages that list a repaired commit.
