@@ -985,8 +985,11 @@ CREATE TABLE packages_last_checked (
     last_checked timestamp with time zone,
     repo_date timestamp with time zone,
     import_date timestamp with time zone,
-    processed_date timestamp with time zone
+    processed_date timestamp with time zone,
+    missing_since timestamp with time zone
 );
+
+COMMENT ON COLUMN packages_last_checked.missing_since IS 'When the hourly check (check_repos_for_new_stuff.py) first got no date for this repo, usually a 404; NULL while the repo is there. PackagesDeleteForMissingRepos() deletes the packages of repos missing for more than 7 days. See https://github.com/FreshPorts/freshports/issues/449';
 
 COMMENT ON COLUMN packages_last_checked.processed_date IS 'The timestamp of the last processing of data, for a given ABI/branch, from packages_raw into packages.';
 
