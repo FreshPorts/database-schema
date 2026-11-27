@@ -9,7 +9,7 @@ database restored from an older backup.
 The background, the tests and the results are in two posts on news.freshports.org:
 
 - [GalÃ¨ne: fixing double-encoded port files](https://news.freshports.org/2026/11/21/galene-fixing-double-encoded-port-files/)
-- GalÃ¨ne, part 2: tests passed, old data repaired
+- [GalÃ¨ne, part 2: tests passed, old data repaired](https://news.freshports.org/2026/11/26/galene-part-2-tests-passed-old-data-repaired/)
 
 ## What was wrong
 
